@@ -3,7 +3,7 @@ Documentation of Robotology repositories
 
 ![](https://github.com/robotology/robotology-documentation/workflows/GitHub%20Pages/badge.svg)
 
-Check out the [website 🌐](https://robotology.github.io/robotology-documentation/doc/html/index.html)
+Check out the [website 🌐](https://robotology.github.io/robotology-documentation/doc/html)
 
 Here we make available a GH Action that serves to automatically generate the documentation of certain repositories hosted on this organization.
 
