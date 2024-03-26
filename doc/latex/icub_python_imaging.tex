@@ -1,0 +1,125 @@
+\begin{DoxyAuthor}{Author}
+Marek Rucinski
+\end{DoxyAuthor}
+\hypertarget{icub_python_simworld_control_sec_goal}{}\doxysection{Goal}\label{icub_python_simworld_control_sec_goal}
+This tutorial shows how to handle YARP images in Python. The most important issue is fast two-\/way conversion between image data structures from YARP and those native for Python.
+
+We assume that you have already compiled or installed the Python bindings. Moreover this tutorial assumes basic knowledge of how YARP works in C++ as well as of the referenced python libraries (especially the Num\+Py-\/\+Sci\+Py-\/\+Matplotlib trinity).\hypertarget{icub_python_imaging_sec_there-and-back-again}{}\doxysection{Conversion between YARP image types and Python types (and back)}\label{icub_python_imaging_sec_there-and-back-again}
+The key to obtain high performance in any image processing software is to avoid copying the data back and forth whenever possible. Ideally, having received an image through a YARP port, we would modify it {\itshape in place} and then pass the very same image to the output port. To facilitate this, {\ttfamily yarp\+::sig\+::\+Image} class implements a method called {\ttfamily set\+External()} which allows an Image object to \char`\"{}wrap around\char`\"{} an already existing data buffer. Therefore the key element of image processing in Python is creating a YARP image object that wraps around a data structure native to Python, which then can be then conveniently manipulated using Python-\/specific means. Due to its popularity and mature stage of development, in this tutorial we consider Num\+Py arrays as the substrate for image processing within Python (see for instance \href{http://docs.scipy.org/doc/scipy/reference/ndimage.html}{\texttt{ {\ttfamily scipy.\+ndimage} }} or \href{http://scikit-image.org/}{\texttt{ {\ttfamily scikit-\/image} }} modules for off-\/the-\/shelf image processing routines operating on Num\+Py arrays). However, the concepts presented here may be applied to other Python frameworks as well (e.\+g. PIL, Py\+Qt), provided certain requirements discussed below are fulfilled.\hypertarget{icub_python_imaging_sec_python_to_yarp}{}\doxysection{Sending data from Python to YARP}\label{icub_python_imaging_sec_python_to_yarp}
+If you\textquotesingle{}re using Python 3.\+x and the data structure you want to receive the image data into supports the Python \href{http://docs.python.org/2/c-api/buffer.html}{\texttt{ buffer protocol}} (which is the case for Num\+Py arrays), all you have to do is to call the {\ttfamily set\+External} method of an YARP image object, specifying your python object as its first argument.
+
+In the following example, a Num\+Py array with random contents is created, a YARP image is wrapped around it and sent to a YARP port. It is assumed that there is an instance of {\ttfamily yarpview} running with associated port name {\ttfamily \char`\"{}/view01\char`\"{}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{keyword}{import} numpy}
+\DoxyCodeLine{\textcolor{keyword}{import} yarp}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{\# Initialise YARP}}
+\DoxyCodeLine{yarp.Network.init()}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{\# Create the array with random data}}
+\DoxyCodeLine{img\_array = numpy.random.uniform(0., 255., (240, 320)).astype(numpy.float32)}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{\# Create the yarp image and wrap it around the array  }}
+\DoxyCodeLine{yarp\_image = yarp.ImageFloat()}
+\DoxyCodeLine{yarp\_image.setExternal(img\_array, img\_array.shape[1], img\_array.shape[0])}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{\# Create the yarp port, connect it to the running instance of yarpview and send the image}}
+\DoxyCodeLine{output\_port = yarp.Port()}
+\DoxyCodeLine{output\_port.open(\textcolor{stringliteral}{"{}/python-\/image-\/port"{}})}
+\DoxyCodeLine{yarp.Network.connect(\textcolor{stringliteral}{"{}/python-\/image-\/port"{}}, \textcolor{stringliteral}{"{}/view01"{}})}
+\DoxyCodeLine{output\_port.write(yarp\_image)}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{\# Cleanup}}
+\DoxyCodeLine{output\_port.close()}
+
+\end{DoxyCode}
+
+
+There is a number of crucial things that need to be kept in mind\+:
+
+
+\begin{DoxyEnumerate}
+\item {\itshape Num\+Py array shape, data type and value range must be compatible with the type of YARP image to be wrapped around it}. Below is the list of YARP image types exposed by YARP bindings and corresponding requirements for the underlying Num\+Py array\+:
+\begin{DoxyItemize}
+\item {\ttfamily yarp.\+Image\+Mono} -\/ array data type\+: {\ttfamily uint8}, shape\+: ($<$image-\/height$>$, $<$image-\/width$>$), values range\+: 0 to 255
+\item {\ttfamily yarp.\+Image\+Float} -\/ array data type\+: {\ttfamily float32}, shape\+: ($<$image-\/height$>$, $<$image-\/width$>$), values range\+: 0. to 255. (Note\+: this is {\itshape different} from 0. to 1. range, assumed by default e.\+g. by {\ttfamily scipy.\+ndimage} routines!)
+\item {\ttfamily yarp.\+Image\+Rgb} -\/ array data type\+: {\ttfamily uint8}, shape\+: ($<$image-\/height$>$, $<$image-\/width$>$, 3), values range\+: 0 to 255
+\item {\ttfamily yarp.\+Image\+Rgb\+Float} -\/ array data type\+: {\ttfamily float32}, shape\+: ($<$image-\/height$>$, $<$image-\/width$>$, 3), values range\+: 0. to 255.
+\item {\ttfamily yarp.\+Image\+Rgba} -\/ array data type\+: {\ttfamily uint8}, shape\+: ($<$image-\/height$>$, $<$image-\/width$>$, 4), values range\+: 0 to 255
+\end{DoxyItemize}
+
+In the example above the result of calling numpy.\+random.\+uniform() had to be explicitly cast to {\ttfamily float32}, since by default it returned {\ttfamily float64}. This may very well be architecture-\/dependent, so it\textquotesingle{}s best to specify the array data type explicitly (tip\+: most Num\+Py array creation routines accept the {\ttfamily dtype} parameter).
+\item {\itshape Num\+Py array being wrapped around must be contiguous in the memory}. This is usually the case for newly created arrays, but if the array you want to send is a result of some computation process (especially one involving operations like transposing, slicing, etc.), make sure to call {\ttfamily numpy.\+ascontiguousarray()} before passing the array to {\ttfamily set\+External()}.
+\item {\itshape Image dimensions specified in {\ttfamily set\+External} call must match actual dimensions of the array}. Using the array\textquotesingle{}s shape attribute as in the example above is the most fool-\/proof way to go, but note the order in which the array dimensions are specified in this attribute. Rows (corresponding to image height) come first, then columns (image width).
+\item {\itshape Underlying array must outlive the Image object wrapping around it}. Make sure the array exists as long as the image object is being used. It may be a good practice to delete the image object explicitly (tip\+: Python {\ttfamily del} statement) as soon as it is no longer needed.
+\end{DoxyEnumerate}\hypertarget{icub_python_imaging_sec_yarp_to_python}{}\doxysection{Receiving data from YARP to Python}\label{icub_python_imaging_sec_yarp_to_python}
+The idea is pretty much the same as when sending an image to the port. In order to minimize the number of copy operations, we wrap the YARP image around a Num\+Py array before reading an image from the port. The example below assumes that \mbox{\hyperlink{namespaceiCub}{i\+Cub}} simulator is running and that the world camera is available at port {\ttfamily \char`\"{}/icub\+Sim/cam\char`\"{}} 
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{keyword}{import} numpy}
+\DoxyCodeLine{\textcolor{keyword}{import} yarp}
+\DoxyCodeLine{\textcolor{keyword}{import} matplotlib.pylab}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{\# Initialise YARP}}
+\DoxyCodeLine{yarp.Network.init()}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{\# Create a port and connect it to the iCub simulator virtual camera}}
+\DoxyCodeLine{input\_port = yarp.Port()}
+\DoxyCodeLine{input\_port.open(\textcolor{stringliteral}{"{}/python-\/image-\/port"{}})}
+\DoxyCodeLine{yarp.Network.connect(\textcolor{stringliteral}{"{}/icubSim/cam"{}}, \textcolor{stringliteral}{"{}/python-\/image-\/port"{}})}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{\# Create numpy array to receive the image and the YARP image wrapped around it}}
+\DoxyCodeLine{img\_array = numpy.zeros((240, 320, 3), dtype=numpy.uint8)}
+\DoxyCodeLine{yarp\_image = yarp.ImageRgb()}
+\DoxyCodeLine{yarp\_image.resize(320, 240)}
+\DoxyCodeLine{yarp\_image.setExternal(img\_array, img\_array.shape[1], img\_array.shape[0])}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{\# Read the data from the port into the image}}
+\DoxyCodeLine{input\_port.read(yarp\_image)}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{\# display the image that has been read}}
+\DoxyCodeLine{matplotlib.pylab.imshow(img\_array)}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{\# Cleanup}}
+\DoxyCodeLine{input\_port.close()}
+
+\end{DoxyCode}
+
+
+All remarks mentioned in section \mbox{\hyperlink{icub_python_imaging_sec_python_to_yarp}{Sending data from Python to YARP}} are also valid here.
+
+The method above minimizes the number of performed copy operations however it comes with a serious limitation\+: the exact size and type of the incoming image must be known beforehand. If the image coming through the port does not match the dimensions, pixel type or quantum of the prepared {\ttfamily yarp\+\_\+image}, the latter will be automatically re-\/allocated when {\ttfamily \mbox{\hyperlink{namespaceeth_1_1parser_a8ec58da625146082584ad1a365bdd0e5}{read()}}} is called and association with {\ttfamily img\+\_\+array} will be covertly lost. Note that before calling {\ttfamily set\+External()} we call {\ttfamily resize()} on the {\ttfamily yarp\+\_\+image}. This is required because just calling {\ttfamily set\+External} will not set internal variables of the image class properly (namely the pixel size and the quantum), and the {\ttfamily yarp\+\_\+image\textquotesingle{}s} buffer will also be re-\/allocated by {\ttfamily \mbox{\hyperlink{namespaceeth_1_1parser_a8ec58da625146082584ad1a365bdd0e5}{read()}}}.
+
+If the size and type of the incoming image is not known or when greater flexibility is required, we won\textquotesingle{}t get away without copying the image, at least when a frame with new size or format is retrieved. One must detect such situation, adjust the receiving array accordingly and copy the image contents.
+
+As an alternative to using the bare {\ttfamily yarp.\+Port} class, one can also use one of the specialized instantiations of the of the {\ttfamily Buffered\+Port} template exposed by the YARP bindings, e.\+g. {\ttfamily Buffered\+Port\+Image\+Rgb}. The {\ttfamily \mbox{\hyperlink{namespaceeth_1_1parser_a8ec58da625146082584ad1a365bdd0e5}{read()}}} method of this class returns a yarp image of an appropriate type, which then must be copied to another yarp image, associated with a Num\+Py array. Although this introduces one additional copy operation, this facilitates adjusting the receiving Num\+Py array to potentially changing image size, as discussed in the previous paragraph.\hypertarget{icub_python_imaging_array_interface}{}\doxysection{YARP images with Python 2.\+x / array interface}\label{icub_python_imaging_array_interface}
+As noted at the beginning, {\ttfamily set\+External()} can be called for any Python object which supports the buffer protocol {\itshape if} you\textquotesingle{}re using Python version 3.\+0 or greater. If you are using an older version of Python you must try another approach. YARP bindings export another variant of the {\ttfamily set\+External} method which accepts {\ttfamily long} value (as well as {\ttfamily long} {\ttfamily long} for 64-\/bit systems), which is then explicitly cast to {\ttfamily void$\ast$} before being passed to the default {\ttfamily set\+External} implementation. Thus, if your Python object enables you to obtain the physical value of the pointer to the buffer you want the image data to be written to, the requirement of supporting the buffer protocol can be circumnavigated.
+
+For example, Num\+Py arrays implement what is called an \href{http://docs.scipy.org/doc/numpy/reference/arrays.interface.html}{\texttt{ array interface}}. It is essentially a dictionary which contains a bunch of information about the underlying buffer, one of them being a raw value of the pointer to the data. This value can be used in an alternative call to {\ttfamily set\+External\+:} 
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{yarp\_image.setExternal(img\_array.\_\_array\_interface\_\_[\textcolor{stringliteral}{'data'}][0], img\_array.shape[1], img\_array.shape[0])}
+
+\end{DoxyCode}
+
+
+Obviously, since this means playing around with memory addresses, a great deal of caution is advised. If supported, buffer protocol should be preferred.
+
+Array interface can also be used to easily detect whether the image has been, for whatever reason, re-\/allocated behind the scenes, e.\+g. by the {\ttfamily \mbox{\hyperlink{namespaceeth_1_1parser_a8ec58da625146082584ad1a365bdd0e5}{Port.\+read()}}} method (see section \mbox{\hyperlink{icub_python_imaging_sec_yarp_to_python}{Receiving data from YARP to Python}}). In the example below it is assumed that {\ttfamily yarp\+\_\+image} has been associated with {\ttfamily img\+\_\+array} via {\ttfamily set\+External()} before {\ttfamily \mbox{\hyperlink{namespaceeth_1_1parser_a8ec58da625146082584ad1a365bdd0e5}{Port.\+read()}}} is called\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{input\_port.read(yarp\_image)}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{keywordflow}{if} yarp\_image.getRawImage().\_\_long\_\_() <> img\_array.\_\_array\_interface\_\_[\textcolor{stringliteral}{'data'}][0]:}
+\DoxyCodeLine{    \textcolor{keywordflow}{print} \textcolor{stringliteral}{"{}read() reallocated my yarp\_image!"{}}}
+
+\end{DoxyCode}
+\hypertarget{icub_python_imaging_final_example}{}\doxysection{Real-\/world example}\label{icub_python_imaging_final_example}
+Code used in this tutorial can be found at \mbox{\hyperlink{python__imaging_8py}{python/python\+\_\+imaging.\+py}} In addition, the file contains a class implementing a simple image filter, which retrieves images through one YARP port, computes a Sobel operator, and sends the result to another port. To run this example, make sure you have the \mbox{\hyperlink{namespaceiCub}{i\+Cub}} simulator and yarpview instance running as in examples above, and simply execute the {\ttfamily python\+\_\+image.\+py} module as a regular python program.
+
+This file can be edited at \mbox{\hyperlink{python-imaging_8dox}{doc/python-\/imaging.\+dox}} 

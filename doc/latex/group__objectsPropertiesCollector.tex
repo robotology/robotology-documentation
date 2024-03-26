@@ -1,0 +1,190 @@
+\hypertarget{group__objectsPropertiesCollector}{}\doxysection{objects\+Properties\+Collector}
+\label{group__objectsPropertiesCollector}\index{objectsPropertiesCollector@{objectsPropertiesCollector}}
+
+
+Provides a on-\/line yarp-\/oriented database to collect properties of objects that are of interest for your specific application.  
+
+
+Collaboration diagram for objects\+Properties\+Collector\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=344pt]{group__objectsPropertiesCollector}
+\end{center}
+\end{figure}
+Provides a on-\/line yarp-\/oriented database to collect properties of objects that are of interest for your specific application. 
+
+Copyright (C) 2010 Robot\+Cub Consortium
+
+Author\+: Ugo Pattacini
+
+Date\+: first release 06/10/2010
+
+Copy\+Policy\+: Released under the terms of the GNU GPL v2.\+0.\hypertarget{group__tutorial__perceptiveModels_intro_sec}{}\doxysubsection{Description}\label{group__tutorial__perceptiveModels_intro_sec}
+Provides a on-\/line yarp-\/oriented database to collect properties such as positions, colors, shapes, grasping points and so on about objects that are of interest for your specific application, i.\+e. normally real objects that the robot can play with but ideally any kind of objects you can think of. The user can set, get, add, remove items and make queries to the database. ~\newline
+ Importantly, the module is capable of running in real-\/time.\hypertarget{group__objectsPropertiesCollector_proto_sec}{}\doxysubsection{Protocol}\label{group__objectsPropertiesCollector_proto_sec}
+Notation used hereafter to explain available commands\+: \mbox{[}.\mbox{]} is a Vocab, \char`\"{}.\char`\"{} is a string, $<$.$>$ is a Value (i.\+e. string, double, int) or a List (so that also complex properties such as images can be attached to the objects).
+
+Reserved properties tags\+:
+
+
+\begin{DoxyItemize}
+\item {\itshape id} is used to specify the unique integer identifier assigned to each stored item.
+\item {\itshape life\+Timer} specifies the forgetting factor given in seconds, meaning that after {\itshape life\+Timer} seconds since its creation, the item is removed automatically from the database. The user can read this property at run-\/time, can even modify it or assign it to an object after its creation.
+\item {\itshape prop\+Set} is used to specify a list of properties over which execute the given command.
+\end{DoxyItemize}
+
+The commands sent as bottles to the module port /$<$module\+Name$>$/rpc are the following\+:
+
+{\bfseries{add}} ~\newline
+{\itshape Format}\+: \mbox{[}add\mbox{]} ((\char`\"{}prop0\char`\"{} $<$val0$>$) (\char`\"{}prop1\char`\"{} $<$val1$>$) ...) ~\newline
+{\itshape Reply}\+: \mbox{[}nack\mbox{]}; \mbox{[}ack\mbox{]} (\char`\"{}id\char`\"{} $<$num$>$) ~\newline
+ {\itshape Action}\+: a new item is added to the database with the given properties. ~\newline
+ A unique identifier is returned that is used to access the item.
+
+{\bfseries{del}} ~\newline
+{\itshape Format}\+: \mbox{[}del\mbox{]} ((\char`\"{}id\char`\"{} $<$num$>$) (prop\+Set (\char`\"{}prop0\char`\"{} \char`\"{}prop1\char`\"{} ...))) ~\newline
+{\itshape Reply}\+: \mbox{[}nack\mbox{]}; \mbox{[}ack\mbox{]} ~\newline
+ {\itshape Action}\+: remove from the database the specified properties belonging to the item specified with the given identifier. ~\newline
+ The special command \char`\"{}del ((id $<$num$>$))\char`\"{} removes the whole item.~\newline
+The special command \char`\"{}\mbox{[}del\mbox{]} (all)\char`\"{} clears the current content of the database.
+
+{\bfseries{get}} ~\newline
+{\itshape Format}\+: \mbox{[}get\mbox{]} ((\char`\"{}id\char`\"{} $<$num$>$) (prop\+Set (\char`\"{}prop0\char`\"{} \char`\"{}prop1\char`\"{} ...))) ~\newline
+{\itshape Reply}\+: \mbox{[}nack\mbox{]}; \mbox{[}ack\mbox{]} ((\char`\"{}prop0\char`\"{} $<$val0$>$) (\char`\"{}prop1\char`\"{} $<$val1$>$) ...) ~\newline
+ {\itshape Action}\+: return the required properties assigned to the stored item. ~\newline
+ The special command \char`\"{}\mbox{[}get\mbox{]} ((id $<$num$>$))\char`\"{} returns all the properties.
+
+{\bfseries{set}} ~\newline
+{\itshape Format}\+: \mbox{[}set\mbox{]} ((\char`\"{}id\char`\"{} $<$num$>$) (\char`\"{}prop0\char`\"{} $<$val0$>$) ...) ~\newline
+ {\itshape Reply}\+: \mbox{[}nack\mbox{]}; \mbox{[}ack\mbox{]} ~\newline
+ {\itshape Action}\+: add/modify properties of the stored item.
+
+{\bfseries{lock}} ~\newline
+{\itshape Format}\+: \mbox{[}lock\mbox{]} ((\char`\"{}id\char`\"{} $<$num$>$)) ~\newline
+ {\itshape Reply}\+: \mbox{[}nack\mbox{]}; \mbox{[}ack\mbox{]} ~\newline
+ {\itshape Action}\+: lock the specified item; this way only the port owner can modify it later on through a \mbox{[}set\mbox{]} request.
+
+{\bfseries{unlock}} ~\newline
+{\itshape Format}\+: \mbox{[}unlock\mbox{]} ((\char`\"{}id\char`\"{} $<$num$>$)) ~\newline
+ {\itshape Reply}\+: \mbox{[}nack\mbox{]}; \mbox{[}ack\mbox{]} ~\newline
+ {\itshape Action}\+: unlock the specified item.
+
+{\bfseries{owner}} ~\newline
+{\itshape Format}\+: \mbox{[}owner\mbox{]} ((\char`\"{}id\char`\"{} $<$num$>$)) ~\newline
+ {\itshape Reply}\+: \mbox{[}nack\mbox{]}; \mbox{[}ack\mbox{]} (\char`\"{}owner\+\_\+name\char`\"{}) ~\newline
+ {\itshape Action}\+: ask for the port name of the item owner; a name equal to \char`\"{}all\char`\"{} means that the item is not locked by any agent.
+
+{\bfseries{time}} ~\newline
+{\itshape Format}\+: \mbox{[}time\mbox{]} ((\char`\"{}id\char`\"{} $<$num$>$)) ~\newline
+ {\itshape Reply}\+: \mbox{[}nack\mbox{]}; \mbox{[}ack\mbox{]} ($<$time$>$) ~\newline
+ {\itshape Action}\+: retrieve the time elapsed in seconds from the last change occured on the stored item. ~\newline
+ Negative values of $<$time$>$ indicates that the item has not been modified since it was loaded within the database.
+
+{\bfseries{dump}} ~\newline
+ {\itshape Format}\+: \mbox{[}dump\mbox{]} ~\newline
+ {\itshape Reply}\+: \mbox{[}ack\mbox{]} ~\newline
+ {\itshape Action}\+: ask the database to dump on the screen all the stored items along with their properties.
+
+{\bfseries{synchronous broadcast}} ~\newline
+ {\itshape Format}\+: \mbox{[}sync\mbox{]} \mbox{[}start\mbox{]} $<$\+T$>$/\mbox{[}stop\mbox{]} ~\newline
+ {\itshape Reply}\+: \mbox{[}nack\mbox{]}; \mbox{[}ack\mbox{]} ~\newline
+ {\itshape Action}\+: ask the database to start/stop broadcasting its content to a yarp port each $<$\+T$>$ seconds. The parameter $<$\+T$>$ is optional.
+
+{\bfseries{asynchronous broadcast}} ~\newline
+ {\itshape Format}\+: \mbox{[}async\mbox{]} \mbox{[}on\mbox{]}/\mbox{[}off\mbox{]} ~\newline
+ {\itshape Reply}\+: \mbox{[}nack\mbox{]}; \mbox{[}ack\mbox{]} ~\newline
+ {\itshape Action}\+: ask the database to enable/disable the broadcast toward a yarp port whenever a change in the content occurs.
+
+{\bfseries{ask}} ~\newline
+{\itshape Format}\+: \mbox{[}ask\mbox{]} ((\char`\"{}prop0\char`\"{} \char`\"{}$<$\char`\"{} $<$val0$>$) $\vert$$\vert$ (\char`\"{}prop1\char`\"{} \char`\"{}$>$=\char`\"{} $<$val1$>$) ...) ~\newline
+ {\itshape Reply}\+: \mbox{[}nack\mbox{]}; \mbox{[}ack\mbox{]} (\char`\"{}id\char`\"{} ($<$num0$>$ $<$num1$>$ ...)) ~\newline
+ {\itshape Action}\+: query the database to find all the items whose properties match the conditions given in the command. You can compose multiple conditions using the boolean operators such as \char`\"{}$\vert$$\vert$\char`\"{} for {\itshape or} and \char`\"{}\&\&\char`\"{} for {\itshape and} and each condition has to be expressed giving the property name, the value to compare with and the corresponding relational operator (e.\+g. \char`\"{}$>$\char`\"{}, \char`\"{}$<$=\char`\"{}, \char`\"{}==\char`\"{}, ...).~\newline
+ Commands such as \char`\"{}\mbox{[}ask\mbox{]} ((prop0) $\vert$$\vert$ (prop1))\char`\"{} will query whether the properties exist or not. ~\newline
+ The special command \char`\"{}\mbox{[}ask\mbox{]}  (all)\char`\"{} returns the whole set of ids present within the database. ~\newline
+ In order to simplify the implementation, nested conditions such as (cond1) \&\& ((cond2) $\vert$$\vert$ (cond3)) are not handled; however, this is not a real limitation since nested conditions can be properly expanded\+: indeed, the previous example can be cast back to (cond1)\&\&(cond2) $\vert$$\vert$ (cond1)\&\&(cond3).
+
+{\bfseries{quit}} ~\newline
+ {\itshape Format}\+: \mbox{[}quit\mbox{]} ~\newline
+ {\itshape Reply}\+: \mbox{[}ack\mbox{]} ~\newline
+ {\itshape Action}\+: quit the module.\hypertarget{group__tutorial__perceptiveModels_lib_sec}{}\doxysubsection{Libraries}\label{group__tutorial__perceptiveModels_lib_sec}
+
+\begin{DoxyItemize}
+\item YARP libraries.
+\end{DoxyItemize}\hypertarget{group__tutorial__perceptiveModels_parameters_sec}{}\doxysubsection{Parameters}\label{group__tutorial__perceptiveModels_parameters_sec}
+--name {\itshape module\+Name} 
+\begin{DoxyItemize}
+\item The parameter {\itshape module\+Name} identifies the module\textquotesingle{}s name; all the open ports will be tagged with the prefix /$<$module\+Name$>$/. If not specified {\itshape objects\+Properties\+Collector} is assumed.
+\end{DoxyItemize}
+
+--db {\itshape db\+File\+Name} 
+\begin{DoxyItemize}
+\item The parameter {\itshape db\+File\+Name} specifies the name of the database to load at startup (if already existing) and save at shutdown.
+\end{DoxyItemize}
+
+--context {\itshape context\+Name} 
+\begin{DoxyItemize}
+\item To specify the context where to search for the database file; {\itshape objects\+Properties\+Collector} is the default context.
+\end{DoxyItemize}
+
+--no-\/load-\/db
+\begin{DoxyItemize}
+\item If this options is given then an empty database is started.
+\end{DoxyItemize}
+
+--no-\/save-\/db
+\begin{DoxyItemize}
+\item If this option is given then the content of database is not saved at shutdown.
+\end{DoxyItemize}
+
+--sync-\/bc $<$\+T$>$
+\begin{DoxyItemize}
+\item Broadcast the database content each {\itshape T} seconds. If not specified, a period of 1.\+0 second is assumed.
+\end{DoxyItemize}
+
+--async-\/bc
+\begin{DoxyItemize}
+\item Broadcast the database content whenever a change occurs.
+\end{DoxyItemize}
+
+--stats
+\begin{DoxyItemize}
+\item Enable statistics printouts.
+\end{DoxyItemize}\hypertarget{group__tutorial__ationPrimitives_portsa_sec}{}\doxysubsection{Ports Accessed}\label{group__tutorial__ationPrimitives_portsa_sec}
+None.\hypertarget{group__tutorial__ationPrimitives_portsc_sec}{}\doxysubsection{Ports Created}\label{group__tutorial__ationPrimitives_portsc_sec}
+
+\begin{DoxyItemize}
+\item {\itshape /} $<$module\+Name$>$/rpc the remote procedure call port used to send requests to the database and receive replies.
+\item {\itshape /} $<$module\+Name$>$/broadcast\+:o the port used to broadcast the database content in synchronous and asynchronous mode.
+\item {\itshape /} $<$module\+Name$>$/modify\+:i the port used to modify the database content complying with the data format implemented for the broadcast port.
+\end{DoxyItemize}\hypertarget{group__tutorial__ationPrimitives_in_files_sec}{}\doxysubsection{Input Data Files}\label{group__tutorial__ationPrimitives_in_files_sec}
+None.\hypertarget{group__tutorial__ationPrimitives_out_data_sec}{}\doxysubsection{Output Data Files}\label{group__tutorial__ationPrimitives_out_data_sec}
+None.\hypertarget{group__tutorial__ationPrimitives_conf_file_sec}{}\doxysubsection{Configuration Files}\label{group__tutorial__ationPrimitives_conf_file_sec}
+None.\hypertarget{group__tutorial__perceptiveModels_tested_os_sec}{}\doxysubsection{Tested OS}\label{group__tutorial__perceptiveModels_tested_os_sec}
+Linux and Windows.\hypertarget{group__objectsPropertiesCollector_reqexample_sec}{}\doxysubsection{Examples}\label{group__objectsPropertiesCollector_reqexample_sec}
+Several examples of the requests you may forward to the database\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{command: [\mbox{\hyperlink{namespacestrain_1_1dsp_1_1q15_af5c1f1ef9d4141e9b874abd615106401}{add}}] ((name ball) (color red) (\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}} 1)) }
+\DoxyCodeLine{reply: [\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fdacee8aa0fdd5c1ef3adb3c501fd914bbf}{ack}}] (\textcolor{keywordtype}{id} 0) }
+\DoxyCodeLine{ }
+\DoxyCodeLine{command: [\mbox{\hyperlink{namespacestrain_1_1dsp_1_1q15_af5c1f1ef9d4141e9b874abd615106401}{add}}] ((name octopus) (color blue) (\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}} 2)) }
+\DoxyCodeLine{reply: [\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fdacee8aa0fdd5c1ef3adb3c501fd914bbf}{ack}}] (\textcolor{keywordtype}{id} 1) }
+\DoxyCodeLine{ }
+\DoxyCodeLine{command: [set] ((\textcolor{keywordtype}{id} 1) (\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}} 3)) }
+\DoxyCodeLine{reply: [\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fdacee8aa0fdd5c1ef3adb3c501fd914bbf}{ack}}] }
+\DoxyCodeLine{ }
+\DoxyCodeLine{command: [get] ((\textcolor{keywordtype}{id} 1)) }
+\DoxyCodeLine{reply: [\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fdacee8aa0fdd5c1ef3adb3c501fd914bbf}{ack}}] ((name octopus) (color blue) (\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}} 3))}
+\DoxyCodeLine{ }
+\DoxyCodeLine{command: [ask] ((\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}} < 10) \&\& (color == blue)) }
+\DoxyCodeLine{reply: [\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fdacee8aa0fdd5c1ef3adb3c501fd914bbf}{ack}}] (id (1))}
+
+\end{DoxyCode}
+
+
+\begin{DoxyAuthor}{Author}
+Ugo Pattacini 
+\end{DoxyAuthor}

@@ -1,0 +1,58 @@
+The layout system is responsible for positioning and scaling layout elements such as axis rects, legends and plot titles in a \mbox{\hyperlink{classQCustomPlot}{QCustom\+Plot}}.\hypertarget{thelayoutsystem_layoutsystem-classesandmechanisms}{}\doxysection{Classes and mechanisms}\label{thelayoutsystem_layoutsystem-classesandmechanisms}
+The layout system is based on the abstract base class \mbox{\hyperlink{classQCPLayoutElement}{QCPLayout\+Element}}. All objects that take part in the layout system derive from this class, either directly or indirectly.
+
+Since \mbox{\hyperlink{classQCPLayoutElement}{QCPLayout\+Element}} itself derives from \mbox{\hyperlink{classQCPLayerable}{QCPLayerable}}, a layout element may draw its own content. However, it is perfectly possible for a layout element to only serve as a structuring and/or positioning element, not drawing anything on its own.\hypertarget{thelayoutsystem_layoutsystem-rects}{}\doxysubsection{Rects of a layout element}\label{thelayoutsystem_layoutsystem-rects}
+A layout element is a rectangular object described by two rects\+: the inner rect (\mbox{\hyperlink{classQCPLayoutElement_a208effccfe2cca4a0eaf9393e60f2dd4}{QCPLayout\+Element\+::rect}}) and the outer rect (\mbox{\hyperlink{classQCPLayoutElement_a38975ea13e36de8e53391ce41d94bc0f}{QCPLayout\+Element\+::set\+Outer\+Rect}}). The inner rect is calculated automatically by applying the margin (\mbox{\hyperlink{classQCPLayoutElement_a8f450b1f3f992ad576fce2c63d8b79cf}{QCPLayout\+Element\+::set\+Margins}}) inward from the outer rect. The inner rect is meant for main content while the margin area may either be left blank or serve for displaying peripheral graphics. For example, \mbox{\hyperlink{classQCPAxisRect}{QCPAxis\+Rect}} positions the four main axes at the sides of the inner rect, so graphs end up inside it and the axis labels and tick labels are in the margin area.\hypertarget{thelayoutsystem_layoutsystem-margins}{}\doxysubsection{Margins}\label{thelayoutsystem_layoutsystem-margins}
+Each layout element may provide a mechanism to automatically determine its margins. Internally, this is realized with the \mbox{\hyperlink{classQCPLayoutElement_a005c9f0fe84bc1591a2cf2c46fd477b4}{QCPLayout\+Element\+::calculate\+Auto\+Margin}} function which takes a \mbox{\hyperlink{namespaceQCP_a7e487e3e2ccb62ab7771065bab7cae54}{QCP\+::\+Margin\+Side}} and returns an integer value which represents the ideal margin for the specified side. The automatic margin will be used on the sides specified in \mbox{\hyperlink{classQCPLayoutElement_accfda49994e3e6d51ed14504abf9d27d}{QCPLayout\+Element\+::set\+Auto\+Margins}}. By default, it is set to \mbox{\hyperlink{namespaceQCP_a7e487e3e2ccb62ab7771065bab7cae54a43d7361cb0c5244eabdc962021bffebc}{QCP\+::ms\+All}} meaning automatic margin calculation is enabled for all four sides. In this case, a minimum margin may be set with \mbox{\hyperlink{classQCPLayoutElement_a0a8a17abc16b7923159fcc7608f94673}{QCPLayout\+Element\+::set\+Minimum\+Margins}}, to prevent the automatic margin mechanism from setting margins smaller than desired for a specific situation. If automatic margin calculation is unset for a specific side, the margin of that side can be controlled directy via \mbox{\hyperlink{classQCPLayoutElement_a8f450b1f3f992ad576fce2c63d8b79cf}{QCPLayout\+Element\+::set\+Margins}}.
+
+If multiple layout ements are arranged next to or beneath each other, it may be desirable to align their inner rects on certain sides. Since they all might have different automatic margins, this usually isn\textquotesingle{}t the case. The class \mbox{\hyperlink{classQCPMarginGroup}{QCPMargin\+Group}} and \mbox{\hyperlink{classQCPLayoutElement_a516e56f76b6bc100e8e71d329866847d}{QCPLayout\+Element\+::set\+Margin\+Group}} fix this by allowing to synchronize multiple margins. See the documentation there for details.\hypertarget{thelayoutsystem_layoutsystem-layout}{}\doxysubsection{Layouts}\label{thelayoutsystem_layoutsystem-layout}
+As mentioned, a \mbox{\hyperlink{classQCPLayoutElement}{QCPLayout\+Element}} may have an arbitrary number of child layout elements and in princple can have the only purpose to manage/arrange those child elements. This is what the subclass \mbox{\hyperlink{classQCPLayout}{QCPLayout}} specializes on. It is a \mbox{\hyperlink{classQCPLayoutElement}{QCPLayout\+Element}} itself but has no visual representation. It defines an interface to add, remove and manage child layout elements. \mbox{\hyperlink{classQCPLayout}{QCPLayout}} isn\textquotesingle{}t a usable layout though, it\textquotesingle{}s an abstract base class that concrete layouts derive from, like \mbox{\hyperlink{classQCPLayoutGrid}{QCPLayout\+Grid}} which arranges its child elements in a grid and \mbox{\hyperlink{classQCPLayoutInset}{QCPLayout\+Inset}} which allows placing child elements freely inside its rect.
+
+Since a \mbox{\hyperlink{classQCPLayout}{QCPLayout}} is a layout element itself, it may be placed inside other layouts. This way, complex hierarchies may be created, offering very flexible arrangements.
+
+
+
+Above is a sketch of the default \mbox{\hyperlink{classQCPLayoutGrid}{QCPLayout\+Grid}} accessible via \mbox{\hyperlink{classQCustomPlot_af1a1f1f571237deb7c2bd34a5e9f018f}{QCustom\+Plot\+::plot\+Layout}}. It shows how two child layout elements are placed inside the grid layout next to each other in cells (0, 0) and (0, 1).\hypertarget{thelayoutsystem_layoutsystem-plotlayout}{}\doxysubsection{The top level plot layout}\label{thelayoutsystem_layoutsystem-plotlayout}
+Every \mbox{\hyperlink{classQCustomPlot}{QCustom\+Plot}} has one top level layout of type \mbox{\hyperlink{classQCPLayoutGrid}{QCPLayout\+Grid}}. It is accessible via \mbox{\hyperlink{classQCustomPlot_af1a1f1f571237deb7c2bd34a5e9f018f}{QCustom\+Plot\+::plot\+Layout}} and contains (directly or indirectly via other sub-\/layouts) all layout elements in the \mbox{\hyperlink{classQCustomPlot}{QCustom\+Plot}}. By default, this top level grid layout contains a single cell which holds the main axis rect.\hypertarget{thelayoutsystem_layoutsystem-examples}{}\doxysubsection{Examples}\label{thelayoutsystem_layoutsystem-examples}
+{\bfseries{Adding a plot title}} is a typical and simple case to demonstrate basic workings of the layout system. 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{comment}{// first we create and prepare a plot title layout element:}}
+\DoxyCodeLine{\mbox{\hyperlink{classQCPPlotTitle}{QCPPlotTitle}} *title = \textcolor{keyword}{new} \mbox{\hyperlink{classQCPPlotTitle}{QCPPlotTitle}}(customPlot);}
+\DoxyCodeLine{title-\/>\mbox{\hyperlink{classQCPPlotTitle_aae5a93e88050dfb2cbf6adc087516821}{setText}}(\textcolor{stringliteral}{"{}Plot Title Example"{}});}
+\DoxyCodeLine{title-\/>\mbox{\hyperlink{classQCPPlotTitle_a199fc7170802ea65006c371875349e37}{setFont}}(QFont(\textcolor{stringliteral}{"{}sans"{}}, 12, QFont::Bold));}
+\DoxyCodeLine{\textcolor{comment}{// then we add it to the main plot layout:}}
+\DoxyCodeLine{customPlot-\/>plotLayout()-\/>insertRow(0); \textcolor{comment}{// insert an empty row above the axis rect}}
+\DoxyCodeLine{customPlot-\/>plotLayout()-\/>addElement(0, 0, title); \textcolor{comment}{// place the title in the empty cell we've just created}}
+
+\end{DoxyCode}
+ 
+
+{\bfseries{Arranging multiple axis rects}} actually is the central purpose of the layout system. 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{customPlot-\/>plotLayout()-\/>clear(); \textcolor{comment}{// let's start from scratch and remove the default axis rect}}
+\DoxyCodeLine{\textcolor{comment}{// add the first axis rect in second row (row index 1):}}
+\DoxyCodeLine{\mbox{\hyperlink{classQCPAxisRect}{QCPAxisRect}} *topAxisRect = \textcolor{keyword}{new} \mbox{\hyperlink{classQCPAxisRect}{QCPAxisRect}}(customPlot);}
+\DoxyCodeLine{customPlot-\/>plotLayout()-\/>addElement(1, 0, topAxisRect);}
+\DoxyCodeLine{\textcolor{comment}{// create a sub layout that we'll place in first row:}}
+\DoxyCodeLine{\mbox{\hyperlink{classQCPLayoutGrid}{QCPLayoutGrid}} *subLayout = \textcolor{keyword}{new} \mbox{\hyperlink{classQCPLayoutGrid}{QCPLayoutGrid}};}
+\DoxyCodeLine{customPlot-\/>plotLayout()-\/>\mbox{\hyperlink{classQCPLayoutGrid_adff1a2ca691ed83d2d24a4cd1fe17012}{addElement}}(0, 0, subLayout);}
+\DoxyCodeLine{\textcolor{comment}{// add two axis rects in the sub layout next to each other:}}
+\DoxyCodeLine{\mbox{\hyperlink{classQCPAxisRect}{QCPAxisRect}} *leftAxisRect = \textcolor{keyword}{new} \mbox{\hyperlink{classQCPAxisRect}{QCPAxisRect}}(customPlot);}
+\DoxyCodeLine{\mbox{\hyperlink{classQCPAxisRect}{QCPAxisRect}} *rightAxisRect = \textcolor{keyword}{new} \mbox{\hyperlink{classQCPAxisRect}{QCPAxisRect}}(customPlot);}
+\DoxyCodeLine{subLayout-\/>\mbox{\hyperlink{classQCPLayoutGrid_adff1a2ca691ed83d2d24a4cd1fe17012}{addElement}}(0, 0, leftAxisRect);}
+\DoxyCodeLine{subLayout-\/>\mbox{\hyperlink{classQCPLayoutGrid_adff1a2ca691ed83d2d24a4cd1fe17012}{addElement}}(0, 1, rightAxisRect);}
+\DoxyCodeLine{subLayout-\/>\mbox{\hyperlink{classQCPLayoutGrid_ae38f31a71687b9d7ee3104852528fb50}{setColumnStretchFactor}}(0, 3); \textcolor{comment}{// left axis rect shall have 60\% of width}}
+\DoxyCodeLine{subLayout-\/>\mbox{\hyperlink{classQCPLayoutGrid_ae38f31a71687b9d7ee3104852528fb50}{setColumnStretchFactor}}(1, 2); \textcolor{comment}{// right one only 40\% (3:2 = 60:40)}}
+\DoxyCodeLine{\textcolor{comment}{// since we've created the axis rects and axes from scratch, we need to place them on}}
+\DoxyCodeLine{\textcolor{comment}{// according layers, if we don't want the grid to be drawn above the axes etc.}}
+\DoxyCodeLine{\textcolor{comment}{// place the axis on "{}axes"{} layer and grids on the "{}grid"{} layer, which is below "{}axes"{}:}}
+\DoxyCodeLine{QList<QCPAxis*> allAxes;}
+\DoxyCodeLine{allAxes << topAxisRect-\/>\mbox{\hyperlink{classQCPAxisRect_a8db4722cb93e9c4a6f0d91150c200867}{axes}}() << leftAxisRect-\/>\mbox{\hyperlink{classQCPAxisRect_a8db4722cb93e9c4a6f0d91150c200867}{axes}}() << rightAxisRect-\/>\mbox{\hyperlink{classQCPAxisRect_a8db4722cb93e9c4a6f0d91150c200867}{axes}}();}
+\DoxyCodeLine{\textcolor{keywordflow}{foreach} (\mbox{\hyperlink{classQCPAxis}{QCPAxis}} *axis, allAxes)}
+\DoxyCodeLine{\{}
+\DoxyCodeLine{  axis-\/>\mbox{\hyperlink{classQCPLayerable_ab0d0da6d2de45a118886d2c8e16d5a54}{setLayer}}(\textcolor{stringliteral}{"{}axes"{}});}
+\DoxyCodeLine{  axis-\/>\mbox{\hyperlink{classQCPAxis_a63f1dd2df663680d2a8d06c19592dd63}{grid}}()-\/>\mbox{\hyperlink{classQCPLayerable_ab0d0da6d2de45a118886d2c8e16d5a54}{setLayer}}(\textcolor{stringliteral}{"{}grid"{}});}
+\DoxyCodeLine{\}}
+
+\end{DoxyCode}
+  

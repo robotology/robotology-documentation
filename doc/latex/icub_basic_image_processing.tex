@@ -1,0 +1,529 @@
+\hypertarget{icub_python_simworld_control_sec_goal}{}\doxysection{Goal}\label{icub_python_simworld_control_sec_goal}
+To choose a visual target and fixate it. For simplicity, the target shall be \char`\"{}blueish stuff\char`\"{}, and we\textquotesingle{}ll work on the simulator.
+
+So if the simulated robot sees something like this\+:
+
+
+
+\hypertarget{icub_basic_image_processing_sec_programs}{}\doxysection{Programs to write}\label{icub_basic_image_processing_sec_programs}
+Let\textquotesingle{}s make two programs\+:
+\begin{DoxyItemize}
+\item find\+\_\+location.\+cpp, this will look at the input from a camera and decide what location within it looks interesting
+\item look\+\_\+at\+\_\+location.\+cpp, this will take an image location and try to move the camera to look towards it
+\end{DoxyItemize}
+
+For the first program, find\+\_\+location, we can use any camera. For the second, we need to use the camera on the robot or the robot simulator. With the simulator, use the \char`\"{}world on\char`\"{} flag in the activation configuration file (conf/i\+Cub\+\_\+parts\+\_\+activation.\+ini) so that the robot has a blue ball on a table in front of it. At the time of writing, you can move the robot\textquotesingle{}s eyes down to see the ball by running\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\mbox{\hyperlink{namespaceyarp}{yarp}} rpc /icubSim/head/rpc:i}
+
+\end{DoxyCode}
+~\newline
+
+
+and typing\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{set pos 0 -\/60}
+
+\end{DoxyCode}
+
+
+(this should turn the eyes 60 degrees downward).\hypertarget{icub_basic_image_processing_sec_find_location}{}\doxysection{Find Location}\label{icub_basic_image_processing_sec_find_location}
+In YARP, camera images are sent from one program to another using ports. In C++, we can create a port for reading or writing images like this\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{BufferedPort<ImageOf<PixelRgb> > port;}
+
+\end{DoxyCode}
+
+
+This means \char`\"{}make a port with buffering for sending/receiving images in RGB format\char`\"{}.
+
+Here\textquotesingle{}s a basic program to get images repeatedly\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{preprocessor}{\#include <stdio.h>}}
+\DoxyCodeLine{\textcolor{comment}{/* Get all OS and signal processing YARP classes */}}
+\DoxyCodeLine{\textcolor{preprocessor}{\#include <yarp/os/all.h>}}
+\DoxyCodeLine{\textcolor{preprocessor}{\#include <yarp/sig/all.h>}}
+\DoxyCodeLine{\textcolor{keyword}{using namespace }yarp::os;}
+\DoxyCodeLine{\textcolor{keyword}{using namespace }yarp::sig;}
+\DoxyCodeLine{\textcolor{keywordtype}{int} \mbox{\hyperlink{icub-main_2src_2core_2emotionInterface_2main_8cpp_a0ddf1224851353fc92bfbff6f499fa97}{main}}() \{}
+\DoxyCodeLine{  Network \mbox{\hyperlink{namespaceyarp}{yarp}}; \textcolor{comment}{// set up yarp}}
+\DoxyCodeLine{  BufferedPort<ImageOf<PixelRgb> > imagePort;  \textcolor{comment}{// make a port for reading images}}
+\DoxyCodeLine{  imagePort.open(\textcolor{stringliteral}{"{}/tutorial/image/in"{}});  \textcolor{comment}{// give the port a name}}
+\DoxyCodeLine{  \textcolor{keywordflow}{while} (1) \{ }
+\DoxyCodeLine{    ImageOf<PixelRgb> *image = imagePort.read();  \textcolor{comment}{// read an image}}
+\DoxyCodeLine{    \textcolor{keywordflow}{if} (image!=NULL) \{ \textcolor{comment}{// check we actually got something}}
+\DoxyCodeLine{       printf(\textcolor{stringliteral}{"{}We got an image of size \%dx\%d\(\backslash\)n"{}}, image-\/>width(), image-\/>height());}
+\DoxyCodeLine{    \}}
+\DoxyCodeLine{  \}}
+\DoxyCodeLine{  \textcolor{keywordflow}{return} 0;}
+\DoxyCodeLine{\}}
+
+\end{DoxyCode}
+
+
+You can compile this any way you like. One quick way to do it is to go into the directory where you saved this program (in a file called for example \char`\"{}find\+\_\+location.\+cpp\char`\"{}) and type\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\mbox{\hyperlink{namespaceyarp}{yarp}} cmake}
+
+\end{DoxyCode}
+~\newline
+
+
+This creates a basic CMake\+Lists.\+txt project file that is good enough to compile most simple programs. Run cmake in this directory, and compile. You will get a program called \char`\"{}yarpy\char`\"{} (you can and should change this name by editing the CMake\+Lists.\+txt file). If you run it, you should see a port called \char`\"{}/tutorial/image/in\char`\"{} being created. ~\newline
+
+
+You can then connect an image source to that port using\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\mbox{\hyperlink{namespaceyarp}{yarp}} connect <name of image port> /tutorial/image/in}
+
+\end{DoxyCode}
+
+
+for example, for the simulator, it would be something like\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\mbox{\hyperlink{namespaceyarp}{yarp}} connect /icubSim/cam/left /tutorial/image/in}
+
+\end{DoxyCode}
+ you should now see messages like this\+: \begin{DoxyVerb}  We got an image of size 320x240
+  We got an image of size 320x240
+  We got an image of size 320x240
+  ...
+\end{DoxyVerb}
+
+
+Now let\textquotesingle{}s extend our program a bit, to pick up blueish objects (for example)\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{preprocessor}{\#include <stdio.h>}}
+\DoxyCodeLine{\textcolor{comment}{// Get all OS and signal processing YARP classes}}
+\DoxyCodeLine{\textcolor{preprocessor}{\#include <yarp/os/all.h>}}
+\DoxyCodeLine{\textcolor{preprocessor}{\#include <yarp/sig/all.h>}}
+\DoxyCodeLine{\textcolor{keyword}{using namespace }yarp::os;}
+\DoxyCodeLine{\textcolor{keyword}{using namespace }yarp::sig;}
+\DoxyCodeLine{\textcolor{keywordtype}{int} \mbox{\hyperlink{icub-main_2src_2core_2emotionInterface_2main_8cpp_a0ddf1224851353fc92bfbff6f499fa97}{main}}() \{}
+\DoxyCodeLine{  Network \mbox{\hyperlink{namespaceyarp}{yarp}}; \textcolor{comment}{// set up yarp}}
+\DoxyCodeLine{  BufferedPort<ImageOf<PixelRgb> > imagePort;  \textcolor{comment}{// make a port for reading images}}
+\DoxyCodeLine{  imagePort.open(\textcolor{stringliteral}{"{}/tutorial/image/in"{}});  \textcolor{comment}{// give the port a name}}
+\DoxyCodeLine{  \textcolor{keywordflow}{while} (1) \{ \textcolor{comment}{// repeat forever}}
+\DoxyCodeLine{    ImageOf<PixelRgb> *image = imagePort.read();  \textcolor{comment}{// read an image}}
+\DoxyCodeLine{    \textcolor{keywordflow}{if} (image!=NULL) \{ \textcolor{comment}{// check we actually got something}}
+\DoxyCodeLine{       printf(\textcolor{stringliteral}{"{}We got an image of size \%dx\%d\(\backslash\)n"{}}, image-\/>width(), image-\/>height());}
+\DoxyCodeLine{       \textcolor{keywordtype}{double} xMean = 0;}
+\DoxyCodeLine{       \textcolor{keywordtype}{double} yMean = 0;}
+\DoxyCodeLine{       \textcolor{keywordtype}{int} ct = 0;}
+\DoxyCodeLine{       \textcolor{keywordflow}{for} (\textcolor{keywordtype}{int} \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}=0; \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}<image-\/>width(); \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}++) \{}
+\DoxyCodeLine{         \textcolor{keywordflow}{for} (\textcolor{keywordtype}{int} \mbox{\hyperlink{show__eyes__axes_8m_a2fb1c5cf58867b5bbc9a1b145a86f3a0}{y}}=0; \mbox{\hyperlink{show__eyes__axes_8m_a2fb1c5cf58867b5bbc9a1b145a86f3a0}{y}}<image-\/>height(); \mbox{\hyperlink{show__eyes__axes_8m_a2fb1c5cf58867b5bbc9a1b145a86f3a0}{y}}++) \{}
+\DoxyCodeLine{           PixelRgb\& pixel = image-\/>pixel(\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}},\mbox{\hyperlink{show__eyes__axes_8m_a2fb1c5cf58867b5bbc9a1b145a86f3a0}{y}});}
+\DoxyCodeLine{           \textcolor{comment}{// very simple test for blueishness}}
+\DoxyCodeLine{           \textcolor{comment}{// make sure blue level exceeds red and green by a factor of 2}}
+\DoxyCodeLine{           \textcolor{keywordflow}{if} (pixel.b>pixel.r*1.2+10 \&\& pixel.b>pixel.g*1.2+10) \{}
+\DoxyCodeLine{            \textcolor{comment}{// there's a blueish pixel at (x,y)!}}
+\DoxyCodeLine{            \textcolor{comment}{// let's find the average location of these pixels}}
+\DoxyCodeLine{            xMean += \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}};}
+\DoxyCodeLine{            yMean += \mbox{\hyperlink{show__eyes__axes_8m_a2fb1c5cf58867b5bbc9a1b145a86f3a0}{y}};}
+\DoxyCodeLine{            ct++;}
+\DoxyCodeLine{           \}}
+\DoxyCodeLine{         \}}
+\DoxyCodeLine{       \}}
+\DoxyCodeLine{       \textcolor{keywordflow}{if} (ct>0) \{}
+\DoxyCodeLine{         xMean /= ct;}
+\DoxyCodeLine{         yMean /= ct;}
+\DoxyCodeLine{       \}}
+\DoxyCodeLine{       \textcolor{keywordflow}{if} (ct>(image-\/>width()/20)*(image-\/>height()/20)) \{}
+\DoxyCodeLine{         printf(\textcolor{stringliteral}{"{}Best guess at blue target: \%g \%g\(\backslash\)n"{}}, xMean, yMean);}
+\DoxyCodeLine{       \}}
+\DoxyCodeLine{    \}}
+\DoxyCodeLine{  \}}
+\DoxyCodeLine{  \textcolor{keywordflow}{return} 0;}
+\DoxyCodeLine{\}}
+
+\end{DoxyCode}
+
+
+Now that we have a target, let\textquotesingle{}s output it. We can output it as a YARP Vector for example, using a port like this\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{BufferedPort<Vector> targetPort;}
+
+\end{DoxyCode}
+
+
+We add some lines at the beginning of the program\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{Network \mbox{\hyperlink{namespaceyarp}{yarp}};}
+\DoxyCodeLine{BufferedPort<ImageOf<PixelRgb> > imagePort;}
+\DoxyCodeLine{BufferedPort<Vector> targetPort;  \textcolor{comment}{// ADD THIS LINE}}
+\DoxyCodeLine{targetPort.open(\textcolor{stringliteral}{"{}/tutorial/target/out"{}});  \textcolor{comment}{// ADD THIS LINE}}
+
+\end{DoxyCode}
+
+
+and then when we know what our target is, we send it\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{printf(\textcolor{stringliteral}{"{}Best guess at blue target: \%g \%g\(\backslash\)n"{}}, xMean, yMean);}
+\DoxyCodeLine{Vector\& v = targetPort.prepare();}
+\DoxyCodeLine{v.resize(3);}
+\DoxyCodeLine{v[0] = xMean;}
+\DoxyCodeLine{v[1] = yMean;}
+\DoxyCodeLine{v[2] = 1;       \textcolor{comment}{// a confidence value, always good practice to add.  In this case, we pretend to be very confident}}
+\DoxyCodeLine{targetPort.write();  \textcolor{comment}{// send our data}}
+
+\end{DoxyCode}
+
+
+When no target is selected, it is still good to send output, to say explicitly that there is no output rather than just remaining silent (which is hard to distinguish from the program just stopping or not running).
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{comment}{/* dd this for the condition where no target is picked */}}
+\DoxyCodeLine{Vector\& v = targetPort.prepare();}
+\DoxyCodeLine{v.resize(3);}
+\DoxyCodeLine{v[0] = 0;}
+\DoxyCodeLine{v[1] = 0;}
+\DoxyCodeLine{v[2] = 0;}
+\DoxyCodeLine{targetPort.write();  \textcolor{comment}{// send our data}}
+
+\end{DoxyCode}
+
+
+Now we can read from this port (just to test) with yarp read\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\mbox{\hyperlink{namespaceyarp}{yarp}} \mbox{\hyperlink{namespaceeth_1_1parser_a8ec58da625146082584ad1a365bdd0e5}{read}} ... /tutorial/target/\mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}}}
+
+\end{DoxyCode}
+\hypertarget{icub_basic_image_processing_sec_look_at}{}\doxysection{Look at Location}\label{icub_basic_image_processing_sec_look_at}
+Now let\textquotesingle{}s write a separate program that takes the target location computed in find\+\_\+location.\+cpp and drives the real of simulated camera to look towards that location. First, we need to read our vector\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{preprocessor}{\#include <cstdio>}}
+\DoxyCodeLine{\textcolor{preprocessor}{\#include <vector>}}
+\DoxyCodeLine{\textcolor{preprocessor}{\#include <yarp/os/all.h>}}
+\DoxyCodeLine{\textcolor{preprocessor}{\#include <yarp/sig/all.h>}}
+\DoxyCodeLine{\textcolor{keyword}{using namespace }std;}
+\DoxyCodeLine{\textcolor{keyword}{using namespace }yarp::os;}
+\DoxyCodeLine{\textcolor{keyword}{using namespace }yarp::sig;}
+\DoxyCodeLine{\textcolor{keywordtype}{int} \mbox{\hyperlink{icub-main_2src_2core_2emotionInterface_2main_8cpp_a0ddf1224851353fc92bfbff6f499fa97}{main}}() \{}
+\DoxyCodeLine{  Network \mbox{\hyperlink{namespaceyarp}{yarp}}; \textcolor{comment}{// set up yarp}}
+\DoxyCodeLine{  BufferedPort<Vector> targetPort;}
+\DoxyCodeLine{  targetPort.open(\textcolor{stringliteral}{"{}/tutorial/target/in"{}});}
+\DoxyCodeLine{  \textcolor{keywordflow}{while} (1) \{ \textcolor{comment}{// repeat forever}}
+\DoxyCodeLine{    Vector *target = targetPort.read();  \textcolor{comment}{// read a target}}
+\DoxyCodeLine{    \textcolor{keywordflow}{if} (target!=NULL) \{ \textcolor{comment}{// check we actually got something}}
+\DoxyCodeLine{       printf(\textcolor{stringliteral}{"{}We got a vector of size \%d\(\backslash\)n"{}}, target-\/>size());}
+\DoxyCodeLine{    \}}
+\DoxyCodeLine{  \}}
+\DoxyCodeLine{  \textcolor{keywordflow}{return} 0;}
+\DoxyCodeLine{\}  }
+
+\end{DoxyCode}
+
+
+Compile using the same method as before. If we run the two programs, connect an image source to the first one, and do\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\mbox{\hyperlink{namespaceyarp}{yarp}} connect /tutorial/target/\mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}} /tutorial/target/in}
+
+\end{DoxyCode}
+
+
+We should see messages like this\+: \begin{DoxyVerb}  We got a vector of size 3
+  We got a vector of size 3
+  ...
+\end{DoxyVerb}
+
+
+Let\textquotesingle{}s change our message from\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{printf(\textcolor{stringliteral}{"{}We got a vector of size \%d\(\backslash\)n"{}}, target-\/>size());}
+
+\end{DoxyCode}
+
+
+to\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{printf(\textcolor{stringliteral}{"{}We got a vector containing"{}});}
+\DoxyCodeLine{\textcolor{keywordflow}{for} (\textcolor{keywordtype}{int} i=0; i<target-\/>size(); i++) \{}
+\DoxyCodeLine{  printf(\textcolor{stringliteral}{"{} \%g"{}}, (*target)[i]);}
+\DoxyCodeLine{\}}
+\DoxyCodeLine{printf(\textcolor{stringliteral}{"{}\(\backslash\)n"{}});}
+
+\end{DoxyCode}
+
+
+We should see messages like this\+: \begin{DoxyVerb}  We got a vector containing 234.459 191.892 1   
+  We got a vector containing 234.459 191.892 1   
+  We got a vector containing 234.459 191.892 1   
+  ...
+\end{DoxyVerb}
+ or \begin{DoxyVerb}  We got a vector containing 0 0 0
+  We got a vector containing 0 0 0
+  We got a vector containing 0 0 0
+\end{DoxyVerb}
+
+
+if no target is visible.
+
+Now we need to drive the motors (see \mbox{\hyperlink{icub_motor_control_tutorial}{Getting accustomed with motor interfaces}}). For this, we need the YARP device classes, so we add another header file at the start of our program\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{preprocessor}{\#include <yarp/dev/all.h>}}
+\DoxyCodeLine{\textcolor{keyword}{using namespace }\mbox{\hyperlink{namespaceyarp_1_1dev}{yarp::dev}};}
+
+\end{DoxyCode}
+
+
+We connect to the simulator head\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{Property options;}
+\DoxyCodeLine{options.put(\textcolor{stringliteral}{"{}device"{}}, \textcolor{stringliteral}{"{}remote\_controlboard"{}});}
+\DoxyCodeLine{options.put(\textcolor{stringliteral}{"{}local"{}}, \textcolor{stringliteral}{"{}/tutorial/motor/client"{}});}
+\DoxyCodeLine{options.put(\textcolor{stringliteral}{"{}remote"{}}, \textcolor{stringliteral}{"{}/icubSim/head"{}});}
+\DoxyCodeLine{PolyDriver robotHead(options);}
+\DoxyCodeLine{\textcolor{keywordflow}{if} (!robotHead.isValid()) \{}
+\DoxyCodeLine{  printf(\textcolor{stringliteral}{"{}Cannot connect to robot head\(\backslash\)n"{}});}
+\DoxyCodeLine{  \textcolor{keywordflow}{return} 1;}
+\DoxyCodeLine{\}}
+\DoxyCodeLine{IControlMode     *mod;}
+\DoxyCodeLine{IPositionControl *pos;}
+\DoxyCodeLine{IVelocityControl *vel;}
+\DoxyCodeLine{IEncoders *enc;}
+\DoxyCodeLine{robotHead.view(mod);}
+\DoxyCodeLine{robotHead.view(pos);}
+\DoxyCodeLine{robotHead.view(vel);}
+\DoxyCodeLine{robotHead.view(enc);}
+\DoxyCodeLine{\textcolor{keywordflow}{if} (mode==NULL || pos==NULL || vel==NULL || enc==NULL) \{}
+\DoxyCodeLine{  printf(\textcolor{stringliteral}{"{}Cannot get interface to robot head\(\backslash\)n"{}});}
+\DoxyCodeLine{  robotHead.close();}
+\DoxyCodeLine{  \textcolor{keywordflow}{return} 1;}
+\DoxyCodeLine{\}}
+\DoxyCodeLine{\textcolor{keywordtype}{int} \mbox{\hyperlink{icub-main_2src_2tools_2simpleClient_2main_8cpp_aac40ef34e7573177f3e908c5195594a6}{jnts}} = 0;}
+\DoxyCodeLine{pos-\/>getAxes(\&\mbox{\hyperlink{icub-main_2src_2tools_2simpleClient_2main_8cpp_aac40ef34e7573177f3e908c5195594a6}{jnts}});}
+\DoxyCodeLine{Vector setpoints;}
+\DoxyCodeLine{setpoints.resize(\mbox{\hyperlink{icub-main_2src_2tools_2simpleClient_2main_8cpp_aac40ef34e7573177f3e908c5195594a6}{jnts}});}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{// enable velocity control mode}}
+\DoxyCodeLine{vector<int> modes(\mbox{\hyperlink{icub-main_2src_2tools_2simpleClient_2main_8cpp_aac40ef34e7573177f3e908c5195594a6}{jnts}},VOCAB\_CM\_VELOCITY);}
+\DoxyCodeLine{mod-\/>setControlModes(modes.data());}
+
+\end{DoxyCode}
+
+
+Finally let\textquotesingle{}s send a dumb command just to test\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{keywordflow}{if} (target!=NULL) \{}
+\DoxyCodeLine{  ...}
+\DoxyCodeLine{  \textcolor{comment}{// prepare command}}
+\DoxyCodeLine{  \textcolor{keywordflow}{for} (\textcolor{keywordtype}{int} i=0; i<\mbox{\hyperlink{icub-main_2src_2tools_2simpleClient_2main_8cpp_aac40ef34e7573177f3e908c5195594a6}{jnts}}; i++) \{}
+\DoxyCodeLine{    setpoints[i] = 0;}
+\DoxyCodeLine{  \}}
+\DoxyCodeLine{  setpoints[3] = 5; \textcolor{comment}{// common tilt of eyes}}
+\DoxyCodeLine{  setpoints[4] = 5; \textcolor{comment}{// common version of eyes}}
+\DoxyCodeLine{  vel-\/>velocityMove(setpoints.data());}
+\DoxyCodeLine{\}}
+
+\end{DoxyCode}
+
+
+The robot head should move to an extreme \char`\"{}diagonal\char`\"{} location. This helps us figure out which signs for velocity move the robot\textquotesingle{}s view in which direction. Here\textquotesingle{}s an actual working tracker\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{keywordtype}{double} \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}} = (*target)[0];}
+\DoxyCodeLine{\textcolor{keywordtype}{double} \mbox{\hyperlink{show__eyes__axes_8m_a2fb1c5cf58867b5bbc9a1b145a86f3a0}{y}} = (*target)[1];}
+\DoxyCodeLine{\textcolor{keywordtype}{double} conf = (*target)[2];}
+\DoxyCodeLine{}
+\DoxyCodeLine{\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}} -\/= 320/2;  \textcolor{comment}{// center of image should mean no motion}}
+\DoxyCodeLine{\mbox{\hyperlink{show__eyes__axes_8m_a2fb1c5cf58867b5bbc9a1b145a86f3a0}{y}} -\/= 240/2;  \textcolor{comment}{// (we should be passing image size in our message)}}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{keywordtype}{double} vx = \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}*0.1;  \textcolor{comment}{// don't move too fast}}
+\DoxyCodeLine{\textcolor{keywordtype}{double} vy = -\/\mbox{\hyperlink{show__eyes__axes_8m_a2fb1c5cf58867b5bbc9a1b145a86f3a0}{y}}*0.1;}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{// prepare command}}
+\DoxyCodeLine{\textcolor{keywordflow}{for} (\textcolor{keywordtype}{int} i=0; i<\mbox{\hyperlink{icub-main_2src_2tools_2simpleClient_2main_8cpp_aac40ef34e7573177f3e908c5195594a6}{jnts}}; i++) \{}
+\DoxyCodeLine{  setpoints[i] = 0;}
+\DoxyCodeLine{\}}
+\DoxyCodeLine{   }
+\DoxyCodeLine{\textcolor{keywordflow}{if} (conf>0.5) \{}
+\DoxyCodeLine{  setpoints[3] = vy;}
+\DoxyCodeLine{  setpoints[4] = vx;}
+\DoxyCodeLine{\} \textcolor{keywordflow}{else} \{}
+\DoxyCodeLine{  setpoints[3] = 0;}
+\DoxyCodeLine{  setpoints[4] = 0;}
+\DoxyCodeLine{\}}
+\DoxyCodeLine{vel-\/>velocityMove(setpoints.data());}
+
+\end{DoxyCode}
+
+
+The simulated robot should now successfully center the blue ball on the table, once it catches sight of it at all.
+
+Complete code for finding the blue ball\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{preprocessor}{ \#include <stdio.h>}}
+\DoxyCodeLine{ }
+\DoxyCodeLine{ \textcolor{comment}{/* Get all OS and signal processing YARP classes */}}
+\DoxyCodeLine{ }
+\DoxyCodeLine{\textcolor{preprocessor}{ \#include <yarp/os/all.h>}}
+\DoxyCodeLine{\textcolor{preprocessor}{ \#include <yarp/sig/all.h>}}
+\DoxyCodeLine{ \textcolor{keyword}{using namespace }yarp::os;}
+\DoxyCodeLine{ \textcolor{keyword}{using namespace }yarp::sig;}
+\DoxyCodeLine{ \textcolor{keywordtype}{int} \mbox{\hyperlink{icub-main_2src_2core_2emotionInterface_2main_8cpp_a0ddf1224851353fc92bfbff6f499fa97}{main}}() \{}
+\DoxyCodeLine{ Network \mbox{\hyperlink{namespaceyarp}{yarp}}; \textcolor{comment}{// set up yarp}}
+\DoxyCodeLine{ BufferedPort<ImageOf<PixelRgb> > imagePort;  \textcolor{comment}{// make a port for reading images}}
+\DoxyCodeLine{ BufferedPort<Vector> targetPort;}
+\DoxyCodeLine{ imagePort.open(\textcolor{stringliteral}{"{}/tutorial/image/in"{}});  \textcolor{comment}{// give the port a name}}
+\DoxyCodeLine{ targetPort.open(\textcolor{stringliteral}{"{}/tutorial/target/out"{}});}
+\DoxyCodeLine{ Network::connect(\textcolor{stringliteral}{"{}/icubSim/cam/left"{}},\textcolor{stringliteral}{"{}/tutorial/image/in"{}});}
+\DoxyCodeLine{ \textcolor{keywordflow}{while} (1) \{ \textcolor{comment}{// repeat forever}}
+\DoxyCodeLine{   ImageOf<PixelRgb> *image = imagePort.read();  \textcolor{comment}{// read an image}}
+\DoxyCodeLine{   \textcolor{keywordflow}{if} (image!=NULL) \{ \textcolor{comment}{// check we actually got something}}
+\DoxyCodeLine{      printf(\textcolor{stringliteral}{"{}We got an image of size \%dx\%d\(\backslash\)n"{}}, image-\/>width(), image-\/>height());}
+\DoxyCodeLine{      \textcolor{keywordtype}{double} xMean = 0;}
+\DoxyCodeLine{      \textcolor{keywordtype}{double} yMean = 0;}
+\DoxyCodeLine{      \textcolor{keywordtype}{int} ct = 0;}
+\DoxyCodeLine{      \textcolor{keywordflow}{for} (\textcolor{keywordtype}{int} \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}=0; \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}<image-\/>width(); \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}++) \{}
+\DoxyCodeLine{        \textcolor{keywordflow}{for} (\textcolor{keywordtype}{int} \mbox{\hyperlink{show__eyes__axes_8m_a2fb1c5cf58867b5bbc9a1b145a86f3a0}{y}}=0; \mbox{\hyperlink{show__eyes__axes_8m_a2fb1c5cf58867b5bbc9a1b145a86f3a0}{y}}<image-\/>height(); \mbox{\hyperlink{show__eyes__axes_8m_a2fb1c5cf58867b5bbc9a1b145a86f3a0}{y}}++) \{}
+\DoxyCodeLine{          PixelRgb\& pixel = image-\/>pixel(\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}},\mbox{\hyperlink{show__eyes__axes_8m_a2fb1c5cf58867b5bbc9a1b145a86f3a0}{y}});}
+\DoxyCodeLine{          \textcolor{comment}{/* very simple test for blueishness */}}
+\DoxyCodeLine{          \textcolor{comment}{/* make sure blue level exceeds red and green by a factor of 2 */}}
+\DoxyCodeLine{          \textcolor{keywordflow}{if} (pixel.b>pixel.r*1.2+10 \&\& pixel.b>pixel.g*1.2+10) \{}
+\DoxyCodeLine{           \textcolor{comment}{/* there's a blueish pixel at (x,y)! */}}
+\DoxyCodeLine{           \textcolor{comment}{/* let's find the average location of these pixels */}}
+\DoxyCodeLine{           xMean += \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}};}
+\DoxyCodeLine{           yMean += \mbox{\hyperlink{show__eyes__axes_8m_a2fb1c5cf58867b5bbc9a1b145a86f3a0}{y}};}
+\DoxyCodeLine{           ct++;}
+\DoxyCodeLine{          \}}
+\DoxyCodeLine{        \}}
+\DoxyCodeLine{      \}}
+\DoxyCodeLine{      \textcolor{keywordflow}{if} (ct>0) \{}
+\DoxyCodeLine{        xMean /= ct;}
+\DoxyCodeLine{        yMean /= ct;}
+\DoxyCodeLine{      \}}
+\DoxyCodeLine{      \textcolor{keywordflow}{if} (ct>(image-\/>width()/20)*(image-\/>height()/20)) \{}
+\DoxyCodeLine{        printf(\textcolor{stringliteral}{"{}Best guess at blue target: \%g \%g\(\backslash\)n"{}}, xMean, yMean);}
+\DoxyCodeLine{        Vector\& target = targetPort.prepare();}
+\DoxyCodeLine{        target.resize(3);}
+\DoxyCodeLine{        target[0] = xMean;}
+\DoxyCodeLine{        target[1] = yMean;}
+\DoxyCodeLine{        target[2] = 1;}
+\DoxyCodeLine{        targetPort.write();}
+\DoxyCodeLine{      \} \textcolor{keywordflow}{else} \{}
+\DoxyCodeLine{        Vector\& target = targetPort.prepare();}
+\DoxyCodeLine{        target.resize(3);}
+\DoxyCodeLine{        target[0] = 0;}
+\DoxyCodeLine{        target[1] = 0;}
+\DoxyCodeLine{        target[2] = 0;}
+\DoxyCodeLine{        targetPort.write();}
+\DoxyCodeLine{      \}}
+\DoxyCodeLine{   \}}
+\DoxyCodeLine{ \}}
+\DoxyCodeLine{ \textcolor{keywordflow}{return} 0;}
+\DoxyCodeLine{\}}
+
+\end{DoxyCode}
+
+
+Complete look\+\_\+at\+\_\+location.\+cpp\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{preprocessor}{\#include <cstdio>}}
+\DoxyCodeLine{\textcolor{preprocessor}{\#include <vector>}}
+\DoxyCodeLine{\textcolor{preprocessor}{\#include <yarp/os/all.h>}}
+\DoxyCodeLine{\textcolor{preprocessor}{\#include <yarp/sig/all.h>}}
+\DoxyCodeLine{\textcolor{preprocessor}{\#include <yarp/dev/all.h>}}
+\DoxyCodeLine{\textcolor{keyword}{using namespace }std;}
+\DoxyCodeLine{\textcolor{keyword}{using namespace }yarp::os;}
+\DoxyCodeLine{\textcolor{keyword}{using namespace }yarp::sig;}
+\DoxyCodeLine{\textcolor{keyword}{using namespace }\mbox{\hyperlink{namespaceyarp_1_1dev}{yarp::dev}};}
+\DoxyCodeLine{\textcolor{keywordtype}{int} \mbox{\hyperlink{icub-main_2src_2core_2emotionInterface_2main_8cpp_a0ddf1224851353fc92bfbff6f499fa97}{main}}() \{}
+\DoxyCodeLine{  Network \mbox{\hyperlink{namespaceyarp}{yarp}}; \textcolor{comment}{// set up yarp}}
+\DoxyCodeLine{  BufferedPort<Vector> targetPort;}
+\DoxyCodeLine{  targetPort.open(\textcolor{stringliteral}{"{}/tutorial/target/in"{}});}
+\DoxyCodeLine{  Network::connect(\textcolor{stringliteral}{"{}/tutorial/target/out"{}},\textcolor{stringliteral}{"{}/tutorial/target/in"{}});}
+\DoxyCodeLine{}
+\DoxyCodeLine{  Property options;}
+\DoxyCodeLine{  options.put(\textcolor{stringliteral}{"{}device"{}}, \textcolor{stringliteral}{"{}remote\_controlboard"{}});}
+\DoxyCodeLine{  options.put(\textcolor{stringliteral}{"{}local"{}}, \textcolor{stringliteral}{"{}/tutorial/motor/client"{}});}
+\DoxyCodeLine{  options.put(\textcolor{stringliteral}{"{}remote"{}}, \textcolor{stringliteral}{"{}/icubSim/head"{}});}
+\DoxyCodeLine{  PolyDriver robotHead(options);}
+\DoxyCodeLine{  \textcolor{keywordflow}{if} (!robotHead.isValid()) \{}
+\DoxyCodeLine{    printf(\textcolor{stringliteral}{"{}Cannot connect to robot head\(\backslash\)n"{}});}
+\DoxyCodeLine{    \textcolor{keywordflow}{return} 1;}
+\DoxyCodeLine{  \}}
+\DoxyCodeLine{  IControlMode     *mod;}
+\DoxyCodeLine{  IPositionControl *pos;}
+\DoxyCodeLine{  IVelocityControl *vel;}
+\DoxyCodeLine{  IEncoders *enc;}
+\DoxyCodeLine{  robotHead.view(mod);}
+\DoxyCodeLine{  robotHead.view(pos);}
+\DoxyCodeLine{  robotHead.view(vel);}
+\DoxyCodeLine{  robotHead.view(enc);}
+\DoxyCodeLine{  \textcolor{keywordflow}{if} (pos==NULL || vel==NULL || enc==NULL) \{}
+\DoxyCodeLine{    printf(\textcolor{stringliteral}{"{}Cannot get interface to robot head\(\backslash\)n"{}});}
+\DoxyCodeLine{    robotHead.close();}
+\DoxyCodeLine{    \textcolor{keywordflow}{return} 1;}
+\DoxyCodeLine{  \}}
+\DoxyCodeLine{  \textcolor{keywordtype}{int} \mbox{\hyperlink{icub-main_2src_2tools_2simpleClient_2main_8cpp_aac40ef34e7573177f3e908c5195594a6}{jnts}} = 0;}
+\DoxyCodeLine{  pos-\/>getAxes(\&\mbox{\hyperlink{icub-main_2src_2tools_2simpleClient_2main_8cpp_aac40ef34e7573177f3e908c5195594a6}{jnts}});}
+\DoxyCodeLine{  Vector setpoints;}
+\DoxyCodeLine{  setpoints.resize(\mbox{\hyperlink{icub-main_2src_2tools_2simpleClient_2main_8cpp_aac40ef34e7573177f3e908c5195594a6}{jnts}});}
+\DoxyCodeLine{}
+\DoxyCodeLine{  \textcolor{comment}{// enable velocity control mode}}
+\DoxyCodeLine{  vector<int> modes(\mbox{\hyperlink{icub-main_2src_2tools_2simpleClient_2main_8cpp_aac40ef34e7573177f3e908c5195594a6}{jnts}},VOCAB\_CM\_VELOCITY);}
+\DoxyCodeLine{  mod-\/>setControlModes(modes.data());}
+\DoxyCodeLine{}
+\DoxyCodeLine{  \textcolor{keywordflow}{while} (1) \{ \textcolor{comment}{// repeat forever}}
+\DoxyCodeLine{    Vector *target = targetPort.read();  \textcolor{comment}{// read a target}}
+\DoxyCodeLine{    \textcolor{keywordflow}{if} (target!=NULL) \{ \textcolor{comment}{// check we actually got something}}
+\DoxyCodeLine{       printf(\textcolor{stringliteral}{"{}We got a vector containing"{}});}
+\DoxyCodeLine{       \textcolor{keywordflow}{for} (\textcolor{keywordtype}{int} i=0; i<target-\/>size(); i++) \{}
+\DoxyCodeLine{         printf(\textcolor{stringliteral}{"{} \%g"{}}, (*target)[i]);}
+\DoxyCodeLine{       \}}
+\DoxyCodeLine{       printf(\textcolor{stringliteral}{"{}\(\backslash\)n"{}});}
+\DoxyCodeLine{}
+\DoxyCodeLine{       \textcolor{keywordtype}{double} \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}} = (*target)[0];}
+\DoxyCodeLine{       \textcolor{keywordtype}{double} \mbox{\hyperlink{show__eyes__axes_8m_a2fb1c5cf58867b5bbc9a1b145a86f3a0}{y}} = (*target)[1];}
+\DoxyCodeLine{       \textcolor{keywordtype}{double} conf = (*target)[2];}
+\DoxyCodeLine{}
+\DoxyCodeLine{       \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}} -\/= 320/2;}
+\DoxyCodeLine{       \mbox{\hyperlink{show__eyes__axes_8m_a2fb1c5cf58867b5bbc9a1b145a86f3a0}{y}} -\/= 240/2;}
+\DoxyCodeLine{}
+\DoxyCodeLine{       \textcolor{keywordtype}{double} vx = \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}*0.1;}
+\DoxyCodeLine{       \textcolor{keywordtype}{double} vy = -\/\mbox{\hyperlink{show__eyes__axes_8m_a2fb1c5cf58867b5bbc9a1b145a86f3a0}{y}}*0.1;}
+\DoxyCodeLine{}
+\DoxyCodeLine{       \textcolor{comment}{/* prepare command */}}
+\DoxyCodeLine{       \textcolor{keywordflow}{for} (\textcolor{keywordtype}{int} i=0; i<\mbox{\hyperlink{icub-main_2src_2tools_2simpleClient_2main_8cpp_aac40ef34e7573177f3e908c5195594a6}{jnts}}; i++) \{}
+\DoxyCodeLine{         setpoints[i] = 0;}
+\DoxyCodeLine{       \}}
+\DoxyCodeLine{}
+\DoxyCodeLine{       \textcolor{keywordflow}{if} (conf>0.5) \{}
+\DoxyCodeLine{         setpoints[3] = vy;}
+\DoxyCodeLine{         setpoints[4] = vx;}
+\DoxyCodeLine{       \} \textcolor{keywordflow}{else} \{}
+\DoxyCodeLine{         setpoints[3] = 0;}
+\DoxyCodeLine{         setpoints[4] = 0;}
+\DoxyCodeLine{       \}}
+\DoxyCodeLine{       vel-\/>velocityMove(setpoints.data());}
+\DoxyCodeLine{    \}}
+\DoxyCodeLine{  \}}
+\DoxyCodeLine{  \textcolor{keywordflow}{return} 0;}
+\DoxyCodeLine{\}}
+
+\end{DoxyCode}
+
+
+See code at\+:
+
+\mbox{\hyperlink{findLocation_8cpp}{src/image\+Processing/find\+Location.\+cpp}} \mbox{\hyperlink{lookAtLocation_8cpp}{src/image\+Processing/look\+At\+Location.\+cpp}} 

@@ -1,0 +1,19 @@
+var searchData=
+[
+  ['randomfeature_10596',['RandomFeature',['../classiCub_1_1learningmachine_1_1RandomFeature.html',1,'iCub::learningmachine']]],
+  ['ratelimiter_10597',['RateLimiter',['../classiCub_1_1ctrl_1_1RateLimiter.html',1,'iCub::ctrl']]],
+  ['rbfkernel_10598',['RBFKernel',['../classiCub_1_1learningmachine_1_1RBFKernel.html',1,'iCub::learningmachine']]],
+  ['registers_10599',['Registers',['../classstrain_1_1amplifier_1_1PGA308_1_1Registers.html',1,'strain::amplifier::PGA308']]],
+  ['replayer_10600',['Replayer',['../structReplayer.html',1,'']]],
+  ['replayport_10601',['ReplayPort',['../classReplayPort.html',1,'']]],
+  ['requestsqueue_10602',['RequestsQueue',['../classRequestsQueue.html',1,'']]],
+  ['riccati_10603',['Riccati',['../classiCub_1_1ctrl_1_1Riccati.html',1,'iCub::ctrl']]],
+  ['rigidbodytransformation_10604',['RigidBodyTransformation',['../classiCub_1_1iDyn_1_1RigidBodyTransformation.html',1,'iCub::iDyn']]],
+  ['rlslearner_10605',['RLSLearner',['../classiCub_1_1learningmachine_1_1RLSLearner.html',1,'iCub::learningmachine']]],
+  ['robotdriver_10606',['robotDriver',['../classrobotDriver.html',1,'']]],
+  ['rootselector_10607',['RootSelector',['../classiCub_1_1learningmachine_1_1merge_1_1RootSelector.html',1,'iCub::learningmachine::merge']]],
+  ['rotorlimits_5ft_10608',['rotorLimits_t',['../structyarp_1_1dev_1_1eomc_1_1rotorLimits__t.html',1,'yarp::dev::eomc']]],
+  ['roundtripvalidator_10609',['RoundTripValidator',['../classembot_1_1tools_1_1RoundTripValidator.html',1,'embot::tools']]],
+  ['rpcprocessor_10610',['RpcProcessor',['../classiCub_1_1iKin_1_1RpcProcessor.html',1,'iCub::iKin::RpcProcessor'],['../classRpcProcessor.html',1,'RpcProcessor']]],
+  ['rpcserverimpl_10611',['RpcServerImpl',['../classRpcServerImpl.html',1,'']]]
+];

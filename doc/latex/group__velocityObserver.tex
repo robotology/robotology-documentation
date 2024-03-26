@@ -1,0 +1,93 @@
+\hypertarget{group__velocityObserver}{}\doxysection{velocity\+Observer}
+\label{group__velocityObserver}\index{velocityObserver@{velocityObserver}}
+
+
+Estimates the first and second derivatives of incoming data vector through a least-\/squares algorithm based on an adpative window.  
+
+
+Collaboration diagram for velocity\+Observer\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=299pt]{group__velocityObserver}
+\end{center}
+\end{figure}
+Estimates the first and second derivatives of incoming data vector through a least-\/squares algorithm based on an adpative window. 
+
+Copyright (C) 2010 Robot\+Cub Consortium
+
+Author\+: Ugo Pattacini
+
+Date\+: first release 24/10/2008
+
+Copy\+Policy\+: Released under the terms of the GNU GPL v2.\+0.\hypertarget{group__tutorial__perceptiveModels_intro_sec}{}\doxysubsection{Description}\label{group__tutorial__perceptiveModels_intro_sec}
+This module computes the first derivative (velocity) and the second derivative (acceleration) of vector acquired through an input YARP port and provides them to output YARP ports. The estimation is performed relying on a least-\/squares algorithm (\href{http://ieeexplore.ieee.org/iel5/87/19047/00880606.pdf}{\texttt{ PDF}}) which finds the best linear or quadratic regressor upon a certain window of the input samples. The window\textquotesingle{}s length is adaptable, i.\+e. it varies according the smoothness of the input signal. Therefore, the smoother is the input signal the larger will be the window and the delay introduced by the computation will be negligible. For fast change in the input signal, the window\textquotesingle{}s length is reduced in order to best capture the derivative and to limit the latency.
+
+Note that no knowledge of the sampling time is required since to perform the computation the module relies on the time information stored by the sender within the envelope of the message. If the envelope is not available, then the Time Stamp is the reference time of the machine where the module is running (i.\+e. the arrival time)\+: of course in this case the computation will be much less precise due to the variable YARP communication latencies.
+
+The figure below shows a snapshot of the estimated velocity and acceleration along with a comparison between the proposed algorithm and a simple moving average filter\+: \hypertarget{group__tutorial__perceptiveModels_lib_sec}{}\doxysubsection{Libraries}\label{group__tutorial__perceptiveModels_lib_sec}
+
+\begin{DoxyItemize}
+\item YARP libraries.
+\item ctrl\+Lib library.
+\end{DoxyItemize}\hypertarget{group__tutorial__perceptiveModels_parameters_sec}{}\doxysubsection{Parameters}\label{group__tutorial__perceptiveModels_parameters_sec}
+--name {\itshape name} 
+\begin{DoxyItemize}
+\item The parameter {\itshape name} identifies the module\textquotesingle{}s name; all the open ports will be tagged with the prefix $<$name$>$/. If not specified {\itshape /vel\+Obs} is assumed.
+\end{DoxyItemize}
+
+--len\+Vel {\itshape N} 
+\begin{DoxyItemize}
+\item The parameter {\itshape N} identifies the maximum window length for buffering the input data (used for the first derivative estimation). Therefore, the window on which the least-\/squares algorithm operates on will automatically adapts its length from a minimum of 2 to a maximum of N samples. The greater is N, the more filtered is the derivative.
+\end{DoxyItemize}
+
+--len\+Acc {\itshape N} 
+\begin{DoxyItemize}
+\item The same as above but for the second derivative\textquotesingle{}s estimation.
+\end{DoxyItemize}
+
+--thr\+Vel {\itshape D} 
+\begin{DoxyItemize}
+\item With this option it is possibile to specify the maximum deviation threshold for the algorithm (used for the first derivative estimation). During the validation phase, indeed, the window\textquotesingle{}s length is considered valid if all the computed values from the linear regressor lie within this threshold wrt their corresponding sample values. If not the window\textquotesingle{}s length is reduced by one step. Each instance of the computation a trial on a window\textquotesingle{}s length enlarged by one step wrt to the current one is performed. Therefore, iteration by iteration, the window\textquotesingle{}s length can be adapted by only one step change.
+\end{DoxyItemize}
+
+--thr\+Acc {\itshape D} 
+\begin{DoxyItemize}
+\item The same as above but for the second derivative\textquotesingle{}s estimation.
+\end{DoxyItemize}\hypertarget{group__tutorial__ationPrimitives_portsa_sec}{}\doxysubsection{Ports Accessed}\label{group__tutorial__ationPrimitives_portsa_sec}
+The port the service is listening to.\hypertarget{group__tutorial__ationPrimitives_portsc_sec}{}\doxysubsection{Ports Created}\label{group__tutorial__ationPrimitives_portsc_sec}
+
+\begin{DoxyItemize}
+\item {\itshape } $<$name$>$/pos\+:i (e.\+g. /vel\+Obs/pos\+:i) receives the input data vector.
+\item {\itshape } $<$name$>$/vel\+:o (e.\+g. /vel\+Obs/vel\+:o) provides the estimated first derivatives.
+\item {\itshape } $<$name$>$/acc\+:o (e.\+g. /vel\+Obs/acc\+:o) provides the estimated second derivatives.
+\item {\itshape } $<$name$>$/rpc remote procedure call port useful to shut down the module remotely by sending to this port the \textquotesingle{}quit\textquotesingle{} command.
+\end{DoxyItemize}\hypertarget{group__tutorial__ationPrimitives_in_files_sec}{}\doxysubsection{Input Data Files}\label{group__tutorial__ationPrimitives_in_files_sec}
+None.\hypertarget{group__tutorial__ationPrimitives_out_data_sec}{}\doxysubsection{Output Data Files}\label{group__tutorial__ationPrimitives_out_data_sec}
+None.\hypertarget{group__tutorial__ationPrimitives_conf_file_sec}{}\doxysubsection{Configuration Files}\label{group__tutorial__ationPrimitives_conf_file_sec}
+None.\hypertarget{group__tutorial__perceptiveModels_tested_os_sec}{}\doxysubsection{Tested OS}\label{group__tutorial__perceptiveModels_tested_os_sec}
+Linux and Windows.\hypertarget{group__icub__faceExpressions_example_sec}{}\doxysubsection{Example Instantiation of the Module}\label{group__icub__faceExpressions_example_sec}
+By launching the following command\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{velocityObserver -\/-\/name /jointVel -\/-\/lenVel 20 -\/-\/thrVel 2.0 }
+
+\end{DoxyCode}
+
+
+the module will create the listening port /joint\+Vel/pos\+:i for the acquisition of data vector coming for instance from one of the icub ports. At the same time it will provide the estimated derivatives to /joint\+Vel/vel\+:o /joint\+Vel/acc\+:o ports. Here a value of 20 samples is chosen for the velocity maximum window\textquotesingle{}s length and the velocity maximum permitted tolerance is 2.\+0; for the acceleration default values are used (use --help option to see).
+
+Try now the following\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\mbox{\hyperlink{namespaceyarp}{yarp}} connect /icub/right\_arm/\mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104ab}{state}}:o /jointVel/pos:i}
+
+\end{DoxyCode}
+
+
+\begin{DoxyAuthor}{Author}
+Ugo Pattacini 
+\end{DoxyAuthor}

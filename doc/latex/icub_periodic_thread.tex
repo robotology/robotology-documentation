@@ -1,0 +1,190 @@
+In this tutorial we show how to write a control loop using threads.
+
+Before you read this tutorial you should at least get accustomed with motor interfaces as described in \mbox{\hyperlink{icub_motor_control_tutorial}{Getting accustomed with motor interfaces}} (material in \mbox{\hyperlink{icub_basic_image_processing}{Basic Image Processing}} might also be useful).\hypertarget{icub_tutorial_module_sec_intro}{}\doxysection{Introduction}\label{icub_tutorial_module_sec_intro}
+Often, you want to perform different tasks in parallel or with a given periodicity. Modern operating system provides support for writing threads. Threads are functions that are executed by the CPU in parallel. The use of threads is recommended in machines with multiple cores.
+
+YARP supports threads with two main classes\+: yarp\+::os\+::\+Thread and yarp\+::os\+::\+Periodic\+Thread.
+
+In this tutorial we show how to use the yarp\+::os\+::\+Periodic\+Thread class to write a control loop with a certain periodicity.\hypertarget{icub_periodic_thread_sec_yourownthread}{}\doxysection{Writing your own thread}\label{icub_periodic_thread_sec_yourownthread}
+To write a thread you have to derive a new class from yarp\+::os\+::\+Periodic\+Thread. In doing so you can to explicitly call the Periodic\+Thread constructor and pass to it the periodicity of the thread (in seconds).
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{keyword}{class }\mbox{\hyperlink{classControlThread}{ControlThread}}: \textcolor{keyword}{public} yarp::os::PeriodicThread}
+\DoxyCodeLine{\{}
+\DoxyCodeLine{\textcolor{keyword}{public}:}
+\DoxyCodeLine{     \mbox{\hyperlink{classControlThread_a8eec97db0371fd6e6909e2befbee9483}{ControlThread}}(\textcolor{keywordtype}{double} period):PeriodicThread(period)}
+\DoxyCodeLine{    \{...\}}
+\DoxyCodeLine{\};}
+
+\end{DoxyCode}
+
+
+We add three methods to the class\+: run(), thread\+Init() and thread\+Release(). The run() function will be called periodically every \char`\"{}period\char`\"{} seconds. thread\+Init() is called once when the thread starts (before run is executed). Finally the thread executes thread\+Release() when closing.
+
+We would like to write a thread that periodically check the encoders and alternates two velocity commands. This thread will control for example the head of the robot. We need a Poly\+Driver to store the robot device (see \mbox{\hyperlink{icub_motor_control_tutorial}{Getting accustomed with motor interfaces}}), and an instance of IEncoders and IVelocity\+Control.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{PolyDriver dd;}
+\DoxyCodeLine{IVelocityControl *ivel;}
+\DoxyCodeLine{IEncoders        *iencs;}
+
+\end{DoxyCode}
+
+
+We also prepare two vectors of to store the encoders and one to store the commands we will send to the controller. A counter will allow us to alternate between two commands.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{Vector encoders;}
+\DoxyCodeLine{Vector \mbox{\hyperlink{diagnostics__buttons_8cpp_aaad2f6556489c51f2c24302e2cb4188a}{commands}};}
+\DoxyCodeLine{\textcolor{keywordtype}{int} count;}
+
+\end{DoxyCode}
+
+
+Now we can implement the bool thread\+Init() function. First we will create an instance of the polydriver and configure it to connect to the head.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{keywordtype}{bool} threadInit()}
+\DoxyCodeLine{\{}
+\DoxyCodeLine{      \textcolor{comment}{/* initialize here variables */}}
+\DoxyCodeLine{      printf(\textcolor{stringliteral}{"{}ControlThread:starting\(\backslash\)n"{}});}
+\DoxyCodeLine{}
+\DoxyCodeLine{      Property options;}
+\DoxyCodeLine{      options.put(\textcolor{stringliteral}{"{}device"{}}, \textcolor{stringliteral}{"{}remote\_controlboard"{}});}
+\DoxyCodeLine{      options.put(\textcolor{stringliteral}{"{}local"{}}, \textcolor{stringliteral}{"{}/local/head"{}});}
+\DoxyCodeLine{}
+\DoxyCodeLine{      \textcolor{comment}{/* substitute icubSim with icub for use with the real robot */}}
+\DoxyCodeLine{      options.put(\textcolor{stringliteral}{"{}remote"{}}, \textcolor{stringliteral}{"{}/icubSim/head"{}});}
+\DoxyCodeLine{}
+\DoxyCodeLine{      dd.open(options);}
+
+\end{DoxyCode}
+
+
+at this point we have to check that the device is valid and really offers the interfaces we need\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{dd.view(iencs);}
+\DoxyCodeLine{dd.view(ivel);}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{keywordflow}{if} ( (!iencs) || (!ivel) )}
+\DoxyCodeLine{    \textcolor{keywordflow}{return} \textcolor{keyword}{false};}
+
+\end{DoxyCode}
+
+
+Note\+: it is important to return false if something does not go as expected in the initialization. This will prevent the thread from running.
+
+Now we can get the number of joints, resize the vectors and initialize the acceleration of the motors\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{      \textcolor{keywordtype}{int} joints;}
+\DoxyCodeLine{}
+\DoxyCodeLine{      iencs-\/>getAxes(\&joints);}
+\DoxyCodeLine{}
+\DoxyCodeLine{      encoders.resize(joints);}
+\DoxyCodeLine{      \mbox{\hyperlink{diagnostics__buttons_8cpp_aaad2f6556489c51f2c24302e2cb4188a}{commands}}.resize(joints);}
+\DoxyCodeLine{}
+\DoxyCodeLine{      \mbox{\hyperlink{diagnostics__buttons_8cpp_aaad2f6556489c51f2c24302e2cb4188a}{commands}}=10000;}
+\DoxyCodeLine{}
+\DoxyCodeLine{      ivel-\/>setRefAccelerations(\mbox{\hyperlink{diagnostics__buttons_8cpp_aaad2f6556489c51f2c24302e2cb4188a}{commands}}.data());}
+\DoxyCodeLine{      count=0;}
+\DoxyCodeLine{      \textcolor{keywordflow}{return} \textcolor{keyword}{true};}
+\DoxyCodeLine{\} \textcolor{comment}{/* the function threadInit() finishes here */}}
+
+\end{DoxyCode}
+
+
+It is now time to implement the run function. This function is the thread\textquotesingle{}s body, and perform the real control task\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{keywordtype}{void} run()}
+\DoxyCodeLine{\{}
+\DoxyCodeLine{      \textcolor{comment}{/* reads encoders */}}
+\DoxyCodeLine{      iencs-\/>getEncoders(encoders.data());}
+\DoxyCodeLine{}
+\DoxyCodeLine{      count++;}
+\DoxyCodeLine{}
+\DoxyCodeLine{      \textcolor{comment}{/* alternates two commands */}}
+\DoxyCodeLine{      \textcolor{keywordflow}{if} (count\%2)}
+\DoxyCodeLine{          \mbox{\hyperlink{diagnostics__buttons_8cpp_aaad2f6556489c51f2c24302e2cb4188a}{commands}}=5;}
+\DoxyCodeLine{      \textcolor{keywordflow}{else}}
+\DoxyCodeLine{          \mbox{\hyperlink{diagnostics__buttons_8cpp_aaad2f6556489c51f2c24302e2cb4188a}{commands}}=-\/5;}
+\DoxyCodeLine{}
+\DoxyCodeLine{      ivel-\/>velocityMove(\mbox{\hyperlink{diagnostics__buttons_8cpp_aaad2f6556489c51f2c24302e2cb4188a}{commands}}.data());}
+\DoxyCodeLine{}
+\DoxyCodeLine{    \textcolor{comment}{/* print something at each iteration so we see when the thread runs */}}
+\DoxyCodeLine{    printf(\textcolor{stringliteral}{"{}."{}});}
+\DoxyCodeLine{\}}
+
+\end{DoxyCode}
+
+
+When the thread will quit, we have to make sure that we stop the head and release used resources. We put this code in thread\+Release()\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{keywordtype}{void} threadRelease()}
+\DoxyCodeLine{\{}
+\DoxyCodeLine{      printf(\textcolor{stringliteral}{"{}ControlThread:stopping the robot\(\backslash\)n"{}});}
+\DoxyCodeLine{}
+\DoxyCodeLine{      ivel-\/>stop();}
+\DoxyCodeLine{}
+\DoxyCodeLine{      dd.close();}
+\DoxyCodeLine{}
+\DoxyCodeLine{      printf(\textcolor{stringliteral}{"{}Done, goodbye from ControlThread\(\backslash\)n"{}});}
+\DoxyCodeLine{\}}
+
+\end{DoxyCode}
+\hypertarget{icub_periodic_thread_sec_runningthethread}{}\doxysection{Running the thread}\label{icub_periodic_thread_sec_runningthethread}
+Now that we have implemented our thread we can run it. This can be done easily in a few steps\+:
+
+Create an instance of the thread, we use here 4s of period\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\mbox{\hyperlink{classControlThread}{ControlThread}} myThread(4.0);}
+
+\end{DoxyCode}
+
+
+Start the thread\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{myThread.start();}
+
+\end{DoxyCode}
+
+
+The thread is created and start to execute init\+Thread(); if the latter returns true, the thread executes run() periodically. In the meanwhile the main thread can perform other operations. In this example we do not do anything smarter than just sitting idle for 10 seconds\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{keywordtype}{bool} \mbox{\hyperlink{icub-main_2src_2tools_2canBusSniffer_2canBusSnifferV5_2main_8cpp_a1d39aac66e12dae50a24cd7a9100ef33}{done}}=\textcolor{keyword}{false};}
+\DoxyCodeLine{\textcolor{keywordtype}{double} startTime=Time::now();}
+\DoxyCodeLine{\textcolor{keyword}{const} \textcolor{keywordtype}{int} SOME\_TIME=10;}
+\DoxyCodeLine{\textcolor{keywordflow}{while}(!\mbox{\hyperlink{icub-main_2src_2tools_2canBusSniffer_2canBusSnifferV5_2main_8cpp_a1d39aac66e12dae50a24cd7a9100ef33}{done}})}
+\DoxyCodeLine{\{}
+\DoxyCodeLine{    \textcolor{keywordflow}{if} ((Time::now()-\/startTime)>SOME\_TIME)}
+\DoxyCodeLine{        \mbox{\hyperlink{icub-main_2src_2tools_2canBusSniffer_2canBusSnifferV5_2main_8cpp_a1d39aac66e12dae50a24cd7a9100ef33}{done}}=\textcolor{keyword}{true};}
+\DoxyCodeLine{\}}
+
+\end{DoxyCode}
+
+
+To stop the thread we call\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{myThread.stop();}
+
+\end{DoxyCode}
+
+
+stop() blocks and waits that the thread performs the last run() function, and thread\+Release(), after which we can safely return.
+
+Full working code of this tutorial is available here\+: \mbox{\hyperlink{tutorial__periodic__thread_8cpp}{src/periodic\+Thread/tutorial\+\_\+periodic\+\_\+thread.\+cpp}} 

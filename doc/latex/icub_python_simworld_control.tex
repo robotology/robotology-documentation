@@ -1,0 +1,264 @@
+\begin{DoxyAuthor}{Author}
+Marek Rucinski
+\end{DoxyAuthor}
+\hypertarget{icub_python_simworld_control_sec_goal}{}\doxysection{Goal}\label{icub_python_simworld_control_sec_goal}
+This tutorial shows how to control the \mbox{\hyperlink{namespaceiCub}{i\+Cub}} simulator via YARP bindings for Python. Since there is no dedicated \mbox{\hyperlink{namespaceiCub}{i\+Cub}} simulator API available, this has to be achieved via the YARP RPC mechanism. Therefore, this tutorial should also give you a general idea on how to use the RPC interfaces from Python.
+
+It is assumed that you have already compiled or installed the Python bindings. This tutorial assumes basic knowledge of how YARP works in C++, familiarity with YARP RPC mechanism, the specific RPC interface of the \mbox{\hyperlink{namespaceiCub}{i\+Cub}} simulator (described in the simulator README) as well as some basic knowledge of Python, it\textquotesingle{}s essential packages and functions.
+
+This tutorial has the form of a small Python module which implements a World\+Controller class used to communicate with the \mbox{\hyperlink{namespaceiCub}{i\+Cub}} simulator. Full code of this module can be found in \mbox{\hyperlink{python__simworld__control_8py}{python/python\+\_\+simworld\+\_\+control.\+py}}\hypertarget{icub_python_simworld_control_sec_start}{}\doxysection{Module initialisation}\label{icub_python_simworld_control_sec_start}
+As usual, we have to import all modules we\textquotesingle{}ll need, most prominently the yarp python bindings.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{keyword}{import} collections}
+\DoxyCodeLine{\textcolor{keyword}{import} \mbox{\hyperlink{namespaceyarp}{yarp}}}
+\DoxyCodeLine{}
+\DoxyCodeLine{\mbox{\hyperlink{namespaceyarp}{yarp}}.Network.init() \# Initialise YARP}
+
+\end{DoxyCode}
+
+
+Placing the call to yarp.\+Network.\+init() directly in the module code (as opposed to putting it inside some function defined later in the module) ensures that YARP is initialised as soon as the module is imported.\hypertarget{icub_python_simworld_control_sec_wctl}{}\doxysection{World\+Controller class}\label{icub_python_simworld_control_sec_wctl}
+Now we\textquotesingle{}re ready to define our World\+Controller class. At initialisation we create an Rpc\+Client object used for communitation and connect it to the world port of the simulator (therefore the simulator must be up and running when an object of the World\+Controller class is created!)\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{keyword}{class }WorldController:}
+\DoxyCodeLine{    "{}"{}"{}Class for controlling \mbox{\hyperlink{namespaceiCub}{iCub}} simulator via its RPC world port."{}"{}"{}}
+\DoxyCodeLine{}
+\DoxyCodeLine{    def \_\_init\_\_(self):}
+\DoxyCodeLine{        \mbox{\hyperlink{firmwareupdatercore_8cpp_a396f1276c4c0cd4c8ea515f853c8494f}{self}}.\_rpc\_client = \mbox{\hyperlink{namespaceyarp}{yarp}}.RpcClient()}
+\DoxyCodeLine{        \mbox{\hyperlink{firmwareupdatercore_8cpp_a396f1276c4c0cd4c8ea515f853c8494f}{self}}.\_port\_name = "{}/WorldController-\/"{} + str(id(self)) + "{}/\mbox{\hyperlink{diagnostics__buttons_8cpp_aaad2f6556489c51f2c24302e2cb4188a}{commands}}"{}}
+\DoxyCodeLine{        \mbox{\hyperlink{firmwareupdatercore_8cpp_a396f1276c4c0cd4c8ea515f853c8494f}{self}}.\_rpc\_client.open(self.\_port\_name)}
+\DoxyCodeLine{        \mbox{\hyperlink{firmwareupdatercore_8cpp_a396f1276c4c0cd4c8ea515f853c8494f}{self}}.\_rpc\_client.addOutput("{}/icubSim/world"{})}
+\DoxyCodeLine{        }
+\DoxyCodeLine{\textcolor{preprocessor}{        \# A dictionary to track simulator object IDs for all types of objects}}
+\DoxyCodeLine{        \mbox{\hyperlink{firmwareupdatercore_8cpp_a396f1276c4c0cd4c8ea515f853c8494f}{self}}.\_sim\_ids\_counters = collections.defaultdict(lambda:0)}
+\DoxyCodeLine{        }
+\DoxyCodeLine{\textcolor{preprocessor}{        \# A sequence to track internal object IDs. This list stores tuples (object type, simulator id)}}
+\DoxyCodeLine{\textcolor{preprocessor}{        \# so that outside one does not have to remember the type of object.}}
+\DoxyCodeLine{\textcolor{preprocessor}{        self.\_objects = [ ]}}
+
+\end{DoxyCode}
+
+
+Including id(self) in the local port name allows us to use multiple instances of the World\+Controller class at the same time without having yarp port name conflicts.
+
+At the end of the constructor we prepare two data structures which will help us manage simulator object identifiers. Object identifiers in the \mbox{\hyperlink{namespaceiCub}{i\+Cub}} simulator are not unique, in other words you can have two objects (of different types, e.\+g. a \textquotesingle{}sph\textquotesingle{} and a \textquotesingle{}box\textquotesingle{}), having the same identifier (e.\+g. 1). This is rather inconvenient because one has to keep track of object types together with their identifiers. We\textquotesingle{}ll use the World\+Controller class to maintain a single pool of identifiers, so that we can later refer to an object via its identifier only. self.\+\_\+sim\+\_\+ids\+\_\+counters is a dictionary indexed by object type (\textquotesingle{}sph\textquotesingle{}, \textquotesingle{}box\textquotesingle{}, etc.) counting the number objects of each type created so far. self.\+\_\+objects is a sequence of pairs (object type, simulator object id) which will translate our unique object identifiers (essentially indexes of objects on this list) to simulator identifiers.
+
+Now we\textquotesingle{}ll define two helper methods useful for RPC communication\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{def \_execute(\textcolor{keyword}{self}, \mbox{\hyperlink{dataTypes_8h_a4d43e8212bdc9dbee866506f04effcea}{cmd}}):}
+\DoxyCodeLine{    \textcolor{stringliteral}{"{}"{}}\textcolor{stringliteral}{"{}Execute an RPC command, returning obtained answer bottle."{}}\textcolor{stringliteral}{"{}"{}}}
+\DoxyCodeLine{    ans = \mbox{\hyperlink{namespaceyarp}{yarp}}.Bottle()     }
+\DoxyCodeLine{    \mbox{\hyperlink{firmwareupdatercore_8cpp_a396f1276c4c0cd4c8ea515f853c8494f}{self}}.\_rpc\_client.\mbox{\hyperlink{namespacestrain_1_1regulation_a66bdbf1c2aeb26b5d2fa61419b2576a2}{write}}(\mbox{\hyperlink{dataTypes_8h_a4d43e8212bdc9dbee866506f04effcea}{cmd}}, ans)}
+\DoxyCodeLine{    return ans}
+\DoxyCodeLine{}
+\DoxyCodeLine{def \_is\_success(\mbox{\hyperlink{firmwareupdatercore_8cpp_a396f1276c4c0cd4c8ea515f853c8494f}{self}}, ans):}
+\DoxyCodeLine{    \textcolor{stringliteral}{"{}"{}}\textcolor{stringliteral}{"{}Check if RPC call answer Bottle indicates successfull execution."{}}\textcolor{stringliteral}{"{}"{}}}
+\DoxyCodeLine{    return ans.size() == 1 and ans.get(0).asVocab() == 27503 \# Vocab for \textcolor{stringliteral}{'[ok]'}}
+
+\end{DoxyCode}
+
+
+Underscore in front of a class member name is Python convention for indicating \char`\"{}protected\char`\"{} class members, i.\+e. those not intended to be used directly by the user.
+
+The most annoying part of executing an RPC call is preparation of the command bottle. In our code we\textquotesingle{}ll separate the command preparation code from the code which actually executes the command and checks if the call was successful.
+
+As a starting point, let\textquotesingle{}s take the \char`\"{}world del all\char`\"{} command which removes all objects created in the simulator. This is a simple command which takes no arguments, therefore the code is also quite simple\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{def \_prepare\_del\_all\_command(\textcolor{keyword}{self}):}
+\DoxyCodeLine{    \textcolor{stringliteral}{"{}"{}}\textcolor{stringliteral}{"{}Prepare the "{}}world del all\textcolor{stringliteral}{"{} command bottle."{}}\textcolor{stringliteral}{"{}"{}}}
+\DoxyCodeLine{    result = \mbox{\hyperlink{namespaceyarp}{yarp}}.Bottle()}
+\DoxyCodeLine{    result.clear()}
+\DoxyCodeLine{    \mbox{\hyperlink{namespaceiCub_1_1learningmachine_1_1math_a71fd1dc7676d2de7d7ed6617b15e9a5f}{map}}(result.addString, [ \textcolor{stringliteral}{"{}world"{}}, \textcolor{stringliteral}{"{}del"{}}, \textcolor{stringliteral}{"{}all"{}} ])}
+\DoxyCodeLine{    return result}
+\DoxyCodeLine{    }
+\DoxyCodeLine{def del\_all(\mbox{\hyperlink{firmwareupdatercore_8cpp_a396f1276c4c0cd4c8ea515f853c8494f}{self}}):}
+\DoxyCodeLine{    \textcolor{stringliteral}{"{}"{}}\textcolor{stringliteral}{"{}Delete all objects from the simultor"{}}\textcolor{stringliteral}{"{}"{}}}
+\DoxyCodeLine{    result = \mbox{\hyperlink{firmwareupdatercore_8cpp_a396f1276c4c0cd4c8ea515f853c8494f}{self}}.\_is\_success(\mbox{\hyperlink{firmwareupdatercore_8cpp_a396f1276c4c0cd4c8ea515f853c8494f}{self}}.\_execute(\mbox{\hyperlink{firmwareupdatercore_8cpp_a396f1276c4c0cd4c8ea515f853c8494f}{self}}.\_prepare\_del\_all\_command()))}
+\DoxyCodeLine{    }
+\DoxyCodeLine{    if result:}
+\DoxyCodeLine{        \# Clear the counters}
+\DoxyCodeLine{        \mbox{\hyperlink{firmwareupdatercore_8cpp_a396f1276c4c0cd4c8ea515f853c8494f}{self}}.\_sim\_ids\_counters.clear()}
+\DoxyCodeLine{        del \mbox{\hyperlink{firmwareupdatercore_8cpp_a396f1276c4c0cd4c8ea515f853c8494f}{self}}.\_objects[:]}
+\DoxyCodeLine{    }
+\DoxyCodeLine{    return result}
+
+\end{DoxyCode}
+
+
+Note that upon successful deletion of objects from the simulator, we update internal structures for tracking identifiers.
+
+Now for something a little more interesting. RPC interface of the simulator allows creating various objects (spheres, cylinders, etc.) in the simulated world. Let\textquotesingle{}s define a function to prepare the \char`\"{}world mk\char`\"{} command Bottle\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{def \_prepare\_create\_command(\textcolor{keyword}{self}, obj, size, location, colour):}
+\DoxyCodeLine{    \textcolor{stringliteral}{"{}"{}}\textcolor{stringliteral}{"{}Prepare an RPC command for creating an object in the simulator environment.}}
+\DoxyCodeLine{\textcolor{stringliteral}{    }}
+\DoxyCodeLine{\textcolor{stringliteral}{    See Simulator Readme section 'Object Creation'}}
+\DoxyCodeLine{\textcolor{stringliteral}{    }}
+\DoxyCodeLine{\textcolor{stringliteral}{    Parameters:}}
+\DoxyCodeLine{\textcolor{stringliteral}{        obj -\/ object type string. 'sph', 'box', 'cyl' 'ssph', 'sbox' or 'scyl'.}}
+\DoxyCodeLine{\textcolor{stringliteral}{        size -\/ list of values specifying the size of an object. Parameters depend on object type:}}
+\DoxyCodeLine{\textcolor{stringliteral}{            (s)box: [ x, y, z ]}}
+\DoxyCodeLine{\textcolor{stringliteral}{            (s)sph: [ radius ]}}
+\DoxyCodeLine{\textcolor{stringliteral}{            (s)cyl: [ radius, length ]}}
+\DoxyCodeLine{\textcolor{stringliteral}{        location -\/ coordinates of the object location, [ x, y, z ]}}
+\DoxyCodeLine{\textcolor{stringliteral}{        colour -\/ object colour in RGB (normalised), [ r, g, b ]}}
+\DoxyCodeLine{\textcolor{stringliteral}{    Returns:}}
+\DoxyCodeLine{\textcolor{stringliteral}{        yarp.Bottle with the command, ready to be sent to the rpc port of the simulator}}
+\DoxyCodeLine{\textcolor{stringliteral}{    }}
+\DoxyCodeLine{\textcolor{stringliteral}{    "{}}\textcolor{stringliteral}{"{}"{}}}
+\DoxyCodeLine{    }
+\DoxyCodeLine{    result = \mbox{\hyperlink{namespaceyarp}{yarp}}.Bottle()}
+\DoxyCodeLine{    result.clear()}
+\DoxyCodeLine{}
+\DoxyCodeLine{    \mbox{\hyperlink{namespaceiCub_1_1learningmachine_1_1math_a71fd1dc7676d2de7d7ed6617b15e9a5f}{map}}(result.addString, [\textcolor{stringliteral}{"{}world"{}}, \textcolor{stringliteral}{"{}mk"{}}, obj])}
+\DoxyCodeLine{    \mbox{\hyperlink{namespaceiCub_1_1learningmachine_1_1math_a71fd1dc7676d2de7d7ed6617b15e9a5f}{map}}(result.addDouble, size)}
+\DoxyCodeLine{    \mbox{\hyperlink{namespaceiCub_1_1learningmachine_1_1math_a71fd1dc7676d2de7d7ed6617b15e9a5f}{map}}(result.addDouble, location)}
+\DoxyCodeLine{    \mbox{\hyperlink{namespaceiCub_1_1learningmachine_1_1math_a71fd1dc7676d2de7d7ed6617b15e9a5f}{map}}(result.addDouble, colour)}
+\DoxyCodeLine{    }
+\DoxyCodeLine{    return result}
+
+\end{DoxyCode}
+
+
+Note that all dirty work, especially handling different numbers of object size parameters for different types of objects is done for us automatically thanks to the excellent support for sequences in Python. Actually, since size, location and colour are all stored in the Bottle as Doubles, we could have gotten away with only two \mbox{\hyperlink{namespaceiCub_1_1learningmachine_1_1math_a71fd1dc7676d2de7d7ed6617b15e9a5f}{map()}} calls, though this would reduce code readability a little bit.
+
+Now the actual method to create objects\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{def create\_object(\textcolor{keyword}{self}, obj, size, location, colour):}
+\DoxyCodeLine{    \textcolor{stringliteral}{"{}"{}}\textcolor{stringliteral}{"{}Create an object of a specified type, size, location and colour, returning internal object ID or -\/1 on error."{}}\textcolor{stringliteral}{"{}"{}}}
+\DoxyCodeLine{    }
+\DoxyCodeLine{    \mbox{\hyperlink{dataTypes_8h_a4d43e8212bdc9dbee866506f04effcea}{cmd}} = \mbox{\hyperlink{firmwareupdatercore_8cpp_a396f1276c4c0cd4c8ea515f853c8494f}{self}}.\_prepare\_create\_command(obj, size, location, colour)}
+\DoxyCodeLine{    }
+\DoxyCodeLine{    if \mbox{\hyperlink{firmwareupdatercore_8cpp_a396f1276c4c0cd4c8ea515f853c8494f}{self}}.\_is\_success(\mbox{\hyperlink{firmwareupdatercore_8cpp_a396f1276c4c0cd4c8ea515f853c8494f}{self}}.\_execute(\mbox{\hyperlink{dataTypes_8h_a4d43e8212bdc9dbee866506f04effcea}{cmd}})):}
+\DoxyCodeLine{        obj\_sim\_id = \mbox{\hyperlink{firmwareupdatercore_8cpp_a396f1276c4c0cd4c8ea515f853c8494f}{self}}.\_sim\_ids\_counters[obj] + 1 \# \mbox{\hyperlink{namespaceiCub}{iCub}} simulator IDs start from 1}
+\DoxyCodeLine{        }
+\DoxyCodeLine{        \# Update the counters}
+\DoxyCodeLine{        \mbox{\hyperlink{firmwareupdatercore_8cpp_a396f1276c4c0cd4c8ea515f853c8494f}{self}}.\_sim\_ids\_counters[obj] += 1}
+\DoxyCodeLine{        \mbox{\hyperlink{firmwareupdatercore_8cpp_a396f1276c4c0cd4c8ea515f853c8494f}{self}}.\_objects.\mbox{\hyperlink{namespaceiCub_1_1ctrl_1_1dbscan_a8f46d9d0251b88939959e0eaeef08608}{append}}((obj, obj\_sim\_id))}
+\DoxyCodeLine{        }
+\DoxyCodeLine{        \# Internal object IDs are shared among all types of objects and start from 0;}
+\DoxyCodeLine{\textcolor{preprocessor}{        \# they are essentially indices of the self.\_objects sequence}}
+\DoxyCodeLine{        \textcolor{keywordflow}{return} len(\textcolor{keyword}{self}.\_objects) -\/ 1}
+\DoxyCodeLine{    \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{        \textcolor{keywordflow}{return} -\/1 \# \mbox{\hyperlink{namespaceiCub_1_1action_1_1log_a4ba5ea132464d0ea49d618130163c769a41b05ff8216aae3cac29fe50f6db76c0}{error}}}
+
+\end{DoxyCode}
+
+
+In a similiar way, we can define methods to move objects around the simulator...
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{def \_prepare\_move\_command(\textcolor{keyword}{self}, obj, obj\_id, location):}
+\DoxyCodeLine{    \textcolor{stringliteral}{"{}"{}}\textcolor{stringliteral}{"{}Prepare the "{}}world set <obj> <xyz>\textcolor{stringliteral}{"{} command bottle."{}}\textcolor{stringliteral}{"{}"{}}}
+\DoxyCodeLine{    result = \mbox{\hyperlink{namespaceyarp}{yarp}}.Bottle()}
+\DoxyCodeLine{    result.clear()}
+\DoxyCodeLine{}
+\DoxyCodeLine{    \mbox{\hyperlink{namespaceiCub_1_1learningmachine_1_1math_a71fd1dc7676d2de7d7ed6617b15e9a5f}{map}}(result.addString, [\textcolor{stringliteral}{"{}world"{}}, \textcolor{stringliteral}{"{}set"{}}, obj])}
+\DoxyCodeLine{    result.addInt(obj\_id)}
+\DoxyCodeLine{    \mbox{\hyperlink{namespaceiCub_1_1learningmachine_1_1math_a71fd1dc7676d2de7d7ed6617b15e9a5f}{map}}(result.addDouble, location)}
+\DoxyCodeLine{    }
+\DoxyCodeLine{    return result}
+\DoxyCodeLine{}
+\DoxyCodeLine{def move\_object(\mbox{\hyperlink{firmwareupdatercore_8cpp_a396f1276c4c0cd4c8ea515f853c8494f}{self}}, obj\_id, location):}
+\DoxyCodeLine{    \textcolor{stringliteral}{"{}"{}}\textcolor{stringliteral}{"{}Move an object specified by the internal id to another location."{}}\textcolor{stringliteral}{"{}"{}}}
+\DoxyCodeLine{    obj\_desc = \mbox{\hyperlink{firmwareupdatercore_8cpp_a396f1276c4c0cd4c8ea515f853c8494f}{self}}.\_objects[obj\_id]}
+\DoxyCodeLine{    return \mbox{\hyperlink{firmwareupdatercore_8cpp_a396f1276c4c0cd4c8ea515f853c8494f}{self}}.\_is\_success(\mbox{\hyperlink{firmwareupdatercore_8cpp_a396f1276c4c0cd4c8ea515f853c8494f}{self}}.\_execute(\mbox{\hyperlink{firmwareupdatercore_8cpp_a396f1276c4c0cd4c8ea515f853c8494f}{self}}.\_prepare\_move\_command(obj\_desc[0], obj\_desc[1], location)))}
+
+\end{DoxyCode}
+
+
+... as well as rotate them, set their colours, querying their positions, etc. Let\textquotesingle{}s take the latter as the final example, as it will illustrate how to handle the result Bottle returned by the RPC call\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{def \_prepare\_get\_command(\textcolor{keyword}{self}, obj, obj\_id):}
+\DoxyCodeLine{    \textcolor{stringliteral}{"{}"{}}\textcolor{stringliteral}{"{}Prepare the "{}}world get <obj> <id>\textcolor{stringliteral}{"{} command bottle."{}}\textcolor{stringliteral}{"{}"{}}}
+\DoxyCodeLine{    result = \mbox{\hyperlink{namespaceyarp}{yarp}}.Bottle()}
+\DoxyCodeLine{    result.clear()}
+\DoxyCodeLine{}
+\DoxyCodeLine{    \mbox{\hyperlink{namespaceiCub_1_1learningmachine_1_1math_a71fd1dc7676d2de7d7ed6617b15e9a5f}{map}}(result.addString, [\textcolor{stringliteral}{"{}world"{}}, \textcolor{stringliteral}{"{}get"{}}, obj])}
+\DoxyCodeLine{    result.addInt(obj\_id)}
+\DoxyCodeLine{    }
+\DoxyCodeLine{    return result}
+\DoxyCodeLine{}
+\DoxyCodeLine{def get\_object\_location(\mbox{\hyperlink{firmwareupdatercore_8cpp_a396f1276c4c0cd4c8ea515f853c8494f}{self}}, obj\_id):}
+\DoxyCodeLine{    \textcolor{stringliteral}{"{}"{}}\textcolor{stringliteral}{"{}Obtain the object location from the simulator. Returns None on failure."{}}\textcolor{stringliteral}{"{}"{}}}
+\DoxyCodeLine{    obj\_desc = \mbox{\hyperlink{firmwareupdatercore_8cpp_a396f1276c4c0cd4c8ea515f853c8494f}{self}}.\_objects[obj\_id]}
+\DoxyCodeLine{    result = \mbox{\hyperlink{firmwareupdatercore_8cpp_a396f1276c4c0cd4c8ea515f853c8494f}{self}}.\_execute(\mbox{\hyperlink{firmwareupdatercore_8cpp_a396f1276c4c0cd4c8ea515f853c8494f}{self}}.\_prepare\_get\_command(obj\_desc[0], obj\_desc[1]))}
+\DoxyCodeLine{    if result.size() == 3:}
+\DoxyCodeLine{        return [ result.get(i).asDouble() for i in xrange(3) ] \# 3-\/element list with xyz coordinates}
+\DoxyCodeLine{    else:}
+\DoxyCodeLine{        return None \# An \mbox{\hyperlink{namespaceiCub_1_1action_1_1log_a4ba5ea132464d0ea49d618130163c769a41b05ff8216aae3cac29fe50f6db76c0}{error}} occured}
+
+\end{DoxyCode}
+
+
+Finally, we need to make sure that after the World\+Controller is no longer needed, it will clean up stuff after itself\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{def \_\_del\_\_(\textcolor{keyword}{self}):}
+\DoxyCodeLine{    try:}
+\DoxyCodeLine{        if \mbox{\hyperlink{firmwareupdatercore_8cpp_a396f1276c4c0cd4c8ea515f853c8494f}{self}}.\_rpc\_client <> None:}
+\DoxyCodeLine{            \mbox{\hyperlink{firmwareupdatercore_8cpp_a396f1276c4c0cd4c8ea515f853c8494f}{self}}.del\_all()}
+\DoxyCodeLine{        \mbox{\hyperlink{firmwareupdatercore_8cpp_a396f1276c4c0cd4c8ea515f853c8494f}{self}}.\_rpc\_client.close()}
+\DoxyCodeLine{        del \mbox{\hyperlink{firmwareupdatercore_8cpp_a396f1276c4c0cd4c8ea515f853c8494f}{self}}.\_rpc\_client}
+\DoxyCodeLine{    except AttributeError:}
+\DoxyCodeLine{        pass}
+
+\end{DoxyCode}
+
+
+Now that the World\+Controller class definition is complete, we can use our module in the following way, for instance from i\+Python console\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{keyword}{import} \mbox{\hyperlink{namespacepython__simworld__control}{python\_simworld\_control}} as psc  \# YARP is automatically initalised now}
+\DoxyCodeLine{}
+\DoxyCodeLine{wc = psc.\mbox{\hyperlink{classpython__simworld__control_1_1WorldController}{WorldController}}() \# you will see YARP spitting \mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}} debugging messages as RPC client connects to the server}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{preprocessor}{\# Let's create some objects...}}
+\DoxyCodeLine{}
+\DoxyCodeLine{red\_sphere = wc.create\_object(\textcolor{stringliteral}{'ssph'}, [ 0.1 ], [ -\/1, 1, 1 ], [ 1, 0, 0 ])}
+\DoxyCodeLine{green\_box = wc.create\_object(\textcolor{stringliteral}{'sbox'}, [ 0.2, 0.2, 0.2 ], [ 0, 1, 1 ], [ 0, 1, 0 ])}
+\DoxyCodeLine{blue\_cylinder = wc.create\_object(\textcolor{stringliteral}{'scyl'}, [ 0.1, 0.1 ], [ 1, 1, 1 ], [ 0, 0, 1 ])}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{preprocessor}{\# ... move them around ...}}
+\DoxyCodeLine{}
+\DoxyCodeLine{wc.move\_object(red\_sphere, [ 1, 0.5, 1 ])}
+\DoxyCodeLine{wc.move\_object(green\_box, [ -\/1, 0.5, 1 ])}
+\DoxyCodeLine{wc.move\_object(blue\_cylinder, [ 0, 0.5, 1 ])}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{preprocessor}{\# ... and ask for their positions ...}}
+\DoxyCodeLine{}
+\DoxyCodeLine{\mbox{\hyperlink{namespaceeth_1_1parser_ac2f5662a765ffbe9a0790ca81c24a838}{print}} wc.get\_object\_location(green\_box)}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{preprocessor}{\# Now let's cleanup}}
+\DoxyCodeLine{}
+\DoxyCodeLine{wc.del\_all()}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{preprocessor}{\# No, wait, I want more!}}
+\DoxyCodeLine{}
+\DoxyCodeLine{monolith = wc.create\_object(\textcolor{stringliteral}{'sbox'}, [ 0.8, 1.8, 0.2 ], [ 0, 0.9, 1 ], [ 0, 0, 0 ])}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{preprocessor}{\# OK, this time we're done for good -\/ delete the wc object, what will invoke its destructor}}
+\DoxyCodeLine{}
+\DoxyCodeLine{del wc}
+
+\end{DoxyCode}
+
+
+This file can be edited at \mbox{\hyperlink{python-simworld-control_8dox}{doc/python-\/simworld-\/control.\+dox}} 

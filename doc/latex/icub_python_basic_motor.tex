@@ -1,0 +1,86 @@
+\hypertarget{icub_python_simworld_control_sec_goal}{}\doxysection{Goal}\label{icub_python_simworld_control_sec_goal}
+This tutorial shows how to use Python to interface with the \mbox{\hyperlink{namespaceiCub}{i\+Cub}}. In particular we focus on controlling the motors using the motor control interfaces. We assume that you have already compiled or installed the Python bingings. This tutorial assume basic knowledge of how YARP works in C++. We just show how the robot C++ interface can be used in Python.
+
+Dislaimer\+: this code does not do anything fancy with the robot. We let you have fun with the robot and Python once you know how the interface works.\hypertarget{icub_python_basic_motor_sec_python-ll}{}\doxysection{Joint level motor control}\label{icub_python_basic_motor_sec_python-ll}
+For this tutorial we only need the yarp python bindings.
+
+First initialize yarp.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{keyword}{import} \mbox{\hyperlink{namespaceyarp}{yarp}};}
+\DoxyCodeLine{\mbox{\hyperlink{namespaceyarp}{yarp}}.Network.init();}
+
+\end{DoxyCode}
+
+
+We know initialize a remote\+\_\+controlboard object connected to the right\+\_\+arm.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{preprocessor}{\# prepare a property object}}
+\DoxyCodeLine{\mbox{\hyperlink{namespacepython-motor-control_a1919ccc3734ab09b8e6a15d819df565b}{props}} = \mbox{\hyperlink{namespaceyarp}{yarp}}.Property()}
+\DoxyCodeLine{\mbox{\hyperlink{namespacepython-motor-control_a1919ccc3734ab09b8e6a15d819df565b}{props}}.put(\textcolor{stringliteral}{"{}device"{}},\textcolor{stringliteral}{"{}remote\_controlboard"{}})}
+\DoxyCodeLine{\mbox{\hyperlink{namespacepython-motor-control_a1919ccc3734ab09b8e6a15d819df565b}{props}}.put(\textcolor{stringliteral}{"{}local"{}},\textcolor{stringliteral}{"{}/client/right\_arm"{}})}
+\DoxyCodeLine{\mbox{\hyperlink{namespacepython-motor-control_a1919ccc3734ab09b8e6a15d819df565b}{props}}.put(\textcolor{stringliteral}{"{}remote"{}},\textcolor{stringliteral}{"{}/icubSim/right\_arm"{}})}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{preprocessor}{\# create remote driver}}
+\DoxyCodeLine{\textcolor{preprocessor}{armDriver = yarp.PolyDriver(props)}}
+
+\end{DoxyCode}
+
+
+Now we can query the motor interfaces.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{preprocessor}{\#query motor control interfaces}}
+\DoxyCodeLine{\mbox{\hyperlink{namespacepython-motor-control_a58ae1d0a5b13a0a368838e8ced2c3289}{iPos}} = \mbox{\hyperlink{namespacepython-motor-control_a27a4e13b7da2a48a14d19a33a7e4900e}{armDriver}}.viewIPositionControl()}
+\DoxyCodeLine{\mbox{\hyperlink{namespacepython-motor-control_a0bc1ca4256808f6e3f6cb8b043040332}{iEnc}} = \mbox{\hyperlink{namespacepython-motor-control_a27a4e13b7da2a48a14d19a33a7e4900e}{armDriver}}.viewIEncoders()}
+
+\end{DoxyCode}
+
+
+We are now ready to retrive the number of joints, create vectors to store the position commands and move the arm.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{preprocessor}{\#retrieve number of joints}}
+\DoxyCodeLine{\mbox{\hyperlink{icub-main_2src_2tools_2simpleClient_2main_8cpp_aac40ef34e7573177f3e908c5195594a6}{jnts}}=\mbox{\hyperlink{namespacepython-motor-control_a58ae1d0a5b13a0a368838e8ced2c3289}{iPos}}.getAxes()}
+\DoxyCodeLine{}
+\DoxyCodeLine{\mbox{\hyperlink{namespaceeth_1_1parser_ac2f5662a765ffbe9a0790ca81c24a838}{print}} \textcolor{stringliteral}{'Controlling'}, \mbox{\hyperlink{icub-main_2src_2tools_2simpleClient_2main_8cpp_aac40ef34e7573177f3e908c5195594a6}{jnts}}, \textcolor{stringliteral}{'joints'}}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{preprocessor}{\# read encoders}}
+\DoxyCodeLine{\mbox{\hyperlink{namespacepython-motor-control_aa4a312653eff9f950af80bbf61a3d925}{encs}}=\mbox{\hyperlink{namespaceyarp}{yarp}}.Vector(\mbox{\hyperlink{icub-main_2src_2tools_2simpleClient_2main_8cpp_aac40ef34e7573177f3e908c5195594a6}{jnts}})}
+\DoxyCodeLine{\mbox{\hyperlink{namespacepython-motor-control_a0bc1ca4256808f6e3f6cb8b043040332}{iEnc}}.getEncoders(\mbox{\hyperlink{namespacepython-motor-control_aa4a312653eff9f950af80bbf61a3d925}{encs}}.data())}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{preprocessor}{\# store as home position}}
+\DoxyCodeLine{\mbox{\hyperlink{namespacepython-motor-control_ae457f2d5a66ef7a457909b6fd2f9fec3}{home}}=\mbox{\hyperlink{namespaceyarp}{yarp}}.Vector(\mbox{\hyperlink{icub-main_2src_2tools_2simpleClient_2main_8cpp_aac40ef34e7573177f3e908c5195594a6}{jnts}}, \mbox{\hyperlink{namespacepython-motor-control_aa4a312653eff9f950af80bbf61a3d925}{encs}}.data())}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{preprocessor}{\#initialize a new tmp vector identical to encs}}
+\DoxyCodeLine{\mbox{\hyperlink{namespacepython-motor-control_aa48897549d21fee7c0824a33753804e2}{tmp}}=\mbox{\hyperlink{namespaceyarp}{yarp}}.Vector(\mbox{\hyperlink{icub-main_2src_2tools_2simpleClient_2main_8cpp_aac40ef34e7573177f3e908c5195594a6}{jnts}})}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{preprocessor}{\# add 10 degrees to the first four joints}}
+\DoxyCodeLine{\mbox{\hyperlink{namespacepython-motor-control_aa48897549d21fee7c0824a33753804e2}{tmp}}.set(0, \mbox{\hyperlink{namespacepython-motor-control_aa48897549d21fee7c0824a33753804e2}{tmp}}.get(0)+10)}
+\DoxyCodeLine{\mbox{\hyperlink{namespacepython-motor-control_aa48897549d21fee7c0824a33753804e2}{tmp}}.set(1, \mbox{\hyperlink{namespacepython-motor-control_aa48897549d21fee7c0824a33753804e2}{tmp}}.get(1)+10)}
+\DoxyCodeLine{\mbox{\hyperlink{namespacepython-motor-control_aa48897549d21fee7c0824a33753804e2}{tmp}}.set(2, \mbox{\hyperlink{namespacepython-motor-control_aa48897549d21fee7c0824a33753804e2}{tmp}}.get(2)+10)}
+\DoxyCodeLine{\mbox{\hyperlink{namespacepython-motor-control_aa48897549d21fee7c0824a33753804e2}{tmp}}.set(3, \mbox{\hyperlink{namespacepython-motor-control_aa48897549d21fee7c0824a33753804e2}{tmp}}.get(3)+10)}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{preprocessor}{\# move to new position}}
+\DoxyCodeLine{\textcolor{preprocessor}{iPos.positionMove(tmp.data())}}
+
+\end{DoxyCode}
+
+
+Now wait some time and go back to home position\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\mbox{\hyperlink{namespacepython-motor-control_a58ae1d0a5b13a0a368838e8ced2c3289}{iPos}}.positionMove(\mbox{\hyperlink{namespacepython-motor-control_ae457f2d5a66ef7a457909b6fd2f9fec3}{home}}.data())}
+
+\end{DoxyCode}
+
+
+Code can be found at \mbox{\hyperlink{python-motor-control_8py}{python/python-\/motor-\/control.\+py}}
+
+This file can be edited at \mbox{\hyperlink{python-motor-control_8dox}{doc/python-\/motor-\/control.\+dox}} 

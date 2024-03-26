@@ -1,0 +1,204 @@
+\hypertarget{group__icub__dragonfly2}{}\doxysection{dragonfly2}
+\label{group__icub__dragonfly2}\index{dragonfly2@{dragonfly2}}
+
+
+The dragonfly2 framegrabber device driver can acquire RGB color images in 320x240 or 640x480 resolutions.  
+
+
+Collaboration diagram for dragonfly2\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=316pt]{group__icub__dragonfly2}
+\end{center}
+\end{figure}
+The dragonfly2 framegrabber device driver can acquire RGB color images in 320x240 or 640x480 resolutions. 
+
+The dragonfly2raw framegrabber device driver can acquire raw format images in 640x480 resolution.\hypertarget{group__tutorial__perceptiveModels_intro_sec}{}\doxysubsection{Description}\label{group__tutorial__perceptiveModels_intro_sec}
+The dragonfly framegrabber device driver is based on libdc1394-\/2.
+
+It can acquire RGB color images in 320x240 or 640x480 resolutions. In 640x480 there are two options\+: Bayer decoding performed on board by the camera or Bayer pattern decoding performed by the driver. In the second mode the bandwidth required to the Firewire bus is lower, and thus the framerate can be up to 60 fps. In the first mode the framerate is limited to 15 fps with two cameras on the same channel. Moreover, once the resolution is chosen, the image can be cropped on board by the camera before the transfer on the Firewire bus.
+
+These functionalities are made available thought two YARP devices\+: dragonfly2 (for RGB images) and dragondly2raw (for raw images with Bayer encoding).
+
+Runtime parameters can be changed using the graphical interface\+: icub\+\_\+framegrabbergui2.\hypertarget{group__tutorial__perceptiveModels_lib_sec}{}\doxysubsection{Libraries}\label{group__tutorial__perceptiveModels_lib_sec}
+libdc1394-\/2 (Linux) PGRFly\+Capture (Windows)\hypertarget{group__tutorial__perceptiveModels_parameters_sec}{}\doxysubsection{Parameters}\label{group__tutorial__perceptiveModels_parameters_sec}
+--name // image output port
+
+--video\+\_\+type // 1\+: RGB 320x240, 2\+: RGB 640x480, 3\+: RGB 640x480 (default) software Bayer decoding (higher fps)
+
+--width$\vert$size\+\_\+x // width image cropping (limited to image size)
+
+--height$\vert$size\+\_\+y // height image cropping (limited to image size)
+
+--port\+\_\+number // Firewire channel (need to specify only if you have more than one firewire card)
+
+--guid // camera global unique 64 bit identifier {\bfseries{WARNING\+: replaces --d}}
+
+--d // camera unit number {\bfseries{DEPRECATED}}
+
+--white\+\_\+balance // red and blue balance, values are normalized betwen 0.\+0 and 1.\+0
+
+--feature // camera feature setting, normalized between 0.\+0 and 1.\+0 (features listed below)\hypertarget{group__icub__dragonfly2_video_type}{}\doxysubsubsection{The video\+\_\+type parameter}\label{group__icub__dragonfly2_video_type}
+The video\+\_\+type parameter determines how images are acquired by the dragonfly chip.
+
+-\/video\+\_\+type 1\+: the image is acquired by the Dragonfly2 camera in 320x240 resolution as RGB color image, and transferred to the framegrabber driver memory buffer in this format. The Firewire bandwidth allows maximum framerate (60 fps) with two cameras. If specified, the --width and --height parameters will \textquotesingle{}\textquotesingle{}\textquotesingle{}crop\textquotesingle{}\textquotesingle{}\textquotesingle{} the image to the specified dimension.
+
+-\/video\+\_\+type 2\+: the image is acquired by the Dragonfly2 camera in 640x480 resolution as RGB color image, and transferred to the framegrabber driver memory buffer in this format. The Firewire bandwidth allows 15 fps with two cameras. If specified, the --width and --height parameters will \textquotesingle{}\textquotesingle{}\textquotesingle{}crop\textquotesingle{}\textquotesingle{}\textquotesingle{} the image to the specified dimension.
+
+-\/video\+\_\+type 3\+: the image is acquired as a raw Bayer pattern 640x480 image, and transferred in this format to the framegrabber driver memory buffer. In this way, the bandwidth required to the Firewire bus is lower than in the previous format, allowing 60 fps. The Bayer decoding to the usual RGB format provided by the Dragonfly\+Device\+Driver2 framegrabber is performed at software level by the driver itself. If specified, the --width and --height parameters will \textquotesingle{}\textquotesingle{}\textquotesingle{}crop\textquotesingle{}\textquotesingle{}\textquotesingle{} the original 640 x 480 image to the specified dimension.\hypertarget{group__icub__dragonfly2_port_units}{}\doxysubsubsection{Port, Unit number and 64 bit Global Unique Identifier}\label{group__icub__dragonfly2_port_units}
+Many cameras can coexist on the same Firewire bus (port), sharing the available bandwidth. Each camera connected to the same Firewire bus is associated to a unit number. Port numbers, as well as unit numbers, are assigned increasingly starting from 0. The \mbox{\hyperlink{namespaceiCub}{i\+Cub}} robot has one only Firewire card, and thus its port number is always 0 (can be omitted). The two left and right cameras will be unit 0 and 1, but unfortunately this association is not deterministic, and thus the Global Unique Identifier (guid) must be used in order to univokely identify a camera. The yarpdev device driver supports configuration files, thus the most convenient way to deal with GUIDs is putting them in .ini files that will be passed to yarpdev together with all the other parameters as follows\+:
+
+yarpdev --from camera/dragonfly2\+\_\+config\+\_\+left.\+ini yarpdev --from camera/dragonfly2\+\_\+config\+\_\+right.\+ini
+
+In the latest \mbox{\hyperlink{namespaceiCub}{i\+Cub}} software releases the .ini files are already supplied in {\bfseries{app/robots/i\+Cub\+XXXnn/camera}} folders. The --d option must be replaced in them by assigning the guid of the corresponding camera to the guid parameter. The following configuration file dragonfly2\+\_\+config\+\_\+left.\+ini
+
+device grabber ~\newline
+subdevice dragonfly2 ~\newline
+width 320 ~\newline
+height 240 ~\newline
+video\+\_\+type 1 ~\newline
+white\+\_\+balance 0.\+506 0.\+494 ~\newline
+gain 0.\+312 ~\newline
+shutter 0.\+913 ~\newline
+name /icub/cam/left ~\newline
+brightness 0 ~\newline
+DR2 ~\newline
+stamp ~\newline
+sharpness 0.\+5 ~\newline
+hue 0.\+48 ~\newline
+gamma 0.\+4 ~\newline
+saturation 0.\+271 ~\newline
+framerate 30 ~\newline
+d 0 ~\newline
+\#guid $<$64bit global identifier, without the leading 0x$>$ then remove the d option ~\newline
+ will become after configuration, if (for example) A0\+BB98\+F34560\+AAB5 is the guid of the left camera\+:
+
+device grabber ~\newline
+subdevice dragonfly2 ~\newline
+width 320 ~\newline
+height 240 ~\newline
+video\+\_\+type 1 ~\newline
+white\+\_\+balance 0.\+506 0.\+494 ~\newline
+gain 0.\+312 ~\newline
+shutter 0.\+913 ~\newline
+name /icub/cam/left ~\newline
+brightness 0 ~\newline
+DR2 ~\newline
+stamp ~\newline
+sharpness 0.\+5 ~\newline
+hue 0.\+48 ~\newline
+gamma 0.\+4 ~\newline
+saturation 0.\+271 ~\newline
+framerate 30 ~\newline
+guid A0\+BB98\+F34560\+AAB5 ~\newline
+ The configuration files already present in the /app/robots/i\+Cub\+XXXnn/camera folder are\+:
+
+dragonfly\+\_\+config\+\_\+left.\+ini ~\newline
+dragonfly\+\_\+config\+\_\+right.\+ini ~\newline
+dragonfly\+\_\+config\+\_\+left\+\_\+bayer\+\_\+320\+\_\+240.\+ini ~\newline
+dragonfly\+\_\+config\+\_\+right\+\_\+bayer\+\_\+320\+\_\+240.\+ini ~\newline
+dragonfly\+\_\+config\+\_\+left\+\_\+bayer\+\_\+640\+\_\+480.\+ini ~\newline
+dragonfly\+\_\+config\+\_\+right\+\_\+bayer\+\_\+640\+\_\+480.\+ini ~\newline
+ \hypertarget{group__icub__dragonfly2_how_to_guid}{}\doxysubsubsection{How to obtain GUID from a camera}\label{group__icub__dragonfly2_how_to_guid}
+Execute from terminal\+:
+
+yarpdev --device grabber --subdevice dragonfly 2 --name /foocam0 --d 0
+
+The driver will answer something like\+:
+
+-\/-\/-\/--- Camera information -\/-\/-\/--- ~\newline
+Vendor \+: Point Grey Research ~\newline
+Model \+: Dragonfly2 DR2-\/03\+S2\+C-\/\+EX ~\newline
+Unit \+: 0 ~\newline
+Specifications ID \+: 0xa02d ~\newline
+Software revision \+: 0x102 ~\newline
+IIDC version code \+: 548 ~\newline
+Unit directory offset \+: 0x428 ~\newline
+Unit dependent directory offset \+: 0x440 ~\newline
+Commands registers base \+: 0xf00000 ~\newline
+Unique ID \+: 0x00b09d01006fb1fb {\bfseries{$<$== THIS IS THE INFORMATION THAT YOU NEED!!!}} ~\newline
+Vendor ID \+: 0xb09d ~\newline
+Model ID \+: 0x1 ~\newline
+Advanced features found at offset \+: 0xf01000 ~\newline
+1394b mode capable ($>$=800Mbit/s) \+: Yes ~\newline
+Platform backend \+: juju ~\newline
+-\/-\/-\/--- Camera platform-\/specific information -\/-\/-\/--- ~\newline
+Device filename \+: /dev/fw2 ~\newline
+ Now, from another terminal, execute
+
+yarpview --name /fooview0 ~\newline
+yarp connect /foocam0 /fooview0 ~\newline
+ and check in the viewer if the camera is the left or right \mbox{\hyperlink{namespaceiCub}{i\+Cub}} eye. Supposing that it is the left one, write the guid parameter in the dragonfly2\+\_\+config\+\_\+left$\ast$.ini files as shown in the former section. Do the same for the other camera, using unit number 1\+:
+
+yarpdev --device grabber --subdevice dragonfly 2 --name /foocam1 --d 1 ~\newline
+yarpview --name /fooview1 ~\newline
+yarp connect /foocam1 /fooview1 ~\newline
+ and set the corresponding guid in the other camera\textquotesingle{}s .ini files, {\bfseries{without leading 0x}}.\hypertarget{group__icub__dragonfly2_features}{}\doxysubsubsection{Features}\label{group__icub__dragonfly2_features}
+
+\begin{DoxyItemize}
+\item brightness
+\item exposure
+\item sharpness
+\item hue
+\item saturation
+\item gamma
+\item shutter
+\item gain
+\item iris
+\end{DoxyItemize}
+
+Please notice that \textquotesingle{}\textquotesingle{}exposure\textquotesingle{}\textquotesingle{} is an auto mode, if set it controls \textquotesingle{}\textquotesingle{}gain\textquotesingle{}\textquotesingle{} and \textquotesingle{}\textquotesingle{}shutter\textquotesingle{}\textquotesingle{} parameters in order to match the desired \textquotesingle{}\textquotesingle{}exposure\textquotesingle{}\textquotesingle{}.\hypertarget{group__tutorial__ationPrimitives_portsa_sec}{}\doxysubsection{Ports Accessed}\label{group__tutorial__ationPrimitives_portsa_sec}
+None.\hypertarget{group__tutorial__ationPrimitives_portsc_sec}{}\doxysubsection{Ports Created}\label{group__tutorial__ationPrimitives_portsc_sec}
+The dragonfly device driver is usually executed combined with a network wrapper grabber (called {\itshape grabber}, see examples below) which reads images from the driver and streams them on the network. The grabber opens the followig ports\+:
+
+Output ports\+:
+\begin{DoxyItemize}
+\item $<$as specified by -\/-\/name$>$ streams out a yarp\+::sig\+::\+Image\+Of$<$yarp\+::sig\+::\+Pixel\+Rgb$>$ which contains the image grabbed by the Dragonfly camera.
+\end{DoxyItemize}
+
+Input ports\+:
+\begin{DoxyItemize}
+\item $<$as specified by -\/-\/name$>$ input port to control the camera features and acquisition modes, accept a yarp\+::os\+::\+Bottle. The Frame\+Grabber\+Gui module connects to this port.
+\end{DoxyItemize}\hypertarget{group__tutorial__ationPrimitives_in_files_sec}{}\doxysubsection{Input Data Files}\label{group__tutorial__ationPrimitives_in_files_sec}
+None.\hypertarget{group__tutorial__ationPrimitives_out_data_sec}{}\doxysubsection{Output Data Files}\label{group__tutorial__ationPrimitives_out_data_sec}
+None.\hypertarget{group__tutorial__ationPrimitives_conf_file_sec}{}\doxysubsection{Configuration Files}\label{group__tutorial__ationPrimitives_conf_file_sec}
+None.\hypertarget{group__tutorial__perceptiveModels_tested_os_sec}{}\doxysubsection{Tested OS}\label{group__tutorial__perceptiveModels_tested_os_sec}
+Linux and Windows.\hypertarget{group__icub__faceExpressions_example_sec}{}\doxysubsection{Example Instantiation of the Module}\label{group__icub__faceExpressions_example_sec}
+Usage syntax\+:
+
+yarpdev --device grabber --subdevice dragonfly2 --name $<$yarp port name$>$ \mbox{[}--video\+\_\+type $<$type$>$\mbox{]} \mbox{[}--width$\vert$size\+\_\+x $<$\+W$>$ --height$\vert$size\+\_\+y $<$\+H$>$\mbox{]} \mbox{[}--port\+\_\+number $<$pn$>$\mbox{]} \mbox{[}--guid $<$64\+\_\+bit\+\_\+camera\+\_\+unique\+\_\+identifier$>$\mbox{]} \mbox{[}--white\+\_\+balance $<$red\+\_\+value$>$ $<$blue\+\_\+value$>$\mbox{]} \mbox{[}--feature $<$parameter$>$\mbox{]} \mbox{[}...\mbox{]}
+
+yarpdev --device grabber --subdevice dragonfly2raw --name $<$yarp port name$>$ \mbox{[}--width$\vert$size\+\_\+x $<$\+W$>$ --height$\vert$size\+\_\+y $<$\+H$>$\mbox{]} \mbox{[}--port\+\_\+number $<$pn$>$\mbox{]} \mbox{[}--guid $<$64\+\_\+bit\+\_\+global\+\_\+unique\+\_\+identifier$>$\mbox{]} \mbox{[}--white\+\_\+balance $<$red\+\_\+value$>$ $<$blue\+\_\+value$>$\mbox{]} \mbox{[}--feature $<$parameter$>$\mbox{]} \mbox{[}...\mbox{]}
+
+{\bfseries{WARNING\+: the old --d $<$unit\+\_\+number$>$ parameter is still working but deprecated, please use --guid $<$64\+\_\+bit\+\_\+global\+\_\+unique\+\_\+identifier$>$ instead, because --d $<$unit\+\_\+number$>$ camera has become non deterministic in left/right assignment in latest linux releases.}}
+
+Example\+:
+
+yarpdev --device grabber --subdevice dragonfly2 --name /icub/cam/left --guid AB10980\+D6656\+E455 \mbox{[}...\mbox{]}
+
+yarpdev --device grabber --subdevice dragonfly2 --name /icub/cam/right --guid 98FF0666\+E478\+A001 \mbox{[}...\mbox{]}
+
+yarpdev --device grabber --subdevice dragonfly2raw --name /icub/cam/left --guid AB10980\+D6656\+E455 \mbox{[}...\mbox{]}
+
+yarpdev --device grabber --subdevice dragonfly2raw --name /icub/cam/right --guid 98FF0666\+E478\+A001 \mbox{[}...\mbox{]}
+
+{\bfseries{DEPRECATED\+:}}
+
+yarpdev --device grabber --subdevice dragonfly2 --name /icub/cam/right --d 1$\vert$0 \mbox{[}...\mbox{]}
+
+yarpdev --device grabber --subdevice dragonfly2 --name /icub/cam/left --d 0$\vert$1 \mbox{[}...\mbox{]}
+
+yarpdev --device grabber --subdevice dragonfly2raw --name /icub/cam/left --d 0$\vert$1 \mbox{[}...\mbox{]}
+
+yarpdev --device grabber --subdevice dragonfly2raw --name /icub/cam/right --d 1$\vert$0 \mbox{[}...\mbox{]}
+
+\begin{DoxyAuthor}{Author}
+Paul Fitzpatrick, Lorenzo Natale, Giorgio Metta, Alessandro Scalzo
+\end{DoxyAuthor}
+Copyright (C) 2008 Robot\+Cub Consortium
+
+Copy\+Policy\+: Released under the terms of the GNU GPL v2.\+0.
+
+This file can be edited at /src/libraries/icubmod/dragonfly2/common/\+Dragonfly\+Device\+Driver2.h 

@@ -1,0 +1,136 @@
+i\+Dyn is a library for computing kinematics and dynamics of serial-\/links chains of revolute joints and \mbox{\hyperlink{namespaceiCub}{i\+Cub}} limbs.
+
+It started as an extension of the i\+Kin library, with the purpose of including the dynamic description of the links, and gradually evolved until considering the whole body dynamics. Thus, starting from links (from i\+Kin\+Link to i\+Dyn\+Link) the library provides classes for links, chain of links, and generic limbs. Of course, \mbox{\hyperlink{namespaceiCub}{i\+Cub}} limbs are included, with the specific kinematics and dynamics data already set (by default, the CAD parameters).
+
+The library also provides a Newton-\/\+Euler based method to compute forces, moments, and joint torques, for each link in single or multiple interconnected chains, in presence or not of FT sensors, placed anywhere in the chain (e.\+g. in the middle of the chain).
+
+The main purposes of the library are\+:
+
+
+\begin{DoxyItemize}
+\item computation of all \mbox{\hyperlink{namespaceiCub}{i\+Cub}} joint torques
+\item computation of external wrenches acting at the end-\/effector of the arms/legs of \mbox{\hyperlink{namespaceiCub}{i\+Cub}}
+\end{DoxyItemize}
+
+The modules using i\+Dyn and performing these operations are Whole\+Body\+Torque\+Observer  and Wrench\+Observer, which are the bases for the Torque Interface, Torque Control, Impedance Control, Zero-\/force control, external contact detection and so on. The complete and detailed documentation of i\+Dyn code is available \mbox{\hyperlink{group__iDyn}{here}}.\hypertarget{idyn_introduction_sec_library_modules}{}\doxysection{Library modules}\label{idyn_introduction_sec_library_modules}
+The library modules are\+:
+
+
+\begin{DoxyItemize}
+\item Recursive\+Newton\+Euler\+: force/torque computation in a chain using Newton-\/\+Euler recursive formulation, both in the forward/backward sense
+\item i\+Dyn\+Inv\+: estimation of force/moment measured by a virtual FT sensor placed everywhere in a chain
+\item i\+Dyn\+Fwd\+: retrieve joint torques of limbs with single FT sensor measurements
+\item i\+Dyn\+Body\+: whole body dynamics, i.\+e. interconnection of multiple chains
+\item i\+Transform\+: projection of forces along the chain ~\newline
+
+\end{DoxyItemize}\hypertarget{idyn_introduction_sec_core}{}\doxysection{Core classes}\label{idyn_introduction_sec_core}
+The base classes describing serial links chains are\+:
+
+
+\begin{DoxyItemize}
+\item i\+Dyn\+Link\+: a link with kinematic and dynamic characteristics
+\item i\+Dyn\+Chain\+: a chain of serial links, with kinematic and dynamic properties
+\item i\+Dyn\+Limb\+: a generic limb, described by a chain
+\end{DoxyItemize}
+
+Note that i\+Dyn\+Link and i\+Dyn\+Chain are derived from the corresponding classes (i\+Kin\+Link and i\+Kin\+Chain) in the i\+Kin library, so they provide both kinematic and dynamic data and methods. i\+Dyn\+Limb is, as in i\+Kin, basically a redefinition of i\+Dyn\+Chain methods, used to protect some chain data. i\+Dyn\+Link is an extension of i\+Kin\+Link, since it adds the dynamic parameters of the link\+:
+
+
+\begin{DoxyItemize}
+\item $ H_C $ (HC,COM) \+: the center of mass, i.\+e. a roto-\/translational matrix defining the COM with respect to the link frame
+\item $ m $ (m)\+: the link mass, concentrated in the COM
+\item $ I $ (I)\+: the inertia matrix of the link
+\end{DoxyItemize}
+
+and the other characteristic variables used for dynamics\+:
+
+
+\begin{DoxyItemize}
+\item $ \dot{q},\ddot{q} $ (dq/d\+Ang, ddq/d2q/d2\+Ang) \+: joint velocity \& acceleration
+\item $ w, \dot{w} $ (w,dw)\+: link angular velocity \& acceleration
+\item $ \ddot{p},\ddot{p}_C $ (ddp,ddpC)\+: link and its COM linear acceleration
+\item $ f, \mu $ (F, Mu)\+: link force, moment
+\item $ \tau $ (Tau)\+: joint torque ~\newline
+
+\end{DoxyItemize}
+
+An i\+Dyn\+Chain is basically a list of links; the main difference with respect to i\+Kin is that blocked links contribute to the dynamics, so there\textquotesingle{}s no need to have a second list to fasten dynamic computations. However, since i\+Dyn\+Chain inherits from i\+Kin\+Chain, blocked links are considered for the Jacobian computation, which is unchanged. One of the advantages of i\+Dyn is the possibility to interconnect multiple limbs and computing also a \char`\"{}shared\char`\"{} Jacobian. To this purpose, the concept of \char`\"{}node\char`\"{} must be introduced.
+
+i\+Dyn\+Node represents a virtual node where multiple limbs are connected, and may exchange kinematic and wrench information among them. Multiple limbs can be attached to the Node, but at least one must be attached.
+
+The mutual exchange between node and limbs (full duplex) is managed used a Rigid\+Body\+Transformation class, containing the roto-\/translational matrix which describes the connection, and the type of \`{}`flow'\textquotesingle{} of kinematic and wrench variables\+: from limb to node or from node to limb. One limb can be attached to a node at the base or at the end-\/effector\+: this, combined with the information flows, affects the computations in particular the application of the Newton-\/\+Euler algorithm while solving the limbs dynamic.
+
+If a FT sensor is present inside a kinematic chain, its measurements can be exploited to initialize the wrench phase of the Newton-\/\+Euler recursive algorithm, starting from the sensor instead of the end-\/effector of the chain (or the final link of the chain). A i\+Dyn\+Sensor class is then used\+: a generic class, which attaches a FT sensor into a i\+Dyn\+Chain. The \`{}`attach'\textquotesingle{} is specified by the $ s-th $ link hosting the sensor, the roto-\/translational matrix defining the sensor frame with respect to the link frame, and the dynamical parameters of the \char`\"{}sub-\/link\char`\"{} between the link frame and the sensor frame (the portion of link between the sensor and the end of the link).\hypertarget{idyn_introduction_sec_icub_limbs}{}\doxysection{i\+Cub limbs}\label{idyn_introduction_sec_icub_limbs}
+i\+Dyn is a generic library that could be used for any robot, but of course \mbox{\hyperlink{namespaceiCub}{i\+Cub}} parts/limbs are already available to the user, pre-\/configured with the \mbox{\hyperlink{namespaceiCub}{i\+Cub}} CAD parameters. A generic \mbox{\hyperlink{namespaceiCub}{i\+Cub}} limb name is\+: \mbox{\hyperlink{namespaceiCub}{i\+Cub}} + part + Dyn where part is\+: Arm, Torso, Leg, Eye, Eye\+Neck\+Ref, Inertial\+Sensor, Neck\+Inertial. For legs and arms the part can be also followed by the tag \char`\"{}\+No\+Torso\char`\"{}\+: the reason is that in i\+Kin the arm limb includes the torso links in the chain, whereas in i\+Dyn one may choose to work on the arm only; in a similar way, legs in i\+Kin are referred to the torso $H_0$ matrix, whereas in i\+Dyn one can choose to have them without reference to the torso.
+
+\hypertarget{idyn_introduction_sec_using_idyn}{}\doxysection{Using i\+Dyn}\label{idyn_introduction_sec_using_idyn}
+In order to use the i\+Dyn library, make sure that the following steps are done\+: ~\newline
+
+\begin{DoxyEnumerate}
+\item Update YARP and \mbox{\hyperlink{namespaceiCub}{i\+Cub}} repositories.
+\item Compile YARP and \mbox{\hyperlink{namespaceiCub}{i\+Cub}} (always a good practice).
+\item Try first the tutorial examples, located in 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{icub-\/tutorials/src/iDyn}
+
+\end{DoxyCode}
+
+\end{DoxyEnumerate}
+
+i\+Dyn depends only on YARP and i\+Kin. In order to include i\+Dyn and use it in your software, make sure you include the following line in the {\itshape CMake\+Lists.\+txt}\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{TARGET\_LINK\_LIBRARIES(\$\{PROJECTNAME\} ... iDyn ...)}
+
+\end{DoxyCode}
+ Of course if you are developing outside the \mbox{\hyperlink{namespaceiCub}{i\+Cub}} project (e.\+g. in contrib), you may also add these lines\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{FIND\_PACKAGE(YARP)}
+\DoxyCodeLine{FIND\_PACKAGE(ICUB)}
+
+\end{DoxyCode}
+
+
+In your code the i\+Dyn namespace must be declared, and the header files needed must be included\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{preprocessor}{\#include <\mbox{\hyperlink{iDyn_8h}{iCub/iDyn/iDyn.h}}>}}
+\DoxyCodeLine{\textcolor{preprocessor}{\#include <\mbox{\hyperlink{iDynInv_8h}{iCub/iDyn/iDynInv.h}}>}}
+\DoxyCodeLine{...}
+\DoxyCodeLine{using \textcolor{keyword}{namespace }\mbox{\hyperlink{namespaceiCub_1_1iDyn}{iCub::iDyn}};}
+
+\end{DoxyCode}
+\hypertarget{idyn_introduction_sec_notes_newton_euler}{}\doxysection{Basic Newton-\/\+Euler algorithm}\label{idyn_introduction_sec_notes_newton_euler}
+The Newton-\/\+Euler recursive algorithm is basically a set of computations, consisting in two steps\+: the so called \char`\"{}kinematic\char`\"{} and \char`\"{}wrench phase\char`\"{}. In the first, the kinematic variables of the link (angular velocity/acceleration, linear acceleration, and so on) are computed, whereas in the latter the force, moment and joint torque are computed. Both phases must be initialized properly, with kinematic information (usually at the base of the chain) and external wrench information (usually at the end-\/effector of the chain).
+
+{\bfseries{Classic Newton-\/\+Euler computations}}
+
+Kinematic phase (Forward)\+: $ i=1,2,\ldots,n $
+
+\[ w^i_i = {R^{i-1}_i}^\top (w^{i-1}_{i-1} + \dot{\theta}_i z_0) \] \[ \dot{w}^i_i = {R^{i-1}_i}^\top (\dot{w}^{i-1}_{i-1} + \ddot{\theta}_i z_0 + \dot{\theta}_i w^{i-1}_{i-1} \times z_0) \] \[ \ddot{p}^i_i = {R^{i-1}_i}^\top \ddot{p}^{i-1}_{i-1} + \dot{w}^i_i \times r^i_{i-1,i} + w^i_i \times (w^i_i \times r^i_{i-1,i}) \] \[ \ddot{p}^i_{C_i} = \ddot{p}^i_i + \dot{w}^i_i \times r^i_{i,C_i} + w^i_i \times (w^i_i \times r^i_{i,C_i}) \]
+
+initialized by $ w^0_0, \dot{w}^0_0, \ddot{p}^0_0-g^0_0 $.
+
+Wrench phase (Backward)\+: $ i=n,n-1,\ldots,1 $
+
+\[ f^i_i = {R^{i}_{i+1}}^\top f^{i+1}_{i+1} + m_i \ddot{p}^i_{C_i} \] \[ \mu^i_i = - f^i_i \times ( r^i_{i-1,i} + r^i_{i,C_i} ) + R^i_{i+1} \mu^{i+1}_{i+1} + R^i_{i+1} f^{i+1}_{i+1} \times r^i_{i,C_i} + \bar{I}^i_i \dot{w}^i_i + w^i_i \times (\bar{I}^i_i w^i_i) \] \[ \tau_i = {\mu^i_i}^\top {R^{i-1}_i}^\top z_0 \]
+
+initialized by $ f^{n+1}_{n+1},\mu^{n+1}_{n+1} $.
+
+The detailed description of the algorithm can be found in\+: {\itshape L. Sciavicco, B. Siciliano, Modelling and Control of Robot Manipulators, 2nd Edition, Springer-\/\+Verlag, 2000.}
+
+{\bfseries{Note}}
+
+i\+Dyn provides Newton-\/\+Euler recursive algorithm computations for the classical case, but also for all possible cases, i.\+e. when the external kinematic and wrench information are set at the beginning or at the end of the chain, or whenever external force measurements (coming from a FT sensor inside the chain) are available.\hypertarget{idyn_introduction_sec_more_info}{}\doxysection{More about i\+Dyn}\label{idyn_introduction_sec_more_info}
+A more detailed description of the library, along with tutorial slides, is available in the \href{http://wiki.icub.org/wiki/iDyn}{\texttt{ wiki page on i\+Dyn}}.
+
+Some working examples are available under 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{icub-\/tutorials/src/iDyn}
+
+\end{DoxyCode}
+
+
+The detailed code documentation is available \mbox{\hyperlink{group__iDyn}{here}}.
+
+\begin{DoxyAuthor}{Author}
+Serena Ivaldi 
+\end{DoxyAuthor}

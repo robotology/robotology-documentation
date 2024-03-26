@@ -1,0 +1,128 @@
+\hypertarget{group__icub__controlBoardDumper}{}\doxysection{control\+Board\+Dumper}
+\label{group__icub__controlBoardDumper}\index{controlBoardDumper@{controlBoardDumper}}
+
+
+A basic module for collecting data (position, current, applied voltage, pid errors, ...) from a control\+Board and sending them trough a yarp port.  
+
+
+Collaboration diagram for control\+Board\+Dumper\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=275pt]{group__icub__controlBoardDumper}
+\end{center}
+\end{figure}
+A basic module for collecting data (position, current, applied voltage, pid errors, ...) from a control\+Board and sending them trough a yarp port. 
+
+These data can then be dumped to a file using yarpdatadumper. Time stamp is forwarded if present in the collected data. If not present a time stamp is added. {\bfseries{ Remark\+: }} all collected data are obtained by a remote\+Control\+Board connected with a control\+Board. Therefore, collected data needs to be available to the control\+Board. When using the \mbox{\hyperlink{namespaceiCub}{i\+Cub}} canbus protocol this is not necessary guaranteed for all data\+: data are available only if the corresponding broadcast is enabled. This can be easily done by seeting the proper entry in the control\+Board configuration file (e.\+g. icub\+\_\+right\+\_\+arm\+\_\+safe.\+ini)\+:
+
+
+\begin{DoxyItemize}
+\item broadcast\+\_\+pos\+: if 1 enables get\+Encoders (joint position) 
+\item broadcast\+\_\+vel\+\_\+acc\+: if 1 enables get\+Encoder\+Speeds (joint velocity) and get\+Encoder\+Accelerations (joint acceleration) 
+\item broadcast\+\_\+pid\+: if 1 enables get\+Outputs (voltage give to the motor) 
+\item broadcast\+\_\+pid\+\_\+err\+: if 1 enables get\+Position\+Errors and get\+Torque\+Errors (pid tracking error) 
+\item broadcast\+\_\+current\+: if 1 enables get\+Currents (current given to the motor) 
+\end{DoxyItemize}\hypertarget{group__tutorial__perceptiveModels_intro_sec}{}\doxysubsection{Description}\label{group__tutorial__perceptiveModels_intro_sec}
+Data from a control board can be easily accessed trough suitable interfaces (IPosition\+Control, IAmplifier\+Control, IPid\+Control ...) and corresponding functions (get\+Encoders, get\+Currrents, get\+Outputs, ...). The module (control\+Board\+Dumper) accesses all these data and make them available on the network opening suitable yarp ports. The data are collected at a fixed frequency by a suitable thread whose frequency can be changed.\hypertarget{group__icub__controlBoardDumper_libraries_sec}{}\doxysubsection{Libraries}\label{group__icub__controlBoardDumper_libraries_sec}
+Yarp libraries.\hypertarget{group__tutorial__perceptiveModels_parameters_sec}{}\doxysubsection{Parameters}\label{group__tutorial__perceptiveModels_parameters_sec}
+The module uses the Resource\+Finder class as a way to retrieve its own configuration. In particular, the default config file is control\+Board\+Dumper.\+ini and it is assumed to be in the app/dump\+Control\+Board\+Data/conf directory. The file structure is the following\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{robot        icub             \textcolor{comment}{//the robot name [default: icub]}}
+\DoxyCodeLine{}
+\DoxyCodeLine{part         \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}                \textcolor{comment}{//the robot part to be dumped [default: head]}}
+\DoxyCodeLine{}
+\DoxyCodeLine{rate         r                \textcolor{comment}{//[ms] the sampling time for collected data [default: 500]}}
+\DoxyCodeLine{}
+\DoxyCodeLine{joints       (i1 i2 i3...iN)  \textcolor{comment}{//indexes of the joints to be read [default: (0 1)]}}
+\DoxyCodeLine{}
+\DoxyCodeLine{dataToDump   (data1...dataN)  \textcolor{comment}{//type of data to be collected [default: all possible data, except debug interface (getRotorxxx)]}}
+\DoxyCodeLine{}
+\DoxyCodeLine{dataToDumpAll                 \textcolor{comment}{// will dump all data, including the debug interface (getRotorxxx)}}
+\DoxyCodeLine{}
+\DoxyCodeLine{logToFile                     \textcolor{comment}{//if present, this options creates a log file for each data port}}
+
+\end{DoxyCode}
+
+
+If no such file can be found, the application is started with the default parameters. The first parameter (\textquotesingle{}robot\textquotesingle{} with default value \textquotesingle{}icub\textquotesingle{}) specifies the robot name. The second parameter (\textquotesingle{}part\textquotesingle{} with default \textquotesingle{}head\textquotesingle{}) specifies the used part. The third parameter (\textquotesingle{}rate\textquotesingle{} with default \textquotesingle{}500\textquotesingle{}) specifies the acquisition rate. The parameter data\+To\+Dump can assume the following values\+: 
+\begin{DoxyItemize}
+\item get\+Encoders (joint position) 
+\item get\+Encoder\+Speeds (joint velocity) 
+\item get\+Encoder\+Accelerations (joint acceleration) 
+\item get\+Position\+Errors (difference between desired and actual position) 
+\item get\+Torque\+Errors (difference between desired and measured torque, if available) 
+\item get\+Outputs (voltage (PWM) given to the motor) 
+\item get\+Currents (current given to the motor) 
+\item get\+Torques (joint torques, if available) 
+\item get\+Pos\+Pid\+References (last position referenece) 
+\item get\+Trq\+Pid\+References (last torque reference) 
+\item get\+Rotor\+Positions (hires rotor position, if debug interface is available) 
+\item get\+Rotor\+Speeds (hires rotor velocity, if debug interface is available) 
+\item get\+Rotor\+Accelerations (hires rotor acceleration, if debug interface is available) 
+\item get\+Control\+Modes (joint control mode) 
+\item get\+Interaction\+Modes (joint interaction mode) 
+\end{DoxyItemize}Other data can be easily added by modyfing the classes in the file \mbox{\hyperlink{genericControlBoardDumper_8cpp}{generic\+Control\+Board\+Dumper.\+cpp}} which contains a class named \mbox{\hyperlink{classGetData}{Get\+Data}} with a method get\+Data which can be used to instantiate a thread control\+Board\+Dumper which does not depend on the specific interface (e.\+g. IPosition\+Control) or function (e.\+g. get\+Encoders).
+
+Please note that for dumping the get\+Rototxxx data the debug\+Interface is required. This means the robot must instantiate the debug\+Interface\+Wrapper in order to have remote access to those data.
+
+The module can also be executed from a command line with the following format\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{controlBoardDumper -\/-\/robot r -\/-\/part \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}} -\/-\/rate r -\/-\/joints \textcolor{stringliteral}{"{}(i1 i2 i3...iN)"{}}}
+
+\end{DoxyCode}
+ for example\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{controlBoardDumper -\/-\/robot icub -\/-\/part head -\/-\/rate 20 -\/-\/joints \textcolor{stringliteral}{"{}(0 1 2)"{}}}
+
+\end{DoxyCode}
+
+
+In this case all the following standard data will be dumped\+:  get\+Encoders  get\+Encoder\+Speeds  get\+Encoder\+Accelerations  get\+Position\+Errors  get\+Torque\+Errors  get\+Outputs  get\+Currents  get\+Torques
+
+To dump only specific data you can use the --data\+To\+Dump option
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{controlBoardDumper -\/-\/robot r -\/-\/part \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}} -\/-\/rate r -\/-\/joints \textcolor{stringliteral}{"{}(i1 i2 i3...iN)"{}} -\/-\/dataToDump \textcolor{stringliteral}{"{}(data1...dataN)"{}}}
+
+\end{DoxyCode}
+
+
+and the example is\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{controlBoardDumper -\/-\/robot icub -\/-\/part head -\/-\/rate 20 -\/-\/joints \textcolor{stringliteral}{"{}(0 1 2)"{}} -\/-\/dataToDump \textcolor{stringliteral}{"{}(getCurrents getOutputs)"{}}}
+
+\end{DoxyCode}
+
+
+To dump all the data, including the debug ones, you can use the data\+To\+Dump\+All option control\+Board\+Dumper --robot r --part p --rate r --joints \char`\"{}(i1 i2 i3...\+i\+N)\char`\"{} --data\+To\+Dump\+All
+
+and the example is\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{controlBoardDumper -\/-\/robot icub -\/-\/part head -\/-\/rate 20 -\/-\/joints \textcolor{stringliteral}{"{}(0 1 2)"{}} -\/-\/dataToDumpAll}
+
+\end{DoxyCode}
+\hypertarget{group__tutorial__ationPrimitives_portsa_sec}{}\doxysubsection{Ports Accessed}\label{group__tutorial__ationPrimitives_portsa_sec}
+For each part initalized (e.\+g. head)\+: 
+\begin{DoxyItemize}
+\item /icub/head/rpc\+:i 
+\item /icub/head/command\+:i 
+\item /icub/head/state\+:i 
+\end{DoxyItemize}\hypertarget{group__tutorial__ationPrimitives_portsc_sec}{}\doxysubsection{Ports Created}\label{group__tutorial__ationPrimitives_portsc_sec}
+For each part initalized (e.\+g. head)\+: 
+\begin{DoxyItemize}
+\item /robot/control\+Board\+Dumper/part/data e.\+g. /icub/control\+Board\+Dumper/head/get\+Encoders 
+\end{DoxyItemize}
+
+\begin{DoxyAuthor}{Author}
+Francesco Nori
+\end{DoxyAuthor}
+Copyright (C) 2008 Robot\+Cub Consortium
+
+Copy\+Policy\+: Released under the terms of the GNU GPL v2.\+0.
+
+This file can be edited at src/control\+Board\+Dumper/main.\+cpp. 

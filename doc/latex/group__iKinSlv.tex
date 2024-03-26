@@ -1,0 +1,120 @@
+\hypertarget{group__iKinSlv}{}\doxysection{i\+Kin\+Slv}
+\label{group__iKinSlv}\index{iKinSlv@{iKinSlv}}
+
+
+Classes for on-\/line solution of inverse kinematic of \mbox{\hyperlink{namespaceiCub}{i\+Cub}} limbs based on \href{http://wiki.icub.org/wiki/Installing_IPOPT}{\texttt{ Ip\+Opt}}.  
+
+
+Collaboration diagram for i\+Kin\+Slv\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=201pt]{group__iKinSlv}
+\end{center}
+\end{figure}
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \mbox{\hyperlink{classiCub_1_1iKin_1_1CartesianSolver}{i\+Cub\+::i\+Kin\+::\+Cartesian\+Solver}}
+\begin{DoxyCompactList}\small\item\em Abstract class defining the core of on-\/line solvers. \end{DoxyCompactList}\item 
+class \mbox{\hyperlink{classiCub_1_1iKin_1_1iCubArmCartesianSolver}{i\+Cub\+::i\+Kin\+::i\+Cub\+Arm\+Cartesian\+Solver}}
+\begin{DoxyCompactList}\small\item\em Derived class which implements the on-\/line solver for the chain torso+arm. \end{DoxyCompactList}\item 
+class \mbox{\hyperlink{classiCub_1_1iKin_1_1iCubLegCartesianSolver}{i\+Cub\+::i\+Kin\+::i\+Cub\+Leg\+Cartesian\+Solver}}
+\begin{DoxyCompactList}\small\item\em Derived class which implements the on-\/line solver for the leg chain. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Classes for on-\/line solution of inverse kinematic of \mbox{\hyperlink{namespaceiCub}{i\+Cub}} limbs based on \href{http://wiki.icub.org/wiki/Installing_IPOPT}{\texttt{ Ip\+Opt}}. 
+
+The solvers run as on-\/line daemons which connect to the robot to retrieve information on the current joints configuration (along with the bounds) and by requesting a desired pose with queries made through YARP ports they return the corresponding target joints.
+
+The task to be solved is\+:
+
+\[ \begin{array}{c} \mathbf{q}=\arg\min\limits_{\mathbf{q} \in \mathbb{R}^{n} }\left(\left\|\mathbf{\alpha}_d-\mathit{K_{\alpha}}\left(\mathbf{q}\right)\right\|^2+\mathit{w}\cdot\left(\mathbf{q}_r-\mathbf{q}\right)^{\top}\mathit{W}_r\left(\mathbf{q}_r-\mathbf{q}\right)\right) \\ \text{s.t.} \begin{cases} \left\|\mathbf{x}_d-\mathit{K_x}\left(\mathbf{q}\right)\right\|^2=0 \\ \mathbf{q}_L<\mathbf{q}<\mathbf{q}_U \end{cases} \end{array}. \]
+
+Where the solution $ \mathbf{q} $ is the joints vector with n components (depending on the task and the current dof configuration) that is guaranteed to be found within the physical bounds expressed by $ \mathbf{q}_L $ and $ \mathbf{q}_U $; $ \mathbf{x}_d\equiv\left(x,y,d\right)_d $ is the positional part of the desired pose, $ \mathbf{\alpha}_d $ is the desired orientation and $ \mathit{K_x} $ and $ \mathit{K_{\alpha}} $ are the forward kinematic maps for the position and orientation part, respectively; $ \mathbf{q}_r $ is used to keep the solution as close as possible to a given rest position in the joint space (weighting with a positive factor $ \mathit{w} < 1 $ and also through the diagonal matrix $ \mathit{W}_r $ which allows selecting a specific weight for each joint).\hypertarget{group__iKinSlv_protocol_sec}{}\doxysubsection{Solver protocol}\label{group__iKinSlv_protocol_sec}
+Once created the solver will open three ports with which user can communicate and exchange information according to the following rules\+:
+
+{\bfseries{ /$<$solver\+Name$>$/in }} accepts a properties-\/like bottle containing the following requests in streaming mode\+:
+
+{\bfseries{xd}} request\+: example (\mbox{[}xd\mbox{]} (x y z ax ay az theta)), specifies the target pose to be achieved as a 7-\/components vector for position and orientation parts. Note that if the current pose is of \mbox{[}xyz\mbox{]} type, then only the first 3-\/components are meaningful (x,...,az are in meters, theta is in radians).
+
+{\bfseries{pose}} request\+: example (\mbox{[}pose\mbox{]} \mbox{[}full\mbox{]}), specifies the end-\/effector pose the user wants to achieve; it can be \mbox{[}full\mbox{]} (position+orientation) or \mbox{[}xyz\mbox{]} (only position).
+
+{\bfseries{mode}} request\+: example (\mbox{[}mode\mbox{]} \mbox{[}cont\mbox{]}), selects the solver mode between \mbox{[}cont\mbox{]} which implements a continuous tracking and \mbox{[}shot\mbox{]} which does not compensate for movements induced on unacatuated joints. Indeed, in continuous mode the solver yields a new solution whenever a detected movements on uncontrolled links determines a displacement from the desired target.
+
+{\bfseries{dof}} request\+: example (\href{1 1 0 1 ...}{\texttt{ dof}}), specifies which dof of the chain are actuated (by putting 1 in the corresponding position) and which not (with 0). The length of the provided list of 1\textquotesingle{}s and 0\textquotesingle{}s should match the number of chain\textquotesingle{}s dof. The special value 2 is used to keep the link status unchanged and proceed to the next link.
+
+{\bfseries{resp}} request\+: example (\href{20.0 0.0 0.0 ...}{\texttt{ resp}}), specifies for each joint the rest position in degrees. The reply will contain the rest position resulting from the application of joints limits.
+
+{\bfseries{resw}} request\+: example (\href{1.0 0.0 1.0 ...}{\texttt{ resw}}), specifies for each joint the weight used to compute the rest position minimization task. The reply will contain the weights as result of a saturation over zero.
+
+{\bfseries{tok}} synchro\+: a double may be added to the request which will be in turn sent back by the solver for synchronization purpose.
+
+\begin{DoxyNote}{Note}
+One single command sent to the streaming input port can contain multiple requests\+: e.\+g. (\mbox{[}pose\mbox{]} \mbox{[}xyz\mbox{]}) (\mbox{[}dof\mbox{]} (1 0 1 2 1)) (\href{-0.1 0.1 0.1}{\texttt{ xd}} (\mbox{[}tok\mbox{]} 1.\+234) ...)
+
+Remind that the intended use of this port is in streaming mode, thus it might happen that one request is dropped in favour of the most recent one. Therefore, as a general remark, rely on this port for xd requests and use rpc for dof, mode, pose, ... requests (see below).
+\end{DoxyNote}
+{\bfseries{ /$<$solver\+Name$>$/rpc }} accepts a vocab-\/like bottle containing the following requests, executes them and replies with \mbox{[}ack\mbox{]}/\mbox{[}nack\mbox{]} and/or some useful info\+:
+
+Commands issued through \mbox{[}set\mbox{]}/\mbox{[}get\mbox{]} vocab\+:
+
+{\bfseries{pose}} request\+: example \mbox{[}set\mbox{]} \mbox{[}pose\mbox{]} \mbox{[}full\mbox{]}/\mbox{[}xyz\mbox{]}, \mbox{[}get\mbox{]} \mbox{[}pose\mbox{]}.
+
+{\bfseries{pose}} priority request\+: example \mbox{[}set\mbox{]} \mbox{[}prio\mbox{]} \mbox{[}xyz\mbox{]}/\mbox{[}ang\mbox{]}, \mbox{[}get\mbox{]} \mbox{[}prio\mbox{]}. For example, setting priority to \mbox{[}ang\mbox{]} allows considering the reaching in orientation as a constraint while reaching in position is handled as an objective.
+
+\begin{DoxyNote}{Note}
+Caveat. If priority is given to \mbox{[}ang\mbox{]}, then commands such as \mbox{[}set\mbox{]} \mbox{[}pose\mbox{]} will need still to be used with the tag \mbox{[}xyz\mbox{]} in order to reach for a non-\/full pose. This choice, even if counter-\/intuitive, ensures back-\/compatibility and in the end does not represent a big hitch since orientation is very rarely prioritized over position.
+\end{DoxyNote}
+{\bfseries{mode}} request\+: example \mbox{[}set\mbox{]} \mbox{[}mode\mbox{]} \mbox{[}cont\mbox{]}/\mbox{[}shot\mbox{]}, \mbox{[}get\mbox{]} \mbox{[}mode\mbox{]}.
+
+{\bfseries{lim}} request\+: example \mbox{[}set\mbox{]} \mbox{[}lim\mbox{]} axis min max, \mbox{[}get\mbox{]} \mbox{[}lim\mbox{]} axis. Set/return minimum and maximum values for the joint. Allowed range shall be a valid subset of the real control limits (unit is deg).
+
+{\bfseries{verbosity}} request\+: example \mbox{[}set\mbox{]} \mbox{[}verb\mbox{]} \mbox{[}on\mbox{]}/\mbox{[}off\mbox{]}, \mbox{[}get\mbox{]} \mbox{[}verb\mbox{]}.
+
+{\bfseries{dof}} request\+: example \mbox{[}set\mbox{]} \href{1 2 1 0 ...}{\texttt{ dof}}, \mbox{[}get\mbox{]} \mbox{[}dof\mbox{]}. The reply will contain the current dof as result of the reconfiguration. The result may differ from the request since on certain limb (e.\+g. arm) some links are considered to form a unique super-\/link (e.\+g. the shoulder) whose components cannot be actuated separately.
+
+{\bfseries{resp}} request\+: example \mbox{[}set\mbox{]} \href{20.0 0.0 0.0 ...}{\texttt{ resp}}, \mbox{[}get\mbox{]} \mbox{[}resp\mbox{]}. Set/get for each joint the rest position in degrees. The reply will contain the rest position resulting from the application of joints limits (lim request does affect the range).
+
+{\bfseries{resw}} request\+: example \mbox{[}set\mbox{]} \href{1.0 0.0 1.0 ...}{\texttt{ resw}}, \mbox{[}get\mbox{]} \mbox{[}resw\mbox{]}. Set/get for each joint the weight used to compute the rest position minimization task. The reply will contain the weights as result of a saturation over zero.
+
+{\bfseries{tsk2}} request\+: example \mbox{[}set\mbox{]} \mbox{[}tsk2\mbox{]} (6 (0.\+0 0.\+0 -\/1.\+0) (0.\+0 0.\+0 1.\+0), \mbox{[}get\mbox{]} \mbox{[}tsk2\mbox{]}. Set/get the options for the secondary task, where the first integer accounts for the joints to control, then come the desired x-\/y-\/z coordinates of the secondary end-\/effector and finally the corresponding three weights.
+
+{\bfseries{conv}} request\+: example \mbox{[}set\mbox{]} \href{(max_iter 200) (tol
+      0.001)}{\texttt{ conv}}, \mbox{[}get\mbox{]} \mbox{[}conv\mbox{]}. Set/get the options for specifying solver\textquotesingle{}s convergence.
+
+Commands issued through the \mbox{[}ask\mbox{]} vocab\+:
+
+{\bfseries{xd}} request\+: example \mbox{[}ask\mbox{]} (\mbox{[}xd\mbox{]} (x y z ax ay az theta)) (\mbox{[}pose\mbox{]} \mbox{[}xyz\mbox{]}) (\href{...}{\texttt{ q}}). Ask to solve for the target xd. User can specifies a different starting joint configuration q and the pose mode. The reply will contain something like \href{[q] (...)}{\texttt{ ack}} (\href{...}{\texttt{ x}}), where the found configuration q is returned as well as the final attained pose x.
+
+Commands concerning the thread status\+:
+
+{\bfseries{susp}} request\+: example \mbox{[}susp\mbox{]}, suspend the thread.
+
+{\bfseries{run}} request\+: example \mbox{[}run\mbox{]}, let the thread run again.
+
+{\bfseries{status}} request\+: example \mbox{[}status\mbox{]}, returns \mbox{[}ack\mbox{]} \char`\"{}not\+\_\+started\char`\"{}$\vert$\char`\"{}running\char`\"{}$\vert$\char`\"{}suspended\char`\"{}.
+
+{\bfseries{quit}} request\+: example \mbox{[}quit\mbox{]}, close ports and quit the thread. \mbox{[}ack\mbox{]} is returned.
+
+Commands concerning the solver configuration\+:
+
+{\bfseries{cfg}} request\+: example \mbox{[}cfg\mbox{]} (robot icub) (type left) (pose full) (tol 0.\+001) (constr\+\_\+tol 0.\+000001) (max\+Iter 150) ... Once instantiated the solver is not automatically configured. To do that user can call the open() method locally or can configure the solver remotely by sending to the rpc port the configuration properties. For a list of these properties please see the documentation of open() method.
+
+{\bfseries{ /$<$solver\+Name$>$/out }} streams out a bottle containing the result of optimization instance. The format is (\href{...}{\texttt{ xd}}) (\href{...}{\texttt{ x}}) (\href{...}{\texttt{ q}} (\mbox{[}tok\mbox{]} ...)) as following\+:
+
+{\bfseries{xd}} property\+: contains the desired cartesian pose to be achieved (7-\/components vector).
+
+{\bfseries{x}} property\+: contains the real cartesian pose achieved which in norm is the nearest one to xd (7-\/components vector).
+
+{\bfseries{q}} property\+: contains the joints configuration which achieves x (DOF-\/components vector in degrees).
+
+{\bfseries{tok}} property\+: contains the token that the client may have added to the request.
+
+Date\+: first release 20/06/2009
+
+\begin{DoxyAuthor}{Author}
+Ugo Pattacini 
+\end{DoxyAuthor}

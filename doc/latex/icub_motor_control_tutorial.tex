@@ -1,0 +1,189 @@
+This tutorial shows how to get interfaces to control the arm.\hypertarget{icub_tutorial_module_sec_intro}{}\doxysection{Introduction}\label{icub_tutorial_module_sec_intro}
+Motor control in YARP is done through a motor control device.
+
+The code in this tutorial is a good example to start playing with motor control. This example uses a remoted device driver which exports exactly the same interfaces of the actual device driver (only initialization is different). The main difference between the two is in terms of efficiency, if you\textquotesingle{}re developing a low-\/level control loop you might want to be local, on the other hand a simple sporadic position control can be effected through the remote device driver. Let\textquotesingle{}s assume we have started the server side already (e.\+g. the simulator).\hypertarget{icub_motor_control_tutorial_sec_initialization}{}\doxysection{Initialization}\label{icub_motor_control_tutorial_sec_initialization}
+Let us assume the simulator is up and running.
+
+In practice, we start by preparing a set of configuration parameters\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{Property options;}
+\DoxyCodeLine{options.put(\textcolor{stringliteral}{"{}device"{}}, \textcolor{stringliteral}{"{}remote\_controlboard"{}});}
+\DoxyCodeLine{options.put(\textcolor{stringliteral}{"{}local"{}}, \textcolor{stringliteral}{"{}/test/client"{}});                 \textcolor{comment}{//local port names}}
+\DoxyCodeLine{options.put(\textcolor{stringliteral}{"{}remote"{}}, \textcolor{stringliteral}{"{}/icubSim/right\_arm"{}});         \textcolor{comment}{//where we connect to}}
+
+\end{DoxyCode}
+
+
+where the \textquotesingle{}\textquotesingle{}local\textquotesingle{}\textquotesingle{} and \textquotesingle{}\textquotesingle{}remote\textquotesingle{}\textquotesingle{} parameters are used to set the port names for the connection to the server side. In our example this means that the process will create the following (local) ports\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{/test/client/\mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104ab}{state}}:i}
+\DoxyCodeLine{/test/client/command:o}
+\DoxyCodeLine{/test/client/rpc:o}
+
+\end{DoxyCode}
+
+
+And will automatically connect them to the server, on the following (remote) ports (we assume here that the server created those ports correctly)\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{/icubSim/right\_arm/\mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104ab}{state}}:o}
+\DoxyCodeLine{/icubSim/right\_arm/command:i}
+\DoxyCodeLine{/icubSim/right\_arm/rpc:i}
+
+\end{DoxyCode}
+
+
+To create the driver we use the Poly\+Driver\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{PolyDriver robotDevice(options);}
+\DoxyCodeLine{\textcolor{keywordflow}{if} (!robotDevice.isValid()) \{}
+\DoxyCodeLine{    printf(\textcolor{stringliteral}{"{}Device not available.  Here are the known devices:\(\backslash\)n"{}});}
+\DoxyCodeLine{    printf(\textcolor{stringliteral}{"{}\%s"{}}, Drivers::factory().\mbox{\hyperlink{namespaceiCub_1_1skinManager_a34046cbbd9cb77d15cb2d25870c0ee03}{toString}}().c\_str());}
+\DoxyCodeLine{    \textcolor{keywordflow}{return} 1;}
+\DoxyCodeLine{\}}
+
+\end{DoxyCode}
+
+
+which instantiates the driver. If the parameters are correct and the server side has been prepared the local driver also connects to the remote one. The next step is to get a set of interfaces (pointers to) to work with, for example\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{IPositionControl *pos;}
+\DoxyCodeLine{IVelocityControl *vel;}
+\DoxyCodeLine{IEncoders *enc;}
+
+\end{DoxyCode}
+
+
+and\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{robotDevice.view(pos);}
+\DoxyCodeLine{robotDevice.view(vel);}
+\DoxyCodeLine{robotDevice.view(enc);}
+
+\end{DoxyCode}
+
+
+if everything went ok the pointers are valid pointers (check it!). For example\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{keywordflow}{if} (pos==0) \{}
+\DoxyCodeLine{  printf(\textcolor{stringliteral}{"{}Error getting IPositionControl interface.\(\backslash\)n"{}});}
+\DoxyCodeLine{  \textcolor{keywordflow}{return} 1;}
+\DoxyCodeLine{\}}
+
+\end{DoxyCode}
+
+
+We can thus start with checking how many axes we can control by doing\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{keywordtype}{int} \mbox{\hyperlink{icub-main_2src_2tools_2simpleClient_2main_8cpp_aac40ef34e7573177f3e908c5195594a6}{jnts}} = 0;}
+\DoxyCodeLine{pos-\/>getAxes(\&\mbox{\hyperlink{icub-main_2src_2tools_2simpleClient_2main_8cpp_aac40ef34e7573177f3e908c5195594a6}{jnts}});}
+
+\end{DoxyCode}
+
+
+Let\textquotesingle{}s create some vectors for later use\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{Vector \mbox{\hyperlink{namespacepython-motor-control_aa48897549d21fee7c0824a33753804e2}{tmp}};}
+\DoxyCodeLine{Vector encoders;}
+\DoxyCodeLine{Vector command\_position;}
+\DoxyCodeLine{Vector command\_velocity;}
+\DoxyCodeLine{}
+\DoxyCodeLine{\mbox{\hyperlink{namespacepython-motor-control_aa48897549d21fee7c0824a33753804e2}{tmp}}.resize(\mbox{\hyperlink{icub-main_2src_2tools_2simpleClient_2main_8cpp_aac40ef34e7573177f3e908c5195594a6}{jnts}});}
+\DoxyCodeLine{encoders.resize(\mbox{\hyperlink{icub-main_2src_2tools_2simpleClient_2main_8cpp_aac40ef34e7573177f3e908c5195594a6}{jnts}});}
+\DoxyCodeLine{...}
+
+\end{DoxyCode}
+
+
+Let\textquotesingle{}s now initialize the controllers and start up the amplifiers\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{comment}{/* we need to set reference accelerations used to generate the velocity */}}
+\DoxyCodeLine{\textcolor{comment}{/* profile, here 50 degrees/sec\string^2 */}}
+\DoxyCodeLine{\textcolor{keywordtype}{int} i;}
+\DoxyCodeLine{\textcolor{keywordflow}{for} (i = 0; i < \mbox{\hyperlink{icub-main_2src_2tools_2simpleClient_2main_8cpp_aac40ef34e7573177f3e908c5195594a6}{jnts}}; i++) \{}
+\DoxyCodeLine{    \mbox{\hyperlink{namespacepython-motor-control_aa48897549d21fee7c0824a33753804e2}{tmp}}[i] = 50.0;}
+\DoxyCodeLine{\}}
+\DoxyCodeLine{pos-\/>setRefAccelerations(\mbox{\hyperlink{namespacepython-motor-control_aa48897549d21fee7c0824a33753804e2}{tmp}}.data());}
+
+\end{DoxyCode}
+
+
+if needed we can check the position of our axes by doing\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{enc-\/>getEncoders(encoders.data());}
+
+\end{DoxyCode}
+
+
+which reads the values of the motor encoders into a vector of doubles of size \textquotesingle{}\textquotesingle{}jnts\textquotesingle{}\textquotesingle{}.
+
+Important\+: check the return value of this function to ensure that communication with the robot is sane and that the function can return updated values.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{keywordtype}{bool} ret=enc-\/>getEncoders(encoders.data());}
+\DoxyCodeLine{\textcolor{keywordflow}{if} (!ret)}
+\DoxyCodeLine{\{}
+\DoxyCodeLine{     \mbox{\hyperlink{saveNetwork_8m_a0eba6f64b9c26507a877bcb0c4f270e2}{fprintf}}(stderr, \textcolor{stringliteral}{"{}Error reading encoders, check connectivity with the robot\(\backslash\)n"{}});}
+\DoxyCodeLine{\}}
+\DoxyCodeLine{\textcolor{keywordflow}{else}}
+\DoxyCodeLine{\{}
+\DoxyCodeLine{     \textcolor{comment}{/* use encoders */}}
+\DoxyCodeLine{\}}
+
+\end{DoxyCode}
+\hypertarget{icub_motor_control_tutorial_sec_position}{}\doxysection{Position control}\label{icub_motor_control_tutorial_sec_position}
+First do\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{keywordtype}{int} i;}
+\DoxyCodeLine{\textcolor{keywordflow}{for} (i = 0; i < \mbox{\hyperlink{icub-main_2src_2tools_2simpleClient_2main_8cpp_aac40ef34e7573177f3e908c5195594a6}{jnts}}; i++) \{}
+\DoxyCodeLine{    \mbox{\hyperlink{namespacepython-motor-control_aa48897549d21fee7c0824a33753804e2}{tmp}}[i] = 40.0;}
+\DoxyCodeLine{\}}
+\DoxyCodeLine{pos-\/>setRefSpeeds(\mbox{\hyperlink{namespacepython-motor-control_aa48897549d21fee7c0824a33753804e2}{tmp}}.data());}
+
+\end{DoxyCode}
+
+
+which sets the reference speed for all axes to 40 degrees per second. The reference speed is used to interpolate the trajectory between the current and the desired position.
+
+Now you can do\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{keywordtype}{bool} \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}} = pos-\/>positionMove(command\_position.data());}
+
+\end{DoxyCode}
+
+
+where \textquotesingle{}\textquotesingle{}command\+\_\+position\textquotesingle{}\textquotesingle{} is the desired position. This starts a movement of all axes toward the desired position.\hypertarget{icub_motor_control_tutorial_sec_velocity}{}\doxysection{Velocity control}\label{icub_motor_control_tutorial_sec_velocity}
+To send velocity commands do\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{keywordtype}{bool} \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}} = vel-\/>velocityMove(command\_velocity.data());}
+
+\end{DoxyCode}
+
+
+which accelerates all axes to the velocity described by the vector \textquotesingle{}\textquotesingle{}command\+\_\+velocity\textquotesingle{}\textquotesingle{} (in degrees per second).\hypertarget{icub_motor_control_tutorial_sec_closing}{}\doxysection{Closing the device}\label{icub_motor_control_tutorial_sec_closing}
+When you are done with controlling the robot don\textquotesingle{}t forget to close the device\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{robotDevice.close();}
+
+\end{DoxyCode}
+\hypertarget{icub_motor_control_tutorial_sec_more_interfaces}{}\doxysection{More interfaces}\label{icub_motor_control_tutorial_sec_more_interfaces}
+To read more about the interfaces that are available in YARP read the online documentation\+: \href{http://eris.liralab.it/yarpdoc/namespaceyarp_1_1dev.html}{\texttt{ http\+://eris.\+liralab.\+it/yarpdoc/namespaceyarp\+\_\+1\+\_\+1dev.\+html}}\hypertarget{icub_tutorial_module_sec_code}{}\doxysection{Code}\label{icub_tutorial_module_sec_code}
+See code in\+: \mbox{\hyperlink{tutorial__arm_8cpp}{src/motor\+Control\+Basic/tutorial\+\_\+arm.\+cpp}} 

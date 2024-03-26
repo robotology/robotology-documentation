@@ -1,0 +1,141 @@
+\hypertarget{group__icub__skinManager}{}\doxysection{skin\+Manager}
+\label{group__icub__skinManager}\index{skinManager@{skinManager}}
+
+
+This module reads the raw tactile sensor values, compensates for the (thermal) drift of the sensors (basically it is a high pass filter) and writes the compensated values on output ports.  
+
+
+Collaboration diagram for skin\+Manager\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=279pt]{group__icub__skinManager}
+\end{center}
+\end{figure}
+This module reads the raw tactile sensor values, compensates for the (thermal) drift of the sensors (basically it is a high pass filter) and writes the compensated values on output ports. 
+
+The module can manage many input ports at the same time (see parameter \char`\"{}input\+Ports\char`\"{}). For each input port the compensated tactile data are written on the corresponding output port (see parameter \char`\"{}output\+Ports\char`\"{}). Optionally, the module also can apply a smoothing filter (low pass filter) and/or a binarization filter to the data. The skin\+Manager\+Gui can be used to control and monitor an instance of the skin\+Manager module. If the 3d position of the tactile sensors is provided, then this module computes the skin\+Contacts (see library skin\+Dyn\+Lib), which can be used by \mbox{\hyperlink{group__wholeBodyDynamics}{whole\+Body\+Dynamics}} to compute the contact forces.\hypertarget{group__tutorial__perceptiveModels_intro_sec}{}\doxysubsection{Description}\label{group__tutorial__perceptiveModels_intro_sec}
+When launched the module executes the skin sensor calibration, assuming that the sensors are not in contact with anything during this phase. The calibration resets the taxel baselines, gathers the sensor data for 5 sec, computes the mean (i.\+e. the baseline) and the 95 percentile (i.\+e. the touch threshold) for every taxel.
+
+After the calibration the module starts reading the raw data, computing the difference between the read values and the baseline, and outputs the results. If no touch is detected (i.\+e. the compensated values are under the touch threshold) then the baseline is updated in order to follow the drift (if any).
+
+The binarization filter is really simple. Every taxel has a touch threshold, given by its 95\% percentile plus a safety threshold (2 by default). If the read value is greater than the corrisponding touch threshold the output is set to 100, otherwise to 0. The binarization filter can be used for stressing the touch detection, especially in cases where the touch is very light.
+
+The smoothing filter performs an exponential moving average in order to reduce the sensor noise. The intensity of the filter can be tuned by setting the parameter alpha, also called \char`\"{}smoothing factor\char`\"{}. The smoothed output is a weighted average of the current input and the previous output\+: y(t) = (1-\/alpha)$\ast$x(t) + alpha$\ast$y(t-\/1)
+
+If the module is properly configured then it performs contact clustering, that is it determines how many contacts are detected by the tactile sensors. When tactile sensors that are neighbors detect contact, they are clustered together. When tactile sensors that are not neighbors detect contact, they are considered as independent contacts. The result of this operation is a skin\+Contact\+List (see skin\+Dyn\+Lib) that is written on the output port \char`\"{}\textbackslash{}module\+Name\textbackslash{}skin\+\_\+events\+:o\char`\"{}. Tipically this port is connected to an input port of the module \mbox{\hyperlink{group__wholeBodyDynamics}{whole\+Body\+Dynamics}} which uses this data to estimate the contact forces.\hypertarget{group__tutorial__perceptiveModels_lib_sec}{}\doxysubsection{Libraries}\label{group__tutorial__perceptiveModels_lib_sec}
+YARP.\hypertarget{group__tutorial__perceptiveModels_parameters_sec}{}\doxysubsection{Parameters}\label{group__tutorial__perceptiveModels_parameters_sec}
+{\bfseries{Command-\/line Parameters}}
+
+The following key-\/value pairs can be specified as command-\/line parameters by prefixing -- to the key (e.\+g. --from file.\+ini). The value part can be changed to suit your needs; the default values are shown below.
+\begin{DoxyItemize}
+\item {\ttfamily from} {\ttfamily }\mbox{[}drift\+Comp\+Left.\+ini\mbox{]} ~\newline
+ specifies the configuration file
+\item {\ttfamily context} {\ttfamily }\mbox{[}skin\+Gui\mbox{]} ~\newline
+ specifies the sub-\/path from {\ttfamily \$\+ICUB\+\_\+\+ROOT/app} to the configuration file
+\item {\ttfamily name} {\ttfamily }\mbox{[}skin\+Manager\mbox{]} ~\newline
+ ~\newline
+ specifies the name of the module (used to form the stem of module port names) ~\newline
+
+\item {\ttfamily robot} {\ttfamily }\mbox{[}icub\mbox{]} ~\newline
+ ~\newline
+ specifies the name of the robot (used only to distiguish the simulator and the real robot)
+\end{DoxyItemize}
+
+{\bfseries{Configuration File Parameters }}
+
+The following key-\/value pairs can be specified as parameters in the configuration file (they can also be specified as command-\/line parameters if you so wish). The value part can be changed to suit your needs; the default values are shown below.
+\begin{DoxyItemize}
+\item {\ttfamily input\+Ports} {\ttfamily }\mbox{[}empty\+List\mbox{]} ~\newline
+ list of the input ports from which the module has to read the tactile data. For each input port there has to be a corresponding output port specified in the \char`\"{}output\+Ports\char`\"{} parameter.
+\item {\ttfamily output\+Ports} {\ttfamily }\mbox{[}empty\+List\mbox{]} ~\newline
+ list of the output ports on which the module has to write the compensated tactile data. For each output port there has to be a corresponding input port specified in the \char`\"{}input\+Ports\char`\"{} parameter.
+\item {\ttfamily period} {\ttfamily }\mbox{[}20\mbox{]} ~\newline
+ period of the compensating thread expressed in ms.
+\item {\ttfamily min\+Baseline} {\ttfamily }\mbox{[}3\mbox{]} ~\newline
+ ~\newline
+ if the baseline of one sensor (at least) reaches this value, then a warning message is sent on the info output port.
+\item {\ttfamily zero\+Up\+Raw\+Data} {\ttfamily }\mbox{[}false\mbox{]} ~\newline
+ if true the input tactile data are considered from zero up, otherwise from 255 down
+\item {\ttfamily binarization} {\ttfamily }\mbox{[}not active\mbox{]}~\newline
+ if specified the output tactile data are binarized\+: 0 indicates no touch, whereas 100 indicates touch
+\item {\ttfamily smooth\+Filter} {\ttfamily }\mbox{[}not active\mbox{]}~\newline
+ if specified the output tactile data are filtered with an exponential moving average (where alpha is the smooth factor)\+: \textbackslash{}t-\/ y(t) = (1-\/alpha)$\ast$x(t) + alpha$\ast$y(t-\/1)
+\item {\ttfamily smooth\+Factor} {\ttfamily }\mbox{[}0.\+5\mbox{]} ~\newline
+ alpha value of the smoothing filter, in \mbox{[}0, 1\mbox{]} where 0 is no smoothing at all and 1 is the max smoothing possible.
+\end{DoxyItemize}
+
+An optional section called SKIN\+\_\+\+EVENTS may be specified in the configuration file. These are the parameters of this section\+:
+\begin{DoxyItemize}
+\item {\ttfamily body\+Parts} {\ttfamily }\mbox{[}empty\+List\mbox{]} ~\newline
+ list of the body parts corresponding to the specified input\+Ports (see common.\+h in skin\+Dyn\+Lib for the definition of Body\+Part). For each input port there has to be a body part, e.\+g. UNKNOWN\+\_\+\+BODY\+\_\+\+PART, HEAD, TORSO, LEFT\+\_\+\+ARM, RIGHT\+\_\+\+ARM, LEFT\+\_\+\+LEG, RIGHT\+\_\+\+LEG.
+\item {\ttfamily skin\+Parts} {\ttfamily }\mbox{[}empty\+List\mbox{]} ~\newline
+ list of the skin part corresponding to the specified input\+Ports (see skin\+Dyn\+Lib for the definition of Skin\+Part). For each input port there has to be a skin part, e.\+g. UNKNOWN\+\_\+\+SKIN\+\_\+\+PART, HAND, FOREARM, UPPER\+\_\+\+ARM.
+\item {\ttfamily link\+List} {\ttfamily }\mbox{[}empty\+List\mbox{]} ~\newline
+ list of the link number corresponding to the specified input\+Ports. For each input port there has to be a link number (2\+: upper\+Arm link, 4\+: forearm link, 6\+: hand link).
+\item {\ttfamily taxel\+Position\+Files} \mbox{[}empty\+List\mbox{]} ~\newline
+ list of the files containing the 3D positions and orientations of the tactile sensors for each input port. The files contains a set of parameters used for configuring the correspondent skin\+Part (\mbox{\hyperlink{classiCub_1_1skinDynLib_1_1skinPart}{i\+Cub\+::skin\+Dyn\+Lib\+::skin\+Part}} , see skin\+Dyn\+Lib for a definition of this class). Further, there is a group called \mbox{[}calibration\mbox{]} containing one line for each tactile sensor. In each line there are 6 values, the first three are the position, the last three are the orientation. For each input port there has to be a taxel position file (which may not exist because of missing calibration procedure for that skin part).
+\item {\ttfamily max\+Neighbor\+Dist} {\ttfamily 0.\+015} ~\newline
+ maximum distance between two neighbor tactile sensors (in meters).
+\end{DoxyItemize}\hypertarget{group__tutorial__ationPrimitives_portsa_sec}{}\doxysubsection{Ports Accessed}\label{group__tutorial__ationPrimitives_portsa_sec}
+All the ports listed in the \char`\"{}input\+Ports\char`\"{} parameter and the corresponding rpc ports. For instance if in the \char`\"{}input\+Ports\char`\"{} parameter it is specified the port
+\begin{DoxyItemize}
+\item /icub/skin/right\+\_\+hand
+\end{DoxyItemize}then also the port
+\begin{DoxyItemize}
+\item /icub/skin/right\+\_\+hand/rpc\+:i
+\end{DoxyItemize}will be accessed.\hypertarget{group__tutorial__ationPrimitives_portsc_sec}{}\doxysubsection{Ports Created}\label{group__tutorial__ationPrimitives_portsc_sec}
+{\bfseries{Output ports }}
+\begin{DoxyItemize}
+\item Every port specified in the \char`\"{}output\+Ports\char`\"{} parameter\+: outputs a yarp\+::sig\+::\+Vector containing the compensated tactile data.
+\item \char`\"{}/\char`\"{}+module\+Name+\char`\"{}/monitor\+:o\char`\"{}\+: ~\newline
+ outputs a yarp\+::os\+::\+Bottle containing streaming information regarding the compensation status (used to communicate with the skin\+Manager\+Gui). The first value is the data frequency, while all the following ones represent the drift compensated so far for each taxel.
+\item \char`\"{}/\char`\"{}+module\+Name+\char`\"{}/info\+:o\char`\"{}\+: ~\newline
+ outputs a yarp\+::os\+::\+Bottle containing occasional information regarding the compensation status such as warning or error messages (used to communicate with the skin\+Manager\+Gui). Possible messages may regard an error in the sensor reading or an excessive drift of the baseline of a taxel.~\newline
+
+\item \char`\"{}/\char`\"{}+module\+Name+\char`\"{}/skin\+\_\+events\+:o\char`\"{}\+: ~\newline
+ outputs a \mbox{\hyperlink{classiCub_1_1skinDynLib_1_1skinContactList}{i\+Cub\+::skin\+Dyn\+Lib\+::skin\+Contact\+List}} containing the list of contacts.
+\end{DoxyItemize}
+
+{\bfseries{Input ports}}
+\begin{DoxyItemize}
+\item For each port specified in the \char`\"{}input\+Ports\char`\"{} parameter a local port is created with the name \char`\"{}/\char`\"{}+module\+Name+index+\char`\"{}/input\char`\"{}, where \char`\"{}index\char`\"{} is an increasing counter starting from 0.
+\item \char`\"{}/\char`\"{}+module\+Name+\char`\"{}/rpc\+:i\char`\"{}\+: input port to control the module (alternatively the skin\+Manager\+Gui can be used). This port accepts a yarp\+::os\+::yarp\+::os\+::\+Bottle that contains one of these commands\+:
+\begin{DoxyItemize}
+\item \char`\"{}calib\char`\"{}\+: force the sensor calibration
+\item \char`\"{}get touch thr\char`\"{}\+: return a yarp\+::os\+::yarp\+::os\+::\+Bottle containing the 95 percentile values of the tactile sensors
+\item \char`\"{}set binarization\char`\"{}\+: enable or disable the binarization (specifying the value on/off)
+\item \char`\"{}get binarization\char`\"{}\+: get the binarization filter state (on, off)
+\item \char`\"{}set smooth filter\char`\"{}\+: enable or disable the smooth filter (specifying the value on/off)
+\item \char`\"{}get smooth filter\char`\"{}\+: get the smooth filter state (on, off)
+\item \char`\"{}set smooth factor\char`\"{}\+: set the value of the smooth factor (in \mbox{[}0,1\mbox{]})
+\item \char`\"{}get smooth factor\char`\"{}\+: get the smooth factor value
+\item \char`\"{}set threshold\char`\"{}\+: set the safety threshold that is added to the touch thresholds (int in \mbox{[}0, 254\mbox{]})
+\item \char`\"{}get threshold\char`\"{}\+: get the safety threshold that is added to the touch thresholds (int in \mbox{[}0, 254\mbox{]})
+\item \char`\"{}set gain\char`\"{}\+: set the compensation gain
+\item \char`\"{}get gain\char`\"{}\+: get the compensation gain
+\item \char`\"{}set contact gain\char`\"{}\+: set the contact compensation gain
+\item \char`\"{}get contact gain\char`\"{}\+: get the contact compensation gain
+\item \char`\"{}is calibrating\char`\"{}\+: tell whether the skin calibration is in progress
+\item \char`\"{}get pose\char`\"{}\+: get taxel pose(s) with input params\+: body part, skin part, taxel index (if taxel index is not specified return all taxel positions),
+\item \char`\"{}set pose\char`\"{}\+: set taxel pose(s) with input params\+: body part, skin part, taxel index, pose(s) (if taxel index is not specified set all taxel positions),
+\item \char`\"{}get info\char`\"{}\+: get information about the module (module name, robot name, input ports, num of taxels)
+\item \char`\"{}help\char`\"{}\+: get a list of the commands accepted by this module
+\item \char`\"{}quit\char`\"{}\+: quit the module
+\end{DoxyItemize}
+\end{DoxyItemize}All the commands accepted by this module are defined in rpc\+Skin\+Manager.\+h .\hypertarget{group__tutorial__ationPrimitives_in_files_sec}{}\doxysubsection{Input Data Files}\label{group__tutorial__ationPrimitives_in_files_sec}
+None.\hypertarget{group__tutorial__ationPrimitives_out_data_sec}{}\doxysubsection{Output Data Files}\label{group__tutorial__ationPrimitives_out_data_sec}
+None.\hypertarget{group__tutorial__ationPrimitives_conf_file_sec}{}\doxysubsection{Configuration Files}\label{group__tutorial__ationPrimitives_conf_file_sec}
+None.\hypertarget{group__tutorial__perceptiveModels_tested_os_sec}{}\doxysubsection{Tested OS}\label{group__tutorial__perceptiveModels_tested_os_sec}
+Linux and Windows.\hypertarget{group__icub__faceExpressions_example_sec}{}\doxysubsection{Example Instantiation of the Module}\label{group__icub__faceExpressions_example_sec}
+skin\+Manager --context skin\+Gui --from drift\+Comp\+Right.\+ini
+
+\begin{DoxyAuthor}{Author}
+Andrea Del Prete (\href{mailto:andrea.delprete@iit.it}{\texttt{ andrea.\+delprete@iit.\+it}}), Alexander Schmitz, Francesco Giovannini (\href{mailto:francesco.giovannini@iit.it}{\texttt{ francesco.\+giovannini@iit.\+it}})
+\end{DoxyAuthor}
+Copyright (C) 2010 Robot\+Cub Consortium
+
+Copy\+Policy\+: Released under the terms of the GNU GPL v2.\+0.
+
+This file can be edited at ICUB\+\_\+\+HOME/main/src/modules/skin\+Manager/include/i\+Cub/skin\+Manager/skin\+Manager.\+h. 

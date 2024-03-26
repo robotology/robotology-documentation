@@ -1,0 +1,115 @@
+In this tutorial we show more details of how to write an \mbox{\hyperlink{namespaceiCub}{i\+Cub}} module using the module helper class.\hypertarget{icub_tutorial_module_sec_intro}{}\doxysection{Introduction}\label{icub_tutorial_module_sec_intro}
+In a previous \href{http://wiki.icub.org/yarpdoc/yarp_resource_finder_tutorials.html}{\texttt{ tutorial}} we showed how to use the Resource\+Finder to organize modules parameters in \$\+YARP\+\_\+\+DATA\+\_\+\+HOME/contexts.
+
+The RFModule helper class simplify writing an \mbox{\hyperlink{namespaceiCub}{i\+Cub}} module that uses the Resource\+Finder class.
+
+This is how a module will look like\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{preprocessor}{\#include <iostream>}}
+\DoxyCodeLine{\textcolor{preprocessor}{\#include <iomanip>}}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{preprocessor}{\#include <yarp/os/Network.h>}}
+\DoxyCodeLine{\textcolor{preprocessor}{\#include <yarp/os/RFModule.h>}}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{keyword}{using namespace }std;}
+\DoxyCodeLine{\textcolor{keyword}{using namespace }yarp::os;}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{keyword}{class }MyModule:\textcolor{keyword}{public} RFModule}
+\DoxyCodeLine{\{}
+\DoxyCodeLine{    Port handlerPort; \textcolor{comment}{// a port to handle messages}}
+\DoxyCodeLine{    \textcolor{keywordtype}{int} count;}
+\DoxyCodeLine{\textcolor{keyword}{public}:}
+\DoxyCodeLine{}
+\DoxyCodeLine{    \textcolor{keywordtype}{double} getPeriod()}
+\DoxyCodeLine{    \{}
+\DoxyCodeLine{        \textcolor{comment}{/* module periodicity (seconds), called implicitly by the module. */}}
+\DoxyCodeLine{        \textcolor{keywordflow}{return} 1.0;}
+\DoxyCodeLine{    \}}
+\DoxyCodeLine{}
+\DoxyCodeLine{    \textcolor{comment}{/* This is our main function. Will be called periodically every getPeriod() seconds */}}
+\DoxyCodeLine{    \textcolor{keywordtype}{bool} updateModule()}
+\DoxyCodeLine{    \{}
+\DoxyCodeLine{        count++;}
+\DoxyCodeLine{        cout<<\textcolor{stringliteral}{"{}["{}}<<count<<\textcolor{stringliteral}{"{}]"{}}<< \textcolor{stringliteral}{"{} updateModule... "{}}<<endl;}
+\DoxyCodeLine{}
+\DoxyCodeLine{        \textcolor{keywordflow}{return} \textcolor{keyword}{true};}
+\DoxyCodeLine{    \}}
+\DoxyCodeLine{}
+\DoxyCodeLine{}
+\DoxyCodeLine{    \textcolor{comment}{/* Message handler. Just echo all received messages. */}}
+\DoxyCodeLine{    \textcolor{keywordtype}{bool} respond(\textcolor{keyword}{const} Bottle\& command, Bottle\& reply)}
+\DoxyCodeLine{    \{}
+\DoxyCodeLine{        cout<<\textcolor{stringliteral}{"{}Got something, echo is on"{}}<<endl;}
+\DoxyCodeLine{        \textcolor{keywordflow}{if} (command.get(0).asString()==\textcolor{stringliteral}{"{}quit"{}})}
+\DoxyCodeLine{            \textcolor{keywordflow}{return} \textcolor{keyword}{false};}
+\DoxyCodeLine{        \textcolor{keywordflow}{else}}
+\DoxyCodeLine{            reply=command;}
+\DoxyCodeLine{        \textcolor{keywordflow}{return} \textcolor{keyword}{true};}
+\DoxyCodeLine{    \}}
+\DoxyCodeLine{}
+\DoxyCodeLine{}
+\DoxyCodeLine{    \textcolor{comment}{/* Configure function. Receive a previously initialized}}
+\DoxyCodeLine{\textcolor{comment}{       resource finder object. Use it to configure your module.}}
+\DoxyCodeLine{\textcolor{comment}{       If you are migrating from the old module, this is the function}}
+\DoxyCodeLine{\textcolor{comment}{       equivalent to the "{}open"{} method. */}}
+\DoxyCodeLine{    \textcolor{keywordtype}{bool} configure(yarp::os::ResourceFinder \&rf)}
+\DoxyCodeLine{    \{}
+\DoxyCodeLine{        count=0;}
+\DoxyCodeLine{        \textcolor{comment}{/* optional, attach a port to the module}}
+\DoxyCodeLine{\textcolor{comment}{           so that messages received from the port are redirected}}
+\DoxyCodeLine{\textcolor{comment}{           to the respond method */}}
+\DoxyCodeLine{        handlerPort.open(\textcolor{stringliteral}{"{}/myModule"{}});}
+\DoxyCodeLine{        attach(handlerPort);}
+\DoxyCodeLine{        \textcolor{keywordflow}{return} \textcolor{keyword}{true};}
+\DoxyCodeLine{    \}}
+\DoxyCodeLine{}
+\DoxyCodeLine{    \textcolor{comment}{// Interrupt function.}}
+\DoxyCodeLine{    \textcolor{keywordtype}{bool} interruptModule()}
+\DoxyCodeLine{    \{}
+\DoxyCodeLine{        cout<<\textcolor{stringliteral}{"{}Interrupting your module, for port cleanup"{}}<<endl;}
+\DoxyCodeLine{        \textcolor{keywordflow}{return} \textcolor{keyword}{true};}
+\DoxyCodeLine{    \}}
+\DoxyCodeLine{}
+\DoxyCodeLine{    \textcolor{comment}{/* Close function, to perform cleanup. */}}
+\DoxyCodeLine{    \textcolor{keywordtype}{bool} close()}
+\DoxyCodeLine{    \{}
+\DoxyCodeLine{        \textcolor{comment}{/* optional, close port explicitly */}}
+\DoxyCodeLine{        cout<<\textcolor{stringliteral}{"{}Calling close function\(\backslash\)n"{}};}
+\DoxyCodeLine{        handlerPort.close();}
+\DoxyCodeLine{      \textcolor{keywordflow}{return} \textcolor{keyword}{true};}
+\DoxyCodeLine{    \}}
+\DoxyCodeLine{\};}
+
+\end{DoxyCode}
+
+
+and this is the main function to instantiate it.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{keywordtype}{int} \mbox{\hyperlink{icub-main_2src_2core_2emotionInterface_2main_8cpp_a0ddf1224851353fc92bfbff6f499fa97}{main}}(\textcolor{keywordtype}{int} \mbox{\hyperlink{namespacescripting_a6bde6d3b016f524979ffc4ed7703cbf7}{argc}}, \textcolor{keywordtype}{char} * argv[])}
+\DoxyCodeLine{\{}
+\DoxyCodeLine{    \textcolor{comment}{/* initialize yarp network */}}
+\DoxyCodeLine{    Network \mbox{\hyperlink{namespaceyarp}{yarp}};}
+\DoxyCodeLine{}
+\DoxyCodeLine{    \textcolor{comment}{/* create your module */}}
+\DoxyCodeLine{    MyModule module;}
+\DoxyCodeLine{}
+\DoxyCodeLine{    \textcolor{comment}{/* prepare and configure the resource finder */}}
+\DoxyCodeLine{    ResourceFinder rf;}
+\DoxyCodeLine{    rf.configure(\mbox{\hyperlink{namespacescripting_a6bde6d3b016f524979ffc4ed7703cbf7}{argc}}, argv);}
+\DoxyCodeLine{    rf.setVerbose(\textcolor{keyword}{true});}
+\DoxyCodeLine{}
+\DoxyCodeLine{    cout << \textcolor{stringliteral}{"{}Configuring and starting module. \(\backslash\)n"{}};}
+\DoxyCodeLine{    module.runModule(rf);   \textcolor{comment}{// This calls configure(rf) and, upon success, the module execution begins with a call to updateModule()}}
+\DoxyCodeLine{}
+\DoxyCodeLine{    cout<<\textcolor{stringliteral}{"{}Main returning..."{}}<<endl;}
+\DoxyCodeLine{}
+\DoxyCodeLine{    \textcolor{keywordflow}{return} 0;}
+\DoxyCodeLine{\}}
+
+\end{DoxyCode}
+\hypertarget{icub_tutorial_module_sec_code}{}\doxysection{Code}\label{icub_tutorial_module_sec_code}
+See code in\+: src/module/tutorial\+\_\+module.\+cpp 

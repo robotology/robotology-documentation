@@ -1,0 +1,206 @@
+This tutorial shows how to use the following interfaces\+:
+
+yarp\+::dev\+::\+IControl\+Mode
+
+yarp\+::dev\+::\+ITorque\+Control
+
+yarp\+::dev\+::\+IImpedance\+Control
+
+yarp\+::dev\+::\+IInteraction\+Control\hypertarget{icub_tutorial_module_sec_intro}{}\doxysection{Introduction}\label{icub_tutorial_module_sec_intro}
+Prerequisites, see \mbox{\hyperlink{icub_motor_control_tutorial}{Getting accustomed with motor interfaces}}
+
+The code described in this tutorial can be found at \mbox{\hyperlink{tutorial__arm__joint__impedance_8cpp}{src/motor\+Control\+Impedance/tutorial\+\_\+arm\+\_\+joint\+\_\+impedance.\+cpp}} ~\newline
+The example is based on the previous tutorial \mbox{\hyperlink{tutorial__arm_8cpp}{src/motor\+Control\+Basic/tutorial\+\_\+arm.\+cpp}}
+
+The example shows how to open the ITorque\+Control to show the arm joint torques and how to change the control mode of the elbow joint from position to impedance control.
+
+A detailed reference of the yarp interfaces used in this tutorial (IControl\+Mode, ITorque\+Control, IImpedance\+Control, IInteraction\+Control) can be found \href{http://wiki.icub.org/yarpdoc/namespaceyarp_1_1dev.html}{\texttt{ in the YARP doxygen documentation}} and in the \href{http://wiki.icub.org/wiki/File:ICub_Control_Modes_1_1.pdf}{\texttt{ YARP Control Modes documentation}}.\hypertarget{icub_motor_control_tutorial_sec_initialization}{}\doxysection{Initialization}\label{icub_motor_control_tutorial_sec_initialization}
+Let us assume the module \mbox{\hyperlink{classwholeBodyDynamics}{whole\+Body\+Dynamics}} is up and running. The \mbox{\hyperlink{classwholeBodyDynamics}{whole\+Body\+Dynamics}} module, based on the \mbox{\hyperlink{group__iDyn}{i\+Dyn}} library acts as a server and is responsibile for the calculation of the joint torques. In order to access to the torque values, our program has to declare and open the yarp ITorque\+Control interface, in the same manner as you open the IPosition\+Control interface (see previous tutorial\+: \mbox{\hyperlink{icub_motor_control_tutorial}{Getting accustomed with motor interfaces}}). We can also open the IControl\+Mode interface (resposibile to set the control mode of each joint (position/velocity/impedance etc.), the IImpedance\+Control interface, used to set the impedance parameters (joint stiffness/ joint damping etc) and the IInteraction\+Control interface, used to set a joint in stiff or compliant interaction mode.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{IPositionControl *pos;}
+\DoxyCodeLine{IEncoders *\mbox{\hyperlink{namespacepython-motor-control_aa4a312653eff9f950af80bbf61a3d925}{encs}};}
+\DoxyCodeLine{IControlMode *ictrl;}
+\DoxyCodeLine{IInteractionMode *iint;}
+\DoxyCodeLine{IImpedanceControl *iimp;}
+\DoxyCodeLine{ITorqueControl *itrq;}
+
+\end{DoxyCode}
+
+
+and\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{keywordtype}{bool} \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}};}
+\DoxyCodeLine{\mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}} = robotDevice.view(pos);}
+\DoxyCodeLine{\mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}} = \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}} \&\& robotDevice.view(\mbox{\hyperlink{namespacepython-motor-control_aa4a312653eff9f950af80bbf61a3d925}{encs}});}
+\DoxyCodeLine{\mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}} = \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}} \&\& robotDevice.view(ictrl);}
+\DoxyCodeLine{\mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}} = \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}} \&\& robotDevice.view(iint);}
+\DoxyCodeLine{\mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}} = \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}} \&\& robotDevice.view(iimp);}
+\DoxyCodeLine{\mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}} = \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}} \&\& robotDevice.view(itrq);}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{keywordflow}{if} (!ok) \{}
+\DoxyCodeLine{    printf(\textcolor{stringliteral}{"{}Problems acquiring interfaces\(\backslash\)n"{}});}
+\DoxyCodeLine{    \textcolor{keywordflow}{return} 0;}
+\DoxyCodeLine{\}}
+
+\end{DoxyCode}
+
+
+We can thus start with checking how many axes we can control by doing\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{keywordtype}{int} \mbox{\hyperlink{icub-main_2src_2tools_2simpleClient_2main_8cpp_aac40ef34e7573177f3e908c5195594a6}{jnts}} = 0;}
+\DoxyCodeLine{pos-\/>getAxes(\&\mbox{\hyperlink{icub-main_2src_2tools_2simpleClient_2main_8cpp_aac40ef34e7573177f3e908c5195594a6}{jnts}});}
+
+\end{DoxyCode}
+
+
+Let\textquotesingle{}s create some vectors for later use\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{Vector \mbox{\hyperlink{namespacepython-motor-control_aa48897549d21fee7c0824a33753804e2}{tmp}};}
+\DoxyCodeLine{Vector encoders;}
+\DoxyCodeLine{Vector command\_position;}
+\DoxyCodeLine{Vector command\_velocity;}
+\DoxyCodeLine{}
+\DoxyCodeLine{\mbox{\hyperlink{namespacepython-motor-control_aa48897549d21fee7c0824a33753804e2}{tmp}}.resize(\mbox{\hyperlink{icub-main_2src_2tools_2simpleClient_2main_8cpp_aac40ef34e7573177f3e908c5195594a6}{jnts}});}
+\DoxyCodeLine{encoders.resize(\mbox{\hyperlink{icub-main_2src_2tools_2simpleClient_2main_8cpp_aac40ef34e7573177f3e908c5195594a6}{jnts}});}
+\DoxyCodeLine{...}
+
+\end{DoxyCode}
+
+
+Let\textquotesingle{}s now initialize the controllers and start up the amplifiers\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{comment}{// we need to set reference accelerations used to generate the velocity}}
+\DoxyCodeLine{\textcolor{comment}{// profile, here 50 degrees/sec\string^2}}
+\DoxyCodeLine{\textcolor{keywordtype}{int} i;}
+\DoxyCodeLine{\textcolor{keywordflow}{for} (i = 0; i < \mbox{\hyperlink{icub-main_2src_2tools_2simpleClient_2main_8cpp_aac40ef34e7573177f3e908c5195594a6}{jnts}}; i++) \{}
+\DoxyCodeLine{    \mbox{\hyperlink{namespacepython-motor-control_aa48897549d21fee7c0824a33753804e2}{tmp}}[i] = 50.0;}
+\DoxyCodeLine{\}}
+\DoxyCodeLine{pos-\/>setRefAccelerations(\mbox{\hyperlink{namespacepython-motor-control_aa48897549d21fee7c0824a33753804e2}{tmp}}.data());}
+\DoxyCodeLine{\textcolor{keywordflow}{for} (i = 0; i < \mbox{\hyperlink{icub-main_2src_2tools_2simpleClient_2main_8cpp_aac40ef34e7573177f3e908c5195594a6}{jnts}}; i++) \{}
+\DoxyCodeLine{    \mbox{\hyperlink{namespacepython-motor-control_aa48897549d21fee7c0824a33753804e2}{tmp}}[i] = 10.0;}
+\DoxyCodeLine{    pos-\/>setRefSpeed(i, \mbox{\hyperlink{namespacepython-motor-control_aa48897549d21fee7c0824a33753804e2}{tmp}}[i]);}
+\DoxyCodeLine{\}}
+
+\end{DoxyCode}
+
+
+if needed we can check the position of our axes by doing\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{enc-\/>getEncoders(encoders.data());}
+
+\end{DoxyCode}
+
+
+which reads the values of the motor encoders into a vector of doubles of size \textquotesingle{}\textquotesingle{}jnts\textquotesingle{}\textquotesingle{}.\hypertarget{icub_motor_control_tutorial_sec_position}{}\doxysection{Position control}\label{icub_motor_control_tutorial_sec_position}
+First do\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{keywordtype}{int} i;}
+\DoxyCodeLine{\textcolor{keywordflow}{for} (i = 0; i < \mbox{\hyperlink{icub-main_2src_2tools_2simpleClient_2main_8cpp_aac40ef34e7573177f3e908c5195594a6}{jnts}}; i++) \{}
+\DoxyCodeLine{    \mbox{\hyperlink{namespacepython-motor-control_aa48897549d21fee7c0824a33753804e2}{tmp}}[i] = 40.0;}
+\DoxyCodeLine{\}}
+\DoxyCodeLine{pos-\/>setRefSpeeds(\mbox{\hyperlink{namespacepython-motor-control_aa48897549d21fee7c0824a33753804e2}{tmp}}.data());}
+
+\end{DoxyCode}
+
+
+which sets the reference speed for all axes to 40 degrees per second. The reference speed is used to interpolate the trajectory between the current and the desired position.
+
+Now you can do\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{keywordtype}{bool} \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}} = pos-\/>positionMove(command\_position.data());}
+
+\end{DoxyCode}
+
+
+where \textquotesingle{}\textquotesingle{}command\+\_\+position\textquotesingle{}\textquotesingle{} is the desired position. This starts a movement of all axes toward the desired position.\hypertarget{icub_impedance_control_tutorial_sec_torque_reading}{}\doxysection{Reading the torques of a joint}\label{icub_impedance_control_tutorial_sec_torque_reading}
+You can use the ITorque\+Control interface to read the torque at a specific joint. 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{Vector torques;}
+\DoxyCodeLine{torques.resize(nj);}
+\DoxyCodeLine{itrq-\/>getTorques(torques.data());}
+
+\end{DoxyCode}
+\hypertarget{icub_impedance_control_tutorial_sec_impedance}{}\doxysection{Using different control modes\+:  Position Control}\label{icub_impedance_control_tutorial_sec_impedance}
+You can change the impedence parameters of a joint at any time\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{keywordtype}{double} stiffness = 0.111;          \textcolor{comment}{// stiffness coefficient, units are Nm/deg}}
+\DoxyCodeLine{\textcolor{keywordtype}{double} damping =  0.014;           \textcolor{comment}{// damping coefficient,   units are Nm/(deg/s)}}
+\DoxyCodeLine{\textcolor{keywordtype}{bool} \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}} = iimp-\/>setImpedance(joint, stiffness, damping);}
+
+\end{DoxyCode}
+
+
+You can use IInteraction\+Mode interface to change the interaction mode of a specific joint to compliant interaction mode\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{ictrl-\/>setPositionMode(3);}
+\DoxyCodeLine{iint-\/>setInteractionMode(3,VOCAB\_IM\_COMPLIANT);}
+
+\end{DoxyCode}
+
+
+When in position control mode with compliant interaction mode, the low level controller (DSP) computes a refence torque Td as\+:
+
+\[ T_d = K_{spring} * (q_d-q) - K_{damp} * \dot{q} + F_{offset} \]
+
+which is tracked by the internal PID regulator.
+
+You can specify a new equilibrium position using the usual position interface, because the control mode of the joint is still VOCAB\+\_\+\+CM\+\_\+\+POSITION even if the interaction mode has changed\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{keywordtype}{bool} \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}} = pos-\/>positionMove(command\_position.data());}
+
+\end{DoxyCode}
+
+
+If you need to change the interaction mode back to stiff mode\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{iint-\/>setInteractionMode(3,VOCAB\_IM\_COMPLIANT);}
+
+\end{DoxyCode}
+
+
+An Impedance\+Velocity control mode is also available. In this control modality you can use vel-\/$>$Velocity\+Move() command in order to command a velocity while mantaining the impedance specified with the iimp-\/$>$set\+Impedance(joint, stiffness, damping, dorce\+\_\+offset) command.\hypertarget{icub_impedance_control_tutorial_sec_torque_control}{}\doxysection{Using different control modes\+: Torque Control}\label{icub_impedance_control_tutorial_sec_torque_control}
+Torque control mode can be used to directly specify a reference torque at a joint.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{ictrl-\/>setTorqueMode(jnt);}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{keywordtype}{double} jnt\_torque= 0.0; \textcolor{comment}{//expressed in Nm}}
+\DoxyCodeLine{itrq-\/>setRefTorque(jnt\_torque); }
+
+\end{DoxyCode}
+
+
+The gains of the PID controller resposibile of tracking the torque reference can be obtained using ITorque\+Control\+::get\+Torque\+Pid() method.
+
+NOTE\+: the reference torque that you can specify on the icub joints is limited (clamped) to a given value. You can check this value in the yarprobotinterface configuration files for your robot.
+
+NOTE2\+: near the hardware limits of the robot, the torque PID controlled is disabled, in order to prevent to command a torque againts the hardware limits. The PID controller is automatically re-\/enabled as soon as the joint is moved far the limits (You can view the value of the limites using the IControl\+Limits interface).
+
+NOTE3\+: during calibration/parking of the robot, yarprobotinterface automatically sets the control mode of all the joints to position control mode with stiff interaction mode.
+
+NOTE4\+: If your application changes the control mode/interaction mode of one joint, it\textquotesingle{}s good practice to reset it to the previous modality when your application quits.\hypertarget{icub_motor_control_tutorial_sec_closing}{}\doxysection{Closing the device}\label{icub_motor_control_tutorial_sec_closing}
+When you are done with controlling the robot don\textquotesingle{}t forget to close the device\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{robotDevice.close();}
+
+\end{DoxyCode}
+\hypertarget{icub_motor_control_tutorial_sec_more_interfaces}{}\doxysection{More interfaces}\label{icub_motor_control_tutorial_sec_more_interfaces}
+To read more about the interfaces that are available in YARP read the \href{http://wiki.icub.org/yarpdoc/namespaceyarp_1_1dev.html}{\texttt{ doxygen online documentation}} and in the \href{http://wiki.icub.org/wiki/File:ICub_Control_Modes_1_1.pdf}{\texttt{ YARP Control Modes documentation}}.\hypertarget{icub_tutorial_module_sec_code}{}\doxysection{Code}\label{icub_tutorial_module_sec_code}
+See code in\+: \mbox{\hyperlink{tutorial__arm__joint__impedance_8cpp}{src/motor\+Control\+Impedance/tutorial\+\_\+arm\+\_\+joint\+\_\+impedance.\+cpp}} 

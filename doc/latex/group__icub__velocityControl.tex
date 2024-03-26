@@ -1,0 +1,86 @@
+\hypertarget{group__icub__velocityControl}{}\doxysection{velocity\+Control}
+\label{group__icub__velocityControl}\index{velocityControl@{velocityControl}}
+
+
+Perform position control using a velocity control loop.  
+
+
+Collaboration diagram for velocity\+Control\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=290pt]{group__icub__velocityControl}
+\end{center}
+\end{figure}
+Perform position control using a velocity control loop. 
+
+\hypertarget{group__tutorial__perceptiveModels_intro_sec}{}\doxysubsection{Description}\label{group__tutorial__perceptiveModels_intro_sec}
+This module performs joint space position control using a velocity loop. It basically implements a pid control converting a position error into a velocity signal that sent to the control board. It allows commanding trajectories at fine temporal scale ($\sim$10-\/20ms).
+
+Note\+: for safey reasons the module initially starts with 0 gain and 0 max velocity, so you first have to set them to correct values.
+
+Use yarp rpc and type for example\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{gain 0 10}
+\DoxyCodeLine{svel 0 10}
+
+\end{DoxyCode}
+
+
+This set gain and maximum velocity to 10 for the joint 0.
+
+There are maximum values for gain and velocity set in the code (check \mbox{\hyperlink{velControlThread_8cpp}{vel\+Control\+Thread.\+cpp}}). At the moment they are set to 10 and 50 deg/sec respectively.\hypertarget{group__tutorial__perceptiveModels_lib_sec}{}\doxysubsection{Libraries}\label{group__tutorial__perceptiveModels_lib_sec}
+YARP\hypertarget{group__tutorial__perceptiveModels_parameters_sec}{}\doxysubsection{Parameters}\label{group__tutorial__perceptiveModels_parameters_sec}
+--robot\+: specifies the name of the robot. It will be used to form the names of the ports created and accessed by module.
+
+--part\+: part to control (e.\+g. head,arm\+\_\+right, arm\+\_\+left, lef\+\_\+right...), it will be used to form the names of the ports created and accessed by the module.
+
+--period\+: the periodicity of the velocity control loop, in milliseconds (possible values are 20 or 10).\hypertarget{group__tutorial__ationPrimitives_portsa_sec}{}\doxysubsection{Ports Accessed}\label{group__tutorial__ationPrimitives_portsa_sec}
+It accesses ports created when the robot is launched.\hypertarget{group__tutorial__ationPrimitives_portsc_sec}{}\doxysubsection{Ports Created}\label{group__tutorial__ationPrimitives_portsc_sec}
+The module instantiates a control\+\_\+board device, which opens the usual ports. The pattern of the name is as follow\+:
+\begin{DoxyItemize}
+\item /robot/vc/part/client/rpc\+:o
+\item /robot/vc/part/client/command\+:o
+\item /robot/vc/part/client/state\+:i
+\end{DoxyItemize}
+
+where robot is the name of the robot as specified with --robot and part is the required part as specified with --part (see below).
+
+
+\begin{DoxyItemize}
+\item /robot/vc/part/input\+: input port of the module
+\begin{DoxyItemize}
+\item \mbox{[}susp\mbox{]}\+: suspend the controller (command zero velocity)
+\item \mbox{[}run\mbox{]}\+: start (and resume after being suspended) the controller
+\item \mbox{[}quit\mbox{]}\+: quit the module (exit)
+\item \mbox{[}set\mbox{]} j p\+: move joint j to p (degrees)
+\item \mbox{[}svel\mbox{]} j v\+: set maximum speed for joint j to v (deg/sec)
+\item \mbox{[}gain\mbox{]} j k\+: set gain for joint j to k
+\item \mbox{[}help\mbox{]} to get this help
+\end{DoxyItemize}
+\end{DoxyItemize}
+
+Note\+: commands to the module through /robot/vc/part/input are not fast, use /robot/vc/part/fast\+Command or /robot/vc/part/command instead.
+
+
+\begin{DoxyItemize}
+\item /robot/vc/part/fast\+Command\+: accept a vector of positions as a bottle of int-\/double pairs, in the form j,p (where j is the joint and p is the requested position). Messages in this format are deprecated, use /robot/vc/part/command instead.
+\item /robot/vc/part/command\+: a a vector of positions which specifies the references for each joint.
+\end{DoxyItemize}\hypertarget{group__tutorial__ationPrimitives_in_files_sec}{}\doxysubsection{Input Data Files}\label{group__tutorial__ationPrimitives_in_files_sec}
+None.\hypertarget{group__tutorial__ationPrimitives_out_data_sec}{}\doxysubsection{Output Data Files}\label{group__tutorial__ationPrimitives_out_data_sec}
+None.\hypertarget{group__tutorial__ationPrimitives_conf_file_sec}{}\doxysubsection{Configuration Files}\label{group__tutorial__ationPrimitives_conf_file_sec}
+None.\hypertarget{group__tutorial__perceptiveModels_tested_os_sec}{}\doxysubsection{Tested OS}\label{group__tutorial__perceptiveModels_tested_os_sec}
+Linux and Windows.\hypertarget{group__icub__faceExpressions_example_sec}{}\doxysubsection{Example Instantiation of the Module}\label{group__icub__faceExpressions_example_sec}
+velocity\+Control --robot icub --part head --period 10
+
+Starts the velocity\+Control module using the robot icub to control the head. The period of the velocity control loop will be 10ms.
+
+\begin{DoxyAuthor}{Author}
+Lorenzo Natale
+\end{DoxyAuthor}
+Copyright (C) 2008 Robot\+Cub Consortium
+
+Copy\+Policy\+: Released under the terms of the GNU GPL v2.\+0.
+
+This file can be edited at src/velocity\+Control/main.\+cpp. 

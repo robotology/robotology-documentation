@@ -1,0 +1,247 @@
+\begin{DoxyAuthor}{Author}
+Ugo Pattacini
+\end{DoxyAuthor}
+\hypertarget{icub_anyrobot_cartesian_interface_sec_customcart_intro}{}\doxysection{Introduction}\label{icub_anyrobot_cartesian_interface_sec_customcart_intro}
+This tutorial will guide the user through the steps required to run all the components of the Cartesian Interface with the purpose of controlling a generic yarp-\/compatible robot limb in its operational space. Therefore, this is a somewhat advanced topic which might be of interest just for developers who want to adopt this interface for their platforms, or for those of you who are really geek inside \+:). ~\newline
+For \char`\"{}normal\char`\"{} people -\/ who have only \mbox{\hyperlink{namespaceiCub}{i\+Cub}} in their work life -\/ the tutorial on the \mbox{\hyperlink{icub_cartesian_interface}{Cartesian Interface}} is extensive enough; it is also a prerequisite for proceeding further.\hypertarget{icub_anyrobot_cartesian_interface_sec_customcart_architecture}{}\doxysection{The Architecture}\label{icub_anyrobot_cartesian_interface_sec_customcart_architecture}
+The architecture of the Cartesian Interface is sketched out below.
+
+
+
+We already know there is a {\bfseries{solver}} in charge of inverting the kinematics, a {\bfseries{server}} controlling the robot limb and finally a {\bfseries{client}} enabling the user to forward requests for cartesian movements directly from within the code through typical calls to C++ methods. ~\newline
+However, the diagram is more informative than that\+: it tells us about how these three components are arranged in the \mbox{\hyperlink{namespaceiCub}{i\+Cub}} network, an allocation that should be preserved also for your robot\textquotesingle{}s architecture to achieve fast and reliable performances. Here follow the details. ~\newline
+
+\begin{DoxyItemize}
+\item The solver is the most computational demanding tool; for this reason it should be launched on a powerful machine belonging to the cluster of PCs connected to the robot network. It employs Ipopt for nonlinear optimization and should not be a burden to any critical routine that has to control the robot in real-\/time. ~\newline
+ Nonetheless, running on a powerful computer, the solver can tackle the inverse kinematics problem with a large number of degrees-\/of-\/freedom in near real-\/time (something like $\sim$30 ms). This level of performance lets the robot do tracking pretty nicely.
+\item The server is a canonical controller responsible for sending commands to the robot with the purpose of achieving the joints configuration as found by the solver by moving the limb in a human-\/like fashion. It is a light-\/weight program so that it can run directly onboard the robot hub; it collects the requests coming from all the clients, it asks the solver to do its job and feeds back clients with useful information such as the current end-\/effector pose.~\newline
+ The main reason why the server should be running on the hub is that the lag due to the communication must be reduced as much as possible since a lag in the control loop will inevitably cause for instance unwanted overshoots in the response. As final suggestion, consider placing the server physically close to the robot, that is where fast ethernet link ends (and yarp too) and the internal robot bus begins (e.\+g. CAN); for \mbox{\hyperlink{namespaceiCub}{i\+Cub}} indeed, the server runs aboard the icub-\/head.
+\item The client simply lives inside the user code, making queries to the server through yarp ports, thus it never speaks to the solver. There are no special needs for it\+: the location of the client depends only on the requirements of the user code; a program that opens up a client may run on a shuffle PC so as on a powerful machine or even aboard the robot hub.
+\end{DoxyItemize}\hypertarget{icub_anyrobot_cartesian_interface_sec_customcart_dependencies}{}\doxysection{Dependencies}\label{icub_anyrobot_cartesian_interface_sec_customcart_dependencies}
+Besides the \char`\"{}classical\char`\"{} dependecies you need to have in order to compile all the components (Ipopt, yarp, icub-\/main, i\+Kin, servercartesiancontroller, clientcartesiancontroller; you should know them very well by now \+:), you are required to accomplish a preliminary job\+: it can be tedious (I realize it when I had to write the \char`\"{}fake\char`\"{} stuff \+:) but is mandatory. You have to provide some low-\/level yarp motor interfaces that are necessary for the cartesian components to start and operate correctly. They are only three\+: {\bfseries{IControl\+Limits}}, {\bfseries{IEncoders}}, {\bfseries{IVelocity\+Control}}. The former two serve to get the number of joints, their actual range along with current joints configuration which is fed back to the controller; the latter is obviously employed to send velocity commands to the robot. ~\newline
+Alternatively, user might consider implementing the newest {\bfseries{IEncoders\+Timed}} motor interface in place of {\bfseries{IEncoders}}, providing also information about the time stamps of the encoders that in turn will be attached to the pose information for synchronization purpose. At startup, the cartesian server will check accordingly the availability of the most suitable encoders interface. ~\newline
+Moreover, as enhanced option, the server is also capable of automatically detecting the availability of the {\bfseries{IPosition\+Direct}} interface, through which the low-\/level velocity control is replaced by the faster and more accurate streaming position control. In this latter modality, also the standard {\bfseries{IPosition\+Control}} interface is required to be implemented. ~\newline
+This is not the right place where to tell about how to deal with these interfaces, but please find out more on the topic of \href{https://www.yarp.it/latest/group__note__devices.html}{\texttt{ making a new device in yarp}}.\hypertarget{icub_anyrobot_cartesian_interface_sec_customcart_custom_example}{}\doxysection{Example of Customization}\label{icub_anyrobot_cartesian_interface_sec_customcart_custom_example}
+Let\textquotesingle{}s explain how to configure all the components for your robot through an example, whose code is available under 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{src/anyRobotCartesianInterface.}
+
+\end{DoxyCode}
+ Imagine you\textquotesingle{}re done with coding the basic motor interfaces for your robot, which is not as cute as \mbox{\hyperlink{namespaceiCub}{i\+Cub}}\+: it is equipped indeed with just three degrees-\/of-\/freedom represented by three joints controlled by three independent motors. You\textquotesingle{}ll probably end up having something similar to the library {\itshape fake\+Motor\+Device} I wrote for our artifact. It contains the server and client implementations of such motor interfaces\+: again, the IControl\+Limits, the IEncoders and the IVelocity\+Control. Of course we would need now a program that simulates our fake manipulator together with the server layer that exposes a yarp access to it. Here it is\+: it\textquotesingle{}s called {\itshape fake\+Robot} and instantiates three motors that are embodied as pure integrators that give back joints positions once fed with joints velocities. ~\newline
+The relevant code snippet of this instantiation is located within the file {\itshape \mbox{\hyperlink{fakeMotorDeviceServer_8cpp}{fake\+Motor\+Device\+Server.\+cpp}}} and resumed here for your convenience\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{Matrix lim(3,2);}
+\DoxyCodeLine{lim(0,0)=-\/180.0; lim(0,1)=180.0;                \textcolor{comment}{// joint 0 bounds [deg]}}
+\DoxyCodeLine{lim(1,0)=-\/90.0;  lim(1,1)=90.0;                 \textcolor{comment}{// joint 1 bounds [deg]}}
+\DoxyCodeLine{lim(2,0)=-\/45.0;  lim(2,1)=45.0;                 \textcolor{comment}{// joint 2 bounds [deg]}}
+\DoxyCodeLine{}
+\DoxyCodeLine{Vector q0;                                      \textcolor{comment}{// create a starting configuration q0}}
+\DoxyCodeLine{\textcolor{keywordflow}{for} (\textcolor{keywordtype}{int} i=0; i<lim.rows(); i++)}
+\DoxyCodeLine{    q0.push\_back((lim(i,0)+lim(i,1))/2.0);}
+\DoxyCodeLine{}
+\DoxyCodeLine{motors=\textcolor{keyword}{new} Integrator(Ts,q0,lim);               \textcolor{comment}{// Ts is the period expressed in [s]}}
+
+\end{DoxyCode}
+ Aside from the details of the {\itshape Integrator} class (it is provided by the \mbox{\hyperlink{group__ctrlLib}{ctrl\+Lib}} library), it is worth noticing here how the joints have bounds defined by the matrix {\itshape lim}.
+
+Now, since you\textquotesingle{}re so motivated, you\textquotesingle{}ve already got the kinematic description of the manipulator from your colleague who\textquotesingle{}s hooked on mechanics. You have to provide the conventional Denavit-\/\+Hartenberg table of links properties as done for the fake robot in the file {\itshape app/conf/kinematics.\+ini}\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{numLinks 3      \textcolor{comment}{// number of revolute links: currently, iKin does not handle prismatic links}}
+\DoxyCodeLine{}
+\DoxyCodeLine{link\_0 (\mbox{\hyperlink{sine_8m_a3b98e2dffc6cb06a89dcb0d5c60a0206}{A}} 1.0) (D 0.0) (alpha 0.0) (\mbox{\hyperlink{sine_8m_aaaa5252a687ef2d373ec966bbbf630ff}{offset}} 0.0) (\mbox{\hyperlink{namespacestrain_1_1dsp_1_1fsc_a746ce6f9a14034939607ccead53e3fd6}{min}} -\/180.0) (\mbox{\hyperlink{namespacestrain_1_1dsp_1_1fsc_a65804363dbaa9346e53442cb1bb9d73f}{max}} 180.0)}
+\DoxyCodeLine{link\_1 (\mbox{\hyperlink{sine_8m_a3b98e2dffc6cb06a89dcb0d5c60a0206}{A}} 1.0) (D 0.0) (alpha 0.0) (\mbox{\hyperlink{sine_8m_aaaa5252a687ef2d373ec966bbbf630ff}{offset}} 0.0) (\mbox{\hyperlink{namespacestrain_1_1dsp_1_1fsc_a746ce6f9a14034939607ccead53e3fd6}{min}} -\/180.0) (\mbox{\hyperlink{namespacestrain_1_1dsp_1_1fsc_a65804363dbaa9346e53442cb1bb9d73f}{max}} 180.0)}
+\DoxyCodeLine{link\_2 (\mbox{\hyperlink{sine_8m_a3b98e2dffc6cb06a89dcb0d5c60a0206}{A}} 1.0) (D 0.0) (alpha 0.0) (\mbox{\hyperlink{sine_8m_aaaa5252a687ef2d373ec966bbbf630ff}{offset}} 0.0) (\mbox{\hyperlink{namespacestrain_1_1dsp_1_1fsc_a746ce6f9a14034939607ccead53e3fd6}{min}} -\/180.0) (\mbox{\hyperlink{namespacestrain_1_1dsp_1_1fsc_a65804363dbaa9346e53442cb1bb9d73f}{max}} 180.0)}
+
+\end{DoxyCode}
+ The meaning of these parameters is described in the i\+Kin\+Link class; at any rate they are easily recognized as the link length ({\itshape A} in \mbox{[}m\mbox{]}), the link offset ({\itshape D} in \mbox{[}m\mbox{]}), the link twist ({\itshape alpha} in \mbox{[}rad\mbox{]}) and so on\+: please visit the \href{https://icub-tech-iit.github.io/documentation/icub_kinematics/icub-forward-kinematics/icub-forward-kinematics}{\texttt{ documentation}} on kinematics for a deeper insight. ~\newline
+A careful reader should have not missed the expression for the joints limits, which here can definitely take whatever values for all the three joints, much different from the bounds assigned to the real joints and hard-\/coded within the fake motor device. Do not worry about that\+: at start-\/up the solver will query the low-\/level interface (namely {\itshape IControl\+Limits}) about the actual joints range and will update the kinematic structure accordingly. Later on, the server will get upgraded with a similar request to the solver. ~\newline
+ At this stage we are happy with the kinematics, so let\textquotesingle{}s continue with the components configuration.\hypertarget{icub_anyrobot_cartesian_interface_sec_customcart_solver_configuration}{}\doxysection{Configuring the Solver}\label{icub_anyrobot_cartesian_interface_sec_customcart_solver_configuration}
+What is required here is only to inherit a new class from the i\+Kin superclass {\bfseries{Cartesian\+Solver}} and then override the method {\itshape get\+Part\+Desc()} which is responsible for describing all the parts used by the solver. ~\newline
+Essentially, you have to do the following four things\+: ~\newline
+
+\begin{DoxyEnumerate}
+\item Retrieve the configuration parameters;
+\item Initialize the devices to access the motors;
+\item Retrieve information about the kinematics;
+\item Fill a descriptor to be returned to the superclass.
+\end{DoxyEnumerate}\hypertarget{icub_anyrobot_cartesian_interface_subsec_customcart_solver_confparams}{}\doxysubsection{1. Retrieving Configuration Parameters}\label{icub_anyrobot_cartesian_interface_subsec_customcart_solver_confparams}
+The parameter of the {\itshape get\+Part\+Desc()} method is a {\itshape Searchable} object that should contain the initial configuration of the solver as provided for instance through the file {\itshape solver.\+ini} whose content is listed just below. However, these values can be easily modified at run-\/time through calls to the cartesian interface methods. 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{robot          fake\_robot               \textcolor{comment}{// the name of the robot to connect to}}
+\DoxyCodeLine{name           solver                   \textcolor{comment}{// the name of the solver as seen in yarp network}}
+\DoxyCodeLine{period         30                       \textcolor{comment}{// the period of the solver in [ms]}}
+\DoxyCodeLine{dof            (1 1 1)                  \textcolor{comment}{// the list of links status as they'll start off: if blocked(0) or dofs(1) -\/ see iKin doc}}
+\DoxyCodeLine{rest\_pos       (0.0 0.0 0.0)            \textcolor{comment}{// the joints resting positions as secondary task for the solver}}
+\DoxyCodeLine{rest\_weights   (0.0 0.0 0.0)            \textcolor{comment}{// the weights of resting positions (0.0 means do not take that joint into account)}}
+\DoxyCodeLine{pose           full                     \textcolor{comment}{// [full] or [xyz] for position+orientation or just position}}
+\DoxyCodeLine{mode           shot                     \textcolor{comment}{// [shot] or [cont] for tracking mode off/on}}
+\DoxyCodeLine{\mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a1bdcfae3209cbd96db35a2ae356fa15e}{verbosity}}      off                      \textcolor{comment}{// self-\/explaining :)}}
+\DoxyCodeLine{maxIter        200                      \textcolor{comment}{// stop solving whenever you overcome this limit}}
+\DoxyCodeLine{tol            0.0001                   \textcolor{comment}{// tolerance for the task}}
+\DoxyCodeLine{constr\_tol     0.000001                 \textcolor{comment}{// tolerance for the constraints}}
+\DoxyCodeLine{interPoints    off                      \textcolor{comment}{// if [on] the points discovered while converging are provided as well: they might be not so adjacent}}
+\DoxyCodeLine{ping\_robot\_tmo 10.0                     \textcolor{comment}{// at start-\/up, while connecting to the robot, wait for this timeout in [s] before giving up}}
+
+\end{DoxyCode}
+\hypertarget{icub_anyrobot_cartesian_interface_subsec_customcart_solver_initdevices}{}\doxysubsection{2. Initializing Motor Devices}\label{icub_anyrobot_cartesian_interface_subsec_customcart_solver_initdevices}
+The solver must be aware of how to open a client to speak to motor device drivers. Prepare therefore as many {\itshape Property} objects containing the suitable options as it is required by the manipulator\+: i.\+e. if the manipulator is composed of two parts (e.\+g. torso + arm), prepare one {\itshape Property} for each part, filled with the instructions to open the corresponding motor client. ~\newline
+In the current example the fake manipulator is represented by just one motor part as it follows\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{Property optPart;}
+\DoxyCodeLine{optPart.put(\textcolor{stringliteral}{"{}device"{}},\textcolor{stringliteral}{"{}fakeyClient"{}});                    \textcolor{comment}{// the name of the device}}
+\DoxyCodeLine{optPart.put(\textcolor{stringliteral}{"{}remote"{}},(\textcolor{stringliteral}{"{}/"{}}+robot+\textcolor{stringliteral}{"{}/"{}}+part).c\_str());     \textcolor{comment}{// the stem-\/name of the server remote yarp port}}
+\DoxyCodeLine{optPart.put(\textcolor{stringliteral}{"{}local"{}},(\textcolor{stringliteral}{"{}/"{}}+slvName+\textcolor{stringliteral}{"{}/"{}}+part).c\_str());    \textcolor{comment}{// the tag used as stem-\/name for the local ports}}
+\DoxyCodeLine{optPart.put(\textcolor{stringliteral}{"{}part"{}},part.c\_str());                       \textcolor{comment}{// just the name of the part for displaying purpose}}
+
+\end{DoxyCode}
+\hypertarget{icub_anyrobot_cartesian_interface_subsec_customcart_solver_kininfo}{}\doxysubsection{3. Retrieving Kinematics Info}\label{icub_anyrobot_cartesian_interface_subsec_customcart_solver_kininfo}
+There is a special key in the configuration file {\itshape solver.\+ini} which is missing\+: the one that tells the solver how to retrieve the kinematics description. Its tag is \char`\"{}\+Custom\+Kin\+File\char`\"{} and must point to the {\itshape kinematics.\+ini} file. The path has to be absolute and can be easily completed automatically by the {\itshape Resource\+Finder} class -\/ as you know\+: that\textquotesingle{}s why we code it like the following\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{Property config;}
+\DoxyCodeLine{config.fromConfigFile(rf.findFile(\textcolor{stringliteral}{"{}from"{}}).c\_str());}
+\DoxyCodeLine{config.put(\textcolor{stringliteral}{"{}CustomKinFile"{}},pathToKin.c\_str());}
+
+\end{DoxyCode}
+
+
+We then build up the kinematic structure by populating an {\itshape i\+Kin\+Limb} object with such information\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{Property linksOptions;}
+\DoxyCodeLine{linksOptions.fromConfigFile(options.find(\textcolor{stringliteral}{"{}CustomKinFile"{}}).asString().c\_str());}
+\DoxyCodeLine{iKinLimb *limb=\textcolor{keyword}{new} iKinLimb(linksOptions);}
+
+\end{DoxyCode}
+\hypertarget{icub_anyrobot_cartesian_interface_subsec_customcart_solver_filldesc}{}\doxysubsection{4. Filling the Descriptor}\label{icub_anyrobot_cartesian_interface_subsec_customcart_solver_filldesc}
+Finally, we need to provide a descriptor that in turn will be processed by the superclass\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{PartDescriptor *\mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}=\textcolor{keyword}{new} PartDescriptor;}
+\DoxyCodeLine{\mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}-\/>lmb=limb;                \textcolor{comment}{// a pointer to the iKinLimb}}
+\DoxyCodeLine{\mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}-\/>chn=limb-\/>asChain();     \textcolor{comment}{// the associated iKinChain object}}
+\DoxyCodeLine{\mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}-\/>cns=NULL;                \textcolor{comment}{// any further (linear) constraints on the joints other than the bounds? This requires some more effort}}
+\DoxyCodeLine{\mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}-\/>prp.push\_back(optPart);  \textcolor{comment}{// attach the options to open the device driver of the fake part}}
+\DoxyCodeLine{\mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}-\/>rvs.push\_back(\textcolor{keyword}{false});    \textcolor{comment}{// (*)}}
+\DoxyCodeLine{\mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}-\/>num=1;                   \textcolor{comment}{// only one device driver for the whole limb}}
+
+\end{DoxyCode}
+ ($\ast$) It may happen that the motor commands to be sent are in reversed order with respect to the order of kinematics links as in the case of the \mbox{\hyperlink{namespaceiCub}{i\+Cub}} torso; if so, push a \char`\"{}true\char`\"{} in the {\itshape rvs} field for the corresponding part.
+
+Whenever a limb is actuated resorting to more than one device (e.\+g. for \mbox{\hyperlink{namespaceiCub}{i\+Cub}}\+: torso+arm), the following applies\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}-\/>prp.push\_back(optTorso);}
+\DoxyCodeLine{\mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}-\/>prp.push\_back(optArm);}
+\DoxyCodeLine{\mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}-\/>rvs.push\_back(\textcolor{keyword}{true});}
+\DoxyCodeLine{\mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}-\/>rvs.push\_back(\textcolor{keyword}{false});}
+\DoxyCodeLine{\mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}-\/>num=2;}
+
+\end{DoxyCode}
+ Intuitively, the insertion order depends on the links of the chain. In \mbox{\hyperlink{namespaceiCub}{i\+Cub}} the three links of torso come first, hence {\itshape opt\+Torso} is the first object to be pushed in the queue.
+
+To conclude, it is worth pointing out how all the steps described above can be conveniently handled also by means of the \mbox{\hyperlink{group__iKinCartesianSolver}{i\+Kin\+Cartesian\+Solver}} module.\hypertarget{icub_anyrobot_cartesian_interface_sec_customcart_server_configuration}{}\doxysection{Configuring the Server}\label{icub_anyrobot_cartesian_interface_sec_customcart_server_configuration}
+Coming to the server, life gets a bit easier. It is indeed required to open the device drivers of each involved part (in our case just one, the \char`\"{}fake\+\_\+part\char`\"{}), put them into a special list, open the {\itshape cartesiancontrollerserver} device passing the proper configuration parameters that ensure the initialization of the kinematic structure, finally attach that list to such cartesian device. ~\newline
+The code is worth a thousand words ... 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{Property optPart(\textcolor{stringliteral}{"{}(device fakeyClient)"{}});}
+\DoxyCodeLine{optPart.put(\textcolor{stringliteral}{"{}device"{}},\textcolor{stringliteral}{"{}fakeyClient"{}});}
+\DoxyCodeLine{optPart.put(\textcolor{stringliteral}{"{}remote"{}},\textcolor{stringliteral}{"{}/fake\_robot/fake\_part"{}});}
+\DoxyCodeLine{optPart.put(\textcolor{stringliteral}{"{}local"{}},\textcolor{stringliteral}{"{}/server/fake\_part"{}});}
+\DoxyCodeLine{optPart.put(\textcolor{stringliteral}{"{}part"{}},\textcolor{stringliteral}{"{}fake\_part"{}});}
+\DoxyCodeLine{}
+\DoxyCodeLine{PolyDriver partDrv;}
+\DoxyCodeLine{partDrv.open(optPart);                                          \textcolor{comment}{// open the device driver for the "{}fake\_part"{}}}
+\DoxyCodeLine{}
+\DoxyCodeLine{Property optServer(\textcolor{stringliteral}{"{}(device cartesiancontrollerserver)"{}});}
+\DoxyCodeLine{optServer.fromConfigFile(rf.findFile(\textcolor{stringliteral}{"{}from"{}}).c\_str(),\textcolor{keyword}{false});    \textcolor{comment}{// init the server options from the ResourceFinder}}
+\DoxyCodeLine{}
+\DoxyCodeLine{PolyDriver server;}
+\DoxyCodeLine{server.open(optServer);                                         \textcolor{comment}{// open the cartesian controller server}}
+\DoxyCodeLine{}
+\DoxyCodeLine{PolyDriverList list;}
+\DoxyCodeLine{list.push(\&partDrv,\textcolor{stringliteral}{"{}fake\_part"{}});                                \textcolor{comment}{// fill the list with the given tag-\/name (see below)}}
+\DoxyCodeLine{}
+\DoxyCodeLine{IMultipleWrapper *wrapper;}
+\DoxyCodeLine{server.view(wrapper);}
+\DoxyCodeLine{wrapper-\/>attachAll(list);                                       \textcolor{comment}{// attach the list}}
+
+\end{DoxyCode}
+
+
+The configuration parameters of the server are the following\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{[GENERAL]}
+\DoxyCodeLine{ControllerName        server              \textcolor{comment}{// the yarp stem-\/name of the controller}}
+\DoxyCodeLine{ControllerPeriod      20                  \textcolor{comment}{// the period of the control thread}}
+\DoxyCodeLine{SolverNameToConnect   solver              \textcolor{comment}{// the yarp stem-\/name of the solver to connect to}}
+\DoxyCodeLine{KinematicPart         custom              \textcolor{comment}{// this is a special keyword that tells the server to open custom kinematics}}
+\DoxyCodeLine{CustomKinFile         kinematics.ini      \textcolor{comment}{// the file containing the description of the kinematics (full path or relative to CustomKinContext)}}
+\DoxyCodeLine{CustomKinContext      context             \textcolor{comment}{// the context to locate the kinematics.ini file (optional)}}
+\DoxyCodeLine{PositionControl       off                 \textcolor{comment}{// (*)}}
+\DoxyCodeLine{MultipleJointsControl \mbox{\hyperlink{show__eyes__axes_8m_a58ab1fd68e97078232808206b850161b}{on}}                  \textcolor{comment}{// (**)}}
+\DoxyCodeLine{NumberOfDrivers       1                   \textcolor{comment}{// the number of parts composing the structure}}
+\DoxyCodeLine{}
+\DoxyCodeLine{[DRIVER\_0]                                \textcolor{comment}{// here come the parameters for each part driver}}
+\DoxyCodeLine{Key                   fake\_part           \textcolor{comment}{// the tag-\/name assigned to the part within the code}}
+\DoxyCodeLine{JointsOrder           direct              \textcolor{comment}{// the joints order: [direct] or [reversed] (see explanation above)}}
+\DoxyCodeLine{MinAbsVels            (0.0 0.0 0.0)       \textcolor{comment}{// (***)}}
+
+\end{DoxyCode}
+ ($\ast$) When \char`\"{}on\char`\"{} this parameter enables the low-\/level streaming position control of the robot\textquotesingle{}s joints, meaning that the server will provide as output the position set-\/points straightaway instead of the velocity commands. As result, we gain much faster and more accurate movements, without requiring any {\itshape ad-\/hoc} dynamics compensation (see below). To do that, the {\bfseries{IPosition\+Direct}} interface needs to be available. ~\newline
+($\ast$$\ast$) When \char`\"{}on\char`\"{} allows sending references to multiple joints with one yarp command saving bandwidth; when \char`\"{}off\char`\"{} each yarp command carries reference for one single joint. ~\newline
+($\ast$$\ast$$\ast$) This is an optional parameter that accounts joint by joint for the minimum velocity (in \mbox{[}deg/s\mbox{]}) the motors can somehow achieve, and are meant to be provided in absolute values. Whenever the controller tries to deliver velocities under these thresholds, then it switches in a bang-\/bang mode to finally attain the target positions.\hypertarget{icub_anyrobot_cartesian_interface_subsec_customcart_server_plantident}{}\doxysubsection{Plant Identification (\+Advanced)}\label{icub_anyrobot_cartesian_interface_subsec_customcart_server_plantident}
+This topic is somewhat advanced and is concerned with the possibility to improve the controller\textquotesingle{}s performance, so that it is not strictly required for normal operations and the user might consider skipping it at the early stage of his implementation. Further, if the {\bfseries{IPosition\+Direct}} interface is detected as available by the server and the {\bfseries{Position\+Control}} configuration switch is set to \char`\"{}on\char`\"{}, then the presence of the section \mbox{[}PLANT\+\_\+\+MODEL\mbox{]} described hereinafter will turn to be irrilevant to the control. ~\newline
+The closed-\/loop joint controller is designed in such a way that it delivers velocity commands to shape the system response as to follow a trajectory that resembles a minimum-\/jerk profile. To this end, the strong assumption is that the joint itself behaves like a pure integrator. Of course the real world deviates -\/ sometimes significantly -\/ from the ideal conditions and a number of unmodelled factors starts taking place. In this respect, the following two elements deserve particular care since they can be conveniently compensated\+: (1) the high-\/order plant dynamics, (2) the dead-\/time affecting the plant response.
+
+Regarding the high-\/order plant dynamics, as it is traditionally envisaged, a {\itshape chirp} signal can be injected into the system with the goal of identifying any further relevant zero and/or pole of the plant. Since the overall system is always stable and minimum-\/phase (i.\+e. both further poles and zeros belong to the left side of the complex plane), it derives that the controller is capable of filtering out the unwanted dynamics with pole-\/zero cancellation. ~\newline
+The framework can thus compensate plants characterized by the following transfer function\+:
+
+\[ P\left(s\right)=\frac{K_p}{s}\cdot\frac{1+T_zs}{1+2\zeta T_ws+\left(T_ws\right)^2}\cdot e^{-T_ds}, \]
+
+with two underdamped poles and one zero, besides the integrator. These parameters can be specified within the server configuration file for each joint belonging to the kinematic chain. 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{[PLANT\_MODEL]}
+\DoxyCodeLine{plant\_compensator off   \textcolor{comment}{// turn on this switch to enable plant compensation}}
+\DoxyCodeLine{smith\_predictor   off   \textcolor{comment}{// turn on this switch to enable lag equalization}}
+\DoxyCodeLine{}
+\DoxyCodeLine{joint\_0           ((Kp 1.022) (Tz 0.405) (Tw 0.248) (Zeta 0.797) (Td 0.000))}
+\DoxyCodeLine{joint\_1           ((Kp 1.026) (Tz 0.407) (Tw 0.243) (Zeta 0.822) (Td 0.000))}
+\DoxyCodeLine{joint\_2           ((Kp 1.040) (Tz 0.344) (Tw 0.160) (Zeta 1.110) (Td 0.000))}
+\DoxyCodeLine{joint\_3           ((Kp 1.035) (Tz 0.410) (Tw 0.178) (Zeta 1.198) (Td 0.000))}
+\DoxyCodeLine{joint\_4           ((Kp 1.016) (Tz 0.384) (Tw 0.159) (Zeta 1.222) (Td 0.000))}
+\DoxyCodeLine{joint\_5           ((Kp 1.025) (Tz 0.823) (Tw 0.405) (Zeta 1.030) (Td 0.000))}
+\DoxyCodeLine{joint\_6           ((Kp 1.022) (Tz 0.300) (Tw 0.120) (Zeta 1.303) (Td 0.000))}
+\DoxyCodeLine{joint\_7           ((Kp 1.016) (Tz 0.123) (Tw 0.030) (Zeta 2.204) (Td 0.000))}
+\DoxyCodeLine{joint\_8           ((Kp 1.000) (Tz 0.000) (Tw 0.000) (Zeta 0.000) (Td 0.000))}
+\DoxyCodeLine{joint\_9           ((Kp 1.000) (Tz 0.000) (Tw 0.000) (Zeta 0.000) (Td 0.000))}
+
+\end{DoxyCode}
+
+
+To give the feeling of how important could be accounting for this dynamics, take a look at the picture below, where the ideal response of a joint commanded by our velocity controller (dashed black) is depicted against the two real cases\+: with (green) and without (red) the compensation.
+
+
+
+Interestingly, the application {\itshape joint\+Vel\+Ctrl\+Ident} available from this \href{https://github.com/pattacini/icub-contrib.git}{\texttt{ Git\+Hub repository}} lets you collect information about the system response to the chirp command. You can then think of employing the {\itshape System Identification Toolbox} from MATLAB to find out where these unwanted poles and zero are located in the complex plane. In fact, the {\itshape ident} tool contained whithin the MATLAB package allows you to go through an identification session for the process {\itshape P(s)} specified above.
+
+Finally, as very last step, one can try also to compensate the lag of the control system represented by the exponential term in the transfer function. ~\newline
+As you might know, a lag in a control loop is dangerous because it introduces distortions in the response. To recover the ideal response profile equalizing the lag, one common solution is to plug into the system a Smith Predictor. Nonetheless, this further block should be applied only when between the controller and the plant there exist significant and deterministic communication delays as it happens for example when the controller does not run on the robot hub.\hypertarget{icub_anyrobot_cartesian_interface_sec_customcart_client_configuration}{}\doxysection{Configuring the Client}\label{icub_anyrobot_cartesian_interface_sec_customcart_client_configuration}
+The client does not have to be aware of any particular implementation, thus it can be configured as documented in the \mbox{\hyperlink{icub_cartesian_interface}{Cartesian Interface}} page. In this respect, to open a client that connects to server above one can rely on the following\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{Property option(\textcolor{stringliteral}{"{}(device cartesiancontrollerclient)"{}});}
+\DoxyCodeLine{option.put(\textcolor{stringliteral}{"{}remote"{}},\textcolor{stringliteral}{"{}/server"{}});}
+\DoxyCodeLine{option.put(\textcolor{stringliteral}{"{}local"{}},\textcolor{stringliteral}{"{}/client"{}});}
+\DoxyCodeLine{}
+\DoxyCodeLine{PolyDriver         client;}
+\DoxyCodeLine{ICartesianControl *ctrl=NULL;}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{keywordflow}{if} (client.open(option)) \{}
+\DoxyCodeLine{    client.view(ctrl);    \textcolor{comment}{// open the view}}
+\DoxyCodeLine{\}}
+
+\end{DoxyCode}
+\hypertarget{icub_anyrobot_cartesian_interface_sec_customcart_compile_run_example}{}\doxysection{Compiling and Running the Example}\label{icub_anyrobot_cartesian_interface_sec_customcart_compile_run_example}
+The example has been designed according to the packaging policy we pursue for i\+Cub-\/based application\+: there is a {\itshape src} directory filled with the library and the code and then there is an {\itshape app} directory containing the configuration files and the scripts to run the binaries. Therefore, just create the {\itshape any\+Robot\+Cartesian\+Interface/build} directory (be always neat and divide the code from the compilation products \+:), go there and launch the {\itshape ccmake ../} command. After the compilation and the installation you\textquotesingle{}ll end up having the directory {\itshape any\+Robot\+Cartesian\+Interface/bin} where all the binaries will be copied in, along with the configuration files and the xml scripts. Run the command {\itshape yarprun -\/-\/server /node} from the same directory of the binaries and then launch in a row first the modules in {\itshape robot\+\_\+server\+\_\+solver.\+xml} and soon afterwards the modules in {\itshape client.\+xml}.\hypertarget{icub_anyrobot_cartesian_interface_sec_customcart_succ_stories}{}\doxysection{Success Stories}\label{icub_anyrobot_cartesian_interface_sec_customcart_succ_stories}
+You are warmly encouraged to add up below your case study on the use of Cartesian Interface\+:
+\begin{DoxyItemize}
+\item Duarte Arag{\ucr}o employed the Cartesian Interface for his robot Vizzy and documented the development \href{http://mediawiki.isr.ist.utl.pt/wiki/Vizzy_Cartesian_Interface}{\texttt{ here}}.
+\item Juan G. Victores managed to replicate the Cartesian Interface functionalities for Asibot whose server part is documented \href{http://roboticslab.sourceforge.net/asibot/group__cartesianServer.html}{\texttt{ here}}.
+\item Elena Ceseracciu customized the Cartesian \mbox{\hyperlink{classSolver}{Solver}} for the ARMAR III robot. Relevant info can be browsed \href{http://wiki.icub.org/xperience/dox/html/group__ArmarIIICartesianSolver.html}{\texttt{ here}}. 
+\end{DoxyItemize}

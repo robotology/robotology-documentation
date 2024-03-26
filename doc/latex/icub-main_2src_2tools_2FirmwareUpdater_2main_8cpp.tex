@@ -1,0 +1,520 @@
+\hypertarget{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp}{}\doxysection{icub-\/main/src/tools/\+Firmware\+Updater/main.cpp File Reference}
+\label{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp}\index{icub-\/main/src/tools/FirmwareUpdater/main.cpp@{icub-\/main/src/tools/FirmwareUpdater/main.cpp}}
+{\ttfamily \#include \char`\"{}mainwindow.\+h\char`\"{}}\newline
+{\ttfamily \#include $<$QApplication$>$}\newline
+{\ttfamily \#include $<$QCommand\+Line\+Parser$>$}\newline
+{\ttfamily \#include $<$QCommand\+Line\+Option$>$}\newline
+{\ttfamily \#include $<$QFile\+Info$>$}\newline
+{\ttfamily \#include $<$qdebug.\+h$>$}\newline
+{\ttfamily \#include $<$QDir$>$}\newline
+{\ttfamily \#include \char`\"{}firmwareupdatercore.\+h\char`\"{}}\newline
+Include dependency graph for main.\+cpp\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp__incl}
+\end{center}
+\end{figure}
+\doxysubsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+enum \mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35ec}{action\+\_\+t}} \{ \newline
+\mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35eca58e5efadce1935f7fa459df9e1bc0fcd}{action\+\_\+impossible}} = -\/1
+, \newline
+\mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35eca2534c145ad99911939cebc9b82d538c1}{action\+\_\+none}} = 0
+, \newline
+\mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35eca19c117171e64bf1ae50849c0f3083e81}{action\+\_\+discover}} = 1
+, \newline
+\mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35ecad32aca506e1aa8ca176618ce5fc35920}{action\+\_\+verify}} = 2
+, \newline
+\mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35ecaee7696d1593787132e69065ca025058f}{action\+\_\+program}} = 3
+, \newline
+\mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35ecae29910852151dc2fefa9b9f20b856643}{action\+\_\+forcemaintenance}} = 4
+, \newline
+\mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35eca2038fa20cb3c3e72888aaa0ec1e10c3f}{action\+\_\+forceapplication}} = 5
+, \newline
+\mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35eca137f11e08d1ac9b2beedd2a2216d265a}{action\+\_\+query}} = 6
+, \newline
+\mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35eca8e27af457e31e604013fbc74ad54f3d0}{action\+\_\+loaddatfile}} = 7
+, \newline
+\mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35eca7a5f294c203d4b57717116bbbd717163}{action\+\_\+setstrainsn}} = 8
+, \newline
+\mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35ecacee481cf56494198d0bb88bbbb4934a0}{action\+\_\+setstraingainsoffsets}} = 9
+, \newline
+\mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35ecae96d81f294bfb3dfed7794cfebff9eb7}{action\+\_\+getcanboardversion}} = 10
+, \newline
+\mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35ecace35fd8bdc1012481ccead8b251a9eec}{action\+\_\+savedatfile}} = 11
+, \newline
+\mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35ecaecbd54d992687d08009bd9a02431d0e5}{action\+\_\+change\+Can\+Id}} = 12
+, \newline
+\mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35eca3b6132d6650c820ddb72c64478bae5f8}{action\+\_\+change\+Board\+Ip}} = 13
+, \newline
+\mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35eca1a98382a5b3770cda1c48fcc14b6054c}{action\+\_\+setstrainft45gainsoffsets}} = 14
+, \newline
+\mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35eca6af740b21615dd67a7b6525948cbe662}{action\+\_\+setstrainft58gainsoffsets}} = 15
+, \newline
+\mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35eca44ae9c338931f643cdad04cc3e132f51}{action\+\_\+setstraingainsspecificoffsets}} = 16
+ \}
+\item 
+enum class \mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a5c9cffbb3bff5696fb175d60fae4c4bc}{Sensor\+Model}} \{ \newline
+\mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a5c9cffbb3bff5696fb175d60fae4c4bca6761bea82e602805ee9396f308fc699f}{ft45}}
+, \newline
+\mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a5c9cffbb3bff5696fb175d60fae4c4bca62cc42764d0277ca95ed218b5532ee17}{ft58}}
+ \}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+bool \mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a9aec34e0a6ef917dbfaf2729277ab9b1}{check\+Application\+Lock}} ()
+\item 
+void \mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a89ef13f8b17c8ec3f5579e5397a44116}{remove\+Application\+Lock}} ()
+\item 
+void \mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a2bd0bf65680c4c833b0220eee57bfdfb}{print\+Can\+Devices}} (QList$<$ \mbox{\hyperlink{structsBoard}{s\+Board}} $>$ can\+Boards, QString on\+IPboard, bool slimprint)
+\item 
+int \mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a426bc486a8b8b3dbd5f82096b97baaae}{print\+Second\+Level\+Devices}} (\mbox{\hyperlink{classFirmwareUpdaterCore}{Firmware\+Updater\+Core}} $\ast$, QString device, QString id, bool slimprint)
+\item 
+int \mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a7e6651f7b6288b9c36de5681befee5b0}{print\+Third\+Level\+Devices}} (\mbox{\hyperlink{classFirmwareUpdaterCore}{Firmware\+Updater\+Core}} $\ast$, QString device, QString id, QString \mbox{\hyperlink{opcManager__cfg4pc104_8c_a387aed6ca89cc24e456666d7df7c1fa0}{board}}, bool force\+Maintenance, bool force\+Application, bool slimprint)
+\item 
+int \mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aeb6e0c5ab571943c459025578af1a1fc}{program\+Eth\+Device}} (\mbox{\hyperlink{classFirmwareUpdaterCore}{Firmware\+Updater\+Core}} $\ast$, QString device, QString id, QString \mbox{\hyperlink{opcManager__cfg4pc104_8c_a387aed6ca89cc24e456666d7df7c1fa0}{board}}, QString \mbox{\hyperlink{icub-main_2src_2tools_2embObjProtoTools_2embObjProto__debugParser_2main_8cpp_a702945180aa732857b380a007a7e2a21}{file}})
+\item 
+int \mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a2f58788c5069e4c5eaa8868cd290abd2}{program\+Can\+Device}} (\mbox{\hyperlink{classFirmwareUpdaterCore}{Firmware\+Updater\+Core}} $\ast$, QString device, QString id, QString \mbox{\hyperlink{opcManager__cfg4pc104_8c_a387aed6ca89cc24e456666d7df7c1fa0}{board}}, QString can\+Line, QString can\+Id, QString \mbox{\hyperlink{icub-main_2src_2tools_2embObjProtoTools_2embObjProto__debugParser_2main_8cpp_a702945180aa732857b380a007a7e2a21}{file}}, bool erase\+EEprom)
+\item 
+int \mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a80a9db91eb2815523c9cf42e3e8ca91b}{set\+Board\+To\+Application}} (\mbox{\hyperlink{classFirmwareUpdaterCore}{Firmware\+Updater\+Core}} $\ast$core, QString device, QString id, QString \mbox{\hyperlink{opcManager__cfg4pc104_8c_a387aed6ca89cc24e456666d7df7c1fa0}{board}})
+\item 
+int \mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a9cd7a75311f7446033ed6e1a8b7c62b6}{set\+Board\+To\+Maintenance}} (\mbox{\hyperlink{classFirmwareUpdaterCore}{Firmware\+Updater\+Core}} $\ast$core, QString device, QString id, QString \mbox{\hyperlink{opcManager__cfg4pc104_8c_a387aed6ca89cc24e456666d7df7c1fa0}{board}})
+\item 
+int \mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aa9d94cae6064e3c6f4cd0c25e9c786e7}{verify\+On\+Second\+Level}} (\mbox{\hyperlink{classFirmwareUpdaterCore}{Firmware\+Updater\+Core}} $\ast$core, QString device, QString id, const QString \&target\+IPaddr, const QString \&target\+CANline, const QString \&target\+CANaddr, const QString \&target\+FWvers)
+\item 
+int \mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aa7f18735a449bcc60bcfe62808f15f38}{verify\+On\+Second\+Level\+\_\+\+ETHboard}} (\mbox{\hyperlink{classFirmwareUpdaterCore}{Firmware\+Updater\+Core}} $\ast$core, QString device, QString id, const QString \&target\+IPaddr, const QString \&target\+FWvers)
+\item 
+int \mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a0c540d4262b9af197b8f08578c3b1286}{verify\+On\+Second\+Level\+\_\+\+CANboard}} (\mbox{\hyperlink{classFirmwareUpdaterCore}{Firmware\+Updater\+Core}} $\ast$core, QString device, QString id, const QString \&target\+CANline, const QString \&target\+CANaddr, const QString \&target\+FWvers)
+\item 
+int \mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a314a15e27aa713f65ae03b2240ba5c52}{verify\+Can\+Devices}} (QList$<$ \mbox{\hyperlink{structsBoard}{s\+Board}} $>$ can\+Boards, const QString \&target\+CANline, const QString \&target\+CANaddr, const QString \&target\+FWvers)
+\item 
+int \mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a835c4eacfb72b67ad50d4cd0bedc6011}{verify\+On\+Third\+Level\+\_\+\+CANunder\+ETH}} (\mbox{\hyperlink{classFirmwareUpdaterCore}{Firmware\+Updater\+Core}} $\ast$core, QString device, QString id, QString \mbox{\hyperlink{opcManager__cfg4pc104_8c_a387aed6ca89cc24e456666d7df7c1fa0}{board}}, const QString \&target\+CANline, const QString \&target\+CANaddr, const QString \&target\+FWvers)
+\item 
+int \mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a28120dbd0f9c560b6413737fc8235b7c}{query\+On\+Second\+Level\+\_\+\+ETHboard}} (\mbox{\hyperlink{classFirmwareUpdaterCore}{Firmware\+Updater\+Core}} $\ast$core, QString device, QString id, const QString \&target\+IPaddr)
+\item 
+int \mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_afb2b908d7a60046ff486c1ef8fdb5546}{query\+On\+Second\+Level\+\_\+\+CANboard}} (\mbox{\hyperlink{classFirmwareUpdaterCore}{Firmware\+Updater\+Core}} $\ast$core, QString device, QString id, const QString \&target\+CANline, const QString \&target\+CANaddr)
+\item 
+int \mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aac03969891a45a641aeb42e628416475}{query\+Can\+Devices}} (QList$<$ \mbox{\hyperlink{structsBoard}{s\+Board}} $>$ can\+Boards, const QString on\+IPboard, const QString \&target\+CANline, const QString \&target\+CANaddr)
+\item 
+int \mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a9f5996177db50a70cb30dab9af67c2a6}{query\+On\+Third\+Level\+\_\+\+CANunder\+ETH}} (\mbox{\hyperlink{classFirmwareUpdaterCore}{Firmware\+Updater\+Core}} $\ast$core, QString device, QString id, const QString \mbox{\hyperlink{opcManager__cfg4pc104_8c_a387aed6ca89cc24e456666d7df7c1fa0}{board}}, const QString \&target\+CANline, const QString \&target\+CANaddr)
+\item 
+int \mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aaeb3af22257dd8972e388e34cfaf3ea0}{load\+Dat\+File\+Strain2}} (\mbox{\hyperlink{classFirmwareUpdaterCore}{Firmware\+Updater\+Core}} $\ast$core, QString device, QString id, QString \mbox{\hyperlink{opcManager__cfg4pc104_8c_a387aed6ca89cc24e456666d7df7c1fa0}{board}}, QString can\+Line, QString can\+Id, QString \mbox{\hyperlink{icub-main_2src_2tools_2embObjProtoTools_2embObjProto__debugParser_2main_8cpp_a702945180aa732857b380a007a7e2a21}{file}}, bool erase\+EEprom)
+\item 
+int \mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a97066d9d567bccfb9161a4330aa0fdb4}{save\+Dat\+File\+Strain2}} (\mbox{\hyperlink{classFirmwareUpdaterCore}{Firmware\+Updater\+Core}} $\ast$core, QString device, QString id, QString \mbox{\hyperlink{opcManager__cfg4pc104_8c_a387aed6ca89cc24e456666d7df7c1fa0}{board}}, QString can\+Line, QString can\+Id, bool erase\+EEprom)
+\item 
+int \mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a9c814641af70857cd25818a20dfee5ab}{set\+Strain\+Sn}} (\mbox{\hyperlink{classFirmwareUpdaterCore}{Firmware\+Updater\+Core}} $\ast$core, QString device, QString id, QString \mbox{\hyperlink{opcManager__cfg4pc104_8c_a387aed6ca89cc24e456666d7df7c1fa0}{board}}, QString can\+Line, QString can\+Id, QString serial\+Number)
+\item 
+int \mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_afe4f47583208dd0d8f2ccfcd4a13a4c4}{set\+Strain\+Gains\+Offsets}} (\mbox{\hyperlink{classFirmwareUpdaterCore}{Firmware\+Updater\+Core}} $\ast$core, QString device, QString id, QString \mbox{\hyperlink{opcManager__cfg4pc104_8c_a387aed6ca89cc24e456666d7df7c1fa0}{board}}, QString can\+Line, QString can\+Id, \mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a5c9cffbb3bff5696fb175d60fae4c4bc}{Sensor\+Model}} model)
+\item 
+int \mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a32aae35f243b79acb89e54afa4f25efe}{get\+Can\+Board\+Version}} (\mbox{\hyperlink{classFirmwareUpdaterCore}{Firmware\+Updater\+Core}} $\ast$core, QString device, QString id, QString \mbox{\hyperlink{opcManager__cfg4pc104_8c_a387aed6ca89cc24e456666d7df7c1fa0}{board}}, QString can\+Line, QString can\+Id, bool save)
+\item 
+int \mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a0271c1144693ae2e38460ddca1b37d0d}{change\+Can\+Id}} (\mbox{\hyperlink{classFirmwareUpdaterCore}{Firmware\+Updater\+Core}} $\ast$core, QString device, QString id, QString \mbox{\hyperlink{opcManager__cfg4pc104_8c_a387aed6ca89cc24e456666d7df7c1fa0}{board}}, QString can\+Line, QString can\+Id, QString can\+Id\+New)
+\item 
+int \mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a636e1bc60c7e7f63f657683a52296efc}{change\+Board\+Ip}} (\mbox{\hyperlink{classFirmwareUpdaterCore}{Firmware\+Updater\+Core}} $\ast$core, QString device, QString id, QString \mbox{\hyperlink{opcManager__cfg4pc104_8c_a387aed6ca89cc24e456666d7df7c1fa0}{board}}, QString newipaddr)
+\item 
+void \mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a2bbe615bf0d3d5e6104b3662c76052fc}{check\+For\+Action}} (bool \&action\+Is\+Valid, \mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35ec}{action\+\_\+t}} const \&action\+Value, \mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35ec}{action\+\_\+t}} \&action\+Result)
+\item 
+int \mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a0ddf1224851353fc92bfbff6f499fa97}{main}} (int argc, char $\ast$argv\mbox{[}$\,$\mbox{]})
+\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+int \mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a1bdcfae3209cbd96db35a2ae356fa15e}{verbosity}} = 1
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Enumeration Type Documentation}
+\mbox{\Hypertarget{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35ec}\label{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35ec}} 
+\index{main.cpp@{main.cpp}!action\_t@{action\_t}}
+\index{action\_t@{action\_t}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{action\_t}{action\_t}}
+{\footnotesize\ttfamily enum \mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35ec}{action\+\_\+t}}}
+
+\begin{DoxyEnumFields}{Enumerator}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{action\_impossible@{action\_impossible}!main.cpp@{main.cpp}}\index{main.cpp@{main.cpp}!action\_impossible@{action\_impossible}}}\mbox{\Hypertarget{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35eca58e5efadce1935f7fa459df9e1bc0fcd}\label{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35eca58e5efadce1935f7fa459df9e1bc0fcd}} 
+action\+\_\+impossible&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{action\_none@{action\_none}!main.cpp@{main.cpp}}\index{main.cpp@{main.cpp}!action\_none@{action\_none}}}\mbox{\Hypertarget{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35eca2534c145ad99911939cebc9b82d538c1}\label{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35eca2534c145ad99911939cebc9b82d538c1}} 
+action\+\_\+none&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{action\_discover@{action\_discover}!main.cpp@{main.cpp}}\index{main.cpp@{main.cpp}!action\_discover@{action\_discover}}}\mbox{\Hypertarget{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35eca19c117171e64bf1ae50849c0f3083e81}\label{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35eca19c117171e64bf1ae50849c0f3083e81}} 
+action\+\_\+discover&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{action\_verify@{action\_verify}!main.cpp@{main.cpp}}\index{main.cpp@{main.cpp}!action\_verify@{action\_verify}}}\mbox{\Hypertarget{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35ecad32aca506e1aa8ca176618ce5fc35920}\label{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35ecad32aca506e1aa8ca176618ce5fc35920}} 
+action\+\_\+verify&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{action\_program@{action\_program}!main.cpp@{main.cpp}}\index{main.cpp@{main.cpp}!action\_program@{action\_program}}}\mbox{\Hypertarget{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35ecaee7696d1593787132e69065ca025058f}\label{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35ecaee7696d1593787132e69065ca025058f}} 
+action\+\_\+program&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{action\_forcemaintenance@{action\_forcemaintenance}!main.cpp@{main.cpp}}\index{main.cpp@{main.cpp}!action\_forcemaintenance@{action\_forcemaintenance}}}\mbox{\Hypertarget{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35ecae29910852151dc2fefa9b9f20b856643}\label{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35ecae29910852151dc2fefa9b9f20b856643}} 
+action\+\_\+forcemaintenance&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{action\_forceapplication@{action\_forceapplication}!main.cpp@{main.cpp}}\index{main.cpp@{main.cpp}!action\_forceapplication@{action\_forceapplication}}}\mbox{\Hypertarget{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35eca2038fa20cb3c3e72888aaa0ec1e10c3f}\label{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35eca2038fa20cb3c3e72888aaa0ec1e10c3f}} 
+action\+\_\+forceapplication&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{action\_query@{action\_query}!main.cpp@{main.cpp}}\index{main.cpp@{main.cpp}!action\_query@{action\_query}}}\mbox{\Hypertarget{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35eca137f11e08d1ac9b2beedd2a2216d265a}\label{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35eca137f11e08d1ac9b2beedd2a2216d265a}} 
+action\+\_\+query&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{action\_loaddatfile@{action\_loaddatfile}!main.cpp@{main.cpp}}\index{main.cpp@{main.cpp}!action\_loaddatfile@{action\_loaddatfile}}}\mbox{\Hypertarget{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35eca8e27af457e31e604013fbc74ad54f3d0}\label{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35eca8e27af457e31e604013fbc74ad54f3d0}} 
+action\+\_\+loaddatfile&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{action\_setstrainsn@{action\_setstrainsn}!main.cpp@{main.cpp}}\index{main.cpp@{main.cpp}!action\_setstrainsn@{action\_setstrainsn}}}\mbox{\Hypertarget{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35eca7a5f294c203d4b57717116bbbd717163}\label{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35eca7a5f294c203d4b57717116bbbd717163}} 
+action\+\_\+setstrainsn&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{action\_setstraingainsoffsets@{action\_setstraingainsoffsets}!main.cpp@{main.cpp}}\index{main.cpp@{main.cpp}!action\_setstraingainsoffsets@{action\_setstraingainsoffsets}}}\mbox{\Hypertarget{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35ecacee481cf56494198d0bb88bbbb4934a0}\label{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35ecacee481cf56494198d0bb88bbbb4934a0}} 
+action\+\_\+setstraingainsoffsets&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{action\_getcanboardversion@{action\_getcanboardversion}!main.cpp@{main.cpp}}\index{main.cpp@{main.cpp}!action\_getcanboardversion@{action\_getcanboardversion}}}\mbox{\Hypertarget{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35ecae96d81f294bfb3dfed7794cfebff9eb7}\label{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35ecae96d81f294bfb3dfed7794cfebff9eb7}} 
+action\+\_\+getcanboardversion&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{action\_savedatfile@{action\_savedatfile}!main.cpp@{main.cpp}}\index{main.cpp@{main.cpp}!action\_savedatfile@{action\_savedatfile}}}\mbox{\Hypertarget{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35ecace35fd8bdc1012481ccead8b251a9eec}\label{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35ecace35fd8bdc1012481ccead8b251a9eec}} 
+action\+\_\+savedatfile&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{action\_changeCanId@{action\_changeCanId}!main.cpp@{main.cpp}}\index{main.cpp@{main.cpp}!action\_changeCanId@{action\_changeCanId}}}\mbox{\Hypertarget{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35ecaecbd54d992687d08009bd9a02431d0e5}\label{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35ecaecbd54d992687d08009bd9a02431d0e5}} 
+action\+\_\+change\+Can\+Id&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{action\_changeBoardIp@{action\_changeBoardIp}!main.cpp@{main.cpp}}\index{main.cpp@{main.cpp}!action\_changeBoardIp@{action\_changeBoardIp}}}\mbox{\Hypertarget{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35eca3b6132d6650c820ddb72c64478bae5f8}\label{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35eca3b6132d6650c820ddb72c64478bae5f8}} 
+action\+\_\+change\+Board\+Ip&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{action\_setstrainft45gainsoffsets@{action\_setstrainft45gainsoffsets}!main.cpp@{main.cpp}}\index{main.cpp@{main.cpp}!action\_setstrainft45gainsoffsets@{action\_setstrainft45gainsoffsets}}}\mbox{\Hypertarget{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35eca1a98382a5b3770cda1c48fcc14b6054c}\label{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35eca1a98382a5b3770cda1c48fcc14b6054c}} 
+action\+\_\+setstrainft45gainsoffsets&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{action\_setstrainft58gainsoffsets@{action\_setstrainft58gainsoffsets}!main.cpp@{main.cpp}}\index{main.cpp@{main.cpp}!action\_setstrainft58gainsoffsets@{action\_setstrainft58gainsoffsets}}}\mbox{\Hypertarget{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35eca6af740b21615dd67a7b6525948cbe662}\label{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35eca6af740b21615dd67a7b6525948cbe662}} 
+action\+\_\+setstrainft58gainsoffsets&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{action\_setstraingainsspecificoffsets@{action\_setstraingainsspecificoffsets}!main.cpp@{main.cpp}}\index{main.cpp@{main.cpp}!action\_setstraingainsspecificoffsets@{action\_setstraingainsspecificoffsets}}}\mbox{\Hypertarget{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35eca44ae9c338931f643cdad04cc3e132f51}\label{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35eca44ae9c338931f643cdad04cc3e132f51}} 
+action\+\_\+setstraingainsspecificoffsets&\\
+\hline
+
+\end{DoxyEnumFields}
+
+
+Definition at line 21 of file main.\+cpp.
+
+\mbox{\Hypertarget{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a5c9cffbb3bff5696fb175d60fae4c4bc}\label{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a5c9cffbb3bff5696fb175d60fae4c4bc}} 
+\index{main.cpp@{main.cpp}!SensorModel@{SensorModel}}
+\index{SensorModel@{SensorModel}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{SensorModel}{SensorModel}}
+{\footnotesize\ttfamily enum \mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a5c9cffbb3bff5696fb175d60fae4c4bc}{Sensor\+Model}}\hspace{0.3cm}{\ttfamily [strong]}}
+
+\begin{DoxyEnumFields}{Enumerator}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{ft45@{ft45}!main.cpp@{main.cpp}}\index{main.cpp@{main.cpp}!ft45@{ft45}}}\mbox{\Hypertarget{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a5c9cffbb3bff5696fb175d60fae4c4bca6761bea82e602805ee9396f308fc699f}\label{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a5c9cffbb3bff5696fb175d60fae4c4bca6761bea82e602805ee9396f308fc699f}} 
+ft45&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{ft58@{ft58}!main.cpp@{main.cpp}}\index{main.cpp@{main.cpp}!ft58@{ft58}}}\mbox{\Hypertarget{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a5c9cffbb3bff5696fb175d60fae4c4bca62cc42764d0277ca95ed218b5532ee17}\label{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a5c9cffbb3bff5696fb175d60fae4c4bca62cc42764d0277ca95ed218b5532ee17}} 
+ft58&\\
+\hline
+
+\end{DoxyEnumFields}
+
+
+Definition at line 43 of file main.\+cpp.
+
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a636e1bc60c7e7f63f657683a52296efc}\label{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a636e1bc60c7e7f63f657683a52296efc}} 
+\index{main.cpp@{main.cpp}!changeBoardIp@{changeBoardIp}}
+\index{changeBoardIp@{changeBoardIp}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{changeBoardIp()}{changeBoardIp()}}
+{\footnotesize\ttfamily int change\+Board\+Ip (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classFirmwareUpdaterCore}{Firmware\+Updater\+Core}} $\ast$}]{core,  }\item[{QString}]{device,  }\item[{QString}]{id,  }\item[{QString}]{board,  }\item[{QString}]{newipaddr }\end{DoxyParamCaption})}
+
+
+
+Definition at line 779 of file main.\+cpp.
+
+\mbox{\Hypertarget{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a0271c1144693ae2e38460ddca1b37d0d}\label{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a0271c1144693ae2e38460ddca1b37d0d}} 
+\index{main.cpp@{main.cpp}!changeCanId@{changeCanId}}
+\index{changeCanId@{changeCanId}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{changeCanId()}{changeCanId()}}
+{\footnotesize\ttfamily int change\+Can\+Id (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classFirmwareUpdaterCore}{Firmware\+Updater\+Core}} $\ast$}]{core,  }\item[{QString}]{device,  }\item[{QString}]{id,  }\item[{QString}]{board,  }\item[{QString}]{can\+Line,  }\item[{QString}]{can\+Id,  }\item[{QString}]{can\+Id\+New }\end{DoxyParamCaption})}
+
+
+
+Definition at line 807 of file main.\+cpp.
+
+\mbox{\Hypertarget{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a9aec34e0a6ef917dbfaf2729277ab9b1}\label{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a9aec34e0a6ef917dbfaf2729277ab9b1}} 
+\index{main.cpp@{main.cpp}!checkApplicationLock@{checkApplicationLock}}
+\index{checkApplicationLock@{checkApplicationLock}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{checkApplicationLock()}{checkApplicationLock()}}
+{\footnotesize\ttfamily bool check\+Application\+Lock (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Definition at line 1840 of file main.\+cpp.
+
+\mbox{\Hypertarget{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a2bbe615bf0d3d5e6104b3662c76052fc}\label{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a2bbe615bf0d3d5e6104b3662c76052fc}} 
+\index{main.cpp@{main.cpp}!checkForAction@{checkForAction}}
+\index{checkForAction@{checkForAction}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{checkForAction()}{checkForAction()}}
+{\footnotesize\ttfamily void check\+For\+Action (\begin{DoxyParamCaption}\item[{bool \&}]{action\+Is\+Valid,  }\item[{\mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35ec}{action\+\_\+t}} const \&}]{action\+Value,  }\item[{\mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aec2532b33d2d66f09e5b30ed3ded35ec}{action\+\_\+t}} \&}]{action\+Result }\end{DoxyParamCaption})}
+
+
+
+Definition at line 732 of file main.\+cpp.
+
+\mbox{\Hypertarget{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a32aae35f243b79acb89e54afa4f25efe}\label{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a32aae35f243b79acb89e54afa4f25efe}} 
+\index{main.cpp@{main.cpp}!getCanBoardVersion@{getCanBoardVersion}}
+\index{getCanBoardVersion@{getCanBoardVersion}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{getCanBoardVersion()}{getCanBoardVersion()}}
+{\footnotesize\ttfamily int get\+Can\+Board\+Version (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classFirmwareUpdaterCore}{Firmware\+Updater\+Core}} $\ast$}]{core,  }\item[{QString}]{device,  }\item[{QString}]{id,  }\item[{QString}]{board,  }\item[{QString}]{can\+Line,  }\item[{QString}]{can\+Id,  }\item[{bool}]{save }\end{DoxyParamCaption})}
+
+
+
+Definition at line 863 of file main.\+cpp.
+
+\mbox{\Hypertarget{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aaeb3af22257dd8972e388e34cfaf3ea0}\label{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aaeb3af22257dd8972e388e34cfaf3ea0}} 
+\index{main.cpp@{main.cpp}!loadDatFileStrain2@{loadDatFileStrain2}}
+\index{loadDatFileStrain2@{loadDatFileStrain2}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{loadDatFileStrain2()}{loadDatFileStrain2()}}
+{\footnotesize\ttfamily int load\+Dat\+File\+Strain2 (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classFirmwareUpdaterCore}{Firmware\+Updater\+Core}} $\ast$}]{core,  }\item[{QString}]{device,  }\item[{QString}]{id,  }\item[{QString}]{board,  }\item[{QString}]{can\+Line,  }\item[{QString}]{can\+Id,  }\item[{QString}]{file,  }\item[{bool}]{erase\+EEprom }\end{DoxyParamCaption})}
+
+
+
+Definition at line 1099 of file main.\+cpp.
+
+\mbox{\Hypertarget{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a0ddf1224851353fc92bfbff6f499fa97}\label{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a0ddf1224851353fc92bfbff6f499fa97}} 
+\index{main.cpp@{main.cpp}!main@{main}}
+\index{main@{main}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{main()}{main()}}
+{\footnotesize\ttfamily int main (\begin{DoxyParamCaption}\item[{int}]{argc,  }\item[{char $\ast$}]{argv\mbox{[}$\,$\mbox{]} }\end{DoxyParamCaption})}
+
+
+
+Definition at line 82 of file main.\+cpp.
+
+\mbox{\Hypertarget{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a2bd0bf65680c4c833b0220eee57bfdfb}\label{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a2bd0bf65680c4c833b0220eee57bfdfb}} 
+\index{main.cpp@{main.cpp}!printCanDevices@{printCanDevices}}
+\index{printCanDevices@{printCanDevices}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{printCanDevices()}{printCanDevices()}}
+{\footnotesize\ttfamily void print\+Can\+Devices (\begin{DoxyParamCaption}\item[{QList$<$ \mbox{\hyperlink{structsBoard}{s\+Board}} $>$}]{can\+Boards,  }\item[{QString}]{on\+IPboard,  }\item[{bool}]{slimprint }\end{DoxyParamCaption})}
+
+
+
+Definition at line 1735 of file main.\+cpp.
+
+\mbox{\Hypertarget{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a426bc486a8b8b3dbd5f82096b97baaae}\label{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a426bc486a8b8b3dbd5f82096b97baaae}} 
+\index{main.cpp@{main.cpp}!printSecondLevelDevices@{printSecondLevelDevices}}
+\index{printSecondLevelDevices@{printSecondLevelDevices}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{printSecondLevelDevices()}{printSecondLevelDevices()}}
+{\footnotesize\ttfamily int print\+Second\+Level\+Devices (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classFirmwareUpdaterCore}{Firmware\+Updater\+Core}} $\ast$}]{core,  }\item[{QString}]{device,  }\item[{QString}]{id,  }\item[{bool}]{slimprint }\end{DoxyParamCaption})}
+
+
+
+Definition at line 1597 of file main.\+cpp.
+
+\mbox{\Hypertarget{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a7e6651f7b6288b9c36de5681befee5b0}\label{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a7e6651f7b6288b9c36de5681befee5b0}} 
+\index{main.cpp@{main.cpp}!printThirdLevelDevices@{printThirdLevelDevices}}
+\index{printThirdLevelDevices@{printThirdLevelDevices}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{printThirdLevelDevices()}{printThirdLevelDevices()}}
+{\footnotesize\ttfamily int print\+Third\+Level\+Devices (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classFirmwareUpdaterCore}{Firmware\+Updater\+Core}} $\ast$}]{core,  }\item[{QString}]{device,  }\item[{QString}]{id,  }\item[{QString}]{board,  }\item[{bool}]{force\+Maintenance,  }\item[{bool}]{force\+Application,  }\item[{bool}]{slimprint }\end{DoxyParamCaption})}
+
+
+
+Definition at line 1694 of file main.\+cpp.
+
+\mbox{\Hypertarget{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a2f58788c5069e4c5eaa8868cd290abd2}\label{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a2f58788c5069e4c5eaa8868cd290abd2}} 
+\index{main.cpp@{main.cpp}!programCanDevice@{programCanDevice}}
+\index{programCanDevice@{programCanDevice}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{programCanDevice()}{programCanDevice()}}
+{\footnotesize\ttfamily int program\+Can\+Device (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classFirmwareUpdaterCore}{Firmware\+Updater\+Core}} $\ast$}]{core,  }\item[{QString}]{device,  }\item[{QString}]{id,  }\item[{QString}]{board,  }\item[{QString}]{can\+Line,  }\item[{QString}]{can\+Id,  }\item[{QString}]{file,  }\item[{bool}]{erase\+EEprom }\end{DoxyParamCaption})}
+
+
+
+Definition at line 1489 of file main.\+cpp.
+
+\mbox{\Hypertarget{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aeb6e0c5ab571943c459025578af1a1fc}\label{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aeb6e0c5ab571943c459025578af1a1fc}} 
+\index{main.cpp@{main.cpp}!programEthDevice@{programEthDevice}}
+\index{programEthDevice@{programEthDevice}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{programEthDevice()}{programEthDevice()}}
+{\footnotesize\ttfamily int program\+Eth\+Device (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classFirmwareUpdaterCore}{Firmware\+Updater\+Core}} $\ast$}]{core,  }\item[{QString}]{device,  }\item[{QString}]{id,  }\item[{QString}]{board,  }\item[{QString}]{file }\end{DoxyParamCaption})}
+
+
+
+Definition at line 1564 of file main.\+cpp.
+
+\mbox{\Hypertarget{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aac03969891a45a641aeb42e628416475}\label{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aac03969891a45a641aeb42e628416475}} 
+\index{main.cpp@{main.cpp}!queryCanDevices@{queryCanDevices}}
+\index{queryCanDevices@{queryCanDevices}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{queryCanDevices()}{queryCanDevices()}}
+{\footnotesize\ttfamily int query\+Can\+Devices (\begin{DoxyParamCaption}\item[{QList$<$ \mbox{\hyperlink{structsBoard}{s\+Board}} $>$}]{can\+Boards,  }\item[{const QString}]{on\+IPboard,  }\item[{const QString \&}]{target\+CANline,  }\item[{const QString \&}]{target\+CANaddr }\end{DoxyParamCaption})}
+
+
+
+Definition at line 2281 of file main.\+cpp.
+
+\mbox{\Hypertarget{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_afb2b908d7a60046ff486c1ef8fdb5546}\label{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_afb2b908d7a60046ff486c1ef8fdb5546}} 
+\index{main.cpp@{main.cpp}!queryOnSecondLevel\_CANboard@{queryOnSecondLevel\_CANboard}}
+\index{queryOnSecondLevel\_CANboard@{queryOnSecondLevel\_CANboard}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{queryOnSecondLevel\_CANboard()}{queryOnSecondLevel\_CANboard()}}
+{\footnotesize\ttfamily int query\+On\+Second\+Level\+\_\+\+CANboard (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classFirmwareUpdaterCore}{Firmware\+Updater\+Core}} $\ast$}]{core,  }\item[{QString}]{device,  }\item[{QString}]{id,  }\item[{const QString \&}]{target\+CANline,  }\item[{const QString \&}]{target\+CANaddr }\end{DoxyParamCaption})}
+
+
+
+Definition at line 2360 of file main.\+cpp.
+
+\mbox{\Hypertarget{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a28120dbd0f9c560b6413737fc8235b7c}\label{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a28120dbd0f9c560b6413737fc8235b7c}} 
+\index{main.cpp@{main.cpp}!queryOnSecondLevel\_ETHboard@{queryOnSecondLevel\_ETHboard}}
+\index{queryOnSecondLevel\_ETHboard@{queryOnSecondLevel\_ETHboard}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{queryOnSecondLevel\_ETHboard()}{queryOnSecondLevel\_ETHboard()}}
+{\footnotesize\ttfamily int query\+On\+Second\+Level\+\_\+\+ETHboard (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classFirmwareUpdaterCore}{Firmware\+Updater\+Core}} $\ast$}]{core,  }\item[{QString}]{device,  }\item[{QString}]{id,  }\item[{const QString \&}]{target\+IPaddr }\end{DoxyParamCaption})}
+
+
+
+Definition at line 2167 of file main.\+cpp.
+
+\mbox{\Hypertarget{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a9f5996177db50a70cb30dab9af67c2a6}\label{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a9f5996177db50a70cb30dab9af67c2a6}} 
+\index{main.cpp@{main.cpp}!queryOnThirdLevel\_CANunderETH@{queryOnThirdLevel\_CANunderETH}}
+\index{queryOnThirdLevel\_CANunderETH@{queryOnThirdLevel\_CANunderETH}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{queryOnThirdLevel\_CANunderETH()}{queryOnThirdLevel\_CANunderETH()}}
+{\footnotesize\ttfamily int query\+On\+Third\+Level\+\_\+\+CANunder\+ETH (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classFirmwareUpdaterCore}{Firmware\+Updater\+Core}} $\ast$}]{core,  }\item[{QString}]{device,  }\item[{QString}]{id,  }\item[{const QString}]{board,  }\item[{const QString \&}]{target\+CANline,  }\item[{const QString \&}]{target\+CANaddr }\end{DoxyParamCaption})}
+
+
+
+Definition at line 2227 of file main.\+cpp.
+
+\mbox{\Hypertarget{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a89ef13f8b17c8ec3f5579e5397a44116}\label{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a89ef13f8b17c8ec3f5579e5397a44116}} 
+\index{main.cpp@{main.cpp}!removeApplicationLock@{removeApplicationLock}}
+\index{removeApplicationLock@{removeApplicationLock}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{removeApplicationLock()}{removeApplicationLock()}}
+{\footnotesize\ttfamily void remove\+Application\+Lock (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Definition at line 1870 of file main.\+cpp.
+
+\mbox{\Hypertarget{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a97066d9d567bccfb9161a4330aa0fdb4}\label{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a97066d9d567bccfb9161a4330aa0fdb4}} 
+\index{main.cpp@{main.cpp}!saveDatFileStrain2@{saveDatFileStrain2}}
+\index{saveDatFileStrain2@{saveDatFileStrain2}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{saveDatFileStrain2()}{saveDatFileStrain2()}}
+{\footnotesize\ttfamily int save\+Dat\+File\+Strain2 (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classFirmwareUpdaterCore}{Firmware\+Updater\+Core}} $\ast$}]{core,  }\item[{QString}]{device,  }\item[{QString}]{id,  }\item[{QString}]{board,  }\item[{QString}]{can\+Line,  }\item[{QString}]{can\+Id,  }\item[{bool}]{erase\+EEprom }\end{DoxyParamCaption})}
+
+
+
+Definition at line 1300 of file main.\+cpp.
+
+\mbox{\Hypertarget{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a80a9db91eb2815523c9cf42e3e8ca91b}\label{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a80a9db91eb2815523c9cf42e3e8ca91b}} 
+\index{main.cpp@{main.cpp}!setBoardToApplication@{setBoardToApplication}}
+\index{setBoardToApplication@{setBoardToApplication}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{setBoardToApplication()}{setBoardToApplication()}}
+{\footnotesize\ttfamily int set\+Board\+To\+Application (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classFirmwareUpdaterCore}{Firmware\+Updater\+Core}} $\ast$}]{core,  }\item[{QString}]{device,  }\item[{QString}]{id,  }\item[{QString}]{board }\end{DoxyParamCaption})}
+
+
+
+Definition at line 1463 of file main.\+cpp.
+
+\mbox{\Hypertarget{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a9cd7a75311f7446033ed6e1a8b7c62b6}\label{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a9cd7a75311f7446033ed6e1a8b7c62b6}} 
+\index{main.cpp@{main.cpp}!setBoardToMaintenance@{setBoardToMaintenance}}
+\index{setBoardToMaintenance@{setBoardToMaintenance}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{setBoardToMaintenance()}{setBoardToMaintenance()}}
+{\footnotesize\ttfamily int set\+Board\+To\+Maintenance (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classFirmwareUpdaterCore}{Firmware\+Updater\+Core}} $\ast$}]{core,  }\item[{QString}]{device,  }\item[{QString}]{id,  }\item[{QString}]{board }\end{DoxyParamCaption})}
+
+
+
+Definition at line 1475 of file main.\+cpp.
+
+\mbox{\Hypertarget{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_afe4f47583208dd0d8f2ccfcd4a13a4c4}\label{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_afe4f47583208dd0d8f2ccfcd4a13a4c4}} 
+\index{main.cpp@{main.cpp}!setStrainGainsOffsets@{setStrainGainsOffsets}}
+\index{setStrainGainsOffsets@{setStrainGainsOffsets}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{setStrainGainsOffsets()}{setStrainGainsOffsets()}}
+{\footnotesize\ttfamily int set\+Strain\+Gains\+Offsets (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classFirmwareUpdaterCore}{Firmware\+Updater\+Core}} $\ast$}]{core,  }\item[{QString}]{device,  }\item[{QString}]{id,  }\item[{QString}]{board,  }\item[{QString}]{can\+Line,  }\item[{QString}]{can\+Id,  }\item[{\mbox{\hyperlink{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a5c9cffbb3bff5696fb175d60fae4c4bc}{Sensor\+Model}}}]{model }\end{DoxyParamCaption})}
+
+
+
+Definition at line 934 of file main.\+cpp.
+
+\mbox{\Hypertarget{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a9c814641af70857cd25818a20dfee5ab}\label{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a9c814641af70857cd25818a20dfee5ab}} 
+\index{main.cpp@{main.cpp}!setStrainSn@{setStrainSn}}
+\index{setStrainSn@{setStrainSn}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{setStrainSn()}{setStrainSn()}}
+{\footnotesize\ttfamily int set\+Strain\+Sn (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classFirmwareUpdaterCore}{Firmware\+Updater\+Core}} $\ast$}]{core,  }\item[{QString}]{device,  }\item[{QString}]{id,  }\item[{QString}]{board,  }\item[{QString}]{can\+Line,  }\item[{QString}]{can\+Id,  }\item[{QString}]{serial\+Number }\end{DoxyParamCaption})}
+
+
+
+Definition at line 1038 of file main.\+cpp.
+
+\mbox{\Hypertarget{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a314a15e27aa713f65ae03b2240ba5c52}\label{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a314a15e27aa713f65ae03b2240ba5c52}} 
+\index{main.cpp@{main.cpp}!verifyCanDevices@{verifyCanDevices}}
+\index{verifyCanDevices@{verifyCanDevices}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{verifyCanDevices()}{verifyCanDevices()}}
+{\footnotesize\ttfamily int verify\+Can\+Devices (\begin{DoxyParamCaption}\item[{QList$<$ \mbox{\hyperlink{structsBoard}{s\+Board}} $>$}]{can\+Boards,  }\item[{const QString \&}]{target\+CANline,  }\item[{const QString \&}]{target\+CANaddr,  }\item[{const QString \&}]{target\+FWvers }\end{DoxyParamCaption})}
+
+
+
+Definition at line 2066 of file main.\+cpp.
+
+\mbox{\Hypertarget{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aa9d94cae6064e3c6f4cd0c25e9c786e7}\label{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aa9d94cae6064e3c6f4cd0c25e9c786e7}} 
+\index{main.cpp@{main.cpp}!verifyOnSecondLevel@{verifyOnSecondLevel}}
+\index{verifyOnSecondLevel@{verifyOnSecondLevel}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{verifyOnSecondLevel()}{verifyOnSecondLevel()}}
+{\footnotesize\ttfamily int verify\+On\+Second\+Level (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classFirmwareUpdaterCore}{Firmware\+Updater\+Core}} $\ast$}]{core,  }\item[{QString}]{device,  }\item[{QString}]{id,  }\item[{const QString \&}]{target\+IPaddr,  }\item[{const QString \&}]{target\+CANline,  }\item[{const QString \&}]{target\+CANaddr,  }\item[{const QString \&}]{target\+FWvers }\end{DoxyParamCaption})}
+
+
+
+Definition at line 1889 of file main.\+cpp.
+
+\mbox{\Hypertarget{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a0c540d4262b9af197b8f08578c3b1286}\label{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a0c540d4262b9af197b8f08578c3b1286}} 
+\index{main.cpp@{main.cpp}!verifyOnSecondLevel\_CANboard@{verifyOnSecondLevel\_CANboard}}
+\index{verifyOnSecondLevel\_CANboard@{verifyOnSecondLevel\_CANboard}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{verifyOnSecondLevel\_CANboard()}{verifyOnSecondLevel\_CANboard()}}
+{\footnotesize\ttfamily int verify\+On\+Second\+Level\+\_\+\+CANboard (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classFirmwareUpdaterCore}{Firmware\+Updater\+Core}} $\ast$}]{core,  }\item[{QString}]{device,  }\item[{QString}]{id,  }\item[{const QString \&}]{target\+CANline,  }\item[{const QString \&}]{target\+CANaddr,  }\item[{const QString \&}]{target\+FWvers }\end{DoxyParamCaption})}
+
+
+
+Definition at line 2046 of file main.\+cpp.
+
+\mbox{\Hypertarget{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aa7f18735a449bcc60bcfe62808f15f38}\label{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_aa7f18735a449bcc60bcfe62808f15f38}} 
+\index{main.cpp@{main.cpp}!verifyOnSecondLevel\_ETHboard@{verifyOnSecondLevel\_ETHboard}}
+\index{verifyOnSecondLevel\_ETHboard@{verifyOnSecondLevel\_ETHboard}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{verifyOnSecondLevel\_ETHboard()}{verifyOnSecondLevel\_ETHboard()}}
+{\footnotesize\ttfamily int verify\+On\+Second\+Level\+\_\+\+ETHboard (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classFirmwareUpdaterCore}{Firmware\+Updater\+Core}} $\ast$}]{core,  }\item[{QString}]{device,  }\item[{QString}]{id,  }\item[{const QString \&}]{target\+IPaddr,  }\item[{const QString \&}]{target\+FWvers }\end{DoxyParamCaption})}
+
+
+
+Definition at line 1967 of file main.\+cpp.
+
+\mbox{\Hypertarget{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a835c4eacfb72b67ad50d4cd0bedc6011}\label{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a835c4eacfb72b67ad50d4cd0bedc6011}} 
+\index{main.cpp@{main.cpp}!verifyOnThirdLevel\_CANunderETH@{verifyOnThirdLevel\_CANunderETH}}
+\index{verifyOnThirdLevel\_CANunderETH@{verifyOnThirdLevel\_CANunderETH}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{verifyOnThirdLevel\_CANunderETH()}{verifyOnThirdLevel\_CANunderETH()}}
+{\footnotesize\ttfamily int verify\+On\+Third\+Level\+\_\+\+CANunder\+ETH (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classFirmwareUpdaterCore}{Firmware\+Updater\+Core}} $\ast$}]{core,  }\item[{QString}]{device,  }\item[{QString}]{id,  }\item[{QString}]{board,  }\item[{const QString \&}]{target\+CANline,  }\item[{const QString \&}]{target\+CANaddr,  }\item[{const QString \&}]{target\+FWvers }\end{DoxyParamCaption})}
+
+
+
+Definition at line 2119 of file main.\+cpp.
+
+
+
+\doxysubsection{Variable Documentation}
+\mbox{\Hypertarget{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a1bdcfae3209cbd96db35a2ae356fa15e}\label{icub-main_2src_2tools_2FirmwareUpdater_2main_8cpp_a1bdcfae3209cbd96db35a2ae356fa15e}} 
+\index{main.cpp@{main.cpp}!verbosity@{verbosity}}
+\index{verbosity@{verbosity}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{verbosity}{verbosity}}
+{\footnotesize\ttfamily int verbosity = 1}
+
+
+
+Definition at line 17 of file main.\+cpp.
+

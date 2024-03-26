@@ -1,0 +1,298 @@
+\begin{DoxyAuthor}{Author}
+Ugo Pattacini
+\end{DoxyAuthor}
+\hypertarget{icub_gaze_interface_sec_gaze_intro}{}\doxysection{Introduction}\label{icub_gaze_interface_sec_gaze_intro}
+The YARP {\bfseries{Gaze Interface}} provides an abstract layer to control the \mbox{\hyperlink{namespaceiCub}{i\+Cub}} gaze in a bio-\/plausible way, moving the neck and the eyes independently and performing saccades, pursuit, vergence, OCR (oculo-\/collic reflex), VOR (vestibulo-\/ocular reflex) and gaze stabilization relying on inertial data.
+
+Essentially, the interface exports all the functionalities given by the \mbox{\hyperlink{group__iKinGazeCtrl}{i\+Kin\+Gaze\+Ctrl}} module directly from within the code without having to be concerned with the communication protocol done via YARP ports. Thus, the user is warmly invited to visit the \mbox{\hyperlink{group__iKinGazeCtrl}{i\+Kin\+Gaze\+Ctrl page}} where more detailed descriptions can be found.
+
+\begin{DoxyNote}{Note}
+{\bfseries{If you\textquotesingle{}re going to use this controller for your work, please quote it within any resulting publication}}\+: Roncone A., Pattacini U., Metta G. \& Natale L., \char`\"{}\+A Cartesian 6-\/\+Do\+F Gaze Controller for Humanoid Robots\char`\"{}, {\itshape Proceedings of Robotics\+: Science and Systems}, Ann Arbor, MI, June 18-\/22, 2016.
+\end{DoxyNote}
+\hypertarget{icub_gaze_interface_sec_gaze_dependencies}{}\doxysection{Dependencies}\label{icub_gaze_interface_sec_gaze_dependencies}
+In order to use the Gaze Interface, make sure that the following steps are done\+:
+
+
+\begin{DoxyEnumerate}
+\item Install the required \href{https://icub-tech-iit.github.io/documentation/sw_installation/}{\texttt{ software dependencies}}.
+\item Compile the \mbox{\hyperlink{namespaceiCub}{i\+Cub}} repository with the switch {\bfseries{ENABLE\+\_\+icubmod\+\_\+gazecontrollerclient}} enabled\+: this will make the client part of the interface available. The server part is represented by the module \mbox{\hyperlink{group__iKinGazeCtrl}{i\+Kin\+Gaze\+Ctrl}} itself.
+\end{DoxyEnumerate}\hypertarget{icub_gaze_interface_sec_gaze_runningserver}{}\doxysection{Running the Gaze Server}\label{icub_gaze_interface_sec_gaze_runningserver}
+Launch\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{iKinGazeCtrl}
+
+\end{DoxyCode}
+
+
+The server will load its parameters from the default configuration file (which can be overridden by the {\itshape context} and the {\itshape from} command-\/line options) containing information on the camera intrinsic parameters which are required to use some of the methods provided by the Gaze Interface, and specifically the {\itshape look\+At\+Mono\+Pixel()} and {\itshape look\+At\+Stereo\+Pixel()} method. ~\newline
+Furthermore, by using the installed copy of {\itshape \$\+ICUB\+\_\+\+ROOT/main/app/i\+Cub\+Startup/scripts/i\+Cub\+Startup.xml} application the user is also able to launch the gaze server contextually with the i\+Cub\+Interface module.\hypertarget{icub_gaze_interface_sec_gaze_opencloseinterface}{}\doxysection{Opening and Closing the Gaze Interface}\label{icub_gaze_interface_sec_gaze_opencloseinterface}
+The Gaze Interface can be opened as a normal YARP interface resorting to the {\itshape Poly\+Driver} class\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{Property option;}
+\DoxyCodeLine{option.put(\textcolor{stringliteral}{"{}device"{}},\textcolor{stringliteral}{"{}gazecontrollerclient"{}});}
+\DoxyCodeLine{option.put(\textcolor{stringliteral}{"{}remote"{}},\textcolor{stringliteral}{"{}/iKinGazeCtrl"{}});}
+\DoxyCodeLine{option.put(\textcolor{stringliteral}{"{}local"{}},\textcolor{stringliteral}{"{}/client/gaze"{}});}
+\DoxyCodeLine{}
+\DoxyCodeLine{PolyDriver clientGazeCtrl(option);}
+\DoxyCodeLine{}
+\DoxyCodeLine{IGazeControl *igaze=NULL;}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{keywordflow}{if} (clientGazeCtrl.isValid()) \{}
+\DoxyCodeLine{   clientGazeCtrl.view(igaze);}
+\DoxyCodeLine{\}}
+
+\end{DoxyCode}
+
+
+When you are done with controlling the robot you can explicitly close the device (or just let the destructor do it for you)\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{clientGazeCtrl.close();}
+
+\end{DoxyCode}
+\hypertarget{icub_gaze_interface_sec_gaze_useinterface}{}\doxysection{Using the Gaze Interface}\label{icub_gaze_interface_sec_gaze_useinterface}
+The YARP documentation contains a full description of {\bfseries{\href{https://yarp.it/latest/classyarp_1_1dev_1_1IGazeControl.html}{\texttt{ Gaze Interface}}}}. It makes use of three different coordinate systems that enable the user to control the robot\textquotesingle{}s gaze as detailed hereafter.\hypertarget{icub_gaze_interface_subsec_gaze_cartcoorsystem}{}\doxysubsection{Expressing the fixation point in Cartesian Coordinates}\label{icub_gaze_interface_subsec_gaze_cartcoorsystem}
+This coordinate system is the same as the one the \mbox{\hyperlink{icub_cartesian_interface}{Cartesian Interface}} relies on and complies with the \href{https://icub-tech-iit.github.io/documentation/icub_kinematics/icub-forward-kinematics/icub-forward-kinematics}{\texttt{ documentation}}; it lets the user to give the target location where to gaze at with respect to the root reference frame attached to the robot\textquotesingle{}s waist.
+
+The following snippet of code shows how to command the gaze in the Cartesian space and to retrieve the current configuration.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{Vector \mbox{\hyperlink{pcap__wrapper__linux_8cpp_ae44275d34c468c2018022eafb08b7179}{fp}}(3);}
+\DoxyCodeLine{\mbox{\hyperlink{pcap__wrapper__linux_8cpp_ae44275d34c468c2018022eafb08b7179}{fp}}[0]=-\/0.50;                                    \textcolor{comment}{// x-\/component [m]}}
+\DoxyCodeLine{\mbox{\hyperlink{pcap__wrapper__linux_8cpp_ae44275d34c468c2018022eafb08b7179}{fp}}[1]=+0.00;                                    \textcolor{comment}{// y-\/component [m]}}
+\DoxyCodeLine{\mbox{\hyperlink{pcap__wrapper__linux_8cpp_ae44275d34c468c2018022eafb08b7179}{fp}}[2]=+0.35;                                    \textcolor{comment}{// z-\/component [m]}}
+\DoxyCodeLine{}
+\DoxyCodeLine{igaze-\/>lookAtFixationPointSync(\mbox{\hyperlink{pcap__wrapper__linux_8cpp_ae44275d34c468c2018022eafb08b7179}{fp}});             \textcolor{comment}{// request to gaze at the desired fixation point and wait for reply (sync method)}}
+\DoxyCodeLine{igaze-\/>waitMotionDone();                        \textcolor{comment}{// wait until the operation is done}}
+\DoxyCodeLine{}
+\DoxyCodeLine{Vector \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}};}
+\DoxyCodeLine{igaze-\/>getFixationPoint(\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}});                     \textcolor{comment}{// retrieve the current fixation point}}
+\DoxyCodeLine{}
+\DoxyCodeLine{cout<<\textcolor{stringliteral}{"{}final error = "{}}<<\mbox{\hyperlink{group__Maths_ga791f0548018b3597da95e70a3b226806}{norm}}(\mbox{\hyperlink{pcap__wrapper__linux_8cpp_ae44275d34c468c2018022eafb08b7179}{fp}}-\/\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}})<<endl;       \textcolor{comment}{// return a measure of the displacement error}}
+
+\end{DoxyCode}
+
+
+We have also here {\bfseries{sync}} and {\bfseries{non-\/sync}} methods for yielding gazing movements, therefore we refer the reader to the \mbox{\hyperlink{icub_cartesian_interface}{Cartesian Interface}} to get insights on their peculiarities.\hypertarget{icub_gaze_interface_subsec_gaze_absangcoorsystem}{}\doxysubsection{Expressing the fixation point in Absolute Angular Coordinate System}\label{icub_gaze_interface_subsec_gaze_absangcoorsystem}
+This coordinate system is an absolute head-\/centered angular reference frame as explained below\+:
+\begin{DoxyItemize}
+\item {\itshape Angular} means that it makes use of the azimuth, elevation and vergence that are angular quantities.
+\item {\itshape Head-\/\+Centered} means that the frame is attached at the middle point between the two cameras owning the same set of three axes.
+\item {\itshape Absolute} indicates that it remains still irrespective of the robot motion and it refers to the position of the head when the robot is in rest configuration (i.\+e. torso and head angles zeroed).
+\end{DoxyItemize}
+
+For instance, to specify a desired location where to look at in this coordinate system, one can write\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{Vector ang(3);}
+\DoxyCodeLine{ang[0]=+10.0;                   \textcolor{comment}{// azimuth-\/component [deg]}}
+\DoxyCodeLine{ang[1]=-\/05.0;                   \textcolor{comment}{// elevation-\/component [deg]}}
+\DoxyCodeLine{ang[2]=+20.0;                   \textcolor{comment}{// vergence-\/component [deg]}}
+\DoxyCodeLine{}
+\DoxyCodeLine{igaze-\/>lookAtAbsAngles(ang);    \textcolor{comment}{// move the gaze}}
+\DoxyCodeLine{}
+\DoxyCodeLine{...}
+\DoxyCodeLine{}
+\DoxyCodeLine{igaze-\/>getAngles(ang);          \textcolor{comment}{// get the current angular configuration}}
+
+\end{DoxyCode}
+\hypertarget{icub_gaze_interface_subsec_gaze_relangcoorsystem}{}\doxysubsection{Expressing the fixation point in Relative Angular Coordinate System}\label{icub_gaze_interface_subsec_gaze_relangcoorsystem}
+Also the relative angular coordinate system is available which is basically the same as the absolute one but refers to the current configuration of the head-\/centered frame. Hence we can use\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{Vector ang(3);}
+\DoxyCodeLine{ang[0]=+10.0;   \textcolor{comment}{// azimuth-\/relative component wrt the current configuration [deg]}}
+\DoxyCodeLine{ang[1]=-\/05.0;   \textcolor{comment}{// elevation-\/relative component wrt the current configuration [deg]}}
+\DoxyCodeLine{ang[2]=+20.0;   \textcolor{comment}{// vergence-\/relative component wrt the current configuration [deg]}}
+\DoxyCodeLine{}
+\DoxyCodeLine{igaze-\/>lookAtRelAngles(ang);    \textcolor{comment}{// move the gaze wrt the current configuration}}
+
+\end{DoxyCode}
+\hypertarget{icub_gaze_interface_subsec_gaze_monopixelcoorsystem}{}\doxysubsection{Expressing the fixation point in pixel coordinates (monocular approach)}\label{icub_gaze_interface_subsec_gaze_monopixelcoorsystem}
+The user can also command the gaze by specifying a location within the image plane of one camera as follows\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{keywordtype}{int} camSel=0;   \textcolor{comment}{// select the image plane: 0 (left), 1 (right)}}
+\DoxyCodeLine{}
+\DoxyCodeLine{Vector px(2);   \textcolor{comment}{// specify the pixel where to look}}
+\DoxyCodeLine{px[0]=160.0;}
+\DoxyCodeLine{px[1]=120.0;}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{keywordtype}{double} \mbox{\hyperlink{show__eyes__axes_8m_a25ed1bcb423b0b7200f485fc5ff71c8e}{z}}=1.0;   \textcolor{comment}{// distance [m] of the object from the image plane (extended to infinity): yes, you probably need to guess, but it works pretty robustly}}
+\DoxyCodeLine{}
+\DoxyCodeLine{igaze-\/>lookAtMonoPixel(camSel,px,\mbox{\hyperlink{show__eyes__axes_8m_a25ed1bcb423b0b7200f485fc5ff71c8e}{z}});    \textcolor{comment}{// look!}}
+
+\end{DoxyCode}
+ What the interface will internally execute is to retrieve the corresponding 3D point through a call to {\itshape get3\+DPoint()} to then use this result to command an equivalent Cartesian displacement as in the following\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{Vector \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}};}
+\DoxyCodeLine{igaze-\/>get3DPoint(camSel,px,\mbox{\hyperlink{show__eyes__axes_8m_a25ed1bcb423b0b7200f485fc5ff71c8e}{z}},\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}});}
+\DoxyCodeLine{igaze-\/>lookAtFixationPoint(\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}});}
+
+\end{DoxyCode}
+ The benefit of {\itshape look\+At\+Mono\+Pixel()} method is clearly that the time for the rpc communication is saved, hence it is particularly designed for control in streaming mode; on the other hand, the knowledge of the Cartesian point remains hidden to the user, unless it is retrieved at the end of the motion through a call to {\itshape get\+Fixation\+Point()}. ~\newline
+Alternatively, one can think to rely on the vergence angle given in degrees in place of the the component z, accounting for a different way of expressing distances from the eyes. To this end, the user can call the proper method {\itshape look\+At\+Mono\+Pixel\+With\+Vergence(cam\+Sel,px,ver)}.\hypertarget{icub_gaze_interface_subsec_gaze_stereopixelcoorsystem}{}\doxysubsection{Expressing the fixation point in pixel coordinates (stereo approach)}\label{icub_gaze_interface_subsec_gaze_stereopixelcoorsystem}
+The same thing can be achieved also by exploiting the stereo vision\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{Vector c(2), pxl(2), pxr(2);}
+\DoxyCodeLine{c[0]=160.0;     \textcolor{comment}{// center of image plane}}
+\DoxyCodeLine{c[1]=120.0;}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{keywordtype}{bool} converged=\textcolor{keyword}{false};}
+\DoxyCodeLine{\textcolor{keywordflow}{while} (!converged)}
+\DoxyCodeLine{\{}
+\DoxyCodeLine{    pxl[0]=...;         \textcolor{comment}{// specify somehow the pixel within the left image plane}}
+\DoxyCodeLine{    pxl[1]=...;}
+\DoxyCodeLine{}
+\DoxyCodeLine{    pxr[0]=...;         \textcolor{comment}{// specify somehow the pixel within the right image plane}}
+\DoxyCodeLine{    pxr[1]=...;}
+\DoxyCodeLine{}
+\DoxyCodeLine{    igaze-\/>lookAtStereoPixels(pxl,pxr);                 \textcolor{comment}{// look!}}
+\DoxyCodeLine{}
+\DoxyCodeLine{    converged=(0.5*(\mbox{\hyperlink{group__Maths_ga791f0548018b3597da95e70a3b226806}{norm}}(c-\/pxl)+\mbox{\hyperlink{group__Maths_ga791f0548018b3597da95e70a3b226806}{norm}}(c-\/pxr))<5);        \textcolor{comment}{// recompute somehow the convergence status}}
+\DoxyCodeLine{\}}
+
+\end{DoxyCode}
+ Of course, the matching problem between pixels of different image planes is left to the user, who has also to provide a continuous visual feedback while converging to the target.\hypertarget{icub_gaze_interface_subsec_gaze_geometrypixels}{}\doxysubsection{Geometry of pixels}\label{icub_gaze_interface_subsec_gaze_geometrypixels}
+It might be useful sometimes to perform an homography in order to retrieve the projection of a pixel into a plane specified in the 3D space\+: let\textquotesingle{}s think for instance to the context of the robot presented with a number of objects that all lie on a table. The table introduces a constraint that allows determining the component z of the point in case the monocular approach is used. 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{keywordtype}{int} camSel=0;   \textcolor{comment}{// select the image plane: 0 (left), 1 (right)}}
+\DoxyCodeLine{}
+\DoxyCodeLine{Vector px(2);   \textcolor{comment}{// specify the pixel where to look}}
+\DoxyCodeLine{px[0]=160.0;}
+\DoxyCodeLine{px[1]=120.0;}
+\DoxyCodeLine{}
+\DoxyCodeLine{Vector plane(4);  \textcolor{comment}{// specify the plane in the root reference frame as ax+by+cz+d=0; z=-\/0.12 in this case}}
+\DoxyCodeLine{plane[0]=0.0;     \textcolor{comment}{// a}}
+\DoxyCodeLine{plane[1]=0.0;     \textcolor{comment}{// b}}
+\DoxyCodeLine{plane[2]=1.0;     \textcolor{comment}{// c}}
+\DoxyCodeLine{plane[3]=0.12;    \textcolor{comment}{// d}}
+\DoxyCodeLine{}
+\DoxyCodeLine{Vector \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}};}
+\DoxyCodeLine{igaze-\/>get3DPointOnPlane(camSel,px,plane,\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}});    \textcolor{comment}{// get the projection}}
+
+\end{DoxyCode}
+ It is possible to execute a triangulation to find from the pixels in the images the corresponding 3D point in the space. This problem is solved through a least-\/squares minimization. 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{Vector pxl(2), pxr(2);}
+\DoxyCodeLine{pxl[0]=...;         \textcolor{comment}{// specify somehow the pixel within the left image plane}}
+\DoxyCodeLine{pxl[1]=...;}
+\DoxyCodeLine{}
+\DoxyCodeLine{pxr[0]=...;         \textcolor{comment}{// specify somehow the pixel within the right image plane}}
+\DoxyCodeLine{pxr[1]=...;}
+\DoxyCodeLine{}
+\DoxyCodeLine{Vector \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}};}
+\DoxyCodeLine{igaze-\/>triangulate3DPoint(pxl,pxr,\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}});}
+
+\end{DoxyCode}
+ Importantly, the triangulation is strongly affected by uncertainties in the cameras alignment, so that, unless these unknowns are perfectly compensated, to fixate in stereo mode it is advisable to rely on the method {\itshape look\+At\+Stereo\+Pixels()}.\hypertarget{icub_gaze_interface_subsec_gaze_fastsaccadicmode}{}\doxysubsection{Fast Saccadic Mode}\label{icub_gaze_interface_subsec_gaze_fastsaccadicmode}
+The user has the possibility to enable the fast saccadic mode that employs the low level position control in order to generate very fast saccadic movements of the eyes. To achieve that, one can simply do the following\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{igaze-\/>setSaccadesMode(\textcolor{keyword}{true});}
+
+\end{DoxyCode}
+ After a saccade is executed, the next saccadic movement can be performed only after a given inhibition period of time, that in turn can be retrieved and/or tuned relying on specific methods (i.\+e. {\itshape get/set\+Saccades\+Inhibition\+Period()}). ~\newline
+The controller chooses to perform a saccade only if the angular distance of the target from the straight-\/ahead line overcomes a given threshold the user might profitable tune relying on dedicated methods (i.\+e. {\itshape get/set\+Saccades\+Activation\+Angle()}). ~\newline
+ ~\newline
+{\itshape Caveat}\+: vision processing algorithms that assume the continuity of the images flow might be heavily affected by saccades.\hypertarget{icub_gaze_interface_subsec_gaze_stabilization}{}\doxysubsection{Gaze Stabilization}\label{icub_gaze_interface_subsec_gaze_stabilization}
+The controller can be instructed to do its best in order to keep the fixation point unvaried under the effect of external disturbances/movements. The gaze stabilization makes use of inertial data to accomplish the job and entails that corrections will be sent to the eyes too (therefore, it is not a mere head stabilization). To enable the gaze stabilization, call the following method\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{igaze-\/>setStabilizationMode(\textcolor{keyword}{true});}
+
+\end{DoxyCode}
+ The stabilization is always active also during point-\/to-\/point motion or while tracking a moving reference, regardless of the current setting for the above mode and unless the stabilization has been purposely disabled (via command-\/line option), so that any disturbance occurring during that motion will be compesated for. In this respect, the difference between the {\itshape stabilization mode} and the {\itshape tracking mode} is that in the former modality the fixation point is stabilized in the \char`\"{}world\char`\"{} coordinate system, thus this mode turns to be particularly suitable for robot balancing and walking, while in the latter modality the fixation point will be always tracked in the robot\textquotesingle{}s root reference frame, which might be moving with respect to the world as well. ~\newline
+When the stabilization is active and the robot is purely compensating for external disturbances, the neck and eyes limits customized by the user are not taken into account, thus spanning their whole admittable range. \begin{DoxyNote}{Note}
+For further details about gaze stabilization refer to\+: Roncone A., Pattacini U., Metta G. \& Natale L., \char`\"{}\+Gaze Stabilization for Humanoid Robots\+: a Comprehensive Framework\char`\"{}, {\itshape IEEE-\/\+RAS International Conference on Humanoid Robots}, Madrid, Spain, November 18-\/20, 2014.
+\end{DoxyNote}
+\hypertarget{icub_gaze_interface_sec_gaze_contextswitch}{}\doxysection{Context Switch}\label{icub_gaze_interface_sec_gaze_contextswitch}
+We define here the {\itshape context} as the configuration in which the controller operates\+: therefore the context includes the current tracking mode, the eyes and neck trajectory execution time and so on. Obviously the controller performs the same action differently depending on the current context. A way to easily switch among contexts is to rely on {\itshape store\+Context()} and {\itshape restore\+Context()} methods as follows\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{igaze-\/>setEyesTrajTime(0.5);            \textcolor{comment}{// here the user prepares the context}}
+\DoxyCodeLine{igaze-\/>setTrackingMode(\textcolor{keyword}{true});}
+\DoxyCodeLine{igaze-\/>bindNeckPitch();}
+\DoxyCodeLine{...}
+\DoxyCodeLine{int context\_0;}
+\DoxyCodeLine{igaze-\/>storeContext(\&context\_0);        \textcolor{comment}{// latch the context}}
+\DoxyCodeLine{}
+\DoxyCodeLine{igaze-\/>setNeckTrajTime(1.5);            \textcolor{comment}{// at certain point the user may want the controller to}}
+\DoxyCodeLine{igaze-\/>clearNeckPitch();                \textcolor{comment}{// perform some actions with different configuration}}
+\DoxyCodeLine{igaze-\/>lookAtFixationPoint(\mbox{\hyperlink{pcap__wrapper__linux_8cpp_ae44275d34c468c2018022eafb08b7179}{fp}});}
+\DoxyCodeLine{...}
+\DoxyCodeLine{}
+\DoxyCodeLine{igaze-\/>restoreContext(context\_0);       \textcolor{comment}{// ... and then retrieve the stored context\_0}}
+\DoxyCodeLine{igaze-\/>lookAtFixationPoint(\mbox{\hyperlink{pcap__wrapper__linux_8cpp_ae44275d34c468c2018022eafb08b7179}{fp}});         \textcolor{comment}{// now the controller performs the same action but within the context\_0}}
+
+\end{DoxyCode}
+ Unless the user needs the interface just for logging purposes, it\textquotesingle{}s a good rule to store the context at the initialization of his module in order to then restore it at releasing time to preserve the controller configuration. ~\newline
+Note that the special context tagged with the id 0 is reserved by the system to let the user restore the start-\/up configuration of the controller at any time.\hypertarget{icub_gaze_interface_sec_gaze_eventscallbacks}{}\doxysection{Events Callbacks}\label{icub_gaze_interface_sec_gaze_eventscallbacks}
+The Gaze Interface provides also an easy way to register events callbacks. For example, an event might be represented by the onset of the movement when the controller gets activated by receiving a new target or the end of the movement itself. The user can then attach a callback to any event generated by the interface. ~\newline
+It is required to inherit from the specific class {\itshape Gaze\+Event} that handles events and overrides the {\itshape gaze\+Event\+Callback()} method. 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{keyword}{class }MotionDoneEvent : \textcolor{keyword}{public} GazeEvent}
+\DoxyCodeLine{\{}
+\DoxyCodeLine{\textcolor{keyword}{public}:}
+\DoxyCodeLine{   MotionDoneEvent()}
+\DoxyCodeLine{   \{}
+\DoxyCodeLine{      gazeEventParameters.type=\textcolor{stringliteral}{"{}motion-\/done"{}};      \textcolor{comment}{// select here the event type we want to listen to}}
+\DoxyCodeLine{   \}}
+\DoxyCodeLine{}
+\DoxyCodeLine{   \textcolor{keyword}{virtual} \textcolor{keywordtype}{void} gazeEventCallback()}
+\DoxyCodeLine{   \{}
+\DoxyCodeLine{      cout<<\textcolor{stringliteral}{"{}motion complete"{}}<<endl;}
+\DoxyCodeLine{   \}}
+\DoxyCodeLine{\};}
+\DoxyCodeLine{}
+\DoxyCodeLine{MotionDoneEvent event;}
+\DoxyCodeLine{igaze-\/>registerEvent(event);                       \textcolor{comment}{// the tag "{}motion-\/done"{} identifies the event to be notified}}
+\DoxyCodeLine{igaze-\/>lookAtFixationPoint(\mbox{\hyperlink{pcap__wrapper__linux_8cpp_ae44275d34c468c2018022eafb08b7179}{fp}});                    \textcolor{comment}{// as soon as the motion is complete, the callback will print out the message}}
+
+\end{DoxyCode}
+
+
+To know which events are available for notification, the user can do\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{Bottle \mbox{\hyperlink{namespaceiCub_1_1action_1_1log_a4ba5ea132464d0ea49d618130163c769a432470a52cfded222c35744229d1069e}{info}};}
+\DoxyCodeLine{igaze-\/>getInfo(\mbox{\hyperlink{namespaceiCub_1_1action_1_1log_a4ba5ea132464d0ea49d618130163c769a432470a52cfded222c35744229d1069e}{info}});}
+\DoxyCodeLine{cout<<\mbox{\hyperlink{namespaceiCub_1_1action_1_1log_a4ba5ea132464d0ea49d618130163c769a432470a52cfded222c35744229d1069e}{info}}.find(\textcolor{stringliteral}{"{}events"{}}).asList()-\/>toString().c\_str()<<endl;}
+
+\end{DoxyCode}
+
+
+The class {\itshape Gaze\+Event} contains two structures\+: the {\itshape gaze\+Event\+Parameters} and the {\itshape gaze\+Event\+Variables}. The former has to be filled by the user to set up the event details, whereas the latter is filled directly by the event handler in order to provide information to the callback. ~\newline
+For instance, to raise a callback at the middle point of the path, one can do\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{keyword}{class }MotionMiddleEvent : \textcolor{keyword}{public} GazeEvent}
+\DoxyCodeLine{\{}
+\DoxyCodeLine{\textcolor{keyword}{public}:}
+\DoxyCodeLine{   MotionMiddleEvent()}
+\DoxyCodeLine{   \{}
+\DoxyCodeLine{      gazeEventParameters.type=\textcolor{stringliteral}{"{}motion-\/ongoing"{}};}
+\DoxyCodeLine{      gazeEventParameters.motionOngoingCheckPoint=0.5;   \textcolor{comment}{// middle point is at 50\% of the path}}
+\DoxyCodeLine{   \}}
+\DoxyCodeLine{}
+\DoxyCodeLine{   \textcolor{keyword}{virtual} \textcolor{keywordtype}{void} gazeEventCallback()}
+\DoxyCodeLine{   \{}
+\DoxyCodeLine{      cout<<\textcolor{stringliteral}{"{}attained the "{}}<<100.0*gazeEventVariables.motionOngoingCheckPoint;}
+\DoxyCodeLine{      cout<<\textcolor{stringliteral}{"{}\% of the path"{}}<<endl;}
+\DoxyCodeLine{   \}}
+\DoxyCodeLine{\};}
+
+\end{DoxyCode}
+
+
+The special wildcard \char`\"{}$\ast$\char`\"{} can be used to assign a callback to any event, regardless of its type, as done below. 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{keyword}{class }GeneralEvent : \textcolor{keyword}{public} GazeEvent}
+\DoxyCodeLine{\{}
+\DoxyCodeLine{\textcolor{keyword}{public}:}
+\DoxyCodeLine{   GeneralEvent()}
+\DoxyCodeLine{   \{}
+\DoxyCodeLine{      gazeEventParameters.type=\textcolor{stringliteral}{"{}*"{}};}
+\DoxyCodeLine{   \}}
+\DoxyCodeLine{}
+\DoxyCodeLine{   \textcolor{keyword}{virtual} \textcolor{keywordtype}{void} gazeEventCallback()}
+\DoxyCodeLine{   \{}
+\DoxyCodeLine{      cout<<\textcolor{stringliteral}{"{}event of type: "{}}<<gazeEventVariables.type.c\_str()<<endl;}
+\DoxyCodeLine{      cout<<\textcolor{stringliteral}{"{}happened at:   "{}}<<gazeEventVariables.time<< \textcolor{stringliteral}{"{}[s] (source time)"{}}<<endl;}
+\DoxyCodeLine{   \}}
+\DoxyCodeLine{\};}
+
+\end{DoxyCode}
+ 

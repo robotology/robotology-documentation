@@ -1,0 +1,374 @@
+\begin{DoxyAuthor}{Author}
+Ugo Pattacini
+\end{DoxyAuthor}
+\hypertarget{icub_cartesian_interface_sec_cart_intro}{}\doxysection{Introduction}\label{icub_cartesian_interface_sec_cart_intro}
+The YARP {\bfseries{Cartesian Interface}} has been conceived in order to enable the control of the arms and the legs of the robot directly in the operational space, that is instead of commanding new configuration for the joints, user can require for instance the arm to reach a specified pose in the Cartesian space, expressed as a combination of a 3d point to be attained by the end-\/effector (the center of the palm in this case) along with the desired orientation given in axis-\/angle representation.
+
+Before proceeding, the reader might find helpful to recap some motor control fundamentals (see \mbox{\hyperlink{icub_motor_control_tutorial}{here}}) as well as to be introduced to the underneath topic of forward and inverse kinematics by going through the \mbox{\hyperlink{group__iKin}{i\+Kin}} documentation and tutorials.
+
+The architecture of the Cartesian Interface is based on three components\+: 1) a complex {\bfseries{nonlinear optimizer}} that handles the inverse kinematics problem; 2) a {\bfseries{biologically inspired controller}} that represents the server part of the interface and is responsible for generating the human-\/like velocity profiles to move the system from its initial state to the joints configuration found by the solver; 3) a {\bfseries{client}} part that exposes a collection of C++ methods to abstract the interface from its specific implementation. ~\newline
+Alternatively, the client can act as a pure wrapper over the solver coping with the inverse kinematics, whereas the user might consider developing his own controller meeting some specific requirements. However, also in this configuration, the server part needs to be launched (even if not employed) as a gateway to let the client communicate with the solver.
+
+\begin{DoxyNote}{Note}
+{\bfseries{If you\textquotesingle{}re going to use this controller for your work, please quote it within any resulting publication}}\+: U. Pattacini, F. Nori, L. Natale, G. Metta, G. Sandini, \char`\"{}\+An Experimental Evaluation of a Novel Minimum-\/\+Jerk Cartesian Controller for Humanoid Robots\char`\"{}, {\itshape IEEE/\+RSJ International Conference on Intelligent Robots and Systems}, Taipei, Taiwan, 2010.
+\end{DoxyNote}
+\hypertarget{icub_cartesian_interface_sec_cart_dependencies}{}\doxysection{Dependencies}\label{icub_cartesian_interface_sec_cart_dependencies}
+In order to use the Cartesian Interface, make sure that the following steps are done\+: ~\newline
+\mbox{[}Note that the term {\itshape cluster} refers to the set of computers directly connected to the robot network, whereas {\itshape icub-\/head} indicates the hub board mounted on the robot\mbox{]}
+
+
+\begin{DoxyEnumerate}
+\item Install the required \href{https://icub-tech-iit.github.io/documentation/sw_installation/}{\texttt{ software dependencies}}.
+\item On the cluster\+: compile the repository with the switch {\bfseries{ENABLE\+\_\+icubmod\+\_\+cartesiancontrollerclient}} enabled. This will make the client part of the interface available.
+\item On icub-\/head\+: compile the repository with the switch {\bfseries{ENABLE\+\_\+icubmod\+\_\+cartesiancontrollerserver}} enabled. This will make the server part of the interface available on the hub.
+\end{DoxyEnumerate}
+
+{\bfseries{i\+Cub\+Startup Application \mbox{\hyperlink{classLauncher}{Launcher}}}} ~\newline
+ Henceforth rely on the installed copy of {\itshape \$\+ICUB\+\_\+\+ROOT/main/app/i\+Cub\+Startup/scripts/i\+Cub\+Startup.xml.\+template} application to launch both the Cartesian solvers (and other useful tools as well). ~\newline
+The \mbox{\hyperlink{group__iKinCartesianSolver}{Cartesian Solvers}} are required to invert the kinematics using Ipopt and they are meant to run on the cluster to avoid overloading the icub-\/head core. Make sure that the machines where the solvers will be running are configured properly to work with the specific robot (e.\+g. the {\bfseries{YARP\+\_\+\+ROBOT\+\_\+\+NAME}} correctly points to the name of the robot) in order to load at start-\/up the robot dependent kinematics. ~\newline
+The solvers need the robot\+Interface to connect to the robot to get useful data to operate (e.\+g. the joints bounds) and also the robot\+Interface needs them to open the server side of the Cartesian Interface. Therefore the {\itshape chicken-\/egg} problem is solved by applying proper connection timeout to the solvers and to keep them as close as possible to the robot\+Interface by using the application. Moreover, once everything is launched from within the application, if the user {\itshape accidentally} stops one of these modules, it turns to be mandatory to restart all of them from the beginning; this comes from the requirement to keep the communication protocol as light as possible, avoiding requests for integrity check and reinitialization. ~\newline
+\hypertarget{icub_cartesian_interface_sec_cart_opencloseinterface}{}\doxysection{Opening and Closing the Cartesian Interface}\label{icub_cartesian_interface_sec_cart_opencloseinterface}
+The Cartesian Interface can be opened as a normal YARP interface resorting to the {\itshape Poly\+Driver} class\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{Property option;}
+\DoxyCodeLine{option.put(\textcolor{stringliteral}{"{}device"{}},\textcolor{stringliteral}{"{}cartesiancontrollerclient"{}});}
+\DoxyCodeLine{option.put(\textcolor{stringliteral}{"{}remote"{}},\textcolor{stringliteral}{"{}/icub/cartesianController/right\_arm"{}});}
+\DoxyCodeLine{option.put(\textcolor{stringliteral}{"{}local"{}},\textcolor{stringliteral}{"{}/client/right\_arm"{}});}
+\DoxyCodeLine{}
+\DoxyCodeLine{PolyDriver clientCartCtrl(option);}
+\DoxyCodeLine{}
+\DoxyCodeLine{ICartesianControl *icart=NULL;}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{keywordflow}{if} (clientCartCtrl.isValid()) \{}
+\DoxyCodeLine{   clientCartCtrl.view(icart);}
+\DoxyCodeLine{\}}
+
+\end{DoxyCode}
+
+
+As you might have noticed, the stem-\/name of the Cartesian server controller (taken as standard) is \char`\"{}/$<$robot\+\_\+name$>$/cartesian\+Controller/$<$part\+\_\+name$>$\char`\"{}. Thus, similarly to a usual motor controller, a state port streaming out the Cartesian pose of the limb\textquotesingle{}s end-\/effector is also available whose name is \char`\"{}/$<$robot\+\_\+name$>$/cartesian\+Controller/$<$part\+\_\+name$>$/state\+:o\char`\"{}. As result you can do\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\mbox{\hyperlink{namespaceyarp}{yarp}} \mbox{\hyperlink{namespaceeth_1_1parser_a8ec58da625146082584ad1a365bdd0e5}{read}} /\mbox{\hyperlink{namespaceeth_1_1parser_a8ec58da625146082584ad1a365bdd0e5}{read}} /icub/cartesianController/right\_arm/\mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104ab}{state}}:o}
+
+\end{DoxyCode}
+ getting the current pose of the right hand end-\/effector expressed with seven double $ \left[x,y,z,a_x,a_y,a_z,\theta\right] $, where the first three components are the 3d location of the center of the palm, whilst the final four describe the rotation of the frame attached to the end-\/effector with respect to the root reference frame in axis/angle notation (see \mbox{\hyperlink{icub_cartesian_interface_sec_cart_coordsystem}{Coordinate System}}).
+
+When you are done with controlling the robot you can explicitly close the device (or just let the destructor do it for you)\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{clientCartCtrl.close();}
+
+\end{DoxyCode}
+\hypertarget{icub_cartesian_interface_sec_cart_coordsystem}{}\doxysection{Coordinate System}\label{icub_cartesian_interface_sec_cart_coordsystem}
+Central for a correct usage of the Cartesian controller is the knowledge of the coordinate system that shall be adopted to describe any desired limb pose.
+
+Positions (in meters) and orientation refer to the root frame attached to the waist as in the \href{https://icub-tech-iit.github.io/documentation/icub_kinematics/icub-forward-kinematics/icub-forward-kinematics}{\texttt{ documentation}}. ~\newline
+The root {\bfseries{x-\/axis}} points backward, the {\bfseries{y-\/axis}} points rightward, while the {\bfseries{z-\/axis}} points upward.
+
+To specify a target orientation of the end-\/effector, you have to provide three components for the rotation axis (whose norm is 1) and a fourth component for the rotation angle expressed in radians as required by the axis/angle notation (see \href{http://en.wikipedia.org/wiki/Axis_angle}{\texttt{ here}}). ~\newline
+The axis/angle format compacts the notation and protects from some singularities that might appear when the Euler angles are adopted, but obviously one can still use his most preferable representation since there exist transformation formulas from one domain to another (e.\+g. look at yarp\+::math\+::dcm2axis or yarp\+::math\+::axis2dcm documentation).
+
+{\bfseries{Example}} ~\newline
+ We want to represent the orientation of the right hand when the arm is in the rest position (the torso and arm joints are zeroed), for which the x-\/axis attached to the center of the palm points downward, the y-\/axis points backward, while the z-\/axis points leftward. Hence, to transform the root reference frame in the end-\/effector frame, one solution is to rotate of pi/2 around the y-\/axis and then of -\/pi/2 around the z-\/axis.
+
+In formulas\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{Vector oy(4), oz(4);}
+\DoxyCodeLine{oy[0]=0.0; oy[1]=1.0; oy[2]=0.0; oy[3]=+\mbox{\hyperlink{XSensMTx_8cpp_ae71449b1cc6e6250b91f539153a7a0d3}{M\_PI}}/2.0;}
+\DoxyCodeLine{oz[0]=0.0; oz[1]=0.0; oz[2]=1.0; oz[3]=-\/\mbox{\hyperlink{XSensMTx_8cpp_ae71449b1cc6e6250b91f539153a7a0d3}{M\_PI}}/2.0;}
+\DoxyCodeLine{}
+\DoxyCodeLine{Matrix Ry=yarp::math::axis2dcm(oy);        \textcolor{comment}{// from axis/angle to rotation matrix notation}}
+\DoxyCodeLine{Matrix Rz=yarp::math::axis2dcm(oz);}
+\DoxyCodeLine{}
+\DoxyCodeLine{Matrix R=Rz*Ry;                            \textcolor{comment}{// compose the two rotations keeping the order}}
+\DoxyCodeLine{Vector o=yarp::math::dcm2axis(R);          \textcolor{comment}{// from rotation matrix back to the axis/angle notation}}
+
+\end{DoxyCode}
+
+
+The outcome is\+: o = \mbox{[}0.\+57735 0.\+57735 -\/0.\+57735 2.\+094395\mbox{]}. ~\newline
+Alternatively, one can specify directly the matrix R as a collection of column vectors representing the axes of the goal pose expressed in the root reference frame\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{Matrix R(3,3);}
+\DoxyCodeLine{\textcolor{comment}{// pose x-\/axis   y-\/axis        z-\/axis}}
+\DoxyCodeLine{   R(0,0)= 0.0;  R(0,1)= 1.0;  R(0,2)= 0.0;    \textcolor{comment}{// x-\/coordinate in root frame}}
+\DoxyCodeLine{   R(1,0)= 0.0;  R(1,1)= 0.0;  R(1,2)=-\/1.0;    \textcolor{comment}{// y-\/coordinate    "{}}}
+\DoxyCodeLine{   R(2,0)=-\/1.0;  R(2,1)= 0.0;  R(2,2)= 0.0;    \textcolor{comment}{// z-\/coordinate    "{}}}
+\DoxyCodeLine{}
+\DoxyCodeLine{Vector o=yarp::math::dcm2axis(R);}
+
+\end{DoxyCode}
+\hypertarget{icub_cartesian_interface_sec_cart_useinterface}{}\doxysection{Using the Cartesian Interface}\label{icub_cartesian_interface_sec_cart_useinterface}
+The YARP documentation contains a full description of {\bfseries{\href{https://yarp.it/latest/classyarp_1_1dev_1_1ICartesianControl.html}{\texttt{ Cartesian Interface}}}}. Moreover, some examples are also reported hereafter to gain a deeper insight into the Cartesian device.
+
+Imagine that we want to get the actual arm pose from within our code. What we have to write is just\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{Vector x0,o0;}
+\DoxyCodeLine{icart-\/>getPose(x0,o0);}
+
+\end{DoxyCode}
+ The current translational position is returned in {\itshape x0} while {\itshape o0} contains now the current orientation.
+
+Then we want to move the hand a bit farther from the body, let\textquotesingle{}s say just 10 cm away along -\/x, keeping the orientation constant\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{Vector xd=x0; xd[0]+=-\/0.1;}
+\DoxyCodeLine{Vector od=o0;}
+\DoxyCodeLine{icart-\/>goToPose(xd,od);   \textcolor{comment}{// send request and forget}}
+
+\end{DoxyCode}
+ The {\itshape go\+To\+Pose()} method does not wait for any acknowledgement that the server has received the request, but it just lets the client module go straight to the next instruction in the code flow. Therefore, the intended use of this method is for streaming input (e.\+g. while tracking).
+
+If we would like to test whether the new pose has been achieved, it\textquotesingle{}s as follows\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{icart-\/>goToPoseSync(xd,od);   \textcolor{comment}{// send request and wait for reply}}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{keywordtype}{bool} \mbox{\hyperlink{icub-main_2src_2tools_2canBusSniffer_2canBusSnifferV5_2main_8cpp_a1d39aac66e12dae50a24cd7a9100ef33}{done}}=\textcolor{keyword}{false};}
+\DoxyCodeLine{\textcolor{keywordflow}{while} (!\mbox{\hyperlink{icub-main_2src_2tools_2canBusSniffer_2canBusSnifferV5_2main_8cpp_a1d39aac66e12dae50a24cd7a9100ef33}{done}}) \{}
+\DoxyCodeLine{   icart-\/>checkMotionDone(\&\mbox{\hyperlink{icub-main_2src_2tools_2canBusSniffer_2canBusSnifferV5_2main_8cpp_a1d39aac66e12dae50a24cd7a9100ef33}{done}});}
+\DoxyCodeLine{   Time::delay(0.04);   \textcolor{comment}{// or any suitable delay}}
+\DoxyCodeLine{\}}
+
+\end{DoxyCode}
+ The same can be achieved also by the following streamlined snippet of code\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{icart-\/>goToPoseSync(xd,od);   \textcolor{comment}{// send request and wait for reply}}
+\DoxyCodeLine{icart-\/>waitMotionDone(0.04);  \textcolor{comment}{// wait until the motion is done and ping at each 0.04 seconds}}
+
+\end{DoxyCode}
+ Here the method {\itshape go\+To\+Pose\+Sync()} guarantees that the server has received the request and initiated the movement before allowing the code flow to proceed. If we had used the analogous non-\/sync method, then the result of first check would have been unpredictable.
+
+To tune the trajectory execution time for point-\/to-\/point movements, you can call the proper function\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{icart-\/>setTrajTime(1.5);  \textcolor{comment}{// given in seconds}}
+
+\end{DoxyCode}
+
+
+To let the controller determine when to declare the movement accomplished, there is a dedicated tolerance acting both at the level of position and orientation errors. To set this tolerance you can write the following\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{icart-\/>setInTargetTol(0.001);}
+
+\end{DoxyCode}
+ This means that the movement will be intended finished whenever norm(xd-\/x)$<$0.\+001, where x comprises the position and the orientation of the end-\/effector.
+
+While moving to a target pose, you can query the controller to find out which will be the final joints configuration as determined by the solver\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{Vector xdhat, odhat, qdhat;}
+\DoxyCodeLine{icart-\/>getDesired(xdhat,odhat,qdhat);}
+
+\end{DoxyCode}
+ Of course due to the optimization process $ \hat{x}_d $ differs from the commanded $ x_d $, so as $ \hat{o}_d $ from $ o_d $; $ \hat{q}_d $ is such that $ \left[\hat{x}_d,\hat{o}_d\right]=K\left(\hat{q}_d\right) $, where $ K\left(\cdot\right) $ is the forward kinematic map. ~\newline
+ By contrast, if you want to solve for a given pose without actually moving there, you can use the ask-\/based methods as follows\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{Vector xd(3);}
+\DoxyCodeLine{xd[0]=-\/0.3;}
+\DoxyCodeLine{xd[1]=0.0;}
+\DoxyCodeLine{xd[2]=0.1;}
+\DoxyCodeLine{}
+\DoxyCodeLine{Vector xdhat, odhat, qdhat;}
+\DoxyCodeLine{icart-\/>askForPosition(xd,xdhat,odhat,qdhat);}
+
+\end{DoxyCode}
+ The ask-\/based methods such as {\itshape ask\+For\+Position()} and {\itshape ask\+For\+Pose()} allow the user to employ the Cartesian Interface just as a {\bfseries{simple layer that wraps around the inverse kinematics solver}}.
+
+One useful feature is the possibility to enable/disable some degrees of freedom on-\/line. For example, the arm comes with 10 possible DOF\textquotesingle{}s (the torso is included) that the user may or may not want to use at the same time while reaching. ~\newline
+In the following snippet of code we ask to enable the torso pitch and yaw joints (which are off by default). 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{Vector curDof;}
+\DoxyCodeLine{icart-\/>getDOF(curDof);}
+\DoxyCodeLine{cout<<\textcolor{stringliteral}{"{}["{}}<<curDof.toString()<<\textcolor{stringliteral}{"{}]"{}}<<endl;  \textcolor{comment}{// [0 0 0 1 1 1 1 1 1 1] will be printed out}}
+\DoxyCodeLine{}
+\DoxyCodeLine{Vector newDof(3);}
+\DoxyCodeLine{newDof[0]=1;    \textcolor{comment}{// torso pitch: 1 => enable}}
+\DoxyCodeLine{newDof[1]=2;    \textcolor{comment}{// torso roll:  2 => skip}}
+\DoxyCodeLine{newDof[2]=1;    \textcolor{comment}{// torso yaw:   1 => enable}}
+\DoxyCodeLine{icart-\/>setDOF(newDof,curDof);}
+\DoxyCodeLine{cout<<\textcolor{stringliteral}{"{}["{}}<<curDof.toString()<<\textcolor{stringliteral}{"{}]"{}}<<endl;  \textcolor{comment}{// [1 0 1 1 1 1 1 1 1 1] will be printed out}}
+
+\end{DoxyCode}
+ To sum up, a value of \textquotesingle{}1\textquotesingle{} makes the joint a real degree of freedom, a value of \textquotesingle{}0\textquotesingle{} switches it off, while the special value of \textquotesingle{}2\textquotesingle{} indicates that the joint status won\textquotesingle{}t be modified (to skip it and proceed forward).
+
+Two things deserve your attention\+:
+\begin{DoxyItemize}
+\item The torso joints order is the one defined by the kinematic description available from the wiki\+: \mbox{[}pitch,roll,yaw\mbox{]}. Usually the motor control interfaces stream the torso joints in the reversed order (i.\+e. \mbox{[}yaw,roll,pitch\mbox{]}) since they assume a different kinematic origin (the base of the neck in this case).
+\item The shoulder joints are considered all together to be a super-\/joint (in order to take into account the shoulder\textquotesingle{}s cable length issue) so that you are not allowed to enable/disable one of them differently from the others.
+\end{DoxyItemize}
+
+Furthermore, as you can easily figure out, the torso joints are shared by both arms. This tells us to take care of a misuse of the Cartesian device that might arise when one arm is controlled simultaneously to the other one\+: if this happens, a supervisor that enables/disables the torso joints according to the needs should be put in place.
+
+When the torso is being controlled by an external module, there exists also the possibility for the Cartesian device to counteract to the induced movements of the uncontrolled joints in order to maintain the final end-\/effector pose stable. ~\newline
+To enable this feature one should call the proper method\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{icart-\/>setTrackingMode(\textcolor{keyword}{true});}
+
+\end{DoxyCode}
+ Usually the Cartesian device brings up in {\itshape non-\/tracking} mode\+: this means that once the limb has reached the desired pose, the controller gets disconnected until the next command is yielded and the limb can be moved by other external agents. ~\newline
+Conversely, in {\itshape tracking} mode the controller stays connected and tries to compensate for externally induced movements on the uncontrolled joints (that are seen as disturbs on the actual end-\/effector position) such as the torso ones (in case they have been previously disabled).
+
+Another advanced feature you can benefit from is the chance to change dynamically the rest position the solver uses to specify a secondary task while converging to the solution. ~\newline
+Briefly (a detailed description is given in the \mbox{\hyperlink{group__iKinSlv}{solver page}}), the Cartesian solver implements a nonlinear constrained optimization that can be described in this way\+:
+
+\[ \begin{array}{c} \mathbf{q}=\arg\min\limits_{\mathbf{q} \in \mathbb{R}^{n} }\left(\left\|\mathbf{\alpha}_d-\mathit{K_{\alpha}}\left(\mathbf{q}\right)\right\|^2+\mathit{w}\cdot\left(\mathbf{q}_r-\mathbf{q}\right)^{\top}\mathit{W}_r\left(\mathbf{q}_r-\mathbf{q}\right)\right) \\ \text{s.t.} \begin{cases} \left\|\mathbf{x}_d-\mathit{K_x}\left(\mathbf{q}\right)\right\|^2=0 \\ \mathbf{q}_L<\mathbf{q}<\mathbf{q}_U \end{cases} \end{array}. \]
+
+The term $ \left(\mathbf{q}_r-\mathbf{q}\right)^{\top}\mathit{W}_r\left(\mathbf{q}_r-\mathbf{q}\right) $ represents the aforementioned secondary task, where $ \mathbf{q}_r $ is used to keep the solution as close as possible to a given rest position in the joint space, weighting component by component with the diagonal matrix $ \mathit{W}_r $. ~\newline
+Thereby, to access the elements of $ \mathbf{q}_r $ and $ \mathit{W}_r $ one should call the following methods\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{Vector curRestPos;}
+\DoxyCodeLine{icart-\/>getRestPos(curRestPos);}
+\DoxyCodeLine{cout<<\textcolor{stringliteral}{"{}["{}}<<curRestPos.toString()<<\textcolor{stringliteral}{"{}]"{}}<<endl;  \textcolor{comment}{// [0 0 0 0 0 0 0 0 0 0] will be printed out}}
+\DoxyCodeLine{}
+\DoxyCodeLine{Vector curRestWeights;}
+\DoxyCodeLine{icart-\/>getRestWeights(curRestWeights);}
+\DoxyCodeLine{cout<<\textcolor{stringliteral}{"{}["{}}<<curRestWeights.toString()<<\textcolor{stringliteral}{"{}]"{}}<<endl;  \textcolor{comment}{// [1 1 1 0 0 0 0 0 0 0] will be printed out}}
+
+\end{DoxyCode}
+ Above we\textquotesingle{}ve asked for the default configuration of the secondary task which tries to minimize against the rest position (0,0,0) that considers only the torso joints in the computation. This prevents the robot from leaning out too much if the target position can be reached easily with just the arm.\hypertarget{icub_cartesian_interface_sec_cart_nonlineardesign}{}\doxysection{Nonlinear Problem Design}\label{icub_cartesian_interface_sec_cart_nonlineardesign}
+In this small section a couple of considerations that motivated the design of the inversion problem are briefly summarized as taken from the article on the Cartesian controller and perhaps more importantly as they came up from discussions with some meticulous users.
+
+One of the main aspects of the nonlinear problem as handled by the Cartesian solver is that the reaching for position is a constraint, whereas the reaching in orientation appears directly in the cost function. As result, the former is treated with higher priority with respect to the latter to reflect the requirement of achieving the task in a very localized zone of the space. For example, this particular preference is of major interest for grasping, where having an hand perfectly oriented with respect to the object to be grasped but with a position of even a couple of centimeters away from the target will cause the task to fail much more frequently than having the hand perfectly located in position and with even ten degrees out of the alignment. One behavior emerging from this design that the user may experience effortlessly is the following\+: when a out-\/of-\/range position is commanded together with a given orientation, it turns that the robot will stretch its body up to its maximum extension (depending on the parts currently enabled) almost irrespective of the final orientation. As consequence, bear always in mind to enable the torso to enlarge as much as possible the dexterous space of the \mbox{\hyperlink{namespaceiCub}{i\+Cub}}.
+
+Conversely, if for any reason the orientation is meant to be handled with higher priority with respect to position, user can then declare the reaching in orientation as a contraint and the reaching in position as an objective, respectively. This swap is performed by the following call\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{icart-\/>setPosePriority(\textcolor{stringliteral}{"{}orientation"{}});}
+
+\end{DoxyCode}
+ To switch back to the normal configuration where position is again predominant\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{icart-\/>setPosePriority(\textcolor{stringliteral}{"{}position"{}});}
+
+\end{DoxyCode}
+\hypertarget{icub_cartesian_interface_sec_cart_contextswitch}{}\doxysection{Context Switch}\label{icub_cartesian_interface_sec_cart_contextswitch}
+We define here the {\itshape context} as the configuration in which the controller operates\+: therefore the context includes the actual number of DOF\textquotesingle{}s, their angular bounds, the resting positions and weights, the trajectory execution time, the current tracking mode, the pose priority and so on. Obviously the controller performs the same action differently depending on the current context. A way to easily switch among contexts is to rely on {\itshape store\+Context()} and {\itshape restore\+Context()} methods as follows\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{icart-\/>setDOF(newDof1,curDof1);         \textcolor{comment}{// here the user prepares the context}}
+\DoxyCodeLine{icart-\/>setTrackingMode(\textcolor{keyword}{true});}
+\DoxyCodeLine{...}
+\DoxyCodeLine{int context\_0;}
+\DoxyCodeLine{icart-\/>storeContext(\&context\_0);        \textcolor{comment}{// latch the context}}
+\DoxyCodeLine{}
+\DoxyCodeLine{icart-\/>setDOF(newDof2,curDof2);         \textcolor{comment}{// at certain point the user may want the controller to}}
+\DoxyCodeLine{icart-\/>goToPose(\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}},o);                   \textcolor{comment}{// perform some actions with different configuration}}
+\DoxyCodeLine{...}
+\DoxyCodeLine{}
+\DoxyCodeLine{icart-\/>restoreContext(context\_0);       \textcolor{comment}{// ... and then retrieve the stored context\_0}}
+\DoxyCodeLine{icart-\/>goToPose(\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}},o);                   \textcolor{comment}{// now the controller performs the same action but within the context\_0}}
+
+\end{DoxyCode}
+ Unless the user needs the interface just for logging purposes, it\textquotesingle{}s a good rule to store the context at the initialization of his module in order to then restore it at releasing time to preserve the controller configuration. ~\newline
+Note that the special context tagged with the id 0 is reserved by the system to let the user restore the start-\/up configuration of the controller at any time.\hypertarget{icub_cartesian_interface_sec_cart_taskrefvel}{}\doxysection{Task-\/\+Space Reference Velocity Command}\label{icub_cartesian_interface_sec_cart_taskrefvel}
+The user is further provided with the method {\itshape set\+Task\+Velocities()} that allows commanding a reference velocity for the end-\/effector in the operational space as follows\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{Vector xdot(3); \textcolor{comment}{// move the end-\/effector along y-\/axis at specified velocity}}
+\DoxyCodeLine{xdot[0]=0.0;    \textcolor{comment}{// [m/s]}}
+\DoxyCodeLine{xdot[1]=0.01;}
+\DoxyCodeLine{xdot[2]=0.0;}
+\DoxyCodeLine{}
+\DoxyCodeLine{Vector odot(4); \textcolor{comment}{// no rotation is required}}
+\DoxyCodeLine{odot=0.0;       \textcolor{comment}{// [rad/s]}}
+\DoxyCodeLine{}
+\DoxyCodeLine{icart-\/>setTaskVelocities(xdot,odot);}
+
+\end{DoxyCode}
+ The solver still plays a meaningful role in this command mode so that the whole set of constraints active in the inverse kinematics problem are taken into account. Moreover, the task-\/space reference velocity will be tracked according to the reactivity level of the internal controller which is basically determined by the current trajectory time; thus, for executing high task-\/space velocity the trajectory time should be tuned towards lower values, whereas it should be increased to track low task-\/space reference velocity.\hypertarget{icub_cartesian_interface_sec_cart_tipframe}{}\doxysection{Defining a Different Effector}\label{icub_cartesian_interface_sec_cart_tipframe}
+The Cartesian controller can be also instructed to control a different effector that can be suitably expressed with respect to the standard end-\/effector reference frame. This is thus equivalent to rigidly attaching a tip to the standard end-\/effector. Therefore, to achieve such extension, it is required to call the {\itshape attach\+Tip\+Frame()} method of the interface as done in the following example, where the aim is to control the tip of the index finger rather than the center of the palm\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{IEncoders *iencs;}
+\DoxyCodeLine{...}
+\DoxyCodeLine{}
+\DoxyCodeLine{int nEncs;}
+\DoxyCodeLine{iencs-\/>getAxes(\&nEncs);}
+\DoxyCodeLine{Vector \mbox{\hyperlink{namespacepython-motor-control_aa4a312653eff9f950af80bbf61a3d925}{encs}}(nEncs);}
+\DoxyCodeLine{iencs-\/>getEncoders(\mbox{\hyperlink{namespacepython-motor-control_aa4a312653eff9f950af80bbf61a3d925}{encs}}.data());}
+\DoxyCodeLine{...}
+\DoxyCodeLine{}
+\DoxyCodeLine{Vector joints;}
+\DoxyCodeLine{iCubFinger finger(\textcolor{stringliteral}{"{}right\_index"{}});                  \textcolor{comment}{// relevant code to get the position of the finger tip}}
+\DoxyCodeLine{finger.getChainJoints(\mbox{\hyperlink{namespacepython-motor-control_aa4a312653eff9f950af80bbf61a3d925}{encs}},joints);                \textcolor{comment}{// wrt the end-\/effector frame}}
+\DoxyCodeLine{Matrix tipFrame=finger.getH((\mbox{\hyperlink{XSensMTx_8cpp_ae71449b1cc6e6250b91f539153a7a0d3}{M\_PI}}/180.0)*joints);}
+\DoxyCodeLine{}
+\DoxyCodeLine{Vector tip\_x=tipFrame.getCol(3);}
+\DoxyCodeLine{Vector tip\_o=yarp::math::dcm2axis(tipFrame);}
+\DoxyCodeLine{icart-\/>attachTipFrame(tip\_x,tip\_o);                \textcolor{comment}{// establish the new controlled frame}}
+\DoxyCodeLine{...}
+\DoxyCodeLine{}
+\DoxyCodeLine{icart-\/>getPose(\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}},o);                               \textcolor{comment}{// now we get the pose of the finger tip frame}}
+\DoxyCodeLine{icart-\/>goToPose(xd,od);                            \textcolor{comment}{// so as the target will be attained with the finger tip}}
+\DoxyCodeLine{...}
+\DoxyCodeLine{}
+\DoxyCodeLine{icart-\/>removeTipFrame();                           \textcolor{comment}{// to restore the center of the palm as actual end-\/effector}}
+
+\end{DoxyCode}
+ Importantly, the tip frame is part of the current context, hence it might happen that several tip frames are attached or removed as result of the user context switching requests.\hypertarget{icub_cartesian_interface_sec_cart_eventscallbacks}{}\doxysection{Events Callbacks}\label{icub_cartesian_interface_sec_cart_eventscallbacks}
+The Cartesian Interface provides also an easy way to register events callbacks. For example, an event might be represented by the onset of the movement when the controller gets activated upon the reception of a new target or the end of the movement itself. The user can then attach a callback to any event generated by the interface. ~\newline
+It is required to inherit from the specific class {\itshape Cartesian\+Event} that handles events and overrides the {\itshape cartesian\+Event\+Callback()} method. 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{keyword}{class }MotionDoneEvent : \textcolor{keyword}{public} CartesianEvent}
+\DoxyCodeLine{\{}
+\DoxyCodeLine{\textcolor{keyword}{public}:}
+\DoxyCodeLine{   MotionDoneEvent()}
+\DoxyCodeLine{   \{}
+\DoxyCodeLine{      cartesianEventParameters.type=\textcolor{stringliteral}{"{}motion-\/done"{}};         \textcolor{comment}{// select here the event type we want to listen to}}
+\DoxyCodeLine{   \}}
+\DoxyCodeLine{}
+\DoxyCodeLine{   \textcolor{keyword}{virtual} \textcolor{keywordtype}{void} cartesianEventCallback()}
+\DoxyCodeLine{   \{}
+\DoxyCodeLine{      cout<<\textcolor{stringliteral}{"{}motion complete"{}}<<endl;}
+\DoxyCodeLine{   \}}
+\DoxyCodeLine{\};}
+\DoxyCodeLine{}
+\DoxyCodeLine{MotionDoneEvent event;}
+\DoxyCodeLine{icart-\/>registerEvent(event);                               \textcolor{comment}{// the tag "{}motion-\/done"{} identifies the event to be notified}}
+\DoxyCodeLine{icart-\/>goToPosition(\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}});                                    \textcolor{comment}{// as soon as the motion is complete, the callback will print out the message}}
+
+\end{DoxyCode}
+
+
+To know which events are available for notification, the user can do\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{Bottle \mbox{\hyperlink{namespaceiCub_1_1action_1_1log_a4ba5ea132464d0ea49d618130163c769a432470a52cfded222c35744229d1069e}{info}};}
+\DoxyCodeLine{icart-\/>getInfo(\mbox{\hyperlink{namespaceiCub_1_1action_1_1log_a4ba5ea132464d0ea49d618130163c769a432470a52cfded222c35744229d1069e}{info}});}
+\DoxyCodeLine{cout<<\mbox{\hyperlink{namespaceiCub_1_1action_1_1log_a4ba5ea132464d0ea49d618130163c769a432470a52cfded222c35744229d1069e}{info}}.find(\textcolor{stringliteral}{"{}events"{}}).asList()-\/>toString().c\_str()<<endl;}
+
+\end{DoxyCode}
+
+
+The class {\itshape Cartesian\+Event} contains two structures\+: the {\itshape cartesian\+Event\+Parameters} and the {\itshape cartesian\+Event\+Variables}. The former has to be filled by the user to set up the event details, whereas the latter is filled directly by the event handler in order to provide information to the callback. ~\newline
+For instance, to raise a callback at the middle point of the path, one can do\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{keyword}{class }MotionMiddleEvent : \textcolor{keyword}{public} CartesianEvent}
+\DoxyCodeLine{\{}
+\DoxyCodeLine{\textcolor{keyword}{public}:}
+\DoxyCodeLine{   MotionMiddleEvent()}
+\DoxyCodeLine{   \{}
+\DoxyCodeLine{      cartesianEventParameters.type=\textcolor{stringliteral}{"{}motion-\/ongoing"{}};}
+\DoxyCodeLine{      cartesianEventParameters.motionOngoingCheckPoint=0.5;   \textcolor{comment}{// middle point is at 50\% of the path}}
+\DoxyCodeLine{   \}}
+\DoxyCodeLine{}
+\DoxyCodeLine{   \textcolor{keyword}{virtual} \textcolor{keywordtype}{void} cartesianEventCallback()}
+\DoxyCodeLine{   \{}
+\DoxyCodeLine{      cout<<\textcolor{stringliteral}{"{}attained the "{}}<<100.0*cartesianEventVariables.motionOngoingCheckPoint;}
+\DoxyCodeLine{      cout<<\textcolor{stringliteral}{"{}\% of the path"{}}<<endl;}
+\DoxyCodeLine{   \}}
+\DoxyCodeLine{\};}
+
+\end{DoxyCode}
+
+
+The special wildcard \char`\"{}$\ast$\char`\"{} can be used to assign a callback to any event, regardless of its type, as done below. 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{keyword}{class }GeneralEvent : \textcolor{keyword}{public} CartesianEvent}
+\DoxyCodeLine{\{}
+\DoxyCodeLine{\textcolor{keyword}{public}:}
+\DoxyCodeLine{   GeneralEvent()}
+\DoxyCodeLine{   \{}
+\DoxyCodeLine{      cartesianEventParameters.type=\textcolor{stringliteral}{"{}*"{}};}
+\DoxyCodeLine{   \}}
+\DoxyCodeLine{}
+\DoxyCodeLine{   \textcolor{keyword}{virtual} \textcolor{keywordtype}{void} cartesianEventCallback()}
+\DoxyCodeLine{   \{}
+\DoxyCodeLine{      cout<<\textcolor{stringliteral}{"{}event of type: "{}}<<cartesianEventVariables.type.c\_str()<<endl;}
+\DoxyCodeLine{      cout<<\textcolor{stringliteral}{"{}happened at:   "{}}<<cartesianEventVariables.time<< \textcolor{stringliteral}{"{}[s] (source time)"{}}<<endl;}
+\DoxyCodeLine{   \}}
+\DoxyCodeLine{\};}
+
+\end{DoxyCode}
+ 
