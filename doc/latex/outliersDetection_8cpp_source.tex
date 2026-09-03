@@ -1,0 +1,258 @@
+\doxysection{outliers\+Detection.\+cpp}
+\hypertarget{outliersDetection_8cpp_source}{}\label{outliersDetection_8cpp_source}\index{icub-\/main/src/libraries/ctrlLib/src/outliersDetection.cpp@{icub-\/main/src/libraries/ctrlLib/src/outliersDetection.cpp}}
+\mbox{\hyperlink{outliersDetection_8cpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00001}00001\ \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00002}00002\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2006-\/2018\ Istituto\ Italiano\ di\ Tecnologia\ (IIT)}}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00003}00003\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2006-\/2010\ RobotCub\ Consortium}}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00004}00004\ \textcolor{comment}{\ *\ All\ rights\ reserved.}}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00005}00005\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00006}00006\ \textcolor{comment}{\ *\ This\ software\ may\ be\ modified\ and\ distributed\ under\ the\ terms}}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00007}00007\ \textcolor{comment}{\ *\ of\ the\ BSD-\/3-\/Clause\ license.\ See\ the\ accompanying\ LICENSE\ file\ for}}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00008}00008\ \textcolor{comment}{\ *\ details.}}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00009}00009\ \textcolor{comment}{*/}}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00010}00010\ }
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00011}00011\ \textcolor{preprocessor}{\#include\ <cmath>}}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00012}00012\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{outliersDetection_8h}{iCub/ctrl/outliersDetection.h}}>}}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00013}00013\ }
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00014}00014\ \textcolor{keyword}{using\ namespace\ }std;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00015}00015\ \textcolor{keyword}{using\ namespace\ }yarp::os;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00016}00016\ \textcolor{keyword}{using\ namespace\ }yarp::sig;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00017}00017\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceiCub_1_1ctrl}{iCub::ctrl}};}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00018}00018\ }
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00019}00019\ }
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00020}00020\ \textcolor{comment}{/**********************************************************************/}}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00021}\mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_a80e4b9317bed9da6148a204d56e1c54b}{00021}}\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_a80e4b9317bed9da6148a204d56e1c54b}{ModifiedThompsonTau::ModifiedThompsonTau}}()}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00022}00022\ \{}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00023}00023\ \ \ \ \ \textcolor{comment}{//\ MATLAB\ code\ to\ find\ out\ tau\ values:}}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00024}00024\ \ \ \ \ \textcolor{comment}{//\ n:\ degrees\ of\ freedom}}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00025}00025\ \ \ \ \ \textcolor{comment}{//\ t:\ the\ critical\ student's\ t\ value}}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00026}00026\ \ \ \ \ \textcolor{comment}{//\ t=tinv(1-\/0.05/2,n-\/2);}}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00027}00027\ \ \ \ \ \textcolor{comment}{//\ tau=(t*(n-\/1))/sqrt(n*(n-\/2+t\string^2));}}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00028}00028\ }
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00029}00029\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[3]\ \ \ =1.1511;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00030}00030\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[4]\ \ \ =1.4250;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00031}00031\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[5]\ \ \ =1.5712;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00032}00032\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[6]\ \ \ =1.6563;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00033}00033\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[7]\ \ \ =1.7110;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00034}00034\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[8]\ \ \ =1.7491;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00035}00035\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[9]\ \ \ =1.7770;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00036}00036\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[10]\ \ =1.7984;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00037}00037\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[11]\ \ =1.8153;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00038}00038\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[12]\ \ =1.8290;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00039}00039\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[13]\ \ =1.8403;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00040}00040\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[14]\ \ =1.8498;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00041}00041\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[15]\ \ =1.8579;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00042}00042\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[16]\ \ =1.8649;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00043}00043\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[17]\ \ =1.8710;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00044}00044\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[18]\ \ =1.8764;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00045}00045\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[19]\ \ =1.8811;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00046}00046\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[20]\ \ =1.8853;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00047}00047\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[21]\ \ =1.8891;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00048}00048\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[22]\ \ =1.8926;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00049}00049\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[23]\ \ =1.8957;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00050}00050\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[24]\ \ =1.8985;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00051}00051\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[25]\ \ =1.9011;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00052}00052\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[26]\ \ =1.9035;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00053}00053\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[27]\ \ =1.9057;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00054}00054\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[28]\ \ =1.9078;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00055}00055\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[29]\ \ =1.9096;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00056}00056\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[30]\ \ =1.9114;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00057}00057\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[31]\ \ =1.9130;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00058}00058\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[32]\ \ =1.9146;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00059}00059\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[33]\ \ =1.9160;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00060}00060\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[34]\ \ =1.9174;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00061}00061\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[35]\ \ =1.9186;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00062}00062\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[36]\ \ =1.9198;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00063}00063\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[37]\ \ =1.9209;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00064}00064\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[38]\ \ =1.9220;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00065}00065\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[39]\ \ =1.9230;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00066}00066\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[40]\ \ =1.9240;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00067}00067\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[41]\ \ =1.9248;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00068}00068\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[42]\ \ =1.9257;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00069}00069\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[43]\ \ =1.9265;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00070}00070\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[44]\ \ =1.9273;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00071}00071\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[45]\ \ =1.9280;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00072}00072\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[46]\ \ =1.9288;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00073}00073\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[47]\ \ =1.9294;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00074}00074\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[48]\ \ =1.9301;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00075}00075\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[49]\ \ =1.9307;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00076}00076\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[50]\ \ =1.9313;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00077}00077\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[51]\ \ =1.9319;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00078}00078\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[52]\ \ =1.9324;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00079}00079\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[53]\ \ =1.9330;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00080}00080\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[54]\ \ =1.9335;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00081}00081\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[55]\ \ =1.9340;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00082}00082\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[56]\ \ =1.9345;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00083}00083\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[57]\ \ =1.9349;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00084}00084\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[58]\ \ =1.9354;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00085}00085\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[59]\ \ =1.9358;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00086}00086\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[60]\ \ =1.9362;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00087}00087\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[61]\ \ =1.9366;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00088}00088\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[62]\ \ =1.9370;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00089}00089\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[63]\ \ =1.9373;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00090}00090\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[64]\ \ =1.9377;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00091}00091\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[65]\ \ =1.9381;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00092}00092\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[66]\ \ =1.9384;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00093}00093\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[67]\ \ =1.9387;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00094}00094\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[68]\ \ =1.9390;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00095}00095\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[69]\ \ =1.9393;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00096}00096\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[70]\ \ =1.9396;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00097}00097\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[71]\ \ =1.9399;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00098}00098\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[72]\ \ =1.9402;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00099}00099\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[73]\ \ =1.9405;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00100}00100\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[74]\ \ =1.9408;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00101}00101\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[75]\ \ =1.9410;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00102}00102\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[76]\ \ =1.9413;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00103}00103\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[77]\ \ =1.9415;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00104}00104\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[78]\ \ =1.9418;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00105}00105\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[79]\ \ =1.9420;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00106}00106\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[80]\ \ =1.9422;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00107}00107\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[81]\ \ =1.9424;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00108}00108\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[82]\ \ =1.9427;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00109}00109\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[83]\ \ =1.9429;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00110}00110\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[84]\ \ =1.9431;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00111}00111\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[85]\ \ =1.9433;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00112}00112\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[86]\ \ =1.9435;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00113}00113\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[87]\ \ =1.9437;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00114}00114\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[88]\ \ =1.9439;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00115}00115\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[89]\ \ =1.9440;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00116}00116\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[90]\ \ =1.9442;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00117}00117\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[91]\ \ =1.9444;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00118}00118\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[92]\ \ =1.9446;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00119}00119\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[93]\ \ =1.9447;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00120}00120\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[94]\ \ =1.9449;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00121}00121\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[95]\ \ =1.9451;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00122}00122\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[96]\ \ =1.9452;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00123}00123\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[97]\ \ =1.9454;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00124}00124\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[98]\ \ =1.9455;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00125}00125\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[99]\ \ =1.9457;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00126}00126\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[100]\ =1.9458;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00127}00127\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[150]\ =1.9506;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00128}00128\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[200]\ =1.9530;\ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00129}00129\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[500]\ =1.9572;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00130}00130\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[1000]=1.9586;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00131}00131\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[5000]=1.9597;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00132}00132\ \ \ \ \ \textcolor{comment}{//\ n\ -\/>\ inf\ =>\ tau\ -\/>\ 1.96}}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00133}00133\ \}}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00134}00134\ }
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00135}00135\ }
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00136}00136\ \textcolor{comment}{/**********************************************************************/}}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00137}\mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_a2ba559ace9585470799b76d3eb144d43}{00137}}\ set<size\_t>\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_a2ba559ace9585470799b76d3eb144d43}{ModifiedThompsonTau::detect}}(\textcolor{keyword}{const}\ Vector\ \&\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}},\ \textcolor{keyword}{const}\ Property\ \&options)}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00138}00138\ \{}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00139}00139\ \ \ \ \ set<size\_t>\ res;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00140}00140\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}.length()<3)}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00141}00141\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ res;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00142}00142\ }
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00143}00143\ \ \ \ \ \textcolor{keywordtype}{double}\ mean=0.0;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00144}00144\ \ \ \ \ \textcolor{keywordtype}{double}\ stdev=0.0;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00145}00145\ \ \ \ \ \textcolor{keywordtype}{size\_t}\ N=\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}.length()-\/\mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_a828f0fc94bdf28bc2e47a479bf4df035}{recurIdx}}.size();}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00146}00146\ }
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00147}00147\ \ \ \ \ \textcolor{keywordflow}{if}\ (options.check(\textcolor{stringliteral}{"{}mean"{}})\ \&\&\ options.check(\textcolor{stringliteral}{"{}std"{}}))}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00148}00148\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00149}00149\ \ \ \ \ \ \ \ \ mean=options.find(\textcolor{stringliteral}{"{}mean"{}}).asFloat64();}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00150}00150\ \ \ \ \ \ \ \ \ stdev=options.find(\textcolor{stringliteral}{"{}std"{}}).asFloat64();}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00151}00151\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00152}00152\ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (N>0)}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00153}00153\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00154}00154\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ find\ mean\ and\ standard\ deviation}}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00155}00155\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}.length();\ i++)}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00156}00156\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00157}00157\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ don't\ account\ for\ recursive\ outliers}}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00158}00158\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_a828f0fc94bdf28bc2e47a479bf4df035}{recurIdx}}.find(i)==\mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_a828f0fc94bdf28bc2e47a479bf4df035}{recurIdx}}.end())}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00159}00159\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00160}00160\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ mean+=\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}[i];}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00161}00161\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ stdev+=\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}[i]*\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}[i];}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00162}00162\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00163}00163\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00164}00164\ }
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00165}00165\ \ \ \ \ \ \ \ \ mean/=N;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00166}00166\ \ \ \ \ \ \ \ \ stdev=sqrt(stdev/N-\/mean*mean);}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00167}00167\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00168}00168\ }
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00169}00169\ \ \ \ \ \textcolor{keywordtype}{size\_t}\ i\_check;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00170}00170\ \ \ \ \ \textcolor{keywordtype}{double}\ delta\_check=0.0;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00171}00171\ \ \ \ \ \textcolor{keywordflow}{if}\ (options.check(\textcolor{stringliteral}{"{}sorted"{}}))}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00172}00172\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00173}00173\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ don't\ account\ for\ recursive\ outliers}}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00174}00174\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{size\_t}\ i\_1,i\_n;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00175}00175\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (i\_1=0;\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_a828f0fc94bdf28bc2e47a479bf4df035}{recurIdx}}.find(i\_1)!=\mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_a828f0fc94bdf28bc2e47a479bf4df035}{recurIdx}}.end();\ i\_1++);}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00176}00176\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (i\_n=\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}.length()-\/1;\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_a828f0fc94bdf28bc2e47a479bf4df035}{recurIdx}}.find(i\_n)!=\mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_a828f0fc94bdf28bc2e47a479bf4df035}{recurIdx}}.end();\ i\_n-\/-\/);}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00177}00177\ }
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00178}00178\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ delta\_1=fabs(\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}[i\_1]-\/mean);}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00179}00179\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ delta\_n=fabs(\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}[i\_n]-\/mean);}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00180}00180\ }
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00181}00181\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (delta\_1>delta\_n)}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00182}00182\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00183}00183\ \ \ \ \ \ \ \ \ \ \ \ \ delta\_check=delta\_1;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00184}00184\ \ \ \ \ \ \ \ \ \ \ \ \ i\_check=i\_1;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00185}00185\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00186}00186\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00187}00187\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00188}00188\ \ \ \ \ \ \ \ \ \ \ \ \ delta\_check=delta\_n;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00189}00189\ \ \ \ \ \ \ \ \ \ \ \ \ i\_check=i\_n;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00190}00190\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00191}00191\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00192}00192\ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}.length();\ i++)}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00193}00193\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00194}00194\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ don't\ account\ for\ recursive\ outliers}}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00195}00195\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_a828f0fc94bdf28bc2e47a479bf4df035}{recurIdx}}.find(i)==\mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_a828f0fc94bdf28bc2e47a479bf4df035}{recurIdx}}.end())}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00196}00196\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00197}00197\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ delta=fabs(\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}[i]-\/mean);}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00198}00198\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (delta>delta\_check)}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00199}00199\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00200}00200\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ delta\_check=delta;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00201}00201\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ i\_check=i;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00202}00202\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00203}00203\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00204}00204\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00205}00205\ }
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00206}00206\ \ \ \ \ \textcolor{comment}{//\ choose\ tau}}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00207}00207\ \ \ \ \ \textcolor{keywordtype}{double}\ tau;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00208}00208\ \ \ \ \ \textcolor{keywordflow}{if}\ (N>5000)}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00209}00209\ \ \ \ \ \ \ \ \ tau=1.96;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00210}00210\ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (N>1000)}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00211}00211\ \ \ \ \ \ \ \ \ tau=\mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[5000];}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00212}00212\ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (N>500)}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00213}00213\ \ \ \ \ \ \ \ \ tau=\mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[1000];}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00214}00214\ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (N>200)}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00215}00215\ \ \ \ \ \ \ \ \ tau=\mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[500];}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00216}00216\ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (N>150)}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00217}00217\ \ \ \ \ \ \ \ \ tau=\mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[200];}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00218}00218\ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (N>100)}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00219}00219\ \ \ \ \ \ \ \ \ tau=\mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[150];}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00220}00220\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00221}00221\ \ \ \ \ \ \ \ \ tau=\mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_ad70d82be5134a38d4b966fe204f16f79}{tauLUP}}[N];}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00222}00222\ }
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00223}00223\ \ \ \ \ \textcolor{comment}{//\ perform\ detection}}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00224}00224\ \ \ \ \ \textcolor{keywordflow}{if}\ (delta\_check>tau*stdev)}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00225}00225\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00226}00226\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ account\ for\ current\ instance}}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00227}00227\ \ \ \ \ \ \ \ \ res.insert(i\_check);}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00228}00228\ }
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00229}00229\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ recursive\ computation}}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00230}00230\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (options.check(\textcolor{stringliteral}{"{}recursive"{}}))}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00231}00231\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00232}00232\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ extend\ the\ set\ of\ current\ outliers}}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00233}00233\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_a828f0fc94bdf28bc2e47a479bf4df035}{recurIdx}}.insert(i\_check);}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00234}00234\ }
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00235}00235\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ recursive\ call}}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00236}00236\ \ \ \ \ \ \ \ \ \ \ \ \ set<size\_t>\ tmpRes=\mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_a2ba559ace9585470799b76d3eb144d43}{detect}}(\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}},options);}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00237}00237\ }
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00238}00238\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ if\ tmpRes\ is\ empty\ then\ we're\ done;}}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00239}00239\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ hence\ clear\ the\ temporary\ variables}}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00240}00240\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (tmpRes.empty())}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00241}00241\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ModifiedThompsonTau_a828f0fc94bdf28bc2e47a479bf4df035}{recurIdx}}.clear();}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00242}00242\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ aggregate\ results}}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00243}00243\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{for}\ (set<size\_t>::iterator\ it=tmpRes.begin();\ it!=tmpRes.end();\ it++)}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00244}00244\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ res.insert(*it);}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00245}00245\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00246}00246\ }
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00247}00247\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00248}00248\ }
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00249}00249\ \ \ \ \ \textcolor{keywordflow}{return}\ res;}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00250}00250\ \}}
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00251}00251\ }
+\DoxyCodeLine{\Hypertarget{outliersDetection_8cpp_source_l00252}00252\ }
+
+\end{DoxyCode}

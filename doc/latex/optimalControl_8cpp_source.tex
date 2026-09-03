@@ -1,0 +1,193 @@
+\doxysection{optimal\+Control.\+cpp}
+\hypertarget{optimalControl_8cpp_source}{}\label{optimalControl_8cpp_source}\index{icub-\/main/src/libraries/ctrlLib/src/optimalControl.cpp@{icub-\/main/src/libraries/ctrlLib/src/optimalControl.cpp}}
+\mbox{\hyperlink{optimalControl_8cpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00001}00001\ \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00002}00002\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2006-\/2018\ Istituto\ Italiano\ di\ Tecnologia\ (IIT)}}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00003}00003\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2006-\/2010\ RobotCub\ Consortium}}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00004}00004\ \textcolor{comment}{\ *\ All\ rights\ reserved.}}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00005}00005\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00006}00006\ \textcolor{comment}{\ *\ This\ software\ may\ be\ modified\ and\ distributed\ under\ the\ terms}}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00007}00007\ \textcolor{comment}{\ *\ of\ the\ BSD-\/3-\/Clause\ license.\ See\ the\ accompanying\ LICENSE\ file\ for}}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00008}00008\ \textcolor{comment}{\ *\ details.}}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00009}00009\ \textcolor{comment}{*/}}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00010}00010\ }
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00011}00011\ \textcolor{preprocessor}{\#include\ <cmath>}}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00012}00012\ }
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00013}00013\ \textcolor{preprocessor}{\#include\ <yarp/os/Log.h>}}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00014}00014\ \textcolor{preprocessor}{\#include\ <yarp/math/Math.h>}}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00015}00015\ \textcolor{preprocessor}{\#include\ <yarp/math/SVD.h>}}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00016}00016\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{optimalControl_8h}{iCub/ctrl/optimalControl.h}}>}}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00017}00017\ }
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00018}00018\ \textcolor{keyword}{using\ namespace\ }std;}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00019}00019\ \textcolor{keyword}{using\ namespace\ }yarp::os;}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00020}00020\ \textcolor{keyword}{using\ namespace\ }yarp::sig;}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00021}00021\ \textcolor{keyword}{using\ namespace\ }yarp::math;}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00022}00022\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceiCub_1_1ctrl}{iCub::ctrl}};}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00023}00023\ }
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00024}00024\ }
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00025}00025\ \textcolor{comment}{//\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~}}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00026}\mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a54d9b294ce939f0d915c22bd11e75d98}{00026}}\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a54d9b294ce939f0d915c22bd11e75d98}{Riccati::Riccati}}(\textcolor{keyword}{const}\ Matrix\ \&\_A,\ \textcolor{keyword}{const}\ Matrix\ \&\_B,\ \textcolor{keyword}{const}\ Matrix\ \&\_V,}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00027}00027\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Matrix\ \&\_P,\ \textcolor{keyword}{const}\ Matrix\ \&\_VN,\ \textcolor{keywordtype}{bool}\ verb)\ }
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00028}00028\ \{}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00029}00029\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a35d048e15acd328a46cae38866ef6700}{A}}\ =\ \_A;\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a7bee9ad8baa7a5afe22b7b12d97ccdbf}{At}}\ =\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a35d048e15acd328a46cae38866ef6700}{A}}.transposed();}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00030}00030\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a923ecb5719750a2e24a7530ba96c1cc1}{B}}\ =\ \_B;\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a9002b1541112e01d299e047dcdbdf397}{Bt}}\ =\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a923ecb5719750a2e24a7530ba96c1cc1}{B}}.transposed();}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00031}00031\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_ac24754207e168abc0cc0348bceb88fca}{V}}\ =\ \_V;}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00032}00032\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_ac54c7aaaa58b6beef67de3006c3936fc}{P}}\ =\ \_P;}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00033}00033\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a8e9bfdecbb36d04686c896939e23ed86}{VN}}\ =\ \_VN;}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00034}00034\ }
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00035}00035\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a1392ea434f09fa0d03189f4141c09d30}{Ti}}\ =\ \textcolor{keyword}{new}\ Matrix[1];\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a1392ea434f09fa0d03189f4141c09d30}{Ti}}[0].resize(1,1);\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a1392ea434f09fa0d03189f4141c09d30}{Ti}}[0].zero();}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00036}00036\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a0ee2742481799dac4564ccfc5d7405e0}{Li}}\ =\ \textcolor{keyword}{new}\ Matrix[1];\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a0ee2742481799dac4564ccfc5d7405e0}{Li}}[0].resize(1,1);\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a0ee2742481799dac4564ccfc5d7405e0}{Li}}[0].zero();}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00037}00037\ }
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00038}00038\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_aa8b40795646b4b8a0f169bd9ab5542ad}{n}}=\mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a35d048e15acd328a46cae38866ef6700}{A}}.rows();}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00039}00039\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a74c1873723d36effbb2c0a5900774e0f}{m}}=\mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a923ecb5719750a2e24a7530ba96c1cc1}{B}}.rows();}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00040}00040\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_afc4e31be8187b107d9b69b137880e883}{N}}=-\/1;}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00041}00041\ }
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00042}00042\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a01d6b8bc3ef64422d6f83726d6e01eff}{verbose}}=verb;}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00043}00043\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a01d6b8bc3ef64422d6f83726d6e01eff}{verbose}})}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00044}00044\ \ \ \ \ \ \ \ \ yWarning(\textcolor{stringliteral}{"{}Riccati:\ problem\ defined,\ unsolved."{}});}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00045}00045\ \}}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00046}00046\ }
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00047}00047\ }
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00048}00048\ \textcolor{comment}{//\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~}}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00049}\mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a93243441eb0ffb2e645fb870ea60d16a}{00049}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a93243441eb0ffb2e645fb870ea60d16a}{Riccati::setVerbose}}(\textcolor{keywordtype}{bool}\ verb)}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00050}00050\ \{}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00051}00051\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a01d6b8bc3ef64422d6f83726d6e01eff}{verbose}}=verb;}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00052}00052\ \}}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00053}00053\ }
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00054}00054\ }
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00055}00055\ \textcolor{comment}{//\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~}}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00056}\mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_aeef00f6fa5b23a3e9116c2aa9bbecfe3}{00056}}\ Matrix\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_aeef00f6fa5b23a3e9116c2aa9bbecfe3}{Riccati::L}}(\textcolor{keywordtype}{int}\ step)}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00057}00057\ \{}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00058}00058\ \ \ \ \ \textcolor{keywordflow}{if}(\mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_afc4e31be8187b107d9b69b137880e883}{N}}<0)\ }
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00059}00059\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00060}00060\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a01d6b8bc3ef64422d6f83726d6e01eff}{verbose}})}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00061}00061\ \ \ \ \ \ \ \ \ \ \ \ \ yWarning(\textcolor{stringliteral}{"{}Riccati:\ DARE\ has\ not\ been\ solved\ yet."{}});}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00062}00062\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a0ee2742481799dac4564ccfc5d7405e0}{Li}}[0];}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00063}00063\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00064}00064\ \ \ \ \ \textcolor{keywordflow}{if}(step>=0\ \&\&\ step>=\mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_afc4e31be8187b107d9b69b137880e883}{N}})}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00065}00065\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00066}00066\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a01d6b8bc3ef64422d6f83726d6e01eff}{verbose}})}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00067}00067\ \ \ \ \ \ \ \ \ \ \ \ \ yWarning(\textcolor{stringliteral}{"{}Riccati:\ Index\ for\ gain\ matrix\ out\ of\ bound."{}});}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00068}00068\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a0ee2742481799dac4564ccfc5d7405e0}{Li}}[0];}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00069}00069\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00070}00070\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a0ee2742481799dac4564ccfc5d7405e0}{Li}}[step];}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00071}00071\ \}}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00072}00072\ }
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00073}00073\ }
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00074}00074\ \textcolor{comment}{//\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~}}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00075}\mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_afbfb02fe47bd52973fbd25040f3e274b}{00075}}\ Matrix\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_afbfb02fe47bd52973fbd25040f3e274b}{Riccati::T}}(\textcolor{keywordtype}{int}\ step)}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00076}00076\ \{}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00077}00077\ \ \ \ \ \textcolor{keywordflow}{if}(\mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_afc4e31be8187b107d9b69b137880e883}{N}}<0)\ }
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00078}00078\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00079}00079\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a01d6b8bc3ef64422d6f83726d6e01eff}{verbose}})}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00080}00080\ \ \ \ \ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}Riccati:\ DARE\ has\ not\ been\ solved\ yet."{}});}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00081}00081\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a1392ea434f09fa0d03189f4141c09d30}{Ti}}[0];}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00082}00082\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00083}00083\ \ \ \ \ \textcolor{keywordflow}{if}(step>=0\ \&\&\ step>\mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_afc4e31be8187b107d9b69b137880e883}{N}})}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00084}00084\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00085}00085\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a01d6b8bc3ef64422d6f83726d6e01eff}{verbose}})}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00086}00086\ \ \ \ \ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}Riccati:\ Index\ for\ DARE\ matrix\ out\ of\ bound."{}});}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00087}00087\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a1392ea434f09fa0d03189f4141c09d30}{Ti}}[0];}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00088}00088\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00089}00089\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a1392ea434f09fa0d03189f4141c09d30}{Ti}}[step];}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00090}00090\ \}}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00091}00091\ }
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00092}00092\ }
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00093}00093\ \textcolor{comment}{//\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~}}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00094}\mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_aad05ee1194949a864be38a53a4220a6b}{00094}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_aad05ee1194949a864be38a53a4220a6b}{Riccati::setProblemData}}(\textcolor{keyword}{const}\ Matrix\ \&\_A,\ \textcolor{keyword}{const}\ Matrix\ \&\_B,\ \textcolor{keyword}{const}\ Matrix\ \&\_V,}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00095}00095\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Matrix\ \&\_P,\ \textcolor{keyword}{const}\ Matrix\ \&\_VN)}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00096}00096\ \{}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00097}00097\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a35d048e15acd328a46cae38866ef6700}{A}}\ =\ \_A;\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a7bee9ad8baa7a5afe22b7b12d97ccdbf}{At}}\ =\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a35d048e15acd328a46cae38866ef6700}{A}}.transposed();}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00098}00098\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a923ecb5719750a2e24a7530ba96c1cc1}{B}}\ =\ \_B;\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a9002b1541112e01d299e047dcdbdf397}{Bt}}\ =\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a923ecb5719750a2e24a7530ba96c1cc1}{B}}.transposed();}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00099}00099\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_ac24754207e168abc0cc0348bceb88fca}{V}}\ =\ \_V;}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00100}00100\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_ac54c7aaaa58b6beef67de3006c3936fc}{P}}\ =\ \_P;}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00101}00101\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a8e9bfdecbb36d04686c896939e23ed86}{VN}}\ =\ \_VN;}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00102}00102\ }
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00103}00103\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_aa8b40795646b4b8a0f169bd9ab5542ad}{n}}=\mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a35d048e15acd328a46cae38866ef6700}{A}}.rows();}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00104}00104\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a74c1873723d36effbb2c0a5900774e0f}{m}}=\mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a923ecb5719750a2e24a7530ba96c1cc1}{B}}.rows();}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00105}00105\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_afc4e31be8187b107d9b69b137880e883}{N}}=-\/1;}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00106}00106\ }
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00107}00107\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a01d6b8bc3ef64422d6f83726d6e01eff}{verbose}})}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00108}00108\ \ \ \ \ \ \ \ \ yWarning(\textcolor{stringliteral}{"{}Riccati:\ problem\ defined,\ unsolved."{}});}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00109}00109\ \}}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00110}00110\ }
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00111}00111\ }
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00112}00112\ \textcolor{comment}{//\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~}}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00113}\mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_aa5effeeb6938a9f1e0d5f99965c80beb}{00113}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_aa5effeeb6938a9f1e0d5f99965c80beb}{Riccati::solveRiccati}}(\textcolor{keywordtype}{int}\ steps)}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00114}00114\ \{}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00115}00115\ \ \ \ \ \textcolor{keywordtype}{int}\ i;}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00116}00116\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_afc4e31be8187b107d9b69b137880e883}{N}}\ =\ steps;}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00117}00117\ \ \ \ \ \textcolor{keyword}{delete}\ []\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a1392ea434f09fa0d03189f4141c09d30}{Ti}};}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00118}00118\ \ \ \ \ \textcolor{keyword}{delete}\ []\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a0ee2742481799dac4564ccfc5d7405e0}{Li}};}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00119}00119\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a1392ea434f09fa0d03189f4141c09d30}{Ti}}\ =\ \textcolor{keyword}{new}\ Matrix[steps+1];}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00120}00120\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a0ee2742481799dac4564ccfc5d7405e0}{Li}}\ =\ \textcolor{keyword}{new}\ Matrix[steps];}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00121}00121\ \ \ \ \ \textcolor{keywordflow}{for}(i=0;\ i<=steps;\ i++)}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00122}00122\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a1392ea434f09fa0d03189f4141c09d30}{Ti}}[i].resize(\mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a8e9bfdecbb36d04686c896939e23ed86}{VN}}.rows(),\mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a8e9bfdecbb36d04686c896939e23ed86}{VN}}.cols());\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00123}00123\ \ \ \ \ \textcolor{comment}{//init\ TN=VN}}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00124}00124\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a1392ea434f09fa0d03189f4141c09d30}{Ti}}[steps]=\mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a8e9bfdecbb36d04686c896939e23ed86}{VN}};}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00125}00125\ \ \ \ \ \textcolor{comment}{//compute\ backward\ all\ Ti}}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00126}00126\ \ \ \ \ \textcolor{keywordflow}{for}(i=steps-\/1;\ i>=0;\ i-\/-\/)}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00127}00127\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00128}00128\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_ab753ae7fd5bbb4d680b6b90b1a2bab46}{lastT}}=\mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a1392ea434f09fa0d03189f4141c09d30}{Ti}}[i+1];\ }
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00129}00129\ \ \ \ \ \ \ \ \ \textcolor{comment}{//Ti\ =\ V\ +\ A'\ *\ (Ti+1\ -\/\ Ti+1\ *\ B\ *\ (P\ +\ B'\ *\ Ti+1\ *\ B)\string^-\/1\ *\ B'\ *\ Ti+1\ )*\ A;}}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00130}00130\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a1392ea434f09fa0d03189f4141c09d30}{Ti}}[i]\ =\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_ac24754207e168abc0cc0348bceb88fca}{V}}\ +\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a7bee9ad8baa7a5afe22b7b12d97ccdbf}{At}}\ *(\mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_ab753ae7fd5bbb4d680b6b90b1a2bab46}{lastT}}\ -\/\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_ab753ae7fd5bbb4d680b6b90b1a2bab46}{lastT}}\ *\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a923ecb5719750a2e24a7530ba96c1cc1}{B}}*\ pinv(\mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_ac54c7aaaa58b6beef67de3006c3936fc}{P}}+\mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a9002b1541112e01d299e047dcdbdf397}{Bt}}*\mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_ab753ae7fd5bbb4d680b6b90b1a2bab46}{lastT}}*\mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a923ecb5719750a2e24a7530ba96c1cc1}{B}})*\mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a9002b1541112e01d299e047dcdbdf397}{Bt}}*\mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_ab753ae7fd5bbb4d680b6b90b1a2bab46}{lastT}}\ )*\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a35d048e15acd328a46cae38866ef6700}{A}};\ }
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00131}00131\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00132}00132\ \ \ \ \ \textcolor{comment}{//compute\ forward\ all\ Li}}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00133}00133\ \ \ \ \ \textcolor{keywordflow}{for}(i=0;i<steps;\ i++)}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00134}00134\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00135}00135\ \ \ \ \ \ \ \ \ \textcolor{comment}{//Li\ =\ (P\ +\ B'\ *\ Ti+1\ *\ B)\string^-\/1\ *\ B'\ *\ Ti+1\ *\ A}}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00136}00136\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a0ee2742481799dac4564ccfc5d7405e0}{Li}}[i]\ =\ pinv(\mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_ac54c7aaaa58b6beef67de3006c3936fc}{P}}\ +\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a9002b1541112e01d299e047dcdbdf397}{Bt}}*\mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a1392ea434f09fa0d03189f4141c09d30}{Ti}}[i+1]*\mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a923ecb5719750a2e24a7530ba96c1cc1}{B}})\ *\mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a9002b1541112e01d299e047dcdbdf397}{Bt}}\ *\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a1392ea434f09fa0d03189f4141c09d30}{Ti}}[i+1]\ *\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a35d048e15acd328a46cae38866ef6700}{A}};\ \ }
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00137}00137\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00138}00138\ }
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00139}00139\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a01d6b8bc3ef64422d6f83726d6e01eff}{verbose}})}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00140}00140\ \ \ \ \ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}Riccati:\ DARE\ solved,\ matrices\ Li\ and\ Ti\ computed\ and\ stored."{}});}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00141}00141\ \}}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00142}00142\ }
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00143}00143\ }
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00144}00144\ \textcolor{comment}{//\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~}}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00145}00145\ Vector\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_aa11a3435614f4dd14d764e0b625988fe}{Riccati::doLQcontrol}}(\textcolor{keywordtype}{int}\ step,\ \textcolor{keyword}{const}\ Vector\ \&\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}})}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00146}00146\ \{}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00147}00147\ \ \ \ \ \textcolor{keywordflow}{if}(\mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_afc4e31be8187b107d9b69b137880e883}{N}}<0)\ }
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00148}00148\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00149}00149\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a01d6b8bc3ef64422d6f83726d6e01eff}{verbose}})}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00150}00150\ \ \ \ \ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}Riccati:\ DARE\ has\ not\ been\ solved\ yet."{}});}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00151}00151\ \ \ \ \ \ \ \ \ Vector\ ret(1,0.0);}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00152}00152\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00153}00153\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00154}00154\ \ \ \ \ \textcolor{keywordflow}{if}(step>=0\ \&\&\ step>\mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_afc4e31be8187b107d9b69b137880e883}{N}})}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00155}00155\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00156}00156\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a01d6b8bc3ef64422d6f83726d6e01eff}{verbose}})}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00157}00157\ \ \ \ \ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}Riccati:\ Index\ for\ DARE\ matrix\ out\ of\ bound."{}});}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00158}00158\ \ \ \ \ \ \ \ \ Vector\ ret(1,0.0);}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00159}00159\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00160}00160\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00161}00161\ \ \ \ \ \textcolor{keywordflow}{return}\ (\mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a0ee2742481799dac4564ccfc5d7405e0}{Li}}[step]\ *\ (-\/1.0*\mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a2b2c6b1a22034e3f5985f920f82308e3}{x}}));}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00162}00162\ \}}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00163}00163\ }
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00164}00164\ }
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00165}00165\ \textcolor{comment}{//\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~\string~}}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00166}00166\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_aa11a3435614f4dd14d764e0b625988fe}{Riccati::doLQcontrol}}(\textcolor{keywordtype}{int}\ step,\ \textcolor{keyword}{const}\ Vector\ \&\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}},\ Vector\ \&ret)}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00167}00167\ \{}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00168}00168\ \ \ \ \ \textcolor{keywordflow}{if}(\mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_afc4e31be8187b107d9b69b137880e883}{N}}<0)\ }
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00169}00169\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00170}00170\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a01d6b8bc3ef64422d6f83726d6e01eff}{verbose}})}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00171}00171\ \ \ \ \ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}Riccati:\ DARE\ has\ not\ been\ solved\ yet."{}});}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00172}00172\ \ \ \ \ \ \ \ \ ret.zero();}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00173}00173\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00174}00174\ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}(step>=0\ \&\&\ step>\mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_afc4e31be8187b107d9b69b137880e883}{N}})}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00175}00175\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00176}00176\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a01d6b8bc3ef64422d6f83726d6e01eff}{verbose}})}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00177}00177\ \ \ \ \ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}Riccati:\ Index\ for\ DARE\ matrix\ out\ of\ bound."{}});}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00178}00178\ \ \ \ \ \ \ \ \ ret.zero();}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00179}00179\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00180}00180\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00181}00181\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00182}00182\ \ \ \ \ \ \ \ \ ret.resize(\mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a74c1873723d36effbb2c0a5900774e0f}{m}});}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00183}00183\ \ \ \ \ \ \ \ \ ret\ =\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a0ee2742481799dac4564ccfc5d7405e0}{Li}}[step]\ *\ (-\/1.0*\mbox{\hyperlink{classiCub_1_1ctrl_1_1Riccati_a2b2c6b1a22034e3f5985f920f82308e3}{x}});}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00184}00184\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00185}00185\ \}}
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00186}00186\ }
+\DoxyCodeLine{\Hypertarget{optimalControl_8cpp_source_l00187}00187\ }
+
+\end{DoxyCode}

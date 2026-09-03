@@ -1,0 +1,1074 @@
+\doxysection{straincalibgui.\+cpp}
+\hypertarget{straincalibgui_8cpp_source}{}\label{straincalibgui_8cpp_source}\index{icub-\/main/src/tools/FirmwareUpdater/straincalibgui.cpp@{icub-\/main/src/tools/FirmwareUpdater/straincalibgui.cpp}}
+\mbox{\hyperlink{straincalibgui_8cpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00001}00001\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{straincalibgui_8h}{straincalibgui.h}}"{}}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00002}00002\ \textcolor{preprocessor}{\#include\ "{}ui\_straincalibgui.h"{}}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00003}00003\ \textcolor{preprocessor}{\#include\ <QDebug>}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00004}00004\ \textcolor{preprocessor}{\#include\ <QtConcurrent/QtConcurrent>}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00005}00005\ \textcolor{preprocessor}{\#include\ <QFileDialog>}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00006}00006\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00007}00007\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00008}00008\ \textcolor{comment}{//\#define\ NSAMPLES\ 1000}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00009}00009\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00010}\mbox{\hyperlink{classStrainCalibGui_ae9b502d806f2fd2fe157ed4821ed735c}{00010}}\ \mbox{\hyperlink{classStrainCalibGui_ae9b502d806f2fd2fe157ed4821ed735c}{StrainCalibGui::StrainCalibGui}}(QString\ device,\ \textcolor{keywordtype}{int}\ bus,\ \textcolor{keywordtype}{int}\ pid,\ \mbox{\hyperlink{classFirmwareUpdaterCore}{FirmwareUpdaterCore}}\ *core,\ QWidget\ *parent)\ :}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00011}00011\ \ \ \ \ QDialog(parent),\ mutexacquisitionofdata(QMutex::Recursive),\ mutexdriver(QMutex::Recursive),}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00012}00012\ \ \ \ \ ui(new\ \mbox{\hyperlink{namespaceUi}{Ui}}::\mbox{\hyperlink{classStrainCalibGui}{StrainCalibGui}})}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00013}00013\ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00014}00014\ \ \ \ \ progressvalue\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00015}00015\ \ \ \ \ acquiringdata\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00016}00016\ \ \ \ \ enableacquisitions\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00017}00017\ \ \ \ \ ui-\/>setupUi(\textcolor{keyword}{this});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00018}00018\ \ \ \ \ this-\/>core\ =\ core;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00019}00019\ \ \ \ \ fp\ =\ NULL;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00020}00020\ \ \ \ \ trial=-\/1;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00021}00021\ \ \ \ \ current\_trial\ =\ -\/1;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00022}00022\ \ \ \ \ connect(ui-\/>btnAcquireData,SIGNAL(clicked(\textcolor{keywordtype}{bool})),\textcolor{keyword}{this},SLOT(onAcquireData(\textcolor{keywordtype}{bool})));}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00023}00023\ \ \ \ \ buttons.append(ui-\/>btn1);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00024}00024\ \ \ \ \ buttons.append(ui-\/>btn2);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00025}00025\ \ \ \ \ buttons.append(ui-\/>btn3);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00026}00026\ \ \ \ \ buttons.append(ui-\/>btn4);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00027}00027\ \ \ \ \ buttons.append(ui-\/>btn5);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00028}00028\ \ \ \ \ buttons.append(ui-\/>btn6);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00029}00029\ \ \ \ \ buttons.append(ui-\/>btn7);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00030}00030\ \ \ \ \ buttons.append(ui-\/>btn8);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00031}00031\ \ \ \ \ buttons.append(ui-\/>btn9);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00032}00032\ \ \ \ \ buttons.append(ui-\/>btn10);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00033}00033\ \ \ \ \ buttons.append(ui-\/>btn11);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00034}00034\ \ \ \ \ buttons.append(ui-\/>btn12);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00035}00035\ \ \ \ \ buttons.append(ui-\/>btn13);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00036}00036\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00037}00037\ \ \ \ \ readValues.append(ui-\/>cur1);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00038}00038\ \ \ \ \ readValues.append(ui-\/>cur2);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00039}00039\ \ \ \ \ readValues.append(ui-\/>cur3);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00040}00040\ \ \ \ \ readValues.append(ui-\/>cur4);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00041}00041\ \ \ \ \ readValues.append(ui-\/>cur5);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00042}00042\ \ \ \ \ readValues.append(ui-\/>cur6);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00043}00043\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00044}00044\ \ \ \ \ expValues.append(ui-\/>exp1);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00045}00045\ \ \ \ \ expValues.append(ui-\/>exp2);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00046}00046\ \ \ \ \ expValues.append(ui-\/>exp3);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00047}00047\ \ \ \ \ expValues.append(ui-\/>exp4);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00048}00048\ \ \ \ \ expValues.append(ui-\/>exp5);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00049}00049\ \ \ \ \ expValues.append(ui-\/>exp6);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00050}00050\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00051}00051\ \ \ \ \ errValues.append(ui-\/>err1);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00052}00052\ \ \ \ \ errValues.append(ui-\/>err2);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00053}00053\ \ \ \ \ errValues.append(ui-\/>err3);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00054}00054\ \ \ \ \ errValues.append(ui-\/>err4);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00055}00055\ \ \ \ \ errValues.append(ui-\/>err5);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00056}00056\ \ \ \ \ errValues.append(ui-\/>err6);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00057}00057\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00058}00058\ \ \ \ \ ui-\/>freeEdit1-\/>setValidator(\&validator);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00059}00059\ \ \ \ \ ui-\/>freeEdit2-\/>setValidator(\&validator);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00060}00060\ \ \ \ \ ui-\/>freeEdit3-\/>setValidator(\&validator);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00061}00061\ \ \ \ \ ui-\/>freeEdit4-\/>setValidator(\&validator);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00062}00062\ \ \ \ \ ui-\/>freeEdit5-\/>setValidator(\&validator);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00063}00063\ \ \ \ \ ui-\/>freeEdit6-\/>setValidator(\&validator);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00064}00064\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00065}00065\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00066}00066\ \ \ \ \ \textcolor{keywordtype}{int}\ bi[13]=\{8020,1001,8010,8030,8040,8050,8060,8070,8080,3001,4001,5001,6001\};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00067}00067\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00068}00068\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i=0;\ i<buttons.count();i++)\ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00069}00069\ \ \ \ \ \ \ \ \ buttons.at(i)-\/>setProperty(\textcolor{stringliteral}{"{}btnIndex"{}},bi[i]);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00070}00070\ \ \ \ \ \ \ \ \ connect(buttons.at(i),SIGNAL(clicked(\textcolor{keywordtype}{bool})),\textcolor{keyword}{this},SLOT(onButtonClick(\textcolor{keywordtype}{bool})));}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00071}00071\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00072}00072\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00073}00073\ \ \ \ \ connect(ui-\/>freeAcqModeGroup,SIGNAL(toggled(\textcolor{keywordtype}{bool})),\textcolor{keyword}{this},SLOT(onFreeAcqMode(\textcolor{keywordtype}{bool})));}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00074}00074\ \ \ \ \ \textcolor{comment}{//connect(ui-\/>buttonBox,SIGNAL(accepted()),this,SLOT(close()));}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00075}00075\ \ \ \ \ connect(ui-\/>buttonBox,\ SIGNAL(accepted()),\ \textcolor{keyword}{this},\ SLOT(onClose()));}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00076}00076\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00077}00077\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00078}00078\ \ \ \ \ std::string\ filenameOfexpectedValues\ =\ std::string(\textcolor{stringliteral}{"{}firmwareupdater.strain.expectedvalues.txt"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00079}00079\ \ \ \ \ \textcolor{keywordtype}{bool}\ b\ =\ expected\_values\_handler.\mbox{\hyperlink{classexpected__values__handler__class_a43a1d623413a7131eb0928acbbfa0014}{init}}(filenameOfexpectedValues.c\_str());}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00080}00080\ \ \ \ \ \textcolor{keywordflow}{if}(!b)\{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00081}00081\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}ERROR\ in\ opening\ file"{}}\ <<\ filenameOfexpectedValues\ <<\ \textcolor{stringliteral}{"{}....\ using\ default\ values\ for\ expected\ value\ handler"{}};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00082}00082\ \ \ \ \ \ \ \ \ expected\_values\_handler.\mbox{\hyperlink{classexpected__values__handler__class_a43a1d623413a7131eb0928acbbfa0014}{init}}();}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00083}00083\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00084}00084\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00085}00085\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00086}00086\ \ \ \ \ \ \ \ \ yDebug()\ <<\ \textcolor{stringliteral}{"{}loaded\ file\ of\ expected\ values\ ="{}}\ <<\ filenameOfexpectedValues;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00087}00087\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00088}00088\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00089}00089\ \ \ \ \ \textcolor{keywordtype}{int}\ low\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00090}00090\ \ \ \ \ \textcolor{keywordtype}{int}\ high\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00091}00091\ \ \ \ \ expected\_values\_handler.\mbox{\hyperlink{classexpected__values__handler__class_a17f7d40749c9d99766b139eec96aa289}{get\_thresholds}}(low,\ high);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00092}00092\ \ \ \ \ yDebug()\ <<\ \textcolor{stringliteral}{"{}expected\ values\ for"{}}\ <<\ expected\_values\_handler.\mbox{\hyperlink{classexpected__values__handler__class_a8c6e4bd7c58478035bd9ef92ac60d27a}{get\_serialnumber}}()\ <<\ \textcolor{stringliteral}{"{}with\ thresholds\ =\ "{}}\ <<\ low\ <<\ high;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00093}00093\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00094}00094\ \textcolor{comment}{//\ \ \ \ QString\ tt\ =\ QString("{}Current\ Error\ [\%1,\ \ \%2]"{}).arg(low,\ high);}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00095}00095\ \textcolor{comment}{//\ \ \ \ ui-\/>label\_16-\/>setText(tt);}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00096}00096\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00097}00097\ \ \ \ \ connect(\&watcher,\ SIGNAL(finished()),\ \textcolor{keyword}{this},\ SLOT(onFutureFinished()));}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00098}00098\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00099}00099\ \textcolor{preprocessor}{\#ifdef\ ATI\_SENS}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00100}00100\ \ \ \ \ ATIsens\ =\ \textcolor{keyword}{new}\ devMeasurementFns();}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00101}00101\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00102}00102\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00103}00103\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00104}00104\ \ \ \ \ \textcolor{keywordflow}{if}((device\ ==\ \textcolor{stringliteral}{"{}ETH"{}})\ ||\ (device\ ==\ \textcolor{stringliteral}{"{}eth"{}}))}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00105}00105\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00106}00106\ \ \ \ \ \ \ \ \ config.\mbox{\hyperlink{structstrainInterface_1_1Config_a8d5a5c36b96fdf18d4506f7e78c26652}{network}}\ =\ \mbox{\hyperlink{classstrainInterface_a4970128a879181f741241eacc1974753af8d2e1584059489f8ffa3663b3223df2}{strainInterface::Network::ETH}};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00107}00107\ \ \ \ \ \ \ \ \ yDebug()\ <<\ \textcolor{stringliteral}{"{}strainInterface::Network::ETH"{}};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00108}00108\ \ \ \ \ \}\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00109}00109\ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ ((device\ ==\ \textcolor{stringliteral}{"{}SOCKETCAN"{}})\ ||\ (device\ ==\ \textcolor{stringliteral}{"{}socketcan"{}}))}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00110}00110\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00111}00111\ \ \ \ \ \ \ \ \ yDebug()\ <<\ \textcolor{stringliteral}{"{}strainInterface::Network::socketcan"{}};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00112}00112\ \ \ \ \ \ \ \ \ config.\mbox{\hyperlink{structstrainInterface_1_1Config_a8d5a5c36b96fdf18d4506f7e78c26652}{network}}\ =\ \mbox{\hyperlink{classstrainInterface_a4970128a879181f741241eacc1974753a6180ccabe86b08c9e71547c55a5f9881}{strainInterface::Network::socketcan}};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00113}00113\ \ \ \ \ \}\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00114}00114\ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}((device\ ==\ \textcolor{stringliteral}{"{}ECAN"{}})\ ||\ (device\ ==\ \textcolor{stringliteral}{"{}ecan"{}}))}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00115}00115\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00116}00116\ \ \ \ \ \ \ \ \ yDebug()\ <<\ \textcolor{stringliteral}{"{}strainInterface::Network::ecan"{}};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00117}00117\ \ \ \ \ \ \ \ \ config.\mbox{\hyperlink{structstrainInterface_1_1Config_a8d5a5c36b96fdf18d4506f7e78c26652}{network}}\ =\ \mbox{\hyperlink{classstrainInterface_a4970128a879181f741241eacc1974753a1e22680224cc6b2ef0bd2a34bc251134}{strainInterface::Network::ecan}};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00118}00118\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00119}00119\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00120}00120\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00121}00121\ \ \ \ \ \ \ \ \ config.\mbox{\hyperlink{structstrainInterface_1_1Config_a8d5a5c36b96fdf18d4506f7e78c26652}{network}}\ =\ \mbox{\hyperlink{classstrainInterface_a4970128a879181f741241eacc1974753aad921d60486366258809553a3db49a4a}{strainInterface::Network::unknown}};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00122}00122\ \ \ \ \ \ \ \ \ yDebug()\ <<\ \textcolor{stringliteral}{"{}unknown\ strainInterface::Network\ ="{}}\ <<\ device.toStdString();}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00123}00123\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00124}00124\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00125}00125\ \ \ \ \ config.\mbox{\hyperlink{structstrainInterface_1_1Config_a3b93b9aab646b22e17335d27eb691004}{canbus}}\ =\ (\mbox{\hyperlink{classstrainInterface_af14dcd5dcf253b2eb73ac1e882d0b5db}{strainInterface::CanBus}})bus;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00126}00126\ \ \ \ \ config.\mbox{\hyperlink{structstrainInterface_1_1Config_a934fd045e2cf8e946810b6cd15c1561b}{canaddress}}\ =\ (\mbox{\hyperlink{classstrainInterface_afe0389037c013289df62224ea2b8c648}{strainInterface::CanAddress}})pid;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00127}00127\ \ \ \ \ config.\mbox{\hyperlink{structstrainInterface_1_1Config_adc615de3e481467f8a1df96e0a6fe681}{txrate}}\ =\ 2;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00128}00128\ \textcolor{comment}{//\ \ \ \ config.load\_default();}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00129}00129\ \textcolor{comment}{//\ \ \ \ if(!sI.open(config))\{}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00130}00130\ \textcolor{comment}{//\ \ \ \ \ \ \ \ qDebug()\ <<\ "{}Error\ opening\ device"{};}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00131}00131\ \textcolor{comment}{//\ \ \ \ \}}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00132}00132\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00133}00133\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00134}00134\ \ \ \ \ connect(\&timer,SIGNAL(timeout()),\textcolor{keyword}{this},SLOT(onTimerTimeout()));}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00135}00135\ \ \ \ \ timer.setInterval(500);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00136}00136\ \ \ \ \ timer.setSingleShot(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00137}00137\ \ \ \ \ timer.start();}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00138}00138\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00139}00139\ \ \ \ \ enabledebugprints\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00140}00140\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00141}00141\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00142}00142\ \ \ \ \ \textcolor{keywordflow}{if}(\textcolor{keyword}{false}\ ==\ checkDirectory())}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00143}00143\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00144}00144\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}CANNOT\ find\ the\ data\ folder.\ Please\ create\ it!"{}};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00145}00145\ \ \ \ \ \ \ \ \ ui-\/>labelInstructions-\/>setText(\textcolor{stringliteral}{"{}You\ can\ select\ an\ acquisition\ from\ the\ menu\ ...\ but:"{}}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00146}00146\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\(\backslash\)nCANNOT\ find\ the\ data\ folder."{}}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00147}00147\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\(\backslash\)nIf\ you\ want\ your\ acquisition\ data\ saved,\ please\ create\ it!"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00148}00148\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00149}00149\ \textcolor{comment}{//\ \ \ \ else}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00150}00150\ \textcolor{comment}{//\ \ \ \ \{}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00151}00151\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ ui-\/>labelInstructions-\/>setText("{}Select\ an\ acquisition\ from\ the\ menu"{});}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00152}00152\ \textcolor{comment}{//\ \ \ \ \}}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00153}00153\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00154}00154\ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00155}00155\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00156}\mbox{\hyperlink{classStrainCalibGui_af9e72b80fbb67b6fa6996fae9b07ea14}{00156}}\ \mbox{\hyperlink{classStrainCalibGui_af9e72b80fbb67b6fa6996fae9b07ea14}{StrainCalibGui::\string~StrainCalibGui}}()}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00157}00157\ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00158}00158\ \ \ \ \ \textcolor{comment}{//sI.close();}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00159}00159\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00160}00160\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00161}00161\ \ \ \ \ stopacquisitions();}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00162}00162\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00163}00163\ \ \ \ \ \textcolor{keyword}{delete}\ ui;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00164}00164\ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00165}00165\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00166}00166\ \textcolor{keywordtype}{void}\ StrainCalibGui::stopacquisitions(\textcolor{keywordtype}{bool}\ forcestop)}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00167}00167\ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00168}00168\ \ \ \ \ \textcolor{comment}{//\ wait\ all\ acquisitions\ to\ be\ over:}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00169}00169\ \ \ \ \ \textcolor{comment}{//\ -\/\ stop\ timer\ so\ that\ tick\_acquisition()\ is\ not\ called\ anymore}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00170}00170\ \ \ \ \ \textcolor{comment}{//\ -\/\ wait\ pending\ acquisitions\ to\ be\ over\ by\ calling\ two\ lockdriver()\ true\ /\ false}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00171}00171\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00172}00172\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{bool}\ alreadystopped\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00173}00173\ \ \ \ \ \textcolor{keywordflow}{if}((\textcolor{keyword}{false}\ ==\ alreadystopped)\ ||\ (\textcolor{keyword}{true}\ ==\ forcestop))}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00174}00174\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00175}00175\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ we\ must\ be\ sure\ that\ no\ tick\_acquisition()\ is\ executed:\ we\ stop\ the\ timer\ so\ that\ no\ future}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00176}00176\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ callback\ onTimerTimeout()\ is\ called.\ but\ it\ may\ be\ executing\ rigth\ now.}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00177}00177\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ hence\ we\ first\ set\ enableacquisitions\ =\ false\ for\ furthe\ security}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00178}00178\ \ \ \ \ \ \ \ \ enableacquisitions\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00179}00179\ \ \ \ \ \ \ \ \ timer.stop();}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00180}00180\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00181}00181\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ we\ now\ wait\ until\ any\ acquisition\ is\ over\ and\ we\ force\ stop\ of\ strain\ tx.\ twice!}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00182}00182\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}(\textcolor{keyword}{false}\ ==\ mutexdriver.tryLock(250))}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00183}00183\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00184}00184\ \ \ \ \ \ \ \ \ \ \ \ \ ui-\/>progress-\/>setValue(progressvalue);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00185}00185\ \ \ \ \ \ \ \ \ \ \ \ \ ui-\/>labelInstructions-\/>setText(\textcolor{stringliteral}{"{}Received\ the\ QUIT\ command:\ waiting\ for\ the\ acquisition\ to\ terminate"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00186}00186\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00187}00187\ \ \ \ \ \ \ \ \ \textcolor{comment}{//lockdriver(true);}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00188}00188\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ marco.accame:\ on\ windows,\ esdcan\ driver\ cannot\ manage\ streaming\ mode\ in\ reception....\ sic}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00189}00189\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classcDownloader_a741c9cfa33ec32a487a417079bdd9462}{cDownloader::strain\_acquisition\_mode\_t}}\ acqmode\ =\ (\mbox{\hyperlink{classstrainInterface_a4970128a879181f741241eacc1974753af8d2e1584059489f8ffa3663b3223df2}{strainInterface::Network::ETH}}\ ==\ config.\mbox{\hyperlink{structstrainInterface_1_1Config_a8d5a5c36b96fdf18d4506f7e78c26652}{network}})\ ?\ (\mbox{\hyperlink{classcDownloader_a741c9cfa33ec32a487a417079bdd9462a8c78c5be0134a92c1715b3fc5d7408fb}{cDownloader::strain\_acquisition\_mode\_streaming}})\ :\ (\mbox{\hyperlink{classcDownloader_a741c9cfa33ec32a487a417079bdd9462a393f90a2fdd77eb6fb0986e7b43ab7e3}{cDownloader::strain\_acquisition\_mode\_polling}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00190}00190\ \ \ \ \ \ \ \ \ core-\/>\mbox{\hyperlink{classFirmwareUpdaterCore_aea347afa83f596a7cc4199a9d8ab8f22}{getDownloader}}()-\/>\mbox{\hyperlink{classcDownloader_a4d70b7e544600ef2b55ec133a7e0b51c}{strain\_acquire\_stop}}(config.\mbox{\hyperlink{structstrainInterface_1_1Config_a3942eec91a99e4fb14ab4dc006321c98}{get\_canbus}}(),\ config.\mbox{\hyperlink{structstrainInterface_1_1Config_abf7dd193135e66c45e354f2652b9e7a2}{get\_canaddress}}(),\ acqmode);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00191}00191\ \ \ \ \ \ \ \ \ core-\/>\mbox{\hyperlink{classFirmwareUpdaterCore_aea347afa83f596a7cc4199a9d8ab8f22}{getDownloader}}()-\/>\mbox{\hyperlink{classcDownloader_a4d70b7e544600ef2b55ec133a7e0b51c}{strain\_acquire\_stop}}(config.\mbox{\hyperlink{structstrainInterface_1_1Config_a3942eec91a99e4fb14ab4dc006321c98}{get\_canbus}}(),\ config.\mbox{\hyperlink{structstrainInterface_1_1Config_abf7dd193135e66c45e354f2652b9e7a2}{get\_canaddress}}(),\ acqmode);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00192}00192\ \ \ \ \ \ \ \ \ lockdriver(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00193}00193\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00194}00194\ \ \ \ \ \ \ \ \ alreadystopped\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00195}00195\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00196}00196\ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00197}00197\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00198}00198\ \textcolor{keywordtype}{void}\ StrainCalibGui::onClose()}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00199}00199\ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00200}00200\ \ \ \ \ stopacquisitions(\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00201}00201\ \ \ \ \ stopacquisitions(\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00202}00202\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00203}00203\ \ \ \ \ close();}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00204}00204\ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00205}00205\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00206}00206\ \textcolor{keywordtype}{void}\ StrainCalibGui::onFreeAcqMode(\textcolor{keywordtype}{bool}\ b)}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00207}00207\ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00208}00208\ \ \ \ \ \textcolor{keywordflow}{if}(b)\{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00209}00209\ \ \ \ \ \ \ \ \ ui-\/>spinSamples-\/>setEnabled(\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00210}00210\ \ \ \ \ \ \ \ \ ui-\/>btnContainer1-\/>setEnabled(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00211}00211\ \ \ \ \ \ \ \ \ ui-\/>btnContainer2-\/>setEnabled(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00212}00212\ \ \ \ \ \ \ \ \ ui-\/>btnAcquireData-\/>setEnabled(\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00213}00213\ \ \ \ \ \ \ \ \ ui-\/>labelInstructions-\/>setText(\textcolor{stringliteral}{"{}Free\ Acquisiton\ Mode"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00214}00214\ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00215}00215\ \ \ \ \ \ \ \ \ ui-\/>btnContainer1-\/>setEnabled(\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00216}00216\ \ \ \ \ \ \ \ \ ui-\/>btnContainer2-\/>setEnabled(\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00217}00217\ \ \ \ \ \ \ \ \ ui-\/>btnAcquireData-\/>setEnabled(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00218}00218\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00219}00219\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(\textcolor{keyword}{false}\ ==\ checkDirectory())}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00220}00220\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00221}00221\ \ \ \ \ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}CANNOT\ find\ the\ data\ folder.\ Please\ create\ it!"{}};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00222}00222\ \ \ \ \ \ \ \ \ \ \ \ \ ui-\/>labelInstructions-\/>setText(\textcolor{stringliteral}{"{}You\ can\ select\ an\ acquisition\ from\ the\ menu\ ...\ but:"{}}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00223}00223\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\(\backslash\)nCANNOT\ find\ the\ data\ folder."{}}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00224}00224\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\(\backslash\)nIf\ you\ want\ your\ acquisition\ data\ saved,\ please\ create\ it!"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00225}00225\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00226}00226\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00227}00227\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00228}00228\ \ \ \ \ \ \ \ \ \ \ \ \ \ ui-\/>labelInstructions-\/>setText(\textcolor{stringliteral}{"{}Select\ an\ acquisition\ from\ the\ menu"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00229}00229\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00230}00230\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00231}00231\ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00232}00232\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00233}00233\ \textcolor{keywordtype}{void}\ StrainCalibGui::onFutureFinished()}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00234}00234\ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00235}00235\ \ \ \ \ ui-\/>progress-\/>setMaximum(100);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00236}00236\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00237}00237\ \ \ \ \ \textcolor{keywordflow}{if}(!watcher.result())\{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00238}00238\ \ \ \ \ \ \ \ \ ui-\/>labelInstructions-\/>setText(\textcolor{stringliteral}{"{}Not\ enough\ data\ acquired.\ Repeat\ acquisition."{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00239}00239\ \ \ \ \ \ \ \ \ close\_files();}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00240}00240\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00241}00241\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00242}00242\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00243}00243\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00244}00244\ \ \ \ \ \textcolor{keywordflow}{if}(ui-\/>freeAcqModeGroup-\/>isChecked())}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00245}00245\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00246}00246\ \ \ \ \ \ \ \ \ close\_files();}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00247}00247\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00248}00248\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00249}00249\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00250}00250\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00251}00251\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ rtrial=remap\_trials();}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00252}00252\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00253}00253\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (rtrial==-\/1)\{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00254}00254\ \ \ \ \ \ \ \ \ \ \ \ \ trial\_bias=last\_value;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00255}00255\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00256}00256\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00257}00257\ \ \ \ \ \ \ \ \ trial++;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00258}00258\ \ \ \ \ \ \ \ \ qDebug(\textcolor{stringliteral}{"{}\%d\(\backslash\)n"{}},trial);\ \textcolor{comment}{//debug\ only}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00259}00259\ \ \ \ \ \ \ \ \ showMenu();}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00260}00260\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00261}00261\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00262}00262\ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00263}00263\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00264}00264\ \textcolor{keywordtype}{void}\ StrainCalibGui::onAcquireData(\textcolor{keywordtype}{bool}\ b)}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00265}00265\ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00266}00266\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00267}00267\ \ \ \ \ \textcolor{keywordflow}{if}(ui-\/>freeAcqModeGroup-\/>isChecked())}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00268}00268\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00269}00269\ \ \ \ \ \ \ \ \ QString\ fileName\ =\ QFileDialog::getSaveFileName(NULL,\textcolor{stringliteral}{"{}Choose\ a\ file"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00270}00270\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(fileName.isEmpty())}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00271}00271\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00272}00272\ \ \ \ \ \ \ \ \ \ \ \ \ yWarning()\ <<\ \textcolor{stringliteral}{"{}choose\ another\ file"{}};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00273}00273\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00274}00274\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00275}00275\ \ \ \ \ \ \ \ \ fp\ =\ fopen(fileName.toLatin1().data(),\textcolor{stringliteral}{"{}w"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00276}00276\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(\textcolor{keyword}{nullptr}\ ==\ fp)}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00277}00277\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00278}00278\ \ \ \ \ \ \ \ \ \ \ \ \ yWarning()\ <<\ \textcolor{stringliteral}{"{}cannot\ open\ file"{}}\ <<\ fileName.toLatin1().data()\ <<\ \textcolor{stringliteral}{"{}hence\ i\ will\ not\ perform\ acquisition"{}};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00279}00279\ \ \ \ \ \ \ \ \ \ \ \ \ ui-\/>labelInstructions-\/>setText(\textcolor{stringliteral}{"{}Cannot\ open\ file.\ Try\ once\ more."{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00280}00280\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00281}00281\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00282}00282\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00283}00283\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00284}00284\ \ \ \ \ QFuture<bool>\ future\ =\ QtConcurrent::run(\textcolor{keyword}{this},\&StrainCalibGui::acquire\_samples,ui-\/>spinSamples-\/>value());}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00285}00285\ \ \ \ \ watcher.setFuture(future);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00286}00286\ \ \ \ \ ui-\/>progress-\/>setMaximum(100);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00287}00287\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00288}00288\ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00289}00289\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00290}00290\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00291}00291\ \textcolor{keywordtype}{void}\ StrainCalibGui::onButtonClick(\textcolor{keywordtype}{bool}\ b)}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00292}00292\ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00293}00293\ \ \ \ \ QPushButton\ *btn\ =\ (QPushButton*)sender();}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00294}00294\ \ \ \ \ \textcolor{keywordtype}{int}\ btnIndex\ =\ btn-\/>property(\textcolor{stringliteral}{"{}btnIndex"{}}).toInt();}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00295}00295\ \ \ \ \ currentBtnIndex\ =\ buttons.indexOf(btn);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00296}00296\ \ \ \ \ trial\ =\ btnIndex;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00297}00297\ \ \ \ \ \textcolor{comment}{//ui-\/>btn3-\/>setStyleSheet("{}background-\/color:\ rgb(0,\ 175,\ 0);"{});}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00298}00298\ \ \ \ \ \textcolor{comment}{//\ 4/9/2018\ Tolto\ con\ Marco\ Accame\ perchè\ non\ ritenuto\ comprensibile}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00299}00299\ \ \ \ \ turnOffButtons();}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00300}00300\ \ \ \ \ showMenu();}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00301}00301\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00302}00302\ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00303}00303\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00304}00304\ \textcolor{preprocessor}{\#ifdef\ ATI\_SENS}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00305}00305\ \textcolor{keywordtype}{void}\ acquire\_1000\_samples()}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00306}00306\ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00307}00307\ \ \ \ \ \textcolor{keywordtype}{char}\ temp[255];}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00308}00308\ \ \ \ \ \textcolor{keywordtype}{float}\ \mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}[6]=\{0,0,0,0,0,0\};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00309}00309\ \ \ \ \ printf(\textcolor{stringliteral}{"{}\(\backslash\)n\ \ \ press\ return\ to\ acquire\ ***ATI\ sensor***\ data\ or\ 'r'\ to\ reset\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00310}00310\ \ \ \ \ cin\ >>\ temp;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00311}00311\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00312}00312\ \ \ \ \ \textcolor{keywordflow}{if}\ (strcmp(temp,\textcolor{stringliteral}{"{}r"{}})==0)}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00313}00313\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00314}00314\ \ \ \ \ \ \ \ \ ATIsens-\/>BiasForceTorqueSensor();}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00315}00315\ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\(\backslash\)n\ \ \ bias\ done.\ press\ return\ to\ acquire\ ***ATI\ sensor***\ data\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00316}00316\ \ \ \ \ \ \ \ \ cin\ >>\ temp;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00317}00317\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00318}00318\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00319}00319\ \ \ \ \ \textcolor{keywordtype}{int}\ i=0;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00320}00320\ \ \ \ \ \textcolor{keywordtype}{int}\ j=0;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00321}00321\ \ \ \ \ \textcolor{keywordtype}{float}\ data\_mean[6]\ =\ \{0,0,0,0,0,0\};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00322}00322\ \ \ \ \ \textcolor{keywordflow}{for}\ (i=0;\ i<1000;\ i++)}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00323}00323\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00324}00324\ \ \ \ \ \ \ \ \ Sleep(5);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00325}00325\ \ \ \ \ \ \ \ \ ATIsens-\/>ReadFTsensorData();}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00326}00326\ \ \ \ \ \ \ \ \ ATIsens-\/>GetFTData(\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00327}00327\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{saveNetwork_8m_a0eba6f64b9c26507a877bcb0c4f270e2}{fprintf}}(\mbox{\hyperlink{pcap__wrapper__linux_8cpp_ae44275d34c468c2018022eafb08b7179}{fp}},\textcolor{stringliteral}{"{}\%3d\ \%+f\ \%+f\ \%+f\ \%+f\ \%+f\ \%+f\(\backslash\)n"{}},i,\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}[0],\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}[1],\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}[2],\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}[3],\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}[4],\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}[5]);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00328}00328\ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}samples:\%3d\ [0]:\%+6.2f\ [1]:\%+6.2f\ [2]:\%+6.2f\ [3]:\%+6.2f\ [4]:\%+6.2f\ [5]:\%+6.2f\(\backslash\)r\(\backslash\)n"{}},i,\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}[0],\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}[1],\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}[2],\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}[3],\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}[4],\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}[5]);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00329}00329\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (j=0;\ j<6;\ j++)}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00330}00330\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00331}00331\ \ \ \ \ \ \ \ \ \ \ \ \ data\_mean[j]=data\_mean[j]+\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}[j];}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00332}00332\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00333}00333\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00334}00334\ \ \ \ \ \textcolor{keywordflow}{for}\ (j=0;\ j<6;\ j++)}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00335}00335\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00336}00336\ \ \ \ \ \ \ \ \ \ \ \ \ data\_mean[j]/=1000;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00337}00337\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00338}00338\ \ \ \ \ \textcolor{comment}{//fprintf(fp2,"{}\%3d\ \%+f\ \%+f\ \%+f\ \%+f\ \%+f\ \%+f\(\backslash\)n"{},i,data\_mean[0],data\_mean[1],data\_mean[2],data\_mean[3],data\_mean[4],data\_mean[5]);}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00339}00339\ \ \ \ \ printf(\textcolor{stringliteral}{"{}means:\%3d\ [0]:\%+6.2f\ [1]:\%+6.2f\ [2]:\%+6.2f\ [3]:\%+6.2f\ [4]:\%+6.2f\ [5]:\%+6.2f\(\backslash\)r\(\backslash\)n"{}},i,data\_mean[0],data\_mean[1],data\_mean[2],data\_mean[3],data\_mean[4],data\_mean[5]);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00340}00340\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00341}00341\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00342}00342\ \ \ \ \ trial++;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00343}00343\ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00344}00344\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00345}00345\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00346}00346\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00347}00347\ \textcolor{keywordtype}{void}\ StrainCalibGui::progressbar(\textcolor{keywordtype}{void}\ *owner,\ \textcolor{keywordtype}{float}\ percent)}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00348}00348\ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00349}00349\ \ \ \ \ \textcolor{keywordflow}{if}(\textcolor{keyword}{nullptr}\ ==\ owner)}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00350}00350\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00351}00351\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00352}00352\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00353}00353\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00354}00354\ \ \ \ \ \textcolor{keywordtype}{int}\ value\ =\ \textcolor{keyword}{static\_cast<}\textcolor{keywordtype}{int}\textcolor{keyword}{>}(percent\ *\ 100.0);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00355}00355\ \textcolor{comment}{//\ \ \ \ value\ /=\ 10;}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00356}00356\ \textcolor{comment}{//\ \ \ \ value\ *=\ 10;}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00357}00357\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00358}00358\ \ \ \ \ \mbox{\hyperlink{classStrainCalibGui}{StrainCalibGui}}\ *thegui\ =\ \textcolor{keyword}{reinterpret\_cast<}\mbox{\hyperlink{classStrainCalibGui}{StrainCalibGui}}*\textcolor{keyword}{>}(owner);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00359}00359\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00360}00360\ \ \ \ \ \textcolor{keywordflow}{if}(value\ !=\ thegui-\/>progressvalue)}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00361}00361\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00362}00362\ \ \ \ \ \ \ \ \ thegui-\/>progressvalue\ =\ value;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00363}00363\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00364}00364\ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00365}00365\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00366}00366\ \textcolor{keywordtype}{bool}\ StrainCalibGui::get(\textcolor{keyword}{const}\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ number,\ vector<cDownloader::strain\_value\_t>\ \&values,\ \textcolor{keywordtype}{bool}\ debugprint,\ \textcolor{keywordtype}{bool}\ updateprogress)}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00367}00367\ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00368}00368\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00369}00369\ \ \ \ \ \textcolor{keywordtype}{double}\ t0\ =\ yarp::os::SystemClock::nowSystem();}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00370}00370\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00371}00371\ \ \ \ \ \textcolor{keywordflow}{if}(debugprint)}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00372}00372\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00373}00373\ \ \ \ \ \ \ \ \ yDebug()\ <<\ \textcolor{stringliteral}{"{}strainInterface::get():\ is\ acquiring"{}}\ <<\ number\ <<\ \textcolor{stringliteral}{"{}from\ the\ 6\ channels.\ Please\ wait\ ..."{}};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00374}00374\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00375}00375\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00376}00376\ \ \ \ \ \textcolor{keywordtype}{void}\ *\ param\ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00377}00377\ \ \ \ \ void\ (*updateProgressBar)(\textcolor{keywordtype}{void}*,\ float)\ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00378}00378\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00379}00379\ \ \ \ \ \textcolor{keywordflow}{if}(\textcolor{keyword}{true}\ ==\ updateprogress)}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00380}00380\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00381}00381\ \ \ \ \ \ \ \ \ updateProgressBar\ =\ progressbar;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00382}00382\ \ \ \ \ \ \ \ \ param\ =\ \textcolor{keyword}{reinterpret\_cast<}\textcolor{keywordtype}{void}*\textcolor{keyword}{>}(\textcolor{keyword}{this});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00383}00383\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00384}00384\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00385}00385\ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{bool}\ calibmode\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00386}00386\ \ \ \ \ \textcolor{comment}{//\ marco.accame:\ on\ windows,\ esdcan\ driver\ cannot\ manage\ streaming\ mode\ in\ reception....sic}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00387}00387\ \ \ \ \ \mbox{\hyperlink{classcDownloader_a741c9cfa33ec32a487a417079bdd9462}{cDownloader::strain\_acquisition\_mode\_t}}\ acqmode\ =\ (\mbox{\hyperlink{classstrainInterface_a4970128a879181f741241eacc1974753af8d2e1584059489f8ffa3663b3223df2}{strainInterface::Network::ETH}}\ ==\ config.\mbox{\hyperlink{structstrainInterface_1_1Config_a8d5a5c36b96fdf18d4506f7e78c26652}{network}})\ ?\ (\mbox{\hyperlink{classcDownloader_a741c9cfa33ec32a487a417079bdd9462a8c78c5be0134a92c1715b3fc5d7408fb}{cDownloader::strain\_acquisition\_mode\_streaming}})\ :\ (\mbox{\hyperlink{classcDownloader_a741c9cfa33ec32a487a417079bdd9462a393f90a2fdd77eb6fb0986e7b43ab7e3}{cDownloader::strain\_acquisition\_mode\_polling}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00388}00388\ \ \ \ \ core-\/>\mbox{\hyperlink{classFirmwareUpdaterCore_aea347afa83f596a7cc4199a9d8ab8f22}{getDownloader}}()-\/>\mbox{\hyperlink{classcDownloader_a0a4b5bd544202697656c387ffc4f206e}{strain\_acquire\_start}}(config.\mbox{\hyperlink{structstrainInterface_1_1Config_a3942eec91a99e4fb14ab4dc006321c98}{get\_canbus}}(),\ config.\mbox{\hyperlink{structstrainInterface_1_1Config_abf7dd193135e66c45e354f2652b9e7a2}{get\_canaddress}}(),\ config.\mbox{\hyperlink{structstrainInterface_1_1Config_a4c5433a55e1e3fb692150b77ac8fc048}{get\_txrate}}(),\ calibmode,\ acqmode);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00389}00389\ \ \ \ \ \textcolor{keywordtype}{int}\ ret\ =\ core-\/>\mbox{\hyperlink{classFirmwareUpdaterCore_aea347afa83f596a7cc4199a9d8ab8f22}{getDownloader}}()-\/>\mbox{\hyperlink{classcDownloader_a64b023ef746de5b58bb7cda39b190356}{strain\_acquire\_get}}(config.\mbox{\hyperlink{structstrainInterface_1_1Config_a3942eec91a99e4fb14ab4dc006321c98}{get\_canbus}}(),\ config.\mbox{\hyperlink{structstrainInterface_1_1Config_abf7dd193135e66c45e354f2652b9e7a2}{get\_canaddress}}(),\ values,\ number,\ updateProgressBar,\ param,\ acqmode);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00390}00390\ \ \ \ \ \textcolor{comment}{//yarp::os::SystemClock::delaySystem(0.100);\ i\ used\ it\ to\ test\ the\ flush\ operation\ of\ strain\_acquire\_stop()....}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00391}00391\ \ \ \ \ core-\/>\mbox{\hyperlink{classFirmwareUpdaterCore_aea347afa83f596a7cc4199a9d8ab8f22}{getDownloader}}()-\/>\mbox{\hyperlink{classcDownloader_a4d70b7e544600ef2b55ec133a7e0b51c}{strain\_acquire\_stop}}(config.\mbox{\hyperlink{structstrainInterface_1_1Config_a3942eec91a99e4fb14ab4dc006321c98}{get\_canbus}}(),\ config.\mbox{\hyperlink{structstrainInterface_1_1Config_abf7dd193135e66c45e354f2652b9e7a2}{get\_canaddress}}(),\ acqmode);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00392}00392\ \ \ \ \ core-\/>\mbox{\hyperlink{classFirmwareUpdaterCore_aea347afa83f596a7cc4199a9d8ab8f22}{getDownloader}}()-\/>\mbox{\hyperlink{classcDownloader_a4d70b7e544600ef2b55ec133a7e0b51c}{strain\_acquire\_stop}}(config.\mbox{\hyperlink{structstrainInterface_1_1Config_a3942eec91a99e4fb14ab4dc006321c98}{get\_canbus}}(),\ config.\mbox{\hyperlink{structstrainInterface_1_1Config_abf7dd193135e66c45e354f2652b9e7a2}{get\_canaddress}}(),\ acqmode);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00393}00393\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00394}00394\ \ \ \ \ \textcolor{keywordtype}{double}\ t1\ =\ yarp::os::SystemClock::nowSystem();}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00395}00395\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00396}00396\ \ \ \ \ \textcolor{keywordflow}{if}(debugprint)}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00397}00397\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00398}00398\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (0\ ==\ ret)}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00399}00399\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00400}00400\ \ \ \ \ \ \ \ \ \ \ \ \ yDebug()\ <<\ \textcolor{stringliteral}{"{}strainInterface::get()\ has\ succesfully\ acquired"{}}\ <<\ values.size()\ <<\ \textcolor{stringliteral}{"{}values\ of\ the\ 6\ channels\ in"{}}\ <<\ (t1\ -\/\ t0)\ <<\ \textcolor{stringliteral}{"{}seconds"{}};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00401}00401\ \ \ \ \ \ \ \ \ \ \ \ \ yDebug()\ <<\ \textcolor{stringliteral}{"{}the\ values\ are:"{}};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00402}00402\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i\ =\ 0;\ i\ <\ values.size();\ i++)}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00403}00403\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00404}00404\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yDebug()\ <<\ \textcolor{stringliteral}{"{}\#"{}}\ <<\ i\ +\ 1\ <<\ \textcolor{stringliteral}{"{}="{}}\ <<\ values[i].channel[0]\ <<\ values[i].channel[1]\ <<\ values[i].channel[2]\ <<\ values[i].channel[3]\ <<}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00405}00405\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ values[i].channel[4]\ <<\ values[i].channel[5]\ <<\ values[i].valid;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00406}00406\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00407}00407\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00408}00408\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00409}00409\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00410}00410\ \ \ \ \ \ \ \ \ \ \ \ \ yDebug()\ <<\ \textcolor{stringliteral}{"{}strainInterface::get()\ has\ failed\ acquisitions"{}};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00411}00411\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00412}00412\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00413}00413\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00414}00414\ \ \ \ \ \textcolor{keywordflow}{return}\ (0\ ==\ ret)\ ?\ true\ :\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00415}00415\ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00416}00416\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00417}00417\ \textcolor{keywordtype}{bool}\ StrainCalibGui::print(\textcolor{keyword}{const}\ vector<cDownloader::strain\_value\_t>\ \&values,\ FILE\ *\mbox{\hyperlink{pcap__wrapper__linux_8cpp_ae44275d34c468c2018022eafb08b7179}{fp}},\ QList<float>\ ft)}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00418}00418\ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00419}00419\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00420}00420\ \ \ \ \ \textcolor{keywordflow}{if}(\textcolor{keyword}{nullptr}\ ==\ fp)}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00421}00421\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00422}00422\ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}the\ file\ pointer\ is\ invalid:\ I\ cannot\ print\ my\ \%lu\ values"{}},\ values.size());}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00423}00423\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00424}00424\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00425}00425\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00426}00426\ \ \ \ \ \textcolor{keywordflow}{if}(!ft.isEmpty()\ \&\&\ (ft.count()\ ==\ 6))\{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00427}00427\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{saveNetwork_8m_a0eba6f64b9c26507a877bcb0c4f270e2}{fprintf}}(fp,\textcolor{stringliteral}{"{}-\/\ \%f\ \%f\ \%f\ \%f\ \%f\ \%f\(\backslash\)n\(\backslash\)n"{}},ft.at(0),ft.at(1),ft.at(2),ft.at(3),ft.at(4),ft.at(5));}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00428}00428\ \ \ \ \ \ \ \ \ fflush(fp);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00429}00429\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00430}00430\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00431}00431\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}=0;\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}<values.size();\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}++)}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00432}00432\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00433}00433\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{short}\ unsigned\_gaugeData[6]\ =\ \{0\};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00434}00434\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{signed}\ \textcolor{keywordtype}{short}\ signed\_gaugeData[6]\ =\ \{0\};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00435}00435\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00436}00436\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{size\_t}\ c=0;\ c<6;\ c++)}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00437}00437\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00438}00438\ \ \ \ \ \ \ \ \ \ \ \ \ unsigned\_gaugeData[c]\ =\ values[values.size()-\/1-\/\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}].channel[c];}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00439}00439\ \ \ \ \ \ \ \ \ \ \ \ \ signed\_gaugeData[c]\ =\ unsigned\_gaugeData[c]-\/0x7fff;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00440}00440\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00441}00441\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00442}00442\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(NULL\ !=\ fp)}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00443}00443\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00444}00444\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{saveNetwork_8m_a0eba6f64b9c26507a877bcb0c4f270e2}{fprintf}}(fp,\textcolor{stringliteral}{"{}\%d\ \%d\ \%d\ \%d\ \%d\ \%d\ \%d\(\backslash\)n"{}},\textcolor{keyword}{static\_cast<}\textcolor{keywordtype}{int}\textcolor{keyword}{>}(\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}),signed\_gaugeData[0],signed\_gaugeData[1],signed\_gaugeData[2],}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00445}00445\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ signed\_gaugeData[3],signed\_gaugeData[4],signed\_gaugeData[5]);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00446}00446\ \ \ \ \ \ \ \ \ \ \ \ \ fflush(fp);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00447}00447\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00448}00448\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00449}00449\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(enabledebugprints)}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00450}00450\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00451}00451\ \ \ \ \ \ \ \ \ \ \ \ \ yDebug(\textcolor{stringliteral}{"{}samples:\%3d\ [0]:\%+6d\ [1]:\%+6d\ [2]:\%+6d\ [3]:\%+6d\ [4]:\%+6d\ [5]:\%+6d\(\backslash\)r\(\backslash\)n"{}},\textcolor{keyword}{static\_cast<}\textcolor{keywordtype}{int}\textcolor{keyword}{>}(\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}),signed\_gaugeData[0],signed\_gaugeData[1],signed\_gaugeData[2],signed\_gaugeData[3],signed\_gaugeData[4],signed\_gaugeData[5]);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00452}00452\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00453}00453\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00454}00454\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00455}00455\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00456}00456\ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00457}00457\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00458}00458\ \textcolor{keywordtype}{bool}\ StrainCalibGui::acquire\_samples(\textcolor{keywordtype}{int}\ samples)}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00459}00459\ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00460}00460\ \ \ \ \ \textcolor{comment}{//\ marco.accame:\ now\ we\ acquire\ with\ the\ strainInterface\ class\ in\ one\ shot}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00461}00461\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00462}00462\ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{bool}\ enabledebugprints\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00463}00463\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00464}00464\ \ \ \ \ \textcolor{keywordflow}{if}(\textcolor{keyword}{false}\ ==\ enableacquisitions)}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00465}00465\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00466}00466\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00467}00467\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00468}00468\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00469}00469\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00470}00470\ \ \ \ \ lockdriver(\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00471}00471\ \ \ \ \ setAcquisitionOfDataActive(\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00472}00472\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00473}00473\ \ \ \ \ vector<cDownloader::strain\_value\_t>\ values;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00474}00474\ \ \ \ \ \textcolor{keywordtype}{bool}\ ret\ =\ get(samples,\ values,\ enabledebugprints,\ \textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00475}00475\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00476}00476\ \ \ \ \ \textcolor{keywordflow}{if}\ (ret)}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00477}00477\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00478}00478\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00479}00479\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (samples\ !=\ values.size())}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00480}00480\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00481}00481\ \ \ \ \ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}cannot\ acquire\ enough\ strain\ samples.\ Only:"{}}\ <<\ values.size()\ <<\ \textcolor{stringliteral}{"{}instead\ of"{}}\ <<\ samples;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00482}00482\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00483}00483\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00484}00484\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00485}00485\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (enabledebugprints)}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00486}00486\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00487}00487\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yDebug(\textcolor{stringliteral}{"{}Acquired\ \%lu\ strain\ samples.\ Ready!\ \(\backslash\)n"{}},\ values.size());}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00488}00488\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00489}00489\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00490}00490\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00491}00491\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (ui-\/>freeAcqModeGroup-\/>isChecked())\ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00492}00492\ \ \ \ \ \ \ \ \ \ \ \ \ QList\ <float>\ v;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00493}00493\ \ \ \ \ \ \ \ \ \ \ \ \ v.append(ui-\/>freeEdit1-\/>text().toFloat());}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00494}00494\ \ \ \ \ \ \ \ \ \ \ \ \ v.append(ui-\/>freeEdit2-\/>text().toFloat());}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00495}00495\ \ \ \ \ \ \ \ \ \ \ \ \ v.append(ui-\/>freeEdit3-\/>text().toFloat());}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00496}00496\ \ \ \ \ \ \ \ \ \ \ \ \ v.append(ui-\/>freeEdit4-\/>text().toFloat());}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00497}00497\ \ \ \ \ \ \ \ \ \ \ \ \ v.append(ui-\/>freeEdit5-\/>text().toFloat());}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00498}00498\ \ \ \ \ \ \ \ \ \ \ \ \ v.append(ui-\/>freeEdit6-\/>text().toFloat());}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00499}00499\ \ \ \ \ \ \ \ \ \ \ \ \ print(values,\ fp,\ v);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00500}00500\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00501}00501\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00502}00502\ \ \ \ \ \ \ \ \ \ \ \ \ print(values,\ fp);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00503}00503\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00504}00504\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00505}00505\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00506}00506\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ now\ i\ need\ to\ retrieve\ the\ most\ recent\ value\ from\ values\ but\ in\ a\ particular\ format\ and\ fill\ variable\ last\_value}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00507}00507\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00508}00508\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structcDownloader_1_1strain__value__t}{cDownloader::strain\_value\_t}}\ lastvalue\ =\ values.at(values.size()\ -\/\ 1);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00509}00509\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00510}00510\ \ \ \ \ \ \ \ \ lastvalue.\mbox{\hyperlink{structcDownloader_1_1strain__value__t_ab71ba99f6291ecbcfe2258174ec2bcee}{extract}}(last\_value.\mbox{\hyperlink{structsigned__elem__class_a25d13745ce9feefeec0689b610bb7ee2}{dat}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00511}00511\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00512}00512\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00513}00513\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00514}00514\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00515}00515\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{saveNetwork_8m_a0eba6f64b9c26507a877bcb0c4f270e2}{fprintf}}(fp,\ \textcolor{stringliteral}{"{}acquisition\ error.\ please\ check\ log\ on\ terminal.\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00516}00516\ \ \ \ \ \ \ \ \ fflush(fp);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00517}00517\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00518}00518\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00519}00519\ \ \ \ \ setAcquisitionOfDataActive(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00520}00520\ \ \ \ \ lockdriver(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00521}00521\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00522}00522\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00523}00523\ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00524}00524\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00525}00525\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00526}00526\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00527}00527\ \textcolor{keywordtype}{void}\ StrainCalibGui::showMenu()}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00528}00528\ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00529}00529\ \ \ \ \ \textcolor{keywordflow}{switch}\ (trial)\ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00530}00530\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00531}00531\ \ \ \ \ \textcolor{keywordflow}{case}\ 0:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00532}00532\ \ \ \ \ \ \ \ \ fp\ =\ fopen(\textcolor{stringliteral}{"{}./data/output0.dat"{}},\textcolor{stringliteral}{"{}w"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00533}00533\ \ \ \ \ \ \ \ \ ui-\/>groupBox-\/>setTitle(\textcolor{stringliteral}{"{}Beginning\ calibration\ ..."{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00534}00534\ \ \ \ \ \ \ \ \ ui-\/>labelInstructions-\/>setText(\textcolor{stringliteral}{"{}Remove\ all\ loads\ from\ the\ sensor\(\backslash\)n"{}}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00535}00535\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}Orient\ the\ sensor\ with\ the\ flat\ surface\ facing\ upwards\(\backslash\)n"{}}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00536}00536\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}Turn\ the\ sensor\ on\ (CAN\ message\ 205\ 2\ 7\ 0)"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00537}00537\ \ \ \ \ \ \ \ \ terminate\_section();}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00538}00538\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00539}00539\ \ \ \ \ \textcolor{keywordflow}{case}\ \ 1001:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00540}00540\ \ \ \ \ \ \ \ \ fp\ =\ fopen(\textcolor{stringliteral}{"{}./data/output1.dat"{}},\textcolor{stringliteral}{"{}w"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00541}00541\ \ \ \ \ \ \ \ \ ui-\/>groupBox-\/>setTitle(\textcolor{stringliteral}{"{}(2)\ z+\ pointing\ DOWNwards\ 5kg\ torques\ -\/\ file:\ output1.dat"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00542}00542\ \ \ \ \ \ \ \ \ ui-\/>labelInstructions-\/>setText(\textcolor{stringliteral}{"{}1.\ assemble\ the\ assembly\ with\ a\ M10\ nut\(\backslash\)n"{}}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00543}00543\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}2.\ orient\ the\ assembly\ with\ the\ z+\ axis\ pointing\ downwards\(\backslash\)n\(\backslash\)n"{}}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00544}00544\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}3.\ remove\ loads"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00545}00545\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00546}00546\ \ \ \ \ \textcolor{keywordflow}{case}\ \ 1002:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00547}00547\ \ \ \ \ \ \ \ \ ui-\/>labelInstructions-\/>setText(\textcolor{stringliteral}{"{}4.\ \ apply\ 5.00\ kg\ on\ the\ y-\/\ axis\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00548}00548\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00549}00549\ \ \ \ \ \textcolor{keywordflow}{case}\ \ 1003:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00550}00550\ \ \ \ \ \ \ \ \ ui-\/>labelInstructions-\/>setText(\textcolor{stringliteral}{"{}5.\ \ \ apply\ 5.00\ kg\ on\ the\ x+\ axis\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00551}00551\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00552}00552\ \ \ \ \ \textcolor{keywordflow}{case}\ \ 1004:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00553}00553\ \ \ \ \ \ \ \ \ ui-\/>labelInstructions-\/>setText(\textcolor{stringliteral}{"{}6.\ \ \ apply\ 5.00\ kg\ on\ the\ y+\ axis\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00554}00554\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00555}00555\ \ \ \ \ \textcolor{keywordflow}{case}\ \ 1005:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00556}00556\ \ \ \ \ \ \ \ \ ui-\/>labelInstructions-\/>setText(\textcolor{stringliteral}{"{}7.\ \ \ apply\ 5.00\ kg\ on\ the\ x-\/\ axis\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00557}00557\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00558}00558\ \ \ \ \ \textcolor{keywordflow}{case}\ \ 1006:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00559}00559\ \ \ \ \ \ \ \ \ terminate\_section();}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00560}00560\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00561}00561\ \ \ \ \ \textcolor{keywordflow}{case}\ 3001:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00562}00562\ \ \ \ \ \ \ \ \ fp\ =\ fopen(\textcolor{stringliteral}{"{}./data/output3.dat"{}},\textcolor{stringliteral}{"{}w"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00563}00563\ \ \ \ \ \ \ \ \ ui-\/>groupBox-\/>setTitle(\textcolor{stringliteral}{"{}(10)\ x+\ axis\ pointing\ UPwards\ 5kg\ laterals\ -\/\ file:\ output3.dat"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00564}00564\ \ \ \ \ \ \ \ \ ui-\/>labelInstructions-\/>setText(\textcolor{stringliteral}{"{}1.\ assemble\ the\ assembly\ with\ a\ M10\ knob\(\backslash\)n"{}}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00565}00565\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}2.\ orient\ the\ structure\ with\ the\ x+\ axis\ pointing\ upwards\(\backslash\)n"{}}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00566}00566\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}3.\ remove\ loads\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00567}00567\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00568}00568\ \ \ \ \ \textcolor{keywordflow}{case}\ \ 3002:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00569}00569\ \ \ \ \ \ \ \ \ ui-\/>labelInstructions-\/>setText(\textcolor{stringliteral}{"{}4.\ \ \ apply\ 5.00\ kg\ on\ the\ y-\/\ axis\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00570}00570\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00571}00571\ \ \ \ \ \textcolor{keywordflow}{case}\ \ 3003:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00572}00572\ \ \ \ \ \ \ \ \ ui-\/>labelInstructions-\/>setText(\textcolor{stringliteral}{"{}5.\ \ \ apply\ 5.00\ kg\ on\ the\ z+\ axis\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00573}00573\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00574}00574\ \ \ \ \ \textcolor{keywordflow}{case}\ \ 3004:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00575}00575\ \ \ \ \ \ \ \ \ ui-\/>labelInstructions-\/>setText(\textcolor{stringliteral}{"{}6.\ \ \ apply\ 5.00\ kg\ on\ the\ y+\ axis\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00576}00576\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00577}00577\ \ \ \ \ \textcolor{keywordflow}{case}\ 3005:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00578}00578\ \ \ \ \ \ \ \ \ terminate\_section();}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00579}00579\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00580}00580\ \ \ \ \ \textcolor{keywordflow}{case}\ 4001:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00581}00581\ \ \ \ \ \ \ \ \ fp\ =\ fopen(\textcolor{stringliteral}{"{}./data/output4.dat"{}},\textcolor{stringliteral}{"{}w"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00582}00582\ \ \ \ \ \ \ \ \ ui-\/>groupBox-\/>setTitle(\textcolor{stringliteral}{"{}(11)\ y+\ axis\ pointing\ UPwards\ 5kg\ laterals\ -\/\ file:\ output4.dat"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00583}00583\ \ \ \ \ \ \ \ \ ui-\/>labelInstructions-\/>setText(\textcolor{stringliteral}{"{}1.\ assemble\ the\ assembly\ with\ a\ M10\ knob\(\backslash\)n"{}}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00584}00584\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}2.\ orient\ the\ structure\ with\ the\ y+\ axis\ pointing\ upwards\(\backslash\)n"{}}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00585}00585\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}3.\ remove\ loads\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00586}00586\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00587}00587\ \ \ \ \ \textcolor{keywordflow}{case}\ \ 4002:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00588}00588\ \ \ \ \ \ \ \ \ ui-\/>labelInstructions-\/>setText(\textcolor{stringliteral}{"{}4.\ \ \ apply\ 5.00\ kg\ on\ the\ x+\ axis\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00589}00589\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00590}00590\ \ \ \ \ \textcolor{keywordflow}{case}\ \ 4003:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00591}00591\ \ \ \ \ \ \ \ \ ui-\/>labelInstructions-\/>setText(\textcolor{stringliteral}{"{}5.\ \ \ apply\ 5.00\ kg\ on\ the\ z+\ axis\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00592}00592\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00593}00593\ \ \ \ \ \textcolor{keywordflow}{case}\ \ 4004:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00594}00594\ \ \ \ \ \ \ \ \ ui-\/>labelInstructions-\/>setText(\textcolor{stringliteral}{"{}6.\ \ \ apply\ 5.00\ kg\ on\ the\ x-\/\ axis\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00595}00595\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00596}00596\ \ \ \ \ \textcolor{keywordflow}{case}\ 4005:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00597}00597\ \ \ \ \ \ \ \ \ terminate\_section();}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00598}00598\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00599}00599\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00600}00600\ \ \ \ \ \textcolor{keywordflow}{case}\ 5001:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00601}00601\ \ \ \ \ \ \ \ \ fp\ =\ fopen(\textcolor{stringliteral}{"{}./data/output5.dat"{}},\textcolor{stringliteral}{"{}w"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00602}00602\ \ \ \ \ \ \ \ \ ui-\/>groupBox-\/>setTitle(\textcolor{stringliteral}{"{}(12)\ x-\/\ axis\ pointing\ UPwards\ 5kg\ laterals\ -\/\ file:\ output5.dat"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00603}00603\ \ \ \ \ \ \ \ \ ui-\/>labelInstructions-\/>setText(\textcolor{stringliteral}{"{}1.\ assemble\ the\ assembly\ with\ a\ M10\ knob\(\backslash\)n"{}}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00604}00604\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}2.\ orient\ the\ structure\ with\ the\ x-\/\ axis\ pointing\ upwards\(\backslash\)n"{}}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00605}00605\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}3.\ remove\ loads\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00606}00606\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00607}00607\ \ \ \ \ \textcolor{keywordflow}{case}\ \ 5002:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00608}00608\ \ \ \ \ \ \ \ \ ui-\/>labelInstructions-\/>setText(\textcolor{stringliteral}{"{}4.\ \ \ apply\ 5.00\ kg\ on\ the\ y+\ axis\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00609}00609\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00610}00610\ \ \ \ \ \textcolor{keywordflow}{case}\ \ 5003:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00611}00611\ \ \ \ \ \ \ \ \ ui-\/>labelInstructions-\/>setText(\textcolor{stringliteral}{"{}5.\ \ \ apply\ 5.00\ kg\ on\ the\ z+\ axis\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00612}00612\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00613}00613\ \ \ \ \ \textcolor{keywordflow}{case}\ \ 5004:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00614}00614\ \ \ \ \ \ \ \ \ ui-\/>labelInstructions-\/>setText(\textcolor{stringliteral}{"{}6.\ \ \ apply\ 5.00\ kg\ on\ the\ y-\/\ axis\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00615}00615\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00616}00616\ \ \ \ \ \textcolor{keywordflow}{case}\ 5005:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00617}00617\ \ \ \ \ \ \ \ \ terminate\_section();}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00618}00618\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00619}00619\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00620}00620\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00621}00621\ \ \ \ \ \textcolor{keywordflow}{case}\ 6001:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00622}00622\ \ \ \ \ \ \ \ \ fp\ =\ fopen(\textcolor{stringliteral}{"{}./data/output6.dat"{}},\textcolor{stringliteral}{"{}w"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00623}00623\ \ \ \ \ \ \ \ \ ui-\/>groupBox-\/>setTitle(\textcolor{stringliteral}{"{}(13)\ y-\/\ axis\ pointing\ UPwards\ 5kg\ laterals\ -\/\ file:\ output6.dat"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00624}00624\ \ \ \ \ \ \ \ \ ui-\/>labelInstructions-\/>setText(\textcolor{stringliteral}{"{}1.\ assemble\ the\ assembly\ with\ a\ M10\ knob\(\backslash\)n"{}}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00625}00625\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}2.\ orient\ the\ structure\ with\ the\ y-\/\ axis\ pointing\ upwards\(\backslash\)n"{}}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00626}00626\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}3.\ remove\ loads\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00627}00627\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00628}00628\ \ \ \ \ \textcolor{keywordflow}{case}\ \ 6002:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00629}00629\ \ \ \ \ \ \ \ \ ui-\/>labelInstructions-\/>setText(\textcolor{stringliteral}{"{}4.\ \ \ apply\ 5.00\ kg\ on\ the\ x-\/\ axis\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00630}00630\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00631}00631\ \ \ \ \ \textcolor{keywordflow}{case}\ \ 6003:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00632}00632\ \ \ \ \ \ \ \ \ ui-\/>labelInstructions-\/>setText(\textcolor{stringliteral}{"{}5.\ \ \ apply\ 5.00\ kg\ on\ the\ z+\ axis\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00633}00633\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00634}00634\ \ \ \ \ \textcolor{keywordflow}{case}\ \ 6004:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00635}00635\ \ \ \ \ \ \ \ \ ui-\/>labelInstructions-\/>setText(\textcolor{stringliteral}{"{}6.\ \ \ apply\ 5.00\ kg\ on\ the\ x+\ axis\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00636}00636\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00637}00637\ \ \ \ \ \textcolor{keywordflow}{case}\ 6005:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00638}00638\ \ \ \ \ \ \ \ \ terminate\_section();}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00639}00639\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00640}00640\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00641}00641\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00642}00642\ \ \ \ \ \textcolor{keywordflow}{case}\ 8010:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00643}00643\ \ \ \ \ \ \ \ \ fp\ =\ fopen(\textcolor{stringliteral}{"{}./data/output81.dat"{}},\textcolor{stringliteral}{"{}w"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00644}00644\ \ \ \ \ \ \ \ \ ui-\/>groupBox-\/>setTitle(\textcolor{stringliteral}{"{}(3)\ z+\ pointing\ UPwards\ 25kg\ compression\ -\/\ file:\ output81.dat"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00645}00645\ \ \ \ \ \ \ \ \ ui-\/>labelInstructions-\/>setText(\textcolor{stringliteral}{"{}1.\ assemble\ the\ assembly\ with\ a\ M10\ nut\(\backslash\)n"{}}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00646}00646\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}2.\ orient\ the\ assembly\ with\ the\ z+\ axis\ pointing\ upwards\(\backslash\)n\(\backslash\)n"{}}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00647}00647\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}3.\ remove\ loads\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00648}00648\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00649}00649\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00650}00650\ \ \ \ \ \textcolor{keywordflow}{case}\ \ 8011:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00651}00651\ \ \ \ \ \ \ \ \ ui-\/>labelInstructions-\/>setText(\textcolor{stringliteral}{"{}4.\ apply\ 25\ kg\ in\ the\ z-\/\ direction\ (compression)\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00652}00652\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00653}00653\ \ \ \ \ \textcolor{keywordflow}{case}\ 8012:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00654}00654\ \ \ \ \ \ \ \ \ terminate\_section();}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00655}00655\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00656}00656\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00657}00657\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00658}00658\ \ \ \ \ \textcolor{keywordflow}{case}\ 8020:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00659}00659\ \ \ \ \ \ \ \ \ fp\ =\ fopen(\textcolor{stringliteral}{"{}./data/output82.dat"{}},\textcolor{stringliteral}{"{}w"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00660}00660\ \ \ \ \ \ \ \ \ ui-\/>groupBox-\/>setTitle(\textcolor{stringliteral}{"{}(1)\ z+\ pointing\ DOWNwards\ 25kg\ traction\ -\/\ file:\ output82.dat"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00661}00661\ \ \ \ \ \ \ \ \ ui-\/>labelInstructions-\/>setText(\textcolor{stringliteral}{"{}1.\ assemble\ the\ assembly\ with\ a\ M10\ nut\(\backslash\)n"{}}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00662}00662\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}2.\ screw\ the\ M10\ ring\ on\ the\ top\ of\ the\ assembly\(\backslash\)n"{}}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00663}00663\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}3.\ orient\ the\ assembly\ with\ the\ z+\ axis\ pointing\ downwards\(\backslash\)n\(\backslash\)n"{}}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00664}00664\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}4.\ remove\ loads\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00665}00665\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00666}00666\ \ \ \ \ \textcolor{keywordflow}{case}\ \ 8021:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00667}00667\ \ \ \ \ \ \ \ \ ui-\/>labelInstructions-\/>setText(\textcolor{stringliteral}{"{}5.\ apply\ a\ 25\ kg\ load\ in\ the\ z+\ direction\ (traction)\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00668}00668\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00669}00669\ \ \ \ \ \textcolor{keywordflow}{case}\ 8022:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00670}00670\ \ \ \ \ \ \ \ \ terminate\_section();}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00671}00671\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00672}00672\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00673}00673\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00674}00674\ \ \ \ \ \textcolor{keywordflow}{case}\ 8030:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00675}00675\ \ \ \ \ \ \ \ \ fp\ =\ fopen(\textcolor{stringliteral}{"{}./data/output83.dat"{}},\textcolor{stringliteral}{"{}w"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00676}00676\ \ \ \ \ \ \ \ \ ui-\/>groupBox-\/>setTitle(\textcolor{stringliteral}{"{}(4)\ x+\ pointing\ UPwards\ 25kg\ -\/\ file:\ output83.dat"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00677}00677\ \ \ \ \ \ \ \ \ ui-\/>labelInstructions-\/>setText(\textcolor{stringliteral}{"{}1.\ assemble\ the\ assembly\ with\ a\ M10\ knob\(\backslash\)n"{}}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00678}00678\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}2.\ orient\ the\ plate\ with\ the\ x+\ axis\ pointing\ upwards\(\backslash\)n"{}}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00679}00679\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}3.\ remove\ loads\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00680}00680\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00681}00681\ \ \ \ \ \textcolor{keywordflow}{case}\ 8031:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00682}00682\ \ \ \ \ \ \ \ \ ui-\/>labelInstructions-\/>setText(\textcolor{stringliteral}{"{}4.\ apply\ a\ 25\ kg\ load\ in\ the\ x-\/\ direction\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00683}00683\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00684}00684\ \ \ \ \ \textcolor{keywordflow}{case}\ 8032:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00685}00685\ \ \ \ \ \ \ \ \ terminate\_section();}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00686}00686\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00687}00687\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00688}00688\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00689}00689\ \ \ \ \ \textcolor{keywordflow}{case}\ 8040:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00690}00690\ \ \ \ \ \ \ \ \ fp\ =\ fopen(\textcolor{stringliteral}{"{}./data/output84.dat"{}},\textcolor{stringliteral}{"{}w"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00691}00691\ \ \ \ \ \ \ \ \ ui-\/>groupBox-\/>setTitle(\textcolor{stringliteral}{"{}(5)\ x-\/\ pointing\ UPwards\ 25kg\ -\/\ file:\ output84.dat"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00692}00692\ \ \ \ \ \ \ \ \ ui-\/>labelInstructions-\/>setText(\textcolor{stringliteral}{"{}1.\ assemble\ the\ assembly\ with\ a\ M10\ knob\(\backslash\)n"{}}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00693}00693\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}2.\ orient\ the\ plate\ with\ the\ x-\/\ axis\ pointing\ upwards\(\backslash\)n\(\backslash\)n"{}}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00694}00694\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}3.\ remove\ loads\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00695}00695\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00696}00696\ \ \ \ \ \textcolor{keywordflow}{case}\ 8041:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00697}00697\ \ \ \ \ \ \ \ \ ui-\/>labelInstructions-\/>setText(\textcolor{stringliteral}{"{}4.\ apply\ a\ 25\ kg\ load\ in\ the\ x+\ direction\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00698}00698\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00699}00699\ \ \ \ \ \textcolor{keywordflow}{case}\ 8042:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00700}00700\ \ \ \ \ \ \ \ \ terminate\_section();}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00701}00701\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00702}00702\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00703}00703\ \ \ \ \ \textcolor{keywordflow}{case}\ 8050:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00704}00704\ \ \ \ \ \ \ \ \ fp\ =\ fopen(\textcolor{stringliteral}{"{}./data/output85.dat"{}},\textcolor{stringliteral}{"{}w"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00705}00705\ \ \ \ \ \ \ \ \ ui-\/>groupBox-\/>setTitle(\textcolor{stringliteral}{"{}(6)\ label\ 1\ pointing\ DOWNwards\ 25kg\ -\/\ file:\ output85.dat"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00706}00706\ \ \ \ \ \ \ \ \ ui-\/>labelInstructions-\/>setText(\textcolor{stringliteral}{"{}1.\ assemble\ the\ assembly\ with\ label\ 1\ pointing\ DOWN\(\backslash\)n\(\backslash\)n"{}}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00707}00707\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}3.\ remove\ loads\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00708}00708\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00709}00709\ \ \ \ \ \textcolor{keywordflow}{case}\ 8051:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00710}00710\ \ \ \ \ \ \ \ \ ui-\/>labelInstructions-\/>setText(\textcolor{stringliteral}{"{}4.\ apply\ 25kg\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00711}00711\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00712}00712\ \ \ \ \ \textcolor{keywordflow}{case}\ 8052:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00713}00713\ \ \ \ \ \ \ \ \ terminate\_section();}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00714}00714\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00715}00715\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00716}00716\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00717}00717\ \ \ \ \ \textcolor{keywordflow}{case}\ 8060:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00718}00718\ \ \ \ \ \ \ \ \ fp\ =\ fopen(\textcolor{stringliteral}{"{}./data/output86.dat"{}},\textcolor{stringliteral}{"{}w"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00719}00719\ \ \ \ \ \ \ \ \ ui-\/>groupBox-\/>setTitle(\textcolor{stringliteral}{"{}(7)\ label\ 2\ pointing\ DOWNwards\ 25kg\ -\/\ file:\ output86.dat"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00720}00720\ \ \ \ \ \ \ \ \ ui-\/>labelInstructions-\/>setText(\textcolor{stringliteral}{"{}1.\ assemble\ the\ assembly\ with\ a\ M10\ knob\(\backslash\)n"{}}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00721}00721\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}2.\ orient\ the\ plate\ with\ label\ 2\ pointing\ DOWN\(\backslash\)n\(\backslash\)n"{}}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00722}00722\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}3.\ remove\ loads\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00723}00723\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00724}00724\ \ \ \ \ \textcolor{keywordflow}{case}\ 8061:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00725}00725\ \ \ \ \ \ \ \ \ ui-\/>labelInstructions-\/>setText(\textcolor{stringliteral}{"{}4.\ apply\ 25kg\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00726}00726\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00727}00727\ \ \ \ \ \textcolor{keywordflow}{case}\ 8062:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00728}00728\ \ \ \ \ \ \ \ \ terminate\_section();}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00729}00729\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00730}00730\ \ \ \ \ \textcolor{keywordflow}{case}\ 8070:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00731}00731\ \ \ \ \ \ \ \ \ fp\ =\ fopen(\textcolor{stringliteral}{"{}./data/output87.dat"{}},\textcolor{stringliteral}{"{}w"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00732}00732\ \ \ \ \ \ \ \ \ ui-\/>groupBox-\/>setTitle(\textcolor{stringliteral}{"{}(8)\ label\ 3\ pointing\ DOWNwards\ 25kg\ -\/\ file:\ output87.dat"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00733}00733\ \ \ \ \ \ \ \ \ ui-\/>labelInstructions-\/>setText(\textcolor{stringliteral}{"{}1.\ assemble\ the\ assembly\ with\ a\ M10\ knob\(\backslash\)n"{}}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00734}00734\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}2.\ orient\ the\ plate\ with\ label\ 3\ pointing\ DOWN\(\backslash\)n\(\backslash\)n"{}}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00735}00735\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}3.\ remove\ loads\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00736}00736\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00737}00737\ \ \ \ \ \textcolor{keywordflow}{case}\ 8071:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00738}00738\ \ \ \ \ \ \ \ \ ui-\/>labelInstructions-\/>setText(\textcolor{stringliteral}{"{}4.\ apply\ 25kg\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00739}00739\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00740}00740\ \ \ \ \ \textcolor{keywordflow}{case}\ 8072:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00741}00741\ \ \ \ \ \ \ \ \ terminate\_section();}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00742}00742\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00743}00743\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00744}00744\ \ \ \ \ \textcolor{keywordflow}{case}\ 8080:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00745}00745\ \ \ \ \ \ \ \ \ fp\ =\ fopen(\textcolor{stringliteral}{"{}./data/output88.dat"{}},\textcolor{stringliteral}{"{}w"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00746}00746\ \ \ \ \ \ \ \ \ ui-\/>groupBox-\/>setTitle(\textcolor{stringliteral}{"{}(9)\ label\ 4\ pointing\ DOWNwards\ 25kg\ -\/\ file:\ output88.dat"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00747}00747\ \ \ \ \ \ \ \ \ ui-\/>labelInstructions-\/>setText(\textcolor{stringliteral}{"{}1.\ assemble\ the\ assembly\ with\ a\ M10\ knob\(\backslash\)n"{}}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00748}00748\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}2.\ orient\ the\ plate\ with\ label\ 4\ pointing\ DOWN\(\backslash\)n\(\backslash\)n"{}}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00749}00749\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}3.\ remove\ loads\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00750}00750\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00751}00751\ \ \ \ \ \textcolor{keywordflow}{case}\ 8081:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00752}00752\ \ \ \ \ \ \ \ \ ui-\/>labelInstructions-\/>setText(\textcolor{stringliteral}{"{}4.\ apply\ 25kg\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00753}00753\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00754}00754\ \ \ \ \ \textcolor{keywordflow}{case}\ 8082:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00755}00755\ \ \ \ \ \ \ \ \ terminate\_section();}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00756}00756\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00757}00757\ \ \ \ \ \textcolor{keywordflow}{case}\ 9999:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00758}00758\ \ \ \ \ \ \ \ \ bias\_sensor();}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00759}00759\ \ \ \ \ \ \ \ \ trial=-\/1;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00760}00760\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00761}00761\ \ \ \ \ \textcolor{keywordflow}{default}:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00762}00762\ \ \ \ \ \ \ \ \ trial++;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00763}00763\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00764}00764\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00765}00765\ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00766}00766\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00767}00767\ \textcolor{keywordtype}{void}\ StrainCalibGui::close\_files()}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00768}00768\ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00769}00769\ \ \ \ \ \textcolor{keywordflow}{if}\ (fp!=0)\{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00770}00770\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{sine_8m_a14e2cbac46a5d611bf112b1f4beb7021}{fclose}}(fp);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00771}00771\ \ \ \ \ \ \ \ \ fp=NULL;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00772}00772\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00773}00773\ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00774}00774\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00775}00775\ \textcolor{keywordtype}{void}\ StrainCalibGui::terminate\_section()}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00776}00776\ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00777}00777\ \ \ \ \ trial=-\/1;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00778}00778\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00779}00779\ \ \ \ \ close\_files();}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00780}00780\ \ \ \ \ turnOnButtons();}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00781}00781\ \ \ \ \ \textcolor{keywordflow}{if}(!ui-\/>freeAcqModeGroup-\/>isChecked())\{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00782}00782\ \ \ \ \ \ \ \ \ buttons.at(currentBtnIndex)-\/>setStyleSheet(\textcolor{stringliteral}{"{}background-\/color:\ rgb(0,\ 175,\ 0);"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00783}00783\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00784}00784\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00785}00785\ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00786}00786\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00787}00787\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00788}00788\ \textcolor{keywordtype}{void}\ StrainCalibGui::turnOffButtons()}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00789}00789\ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00790}00790\ \ \ \ \ \textcolor{keywordflow}{if}(!ui-\/>freeAcqModeGroup-\/>isChecked())\{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00791}00791\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{foreach}\ (QPushButton\ *btn,\ buttons)\ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00792}00792\ \ \ \ \ \ \ \ \ \ \ \ \ btn-\/>setEnabled(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00793}00793\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00794}00794\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00795}00795\ \ \ \ \ \ \ \ \ ui-\/>btnAcquireData-\/>setEnabled(\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00796}00796\ \ \ \ \ \ \ \ \ ui-\/>btnAcquireData-\/>setText(\textcolor{stringliteral}{"{}Start\ Acquisition"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00797}00797\ \ \ \ \ \ \ \ \ ui-\/>freeAcqModeGroup-\/>setEnabled(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00798}00798\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00799}00799\ \ \ \ \ ui-\/>spinSamples-\/>setEnabled(\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00800}00800\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00801}00801\ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00802}00802\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00803}00803\ \textcolor{keywordtype}{void}\ StrainCalibGui::turnOnButtons()}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00804}00804\ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00805}00805\ \ \ \ \ ui-\/>groupBox-\/>setTitle(\textcolor{stringliteral}{"{}Instructions"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00806}00806\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00807}00807\ \ \ \ \ \textcolor{keywordflow}{if}(!ui-\/>freeAcqModeGroup-\/>isChecked())\{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00808}00808\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{foreach}\ (QPushButton\ *btn,\ buttons)\ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00809}00809\ \ \ \ \ \ \ \ \ \ \ \ \ btn-\/>setEnabled(\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00810}00810\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00811}00811\ \ \ \ \ \ \ \ \ ui-\/>btnAcquireData-\/>setEnabled(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00812}00812\ \ \ \ \ \ \ \ \ ui-\/>freeAcqModeGroup-\/>setEnabled(\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00813}00813\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(\textcolor{keyword}{false}\ ==\ checkDirectory())}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00814}00814\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00815}00815\ \ \ \ \ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}CANNOT\ find\ the\ data\ folder.\ Please\ create\ it!"{}};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00816}00816\ \ \ \ \ \ \ \ \ \ \ \ \ ui-\/>labelInstructions-\/>setText(\textcolor{stringliteral}{"{}You\ can\ select\ an\ acquisition\ from\ the\ menu\ ...\ but:"{}}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00817}00817\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\(\backslash\)nCANNOT\ find\ the\ data\ folder."{}}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00818}00818\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\(\backslash\)nIf\ you\ want\ your\ acquisition\ data\ saved,\ please\ create\ it!"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00819}00819\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00820}00820\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00821}00821\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00822}00822\ \ \ \ \ \ \ \ \ \ \ \ \ \ ui-\/>labelInstructions-\/>setText(\textcolor{stringliteral}{"{}Select\ an\ acquisition\ from\ the\ menu"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00823}00823\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00824}00824\ \ \ \ \ \}\textcolor{keywordflow}{else}\{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00825}00825\ \ \ \ \ \ \ \ \ ui-\/>labelInstructions-\/>setText(\textcolor{stringliteral}{"{}Free\ Acquisiton\ Mode"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00826}00826\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00827}00827\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00828}00828\ \ \ \ \ ui-\/>spinSamples-\/>setEnabled(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00829}00829\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00830}00830\ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00831}00831\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00832}00832\ \textcolor{keywordtype}{void}\ StrainCalibGui::bias\_sensor()}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00833}00833\ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00834}00834\ \textcolor{preprocessor}{\ \ \ \ \#ifdef\ ATI\_SENS}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00835}00835\ \ \ \ \ \ \ \ \ ATIsens-\/>BiasForceTorqueSensor();}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00836}00836\ \textcolor{preprocessor}{\ \ \ \ \#endif}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00837}00837\ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00838}00838\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00839}00839\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00840}00840\ \textcolor{keywordtype}{int}\ StrainCalibGui::remap\_trials()}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00841}00841\ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00842}00842\ \ \ \ \ \textcolor{comment}{//\{8020,1001,8010,8030,8040,8050,8060,8070,8080,3001,4001,5001,6001\};}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00843}00843\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00844}00844\ \ \ \ \ \textcolor{keywordflow}{switch}\ (trial)}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00845}00845\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00846}00846\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 1001:\ \textcolor{keywordflow}{return}\ -\/1;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00847}00847\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 1002:\ \textcolor{keywordflow}{return}\ 0;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00848}00848\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 1003:\ \textcolor{keywordflow}{return}\ 1;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00849}00849\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 1004:\ \textcolor{keywordflow}{return}\ 2;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00850}00850\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 1005:\ \textcolor{keywordflow}{return}\ 3;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00851}00851\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00852}00852\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 3001:\ \textcolor{keywordflow}{return}\ -\/1;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00853}00853\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 3002:\ \textcolor{keywordflow}{return}\ 4;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00854}00854\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 3003:\ \textcolor{keywordflow}{return}\ 5;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00855}00855\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 3004:\ \textcolor{keywordflow}{return}\ 6;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00856}00856\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00857}00857\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 4001:\ \textcolor{keywordflow}{return}\ -\/1;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00858}00858\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 4002:\ \textcolor{keywordflow}{return}\ 7;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00859}00859\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 4003:\ \textcolor{keywordflow}{return}\ 8;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00860}00860\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 4004:\ \textcolor{keywordflow}{return}\ 9;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00861}00861\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00862}00862\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 5001:\ \textcolor{keywordflow}{return}\ -\/1;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00863}00863\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 5002:\ \textcolor{keywordflow}{return}\ 10;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00864}00864\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 5003:\ \textcolor{keywordflow}{return}\ 11;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00865}00865\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 5004:\ \textcolor{keywordflow}{return}\ 12;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00866}00866\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00867}00867\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 6001:\ \textcolor{keywordflow}{return}\ -\/1;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00868}00868\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 6002:\ \textcolor{keywordflow}{return}\ 13;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00869}00869\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 6003:\ \textcolor{keywordflow}{return}\ 14;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00870}00870\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 6004:\ \textcolor{keywordflow}{return}\ 15;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00871}00871\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00872}00872\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 8010:\ \textcolor{keywordflow}{return}\ -\/1;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00873}00873\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 8011:\ \textcolor{keywordflow}{return}\ 16;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00874}00874\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00875}00875\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 8020:\ \textcolor{keywordflow}{return}\ -\/1;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00876}00876\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 8021:\ \textcolor{keywordflow}{return}\ 17;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00877}00877\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00878}00878\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 8030:\ \textcolor{keywordflow}{return}\ -\/1;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00879}00879\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 8031:\ \textcolor{keywordflow}{return}\ 18;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00880}00880\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00881}00881\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 8040:\ \textcolor{keywordflow}{return}\ -\/1;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00882}00882\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 8041:\ \textcolor{keywordflow}{return}\ 19;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00883}00883\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00884}00884\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 8050:\ \textcolor{keywordflow}{return}\ -\/1;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00885}00885\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 8051:\ \textcolor{keywordflow}{return}\ 20;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00886}00886\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00887}00887\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 8060:\ \textcolor{keywordflow}{return}\ -\/1;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00888}00888\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 8061:\ \textcolor{keywordflow}{return}\ 21;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00889}00889\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00890}00890\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 8070:\ \textcolor{keywordflow}{return}\ -\/1;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00891}00891\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 8071:\ \textcolor{keywordflow}{return}\ 22;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00892}00892\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00893}00893\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 8080:\ \textcolor{keywordflow}{return}\ -\/1;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00894}00894\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 8081:\ \textcolor{keywordflow}{return}\ 23;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00895}00895\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00896}00896\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ -\/1:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00897}00897\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//printf("{}DEBUG:\ section\ completed,\ back\ to\ the\ menu\(\backslash\)n"{});}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00898}00898\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ -\/1;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00899}00899\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00900}00900\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{default}:}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00901}00901\ \ \ \ \ \ \ \ \ \ \ \ \ qDebug(\textcolor{stringliteral}{"{}DEBUG:\ ****\ ERROR,\ invalid\ trial\ (\%d)\ selected!\ ****\(\backslash\)n"{}},\ trial);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00902}00902\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ -\/1;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00903}00903\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00904}00904\ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00905}00905\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00906}00906\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00907}00907\ \textcolor{keywordtype}{void}\ StrainCalibGui::onTimerTimeout()}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00908}00908\ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00909}00909\ \ \ \ \ \textcolor{keywordtype}{int}\ \ i=0;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00910}00910\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00911}00911\ \ \ \ \ current\_trial=remap\_trials();}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00912}00912\ \ \ \ \ \mbox{\hyperlink{structsigned__elem__class}{signed\_elem\_class}}\ exp\_vals;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00913}00913\ \ \ \ \ \mbox{\hyperlink{structsigned__elem__class}{signed\_elem\_class}}\ err\_vals;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00914}00914\ \ \ \ \ \mbox{\hyperlink{structsigned__elem__class}{signed\_elem\_class}}\ in\_bound;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00915}00915\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00916}00916\ \ \ \ \ \textcolor{keywordflow}{if}\ (current\_trial==-\/1)\{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00917}00917\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (i=0;\ i<6;i++)\{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00918}00918\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00919}00919\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ readValues.at(i)-\/>setText(QString(\textcolor{stringliteral}{"{}\%1"{}}).arg(last\_value.\mbox{\hyperlink{structsigned__elem__class_a25d13745ce9feefeec0689b610bb7ee2}{dat}}[i]));}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00920}00920\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ expValues.at(i)-\/>setText(\textcolor{stringliteral}{"{}-\/-\/-\/"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00921}00921\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ errValues.at(i)-\/>setText(\textcolor{stringliteral}{"{}-\/-\/-\/"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00922}00922\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ expValues.at(i)-\/>setStyleSheet(\textcolor{stringliteral}{"{}"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00923}00923\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ errValues.at(i)-\/>setStyleSheet(\textcolor{stringliteral}{"{}"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00924}00924\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00925}00925\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00926}00926\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00927}00927\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(\textcolor{keyword}{true}\ ==\ isAcquisitionOfDataActive())}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00928}00928\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00929}00929\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ui-\/>btnAcquireData-\/>setEnabled(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00930}00930\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ui-\/>btnAcquireData-\/>setText(\textcolor{stringliteral}{"{}Acquiring\ Data\ Now"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00931}00931\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ui-\/>spinSamples-\/>setEnabled(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00932}00932\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ui-\/>progress-\/>setValue(progressvalue);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00933}00933\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00934}00934\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00935}00935\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00936}00936\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(ui-\/>freeAcqModeGroup-\/>isChecked())}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00937}00937\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00938}00938\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ui-\/>btnAcquireData-\/>setEnabled(\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00939}00939\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ui-\/>btnAcquireData-\/>setText(\textcolor{stringliteral}{"{}Start\ Acquiring\ Data"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00940}00940\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ui-\/>spinSamples-\/>setEnabled(\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00941}00941\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00942}00942\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00943}00943\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00944}00944\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(!ui-\/>btnAcquireData-\/>isEnabled())}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00945}00945\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00946}00946\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ui-\/>btnAcquireData-\/>setText(\textcolor{stringliteral}{"{}Choose\ an\ Acquisition\ Mode"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00947}00947\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00948}00948\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00949}00949\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00950}00950\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ui-\/>progress-\/>setValue(0);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00951}00951\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00952}00952\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00953}00953\ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00954}00954\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00955}00955\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(\textcolor{keyword}{true}\ ==\ isAcquisitionOfDataActive())}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00956}00956\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00957}00957\ \ \ \ \ \ \ \ \ \ \ \ \ ui-\/>btnAcquireData-\/>setEnabled(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00958}00958\ \ \ \ \ \ \ \ \ \ \ \ \ ui-\/>btnAcquireData-\/>setText(\textcolor{stringliteral}{"{}Acquiring\ Data\ Now"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00959}00959\ \ \ \ \ \ \ \ \ \ \ \ \ ui-\/>progress-\/>setValue(progressvalue);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00960}00960\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00961}00961\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00962}00962\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00963}00963\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00964}00964\ \ \ \ \ \ \ \ \ \ \ \ \ ui-\/>progress-\/>setValue(0);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00965}00965\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00966}00966\ \ \ \ \ \ \ \ \ \ \ \ \ tick\_acquisition(1);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00967}00967\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00968}00968\ \ \ \ \ \ \ \ \ \ \ \ \ expected\_values\_handler.\mbox{\hyperlink{classexpected__values__handler__class_a7604028d8a92f62fc2f66d290f7a4293}{get\_current\_expected\_values}}(exp\_vals,\ current\_trial);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00969}00969\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (i=0;\ i<6;i++)\{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00970}00970\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ expValues.at(i)-\/>setText(QString(\textcolor{stringliteral}{"{}\%1"{}}).arg(exp\_vals.\mbox{\hyperlink{structsigned__elem__class_a25d13745ce9feefeec0689b610bb7ee2}{dat}}[i]));}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00971}00971\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00972}00972\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00973}00973\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structsigned__elem__class}{signed\_elem\_class}}\ last;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00974}00974\ \ \ \ \ \ \ \ \ \ \ \ \ last\ =\ last\_value;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00975}00975\ \ \ \ \ \ \ \ \ \ \ \ \ last.\mbox{\hyperlink{structsigned__elem__class_aa5617ce6555c9b3e78a42d000f8daee4}{remove\_bias}}(trial\_bias);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00976}00976\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (i=0;\ i<6;i++)\{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00977}00977\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ readValues.at(i)-\/>setText(QString(\textcolor{stringliteral}{"{}\%1"{}}).arg(last.\mbox{\hyperlink{structsigned__elem__class_a25d13745ce9feefeec0689b610bb7ee2}{dat}}[i]));}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00978}00978\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00979}00979\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ in\_boundary\ =\ expected\_values\_handler.\mbox{\hyperlink{classexpected__values__handler__class_ab1776f25e3d16df13838d87357f31b0d}{check\_vals}}(last,current\_trial,err\_vals,in\_bound);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00980}00980\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (i=0;\ i<6;\ i++)\{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00981}00981\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ errValues.at(i)-\/>setText(QString(\textcolor{stringliteral}{"{}\%1"{}}).arg(err\_vals.\mbox{\hyperlink{structsigned__elem__class_a25d13745ce9feefeec0689b610bb7ee2}{dat}}[i]));}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00982}00982\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00983}00983\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (in\_bound.\mbox{\hyperlink{structsigned__elem__class_a25d13745ce9feefeec0689b610bb7ee2}{dat}}[i]==0)\{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00984}00984\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ errValues.at(i)-\/>setStyleSheet(\textcolor{stringliteral}{"{}color:\ rgb(255,\ 0,\ 0);"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00985}00985\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (in\_bound.\mbox{\hyperlink{structsigned__elem__class_a25d13745ce9feefeec0689b610bb7ee2}{dat}}[i]==1)\ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00986}00986\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ errValues.at(i)-\/>setStyleSheet(\textcolor{stringliteral}{"{}color:\ rgb(0,\ 255,\ 0);"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00987}00987\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (in\_bound.\mbox{\hyperlink{structsigned__elem__class_a25d13745ce9feefeec0689b610bb7ee2}{dat}}[i]==2)\ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00988}00988\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ errValues.at(i)-\/>setStyleSheet(\textcolor{stringliteral}{"{}color:\ orange;"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00989}00989\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00990}00990\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00991}00991\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00992}00992\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00993}00993\ \ \ \ \ \ \ \ \ \ \ \ \ ui-\/>btnAcquireData-\/>setEnabled(\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00994}00994\ \ \ \ \ \ \ \ \ \ \ \ \ ui-\/>spinSamples-\/>setEnabled(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00995}00995\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00996}00996\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (in\_boundary==\textcolor{keyword}{false})\{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00997}00997\ \ \ \ \ \ \ \ \ \ \ \ \ \ ui-\/>btnAcquireData-\/>setText(\textcolor{stringliteral}{"{}Strange\ values\ detected.\(\backslash\)n\ Acquire\ anyway?\ "{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00998}00998\ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l00999}00999\ \ \ \ \ \ \ \ \ \ \ \ \ \ ui-\/>btnAcquireData-\/>setText(\textcolor{stringliteral}{"{}Regular\ Values:\ Acquire\ Data"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01000}01000\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01001}01001\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01002}01002\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01003}01003\ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01004}01004\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01005}01005\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01006}01006\ \textcolor{keywordtype}{bool}\ StrainCalibGui::tick\_acquisition(\textcolor{keywordtype}{int}\ samples)}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01007}01007\ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01008}01008\ \ \ \ \ \textcolor{comment}{//\ marco.accame:\ now\ we\ acquire\ with\ the\ strainInterface\ class\ in\ one\ shot}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01009}01009\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01010}01010\ \ \ \ \ \textcolor{keywordflow}{if}(\textcolor{keyword}{false}\ ==\ enableacquisitions)}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01011}01011\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01012}01012\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01013}01013\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01014}01014\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01015}01015\ \ \ \ \ lockdriver(\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01016}01016\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01017}01017\ \ \ \ \ vector<cDownloader::strain\_value\_t>\ values;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01018}01018\ \ \ \ \ get(samples,\ values,\ enabledebugprints,\ \textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01019}01019\ \ \ \ \ \textcolor{comment}{//\ yDebug()\ <<\ "{}simple\ acquisition\ of\ "{}\ <<\ values.size()\ <<\ "{}strain\ samples"{};}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01020}01020\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01021}01021\ \ \ \ \ \textcolor{comment}{//\ now\ i\ need\ to\ retrieve\ the\ most\ recent\ value\ from\ values\ but\ in\ a\ particular\ format\ and\ fill\ variable\ last\_value}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01022}01022\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01023}01023\ \ \ \ \ \textcolor{keywordflow}{if}(values.size()\ >\ 0)}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01024}01024\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01025}01025\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structcDownloader_1_1strain__value__t}{cDownloader::strain\_value\_t}}\ lastvalue\ =\ values.at(values.size()-\/1);}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01026}01026\ \ \ \ \ \ \ \ \ lastvalue.\mbox{\hyperlink{structcDownloader_1_1strain__value__t_ab71ba99f6291ecbcfe2258174ec2bcee}{extract}}(last\_value.\mbox{\hyperlink{structsigned__elem__class_a25d13745ce9feefeec0689b610bb7ee2}{dat}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01027}01027\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01028}01028\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01029}01029\ \ \ \ \ lockdriver(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01030}01030\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01031}01031\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01032}01032\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01033}01033\ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01034}01034\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01035}01035\ \textcolor{keywordtype}{void}\ StrainCalibGui::setAcquisitionOfDataActive(\textcolor{keyword}{const}\ \textcolor{keywordtype}{bool}\ active)}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01036}01036\ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01037}01037\ \ \ \ \ mutexacquisitionofdata.lock();}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01038}01038\ \ \ \ \ acquiringdata\ =\ active;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01039}01039\ \ \ \ \ mutexacquisitionofdata.unlock();}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01040}01040\ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01041}01041\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01042}01042\ \textcolor{keywordtype}{bool}\ StrainCalibGui::isAcquisitionOfDataActive()}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01043}01043\ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01044}01044\ \ \ \ \ \textcolor{keywordtype}{bool}\ active\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01045}01045\ \ \ \ \ mutexacquisitionofdata.lock();}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01046}01046\ \ \ \ \ active\ =\ acquiringdata;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01047}01047\ \ \ \ \ mutexacquisitionofdata.unlock();}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01048}01048\ \ \ \ \ \textcolor{keywordflow}{return}\ active;}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01049}01049\ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01050}01050\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01051}01051\ \textcolor{keywordtype}{void}\ StrainCalibGui::lockdriver(\textcolor{keyword}{const}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{show__eyes__axes_8m_a58ab1fd68e97078232808206b850161b}{on}})}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01052}01052\ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01053}01053\ \ \ \ \ \textcolor{keywordflow}{if}(\mbox{\hyperlink{show__eyes__axes_8m_a58ab1fd68e97078232808206b850161b}{on}})}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01054}01054\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01055}01055\ \ \ \ \ \ \ \ \ mutexdriver.lock();}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01056}01056\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01057}01057\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01058}01058\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01059}01059\ \ \ \ \ \ \ \ \ mutexdriver.unlock();}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01060}01060\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01061}01061\ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01062}01062\ }
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01063}01063\ \textcolor{keywordtype}{bool}\ StrainCalibGui::checkDirectory()}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01064}01064\ \{}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01065}01065\ \ \ \ \ QFileInfo\ dir\ =\ \ QFileInfo(\textcolor{stringliteral}{"{}./data"{}});}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01066}01066\ \ \ \ \ \textcolor{keywordflow}{return}\ dir.isDir();}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01067}01067\ \}}
+\DoxyCodeLine{\Hypertarget{straincalibgui_8cpp_source_l01068}01068\ }
+
+\end{DoxyCode}

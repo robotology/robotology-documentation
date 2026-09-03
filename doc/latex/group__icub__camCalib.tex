@@ -1,0 +1,282 @@
+\doxysubsubsection{cam\+Calib}
+\hypertarget{group__icub__camCalib}{}\label{group__icub__camCalib}\index{camCalib@{camCalib}}
+
+
+\doxylink{classCamera}{Camera} image calibration module.  
+
+
+Collaboration diagram for cam\+Calib\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=261pt]{group__icub__camCalib}
+\end{center}
+\end{figure}
+\doxylink{classCamera}{Camera} image calibration module. 
+
+
+\begin{DoxyImageNoCaption}
+  \mbox{\includegraphics[width=\textwidth,height=\textheight/2,keepaspectratio=true]{dot_inline_dotgraph_1}}
+\end{DoxyImageNoCaption}
+\hypertarget{group__tutorial__perceptiveModels_lib_sec}{}\doxysubsubsubsection{\texorpdfstring{Libraries}{Libraries}}\label{group__tutorial__perceptiveModels_lib_sec}
+YARP Open\+CV (version \texorpdfstring{$>$}{>}= 2.\+0) spmap (icub library)
+
+We have enabled changes of the image saturation directly from the rpc port (see port description). This has been done (temporary) in order to change the saturation for the bayer images. The command are sent via rpc can be\+:
+
+
+\begin{DoxyItemize}
+\item sat 1.\+0 -\/ no changes in saturation
+\item sat x where x is \texorpdfstring{$<$}{<} 1.\+0 -\/ will decrease saturation until a gray image is obtained
+\item sat x where x is \texorpdfstring{$>$}{>} 1.\+0 -\/ will increase saturation
+\end{DoxyItemize}\hypertarget{group__tutorial__perceptiveModels_parameters_sec}{}\doxysubsubsubsection{\texorpdfstring{Parameters}{Parameters}}\label{group__tutorial__perceptiveModels_parameters_sec}
+Command-\/line Parameters
+
+The following key-\/value pairs can be specified as command-\/line parameters by prefixing {\ttfamily -\/-\/} to the key (e.\+g. {\ttfamily -\/-\/from} file.\+ini. The value part can be changed to suit your needs; the default values are shown below.
+
+
+\begin{DoxyItemize}
+\item {\ttfamily -\/-\/from} {\ttfamily camcalib.\+ini} ~\newline
+ specifies the configuration file
+\item {\ttfamily -\/-\/context} {\ttfamily camera\+Calibration} ~\newline
+ specifies the sub-\/path from {\ttfamily \$\+ICUB\+\_\+\+ROOT/icub/app} to the configuration file
+\item {\ttfamily -\/-\/name} {\ttfamily camcalib} ~\newline
+ specifies the name of the module (used to form the stem of module port names)
+\item {\ttfamily -\/-\/group} {\ttfamily CAMERA\+\_\+\+CALIBRATION\+\_\+\+LEFT} ~\newline
+ selects the configuration group to load and, for fisheye rectification, the camera stream to rectify ({\ttfamily CAMERA\+\_\+\+CALIBRATION\+\_\+\+LEFT} or {\ttfamily CAMERA\+\_\+\+CALIBRATION\+\_\+\+RIGHT})
+\end{DoxyItemize}\hypertarget{group__icub__camCalib_pinhole_sec}{}\doxysubsubsubsection{\texorpdfstring{Pinhole Lens Calibration}{Pinhole Lens Calibration}}\label{group__icub__camCalib_pinhole_sec}
+Set {\ttfamily projection} {\ttfamily pinhole} in the selected camera calibration group to undistort a standard pinhole camera image. The following parameters are required in that group\+:
+
+
+\begin{DoxyItemize}
+\item {\ttfamily draw\+Center\+Cross\+:} {\ttfamily 0} to disable or {\ttfamily 1} to draw a cross at the principal point
+\item {\ttfamily w}, {\ttfamily h\+:} image size used when deriving the calibration
+\item {\ttfamily fx}, {\ttfamily fy\+:} focal lengths
+\item {\ttfamily cx}, {\ttfamily cy\+:} principal point
+\item {\ttfamily k1}, {\ttfamily k2\+:} radial distortion coefficients
+\item {\ttfamily p1}, {\ttfamily p2\+:} tangential distortion coefficients
+\end{DoxyItemize}
+
+The intrinsic matrix is automatically rescaled when the runtime image size differs from {\ttfamily w} and {\ttfamily h}. The distortion coefficients remain unchanged.
+
+Example pinhole configuration\+:
+
+
+\begin{DoxyPre}
+projection pinhole
+drawCenterCross 1
+w  320
+h  240
+fx 221.607
+fy 221.689
+cx 174.29
+cy 130.528
+k1 -\/0.397161
+k2 0.180303
+p1 4.08465e-\/005
+p2 0.000456613
+
+\end{DoxyPre}
+\hypertarget{group__icub__camCalib_fisheye_sec}{}\doxysubsubsubsection{\texorpdfstring{Fisheye Lens Stereo Rectification}{Fisheye Lens Stereo Rectification}}\label{group__icub__camCalib_fisheye_sec}
+The module also supports {\ttfamily projection} {\ttfamily fisheye} for stereo fisheye lenses. In this mode, {\ttfamily cam\+Calib} rectifies one camera stream at a time using the calibration of both cameras plus the stereo extrinsic transform stored in the same configuration file.
+
+Fisheye requirements\+:
+
+
+\begin{DoxyItemize}
+\item {\ttfamily projection} {\ttfamily fisheye} in the selected camera group
+\item {\ttfamily -\/-\/group} set to either {\ttfamily CAMERA\+\_\+\+CALIBRATION\+\_\+\+LEFT} or {\ttfamily CAMERA\+\_\+\+CALIBRATION\+\_\+\+RIGHT} 
+\item both {\ttfamily }\mbox{[}CAMERA\+\_\+\+CALIBRATION\+\_\+\+LEFT\mbox{]} and {\ttfamily }\mbox{[}CAMERA\+\_\+\+CALIBRATION\+\_\+\+RIGHT\mbox{]} groups available
+\item a {\ttfamily }\mbox{[}STEREO\+\_\+\+DISPARITY\mbox{]} group containing {\ttfamily HN} as a 4x4 homogeneous transform
+\end{DoxyItemize}
+
+Each fisheye camera group must contain\+:
+
+
+\begin{DoxyItemize}
+\item {\ttfamily w}, {\ttfamily h} 
+\item {\ttfamily fx}, {\ttfamily fy}, {\ttfamily cx}, {\ttfamily cy} 
+\item {\ttfamily k1}, {\ttfamily k2}, {\ttfamily k3}, {\ttfamily k4} 
+\end{DoxyItemize}
+
+Fisheye rectification settings\+:
+
+
+\begin{DoxyItemize}
+\item {\ttfamily balance\+:} value in \mbox{[}0,1\mbox{]} controlling the crop level after rectification. It can be specified globally or in the selected camera group; the global value takes precedence.
+\item {\ttfamily fov\+Scale\+:} value greater than 0 that scales the output field of view. It can be specified globally or in the selected camera group; the global value takes precedence.
+\item {\ttfamily rectify\+Alpha\+:} global fallback value for {\ttfamily balance} when {\ttfamily balance} is not set.
+\item {\ttfamily draw\+Epipolars\+:} global boolean that overlays horizontal epipolar lines on the rectified image.
+\item {\ttfamily epipolar\+Line\+Step\+:} global pixel spacing between epipolar lines; values less than one are treated as one.
+\end{DoxyItemize}
+
+Fisheye rectification automatically rescales the intrinsic matrices if the runtime image size differs from the calibration size.
+
+Example fisheye configuration\+:
+
+
+\begin{DoxyPre}
+[CAMERA\_CALIBRATION\_LEFT]
+projection fisheye
+w 640
+h 480
+fx 320.0
+fy 320.0
+cx 320.0
+cy 240.0
+k1 -\/0.01
+k2 0.001
+k3 0.0
+k4 0.0
+balance 0.0
+fovScale 1.0
+
+[CAMERA\_CALIBRATION\_RIGHT]
+projection fisheye
+w 640
+h 480
+fx 320.0
+fy 320.0
+cx 320.0
+cy 240.0
+k1 -\/0.01
+k2 0.001
+k3 0.0
+k4 0.0
+
+[STEREO\_DISPARITY]
+HN (-\/1 0 0 0 0 -\/1 0 0 0 0 1 0 0.05 0 0 1)
+\end{DoxyPre}
+
+
+Example invocation\+:
+
+{\ttfamily cam\+Calib --name /icub/camcalib/left --context camera\+Calibration --from icub\+Eyes.\+ini --group CAMERA\+\_\+\+CALIBRATION\+\_\+\+LEFT}\hypertarget{group__tutorial__ationPrimitives_portsc_sec}{}\doxysubsubsubsection{\texorpdfstring{Ports Created}{Ports Created}}\label{group__tutorial__ationPrimitives_portsc_sec}
+Input port
+
+
+\begin{DoxyItemize}
+\item {\ttfamily /cam\+Calib/in} ~\newline
+ Input image to calibrate (from camera grabber) (rgb)
+\end{DoxyItemize}
+
+Output port
+
+
+\begin{DoxyItemize}
+\item {\ttfamily /cam\+Calib/out} ~\newline
+ Calibrated output image (rgb)
+\end{DoxyItemize}
+
+Rpc port
+
+
+\begin{DoxyItemize}
+\item {\ttfamily /cam\+Calib/conf} ~\newline
+ Rpc port to change the output image saturation used primarely for the bayer images
+\end{DoxyItemize}\hypertarget{group__tutorial__ationPrimitives_conf_file_sec}{}\doxysubsubsubsection{\texorpdfstring{Configuration Files}{Configuration Files}}\label{group__tutorial__ationPrimitives_conf_file_sec}
+{\ttfamily camcalib.\+ini} in {\ttfamily \$\+ICUB\+\_\+\+ROOT/app/camera\+Calibration} ~\newline
+ \hypertarget{group__tutorial__perceptiveModels_tested_os_sec}{}\doxysubsubsubsection{\texorpdfstring{Tested OS}{Tested OS}}\label{group__tutorial__perceptiveModels_tested_os_sec}
+Linux\+: Ubuntu 9.\+10, Debian Stable, squeeze and windows\hypertarget{group__icub__faceExpressions_example_sec}{}\doxysubsubsubsection{\texorpdfstring{Example Instantiation of the Module}{Example Instantiation of the Module}}\label{group__icub__faceExpressions_example_sec}
+{\ttfamily cam\+Calib --name /icub/camcalib/left --context camera\+Calibration --from icub\+Eyes.\+ini --group CAMERA\+\_\+\+CALIBRATION\+\_\+\+LEFT}
+
+More information on camera calibration\+:~\newline
+Open\+CV\+: \href{http://opencvlibrary.sourceforge.net/CvReference\#cv_3d}{\texttt{ http\+://opencvlibrary.\+sourceforge.\+net/\+Cv\+Reference\#cv\+\_\+3d}}~\newline
+Matlab Toolbox\+: \href{http://www.vision.caltech.edu/bouguetj/calib_doc/}{\texttt{ http\+://www.\+vision.\+caltech.\+edu/bouguetj/calib\+\_\+doc/}}~\newline
+ \begin{DoxySeeAlso}{See also}
+\doxylink{classCamCalibModule}{Cam\+Calib\+Module} 
+
+Calib\+Tool
+\end{DoxySeeAlso}
+\begin{DoxyAuthor}{Author}
+Lijin Aryananda, Jonas Ruesch
+\end{DoxyAuthor}
+
+\begin{DoxyImageNoCaption}
+  \mbox{\includegraphics[width=\textwidth,height=\textheight/2,keepaspectratio=true]{dot_inline_dotgraph_2}}
+\end{DoxyImageNoCaption}
+\hypertarget{group__tutorial__perceptiveModels_lib_sec}{}\doxysubsubsubsection{\texorpdfstring{Libraries}{Libraries}}\label{group__tutorial__perceptiveModels_lib_sec}
+YARP Open\+CV (version \texorpdfstring{$>$}{>}= 2.\+0) spmap (icub library)
+
+We have enabled changes of the image saturation directly from the rpc port (see port description). This has been done (temporary) in order to change the saturation for the bayer images. The command are sent via rpc can be\+:
+
+
+\begin{DoxyItemize}
+\item sat 1.\+0 -\/ no changes in saturation
+\item sat x where x is \texorpdfstring{$<$}{<} 1.\+0 -\/ will decrease saturation until a gray image is obtained
+\item sat x where x is \texorpdfstring{$>$}{>} 1.\+0 -\/ will increase saturation
+\end{DoxyItemize}\hypertarget{group__tutorial__perceptiveModels_parameters_sec}{}\doxysubsubsubsection{\texorpdfstring{Parameters}{Parameters}}\label{group__tutorial__perceptiveModels_parameters_sec}
+Command-\/line Parameters
+
+The following key-\/value pairs can be specified as command-\/line parameters by prefixing {\ttfamily -\/-\/} to the key (e.\+g. {\ttfamily -\/-\/from} file.\+ini. The value part can be changed to suit your needs; the default values are shown below.
+
+
+\begin{DoxyItemize}
+\item {\ttfamily -\/-\/from} {\ttfamily camcalib.\+ini} ~\newline
+ specifies the configuration file
+\item {\ttfamily -\/-\/context} {\ttfamily camera\+Calibration} ~\newline
+ specifies the sub-\/path from {\ttfamily \$\+ICUB\+\_\+\+ROOT/icub/app} to the configuration file
+\item {\ttfamily -\/-\/name} {\ttfamily camcalib} ~\newline
+ specifies the name of the module (used to form the stem of module port names) For calibration configuration options see\+: \doxylink{classPinholeCalibTool_a72aeb98162dfcac36892bcc8bfa038e4}{Pinhole\+Calib\+Tool\+::configure}
+\end{DoxyItemize}
+
+Configuration File Parameters
+
+The following key-\/value pairs can be specified as parameters in the configuration file The value part can be changed to suit your needs; the default values are shown below.
+
+
+\begin{DoxyPre}
+projection pinhole
+drawCenterCross 1
+w  320
+h  240
+fx 221.607
+fy 221.689
+cx 174.29
+cy 130.528
+k1 -\/0.397161
+k2 0.180303
+p1 4.08465e-\/005
+p2 0.000456613
+
+\end{DoxyPre}
+ \hypertarget{group__tutorial__ationPrimitives_portsc_sec}{}\doxysubsubsubsection{\texorpdfstring{Ports Created}{Ports Created}}\label{group__tutorial__ationPrimitives_portsc_sec}
+Input port
+
+
+\begin{DoxyItemize}
+\item {\ttfamily /cam\+Calib/in} ~\newline
+ Input image to calibrate (from camera grabber) (rgb)
+\end{DoxyItemize}
+
+Output port
+
+
+\begin{DoxyItemize}
+\item {\ttfamily /cam\+Calib/out} ~\newline
+ Calibrated output image (rgb)
+\end{DoxyItemize}
+
+Rpc port
+
+
+\begin{DoxyItemize}
+\item {\ttfamily /cam\+Calib/conf} ~\newline
+ Rpc port to change the output image saturation used primarely for the bayer images
+\end{DoxyItemize}\hypertarget{group__tutorial__ationPrimitives_conf_file_sec}{}\doxysubsubsubsection{\texorpdfstring{Configuration Files}{Configuration Files}}\label{group__tutorial__ationPrimitives_conf_file_sec}
+{\ttfamily camcalib.\+ini} in {\ttfamily \$\+ICUB\+\_\+\+ROOT/app/camera\+Calibration} ~\newline
+ \hypertarget{group__tutorial__perceptiveModels_tested_os_sec}{}\doxysubsubsubsection{\texorpdfstring{Tested OS}{Tested OS}}\label{group__tutorial__perceptiveModels_tested_os_sec}
+Linux\+: Ubuntu 9.\+10, Debian Stable, squeeze and windows\hypertarget{group__icub__faceExpressions_example_sec}{}\doxysubsubsubsection{\texorpdfstring{Example Instantiation of the Module}{Example Instantiation of the Module}}\label{group__icub__faceExpressions_example_sec}
+{\ttfamily cam\+Calib --name /icub/camcalib/left --context camera\+Calibration --from icub\+Eyes.\+ini --group CAMERA\+\_\+\+CALIBRATION\+\_\+\+LEFT}
+
+More information on camera calibration\+:~\newline
+Open\+CV\+: \href{http://opencvlibrary.sourceforge.net/CvReference\#cv_3d}{\texttt{ http\+://opencvlibrary.\+sourceforge.\+net/\+Cv\+Reference\#cv\+\_\+3d}}~\newline
+Matlab Toolbox\+: \href{http://www.vision.caltech.edu/bouguetj/calib_doc/}{\texttt{ http\+://www.\+vision.\+caltech.\+edu/bouguetj/calib\+\_\+doc/}}~\newline
+ \begin{DoxySeeAlso}{See also}
+\doxylink{classCamCalibModule}{Cam\+Calib\+Module} 
+
+Calib\+Tool
+\end{DoxySeeAlso}
+\begin{DoxyAuthor}{Author}
+Lijin Aryananda, Jonas Ruesch 
+\end{DoxyAuthor}

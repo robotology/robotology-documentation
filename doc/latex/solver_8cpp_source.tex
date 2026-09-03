@@ -1,0 +1,913 @@
+\doxysection{solver.\+cpp}
+\hypertarget{solver_8cpp_source}{}\label{solver_8cpp_source}\index{icub-\/main/src/modules/iKinGazeCtrl/src/solver.cpp@{icub-\/main/src/modules/iKinGazeCtrl/src/solver.cpp}}
+\mbox{\hyperlink{solver_8cpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00001}00001\ \textcolor{comment}{/*\ }}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00002}00002\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010\ RobotCub\ Consortium,\ European\ Commission\ FP6\ Project\ IST-\/004370}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00003}00003\ \textcolor{comment}{\ *\ Author:\ Ugo\ Pattacini,\ Alessandro\ Roncone}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00004}00004\ \textcolor{comment}{\ *\ email:\ \ ugo.pattacini@iit.it,\ alessandro.roncone@iit.it}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00005}00005\ \textcolor{comment}{\ *\ website:\ www.robotcub.org}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00006}00006\ \textcolor{comment}{\ *\ Permission\ is\ granted\ to\ copy,\ distribute,\ and/or\ modify\ this\ program}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00007}00007\ \textcolor{comment}{\ *\ under\ the\ terms\ of\ the\ GNU\ General\ Public\ License,\ version\ 2\ or\ any}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00008}00008\ \textcolor{comment}{\ *\ later\ version\ published\ by\ the\ Free\ Software\ Foundation.}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00009}00009\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00010}00010\ \textcolor{comment}{\ *\ A\ copy\ of\ the\ license\ can\ be\ found\ at}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00011}00011\ \textcolor{comment}{\ *\ http://www.robotcub.org/icub/license/gpl.txt}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00012}00012\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00013}00013\ \textcolor{comment}{\ *\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00014}00014\ \textcolor{comment}{\ *\ WITHOUT\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00015}00015\ \textcolor{comment}{\ *\ MERCHANTABILITY\ or\ FITNESS\ FOR\ A\ PARTICULAR\ PURPOSE.\ See\ the\ GNU\ General}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00016}00016\ \textcolor{comment}{\ *\ Public\ License\ for\ more\ details}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00017}00017\ \textcolor{comment}{*/}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00018}00018\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00019}00019\ \textcolor{preprocessor}{\#include\ <cmath>}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00020}00020\ \textcolor{preprocessor}{\#include\ <algorithm>}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00021}00021\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00022}00022\ \textcolor{preprocessor}{\#include\ <yarp/math/SVD.h>}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00023}00023\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{solver_8h}{iCub/solver.h}}>}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00024}00024\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00025}00025\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00026}00026\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00027}\mbox{\hyperlink{classEyePinvRefGen_a4dfe6857c1bf60457de7d197bfa37f01}{00027}}\ \mbox{\hyperlink{classEyePinvRefGen_a4dfe6857c1bf60457de7d197bfa37f01}{EyePinvRefGen::EyePinvRefGen}}(PolyDriver\ *\_drvTorso,\ PolyDriver\ *\_drvHead,}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00028}00028\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classExchangeData}{ExchangeData}}\ *\_commData,\ \mbox{\hyperlink{classController}{Controller}}\ *\_ctrl,}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00029}00029\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Vector\ \&\_counterRotGain,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ \_period)\ :}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00030}00030\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ PeriodicThread((double)\_period/1000.0),\ drvTorso(\_drvTorso),\ drvHead(\_drvHead),}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00031}00031\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ commData(\_commData),\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ctrl(\_ctrl),\ \ \ \ \ \ \ \ \ period(\_period),}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00032}00032\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ts(\_period/1000.0),\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ counterRotGain(\_counterRotGain)}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00033}00033\ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00034}00034\ \ \ \ \ \textcolor{comment}{//\ Instantiate\ objects}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00035}00035\ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_ac22af2bd3deab566503cbbf7b61ebe32}{neck}}=\textcolor{keyword}{new}\ \mbox{\hyperlink{classiCub_1_1iKin_1_1iCubHeadCenter}{iCubHeadCenter}}(\textcolor{stringliteral}{"{}right\_v"{}}+\mbox{\hyperlink{classEyePinvRefGen_a770b9677d85782f2396579f6b039cf7c}{commData}}-\/>\mbox{\hyperlink{classExchangeData_adf93c0deb256c3fdd716c7b32fb356c2}{head\_version}}.\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinLimbVersion_af39d2441eed8c2bc7935c3eca2766edb}{get\_version}}());}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00036}00036\ \ \ \ \ \mbox{\hyperlink{classGazeComponent_af0d811689807c394a6e9c6d49ca29c1d}{eyeL}}=\textcolor{keyword}{new}\ \mbox{\hyperlink{classiCub_1_1iKin_1_1iCubEye}{iCubEye}}(\textcolor{stringliteral}{"{}left\_v"{}}+\mbox{\hyperlink{classEyePinvRefGen_a770b9677d85782f2396579f6b039cf7c}{commData}}-\/>\mbox{\hyperlink{classExchangeData_adf93c0deb256c3fdd716c7b32fb356c2}{head\_version}}.\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinLimbVersion_af39d2441eed8c2bc7935c3eca2766edb}{get\_version}}());}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00037}00037\ \ \ \ \ \mbox{\hyperlink{classGazeComponent_aa94da445b35148d2b6bdbe9244cc46c1}{eyeR}}=\textcolor{keyword}{new}\ \mbox{\hyperlink{classiCub_1_1iKin_1_1iCubEye}{iCubEye}}(\textcolor{stringliteral}{"{}right\_v"{}}+\mbox{\hyperlink{classEyePinvRefGen_a770b9677d85782f2396579f6b039cf7c}{commData}}-\/>\mbox{\hyperlink{classExchangeData_adf93c0deb256c3fdd716c7b32fb356c2}{head\_version}}.\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinLimbVersion_af39d2441eed8c2bc7935c3eca2766edb}{get\_version}}());}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00038}00038\ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_a076e533e887a7398044edf3e0abb1c8b}{imu}}=\textcolor{keyword}{new}\ \mbox{\hyperlink{classiCub_1_1iKin_1_1iCubInertialSensor}{iCubInertialSensor}}(\mbox{\hyperlink{classEyePinvRefGen_a770b9677d85782f2396579f6b039cf7c}{commData}}-\/>\mbox{\hyperlink{classExchangeData_adf93c0deb256c3fdd716c7b32fb356c2}{head\_version}}.\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinLimbVersion_af39d2441eed8c2bc7935c3eca2766edb}{get\_version}}());}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00039}00039\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00040}00040\ \ \ \ \ \textcolor{comment}{//\ remove\ constraints\ on\ the\ links:\ logging\ purpose}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00041}00041\ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_a076e533e887a7398044edf3e0abb1c8b}{imu}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_ae52c86ba3b5e0b5dd938f591d69e29ad}{setAllConstraints}}(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00042}00042\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00043}00043\ \ \ \ \ \textcolor{comment}{//\ block\ neck\ dofs}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00044}00044\ \ \ \ \ \mbox{\hyperlink{classGazeComponent_af0d811689807c394a6e9c6d49ca29c1d}{eyeL}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_ad600a7548dcd3dc5cf51839d8da5a899}{blockLink}}(3,0.0);\ \mbox{\hyperlink{classGazeComponent_aa94da445b35148d2b6bdbe9244cc46c1}{eyeR}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_ad600a7548dcd3dc5cf51839d8da5a899}{blockLink}}(3,0.0);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00045}00045\ \ \ \ \ \mbox{\hyperlink{classGazeComponent_af0d811689807c394a6e9c6d49ca29c1d}{eyeL}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_ad600a7548dcd3dc5cf51839d8da5a899}{blockLink}}(4,0.0);\ \mbox{\hyperlink{classGazeComponent_aa94da445b35148d2b6bdbe9244cc46c1}{eyeR}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_ad600a7548dcd3dc5cf51839d8da5a899}{blockLink}}(4,0.0);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00046}00046\ \ \ \ \ \mbox{\hyperlink{classGazeComponent_af0d811689807c394a6e9c6d49ca29c1d}{eyeL}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_ad600a7548dcd3dc5cf51839d8da5a899}{blockLink}}(5,0.0);\ \mbox{\hyperlink{classGazeComponent_aa94da445b35148d2b6bdbe9244cc46c1}{eyeR}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_ad600a7548dcd3dc5cf51839d8da5a899}{blockLink}}(5,0.0);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00047}00047\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00048}00048\ \ \ \ \ \textcolor{comment}{//\ Get\ the\ chain\ objects}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00049}00049\ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_a3cee274dbbc4802f71145019e95dad32}{chainNeck}}=\mbox{\hyperlink{classEyePinvRefGen_ac22af2bd3deab566503cbbf7b61ebe32}{neck}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinLimb_ae0c121656774905c58b668b450417f0e}{asChain}}();}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00050}00050\ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_aba5db5b508f3357b24824bfa1e9367b2}{chainEyeL}}=\mbox{\hyperlink{classGazeComponent_af0d811689807c394a6e9c6d49ca29c1d}{eyeL}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinLimb_ae0c121656774905c58b668b450417f0e}{asChain}}();}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00051}00051\ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_a97851bfd9b07b6e3cd020e3f52d2d329}{chainEyeR}}=\mbox{\hyperlink{classGazeComponent_aa94da445b35148d2b6bdbe9244cc46c1}{eyeR}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinLimb_ae0c121656774905c58b668b450417f0e}{asChain}}();}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00052}00052\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00053}00053\ \ \ \ \ \textcolor{comment}{//\ add\ aligning\ matrices\ read\ from\ configuration\ file}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00054}00054\ \ \ \ \ \mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_a5843d21a62043a1bbd9b7a18808f15ee}{getAlignHN}}(\mbox{\hyperlink{classEyePinvRefGen_a770b9677d85782f2396579f6b039cf7c}{commData}}-\/>\mbox{\hyperlink{classExchangeData_a03b5bd4c0e0f77ffbb9e520fbd3dd3bd}{rf\_cameras}},\textcolor{stringliteral}{"{}ALIGN\_KIN\_LEFT"{}},\mbox{\hyperlink{classGazeComponent_af0d811689807c394a6e9c6d49ca29c1d}{eyeL}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinLimb_ae0c121656774905c58b668b450417f0e}{asChain}}());}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00055}00055\ \ \ \ \ \mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_a5843d21a62043a1bbd9b7a18808f15ee}{getAlignHN}}(\mbox{\hyperlink{classEyePinvRefGen_a770b9677d85782f2396579f6b039cf7c}{commData}}-\/>\mbox{\hyperlink{classExchangeData_a03b5bd4c0e0f77ffbb9e520fbd3dd3bd}{rf\_cameras}},\textcolor{stringliteral}{"{}ALIGN\_KIN\_RIGHT"{}},\mbox{\hyperlink{classGazeComponent_aa94da445b35148d2b6bdbe9244cc46c1}{eyeR}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinLimb_ae0c121656774905c58b668b450417f0e}{asChain}}());}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00056}00056\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00057}00057\ \ \ \ \ \textcolor{comment}{//\ overwrite\ aligning\ matrices\ iff\ specified\ through\ tweak\ values}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00058}00058\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classEyePinvRefGen_a770b9677d85782f2396579f6b039cf7c}{commData}}-\/>\mbox{\hyperlink{classExchangeData_a93e469abe4a5e36b669b3598d40c1533}{tweakOverwrite}})}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00059}00059\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00060}00060\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_a5843d21a62043a1bbd9b7a18808f15ee}{getAlignHN}}(\mbox{\hyperlink{classEyePinvRefGen_a770b9677d85782f2396579f6b039cf7c}{commData}}-\/>\mbox{\hyperlink{classExchangeData_ab09a6ebb162ab38afbd2ec3518dcd192}{rf\_tweak}},\textcolor{stringliteral}{"{}ALIGN\_KIN\_LEFT"{}},\mbox{\hyperlink{classGazeComponent_af0d811689807c394a6e9c6d49ca29c1d}{eyeL}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinLimb_ae0c121656774905c58b668b450417f0e}{asChain}}());}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00061}00061\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_a5843d21a62043a1bbd9b7a18808f15ee}{getAlignHN}}(\mbox{\hyperlink{classEyePinvRefGen_a770b9677d85782f2396579f6b039cf7c}{commData}}-\/>\mbox{\hyperlink{classExchangeData_ab09a6ebb162ab38afbd2ec3518dcd192}{rf\_tweak}},\textcolor{stringliteral}{"{}ALIGN\_KIN\_RIGHT"{}},\mbox{\hyperlink{classGazeComponent_aa94da445b35148d2b6bdbe9244cc46c1}{eyeR}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinLimb_ae0c121656774905c58b668b450417f0e}{asChain}}());}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00062}00062\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00063}00063\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00064}00064\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classEyePinvRefGen_a770b9677d85782f2396579f6b039cf7c}{commData}}-\/>\mbox{\hyperlink{classExchangeData_a93e469abe4a5e36b669b3598d40c1533}{tweakOverwrite}})}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00065}00065\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00066}00066\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_a5843d21a62043a1bbd9b7a18808f15ee}{getAlignHN}}(\mbox{\hyperlink{classEyePinvRefGen_a770b9677d85782f2396579f6b039cf7c}{commData}}-\/>\mbox{\hyperlink{classExchangeData_ab09a6ebb162ab38afbd2ec3518dcd192}{rf\_tweak}},\textcolor{stringliteral}{"{}ALIGN\_KIN\_LEFT"{}},\mbox{\hyperlink{classGazeComponent_af0d811689807c394a6e9c6d49ca29c1d}{eyeL}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinLimb_ae0c121656774905c58b668b450417f0e}{asChain}}());}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00067}00067\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_a5843d21a62043a1bbd9b7a18808f15ee}{getAlignHN}}(\mbox{\hyperlink{classEyePinvRefGen_a770b9677d85782f2396579f6b039cf7c}{commData}}-\/>\mbox{\hyperlink{classExchangeData_ab09a6ebb162ab38afbd2ec3518dcd192}{rf\_tweak}},\textcolor{stringliteral}{"{}ALIGN\_KIN\_RIGHT"{}},\mbox{\hyperlink{classGazeComponent_aa94da445b35148d2b6bdbe9244cc46c1}{eyeR}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinLimb_ae0c121656774905c58b668b450417f0e}{asChain}}());}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00068}00068\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00069}00069\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00070}00070\ \ \ \ \ \textcolor{comment}{//\ get\ the\ length\ of\ the\ half\ of\ the\ eyes\ baseline}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00071}00071\ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_a0a265421db1367e5aea79d1ce4cceca7}{eyesHalfBaseline}}=0.5*\mbox{\hyperlink{group__Maths_ga791f0548018b3597da95e70a3b226806}{norm}}(\mbox{\hyperlink{classGazeComponent_af0d811689807c394a6e9c6d49ca29c1d}{eyeL}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a78408241048e9c9d0e976f22ae522eea}{EndEffPose}}().subVector(0,2)-\/\mbox{\hyperlink{classGazeComponent_aa94da445b35148d2b6bdbe9244cc46c1}{eyeR}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a78408241048e9c9d0e976f22ae522eea}{EndEffPose}}().subVector(0,2));}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00072}00072\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00073}00073\ \ \ \ \ \textcolor{comment}{//\ read\ number\ of\ joints}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00074}00074\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classEyePinvRefGen_a588b827086ce86418140aed2101a7f84}{drvTorso}}!=\textcolor{keyword}{nullptr})}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00075}00075\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00076}00076\ \ \ \ \ \ \ \ \ IEncoders\ *encTorso;\ \mbox{\hyperlink{classEyePinvRefGen_a588b827086ce86418140aed2101a7f84}{drvTorso}}-\/>view(encTorso);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00077}00077\ \ \ \ \ \ \ \ \ encTorso-\/>getAxes(\&\mbox{\hyperlink{classEyePinvRefGen_a77d02c2cef51cf59577888ae7e28021a}{nJointsTorso}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00078}00078\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00079}00079\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00080}00080\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_a77d02c2cef51cf59577888ae7e28021a}{nJointsTorso}}=3;}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00081}00081\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00082}00082\ \ \ \ \ IEncoders\ *encHead;\ \mbox{\hyperlink{classEyePinvRefGen_ad36aecd4bac88b3a824107450894bca9}{drvHead}}-\/>view(encHead);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00083}00083\ \ \ \ \ encHead-\/>getAxes(\&\mbox{\hyperlink{classEyePinvRefGen_aec2b5a16cf9ba63e6a59b4ea157c0f8d}{nJointsHead}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00084}00084\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00085}00085\ \ \ \ \ \textcolor{comment}{//\ joints\ bounds\ alignment}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00086}00086\ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_a6eb8ad1a94fdff3e22d319e1db11209f}{lim}}=\mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_aaef08c17e655887a92240009158d3a1c}{alignJointsBounds}}(\mbox{\hyperlink{classEyePinvRefGen_a3cee274dbbc4802f71145019e95dad32}{chainNeck}},\mbox{\hyperlink{classEyePinvRefGen_a588b827086ce86418140aed2101a7f84}{drvTorso}},\mbox{\hyperlink{classEyePinvRefGen_ad36aecd4bac88b3a824107450894bca9}{drvHead}},\mbox{\hyperlink{classEyePinvRefGen_a770b9677d85782f2396579f6b039cf7c}{commData}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00087}00087\ \ \ \ \ \mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_a4b628bb572f8e0179d6f822c090b75c7}{copyJointsBounds}}(\mbox{\hyperlink{classEyePinvRefGen_a3cee274dbbc4802f71145019e95dad32}{chainNeck}},\mbox{\hyperlink{classEyePinvRefGen_aba5db5b508f3357b24824bfa1e9367b2}{chainEyeL}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00088}00088\ \ \ \ \ \mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_a4b628bb572f8e0179d6f822c090b75c7}{copyJointsBounds}}(\mbox{\hyperlink{classEyePinvRefGen_aba5db5b508f3357b24824bfa1e9367b2}{chainEyeL}},\mbox{\hyperlink{classEyePinvRefGen_a97851bfd9b07b6e3cd020e3f52d2d329}{chainEyeR}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00089}00089\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00090}00090\ \ \ \ \ \textcolor{comment}{//\ just\ eye\ part\ is\ required}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00091}00091\ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_a6eb8ad1a94fdff3e22d319e1db11209f}{lim}}=\mbox{\hyperlink{classEyePinvRefGen_a6eb8ad1a94fdff3e22d319e1db11209f}{lim}}.submatrix(3,5,0,1);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00092}00092\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00093}00093\ \ \ \ \ \textcolor{comment}{//\ reinforce\ vergence\ min\ bound}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00094}00094\ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_a6eb8ad1a94fdff3e22d319e1db11209f}{lim}}(2,0)=\mbox{\hyperlink{classEyePinvRefGen_a770b9677d85782f2396579f6b039cf7c}{commData}}-\/>\mbox{\hyperlink{classExchangeData_acbe44d9ac13590b99d2729c047639760}{minAllowedVergence}};}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00095}00095\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00096}00096\ \ \ \ \ \textcolor{comment}{//\ read\ starting\ position}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00097}00097\ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_a7b88d5c88d3c3e462c7ed573c45c118e}{fbTorso}}.resize(\mbox{\hyperlink{classEyePinvRefGen_a77d02c2cef51cf59577888ae7e28021a}{nJointsTorso}},0.0);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00098}00098\ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_a8bcaf8165d7f0c0307ca7827ea61c109}{fbHead}}.resize(\mbox{\hyperlink{classEyePinvRefGen_aec2b5a16cf9ba63e6a59b4ea157c0f8d}{nJointsHead}},0.0);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00099}00099\ \ \ \ \ \mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_a91c67f2856c92fd4af2bbed36fff8cef}{getFeedback}}(\mbox{\hyperlink{classEyePinvRefGen_a7b88d5c88d3c3e462c7ed573c45c118e}{fbTorso}},\mbox{\hyperlink{classEyePinvRefGen_a8bcaf8165d7f0c0307ca7827ea61c109}{fbHead}},\mbox{\hyperlink{classEyePinvRefGen_a588b827086ce86418140aed2101a7f84}{drvTorso}},\mbox{\hyperlink{classEyePinvRefGen_ad36aecd4bac88b3a824107450894bca9}{drvHead}},\mbox{\hyperlink{classEyePinvRefGen_a770b9677d85782f2396579f6b039cf7c}{commData}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00100}00100\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00101}00101\ \ \ \ \ \textcolor{comment}{//\ save\ original\ eyes\ tilt\ and\ pan\ bounds}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00102}00102\ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_ab06c70b82b499d91379c1db7c482096d}{orig\_eye\_tilt\_min}}=(*chainEyeL)[\mbox{\hyperlink{classEyePinvRefGen_a77d02c2cef51cf59577888ae7e28021a}{nJointsTorso}}+3].getMin();}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00103}00103\ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_a958281bb728766a246ebca322859b805}{orig\_eye\_tilt\_max}}=(*chainEyeL)[\mbox{\hyperlink{classEyePinvRefGen_a77d02c2cef51cf59577888ae7e28021a}{nJointsTorso}}+3].getMax();}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00104}00104\ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_aec86c8a55590cd6863242cf046e29483}{orig\_eye\_pan\_min}}=(*chainEyeL)[\mbox{\hyperlink{classEyePinvRefGen_a77d02c2cef51cf59577888ae7e28021a}{nJointsTorso}}+4].getMin();}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00105}00105\ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_a2b294e6f51e3c3b25715c5c9ac90bc30}{orig\_eye\_pan\_max}}=(*chainEyeL)[\mbox{\hyperlink{classEyePinvRefGen_a77d02c2cef51cf59577888ae7e28021a}{nJointsTorso}}+4].getMax();}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00106}00106\ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_ae6f8c8cc372b962bcf3ab710a2bc2357}{orig\_lim}}=\mbox{\hyperlink{classEyePinvRefGen_a6eb8ad1a94fdff3e22d319e1db11209f}{lim}};}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00107}00107\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00108}00108\ \ \ \ \ \textcolor{comment}{//\ Instantiate\ integrator}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00109}00109\ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_adf0dac328b4009405b59902f3416946f}{qd}}.resize(3);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00110}00110\ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_adf0dac328b4009405b59902f3416946f}{qd}}[0]=\mbox{\hyperlink{classEyePinvRefGen_a8bcaf8165d7f0c0307ca7827ea61c109}{fbHead}}[3];}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00111}00111\ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_adf0dac328b4009405b59902f3416946f}{qd}}[1]=\mbox{\hyperlink{classEyePinvRefGen_a8bcaf8165d7f0c0307ca7827ea61c109}{fbHead}}[4];}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00112}00112\ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_adf0dac328b4009405b59902f3416946f}{qd}}[2]=\mbox{\hyperlink{classEyePinvRefGen_a8bcaf8165d7f0c0307ca7827ea61c109}{fbHead}}[5];}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00113}00113\ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_a38bf84537b309ca95eb9c036cd2be0f1}{I}}=\textcolor{keyword}{new}\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Integrator}{Integrator}}(\mbox{\hyperlink{classEyePinvRefGen_af62bf4126d13b3adfc284aa20a43079b}{Ts}},\mbox{\hyperlink{classEyePinvRefGen_adf0dac328b4009405b59902f3416946f}{qd}},\mbox{\hyperlink{classEyePinvRefGen_a6eb8ad1a94fdff3e22d319e1db11209f}{lim}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00114}00114\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00115}00115\ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_ab977bda7725839268c57d76de77d1b58}{fp}}.resize(3,0.0);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00116}00116\ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_af779741c4e58bba5e3308514b9fe0372}{eyesJ}}.resize(3,3);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00117}00117\ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_af779741c4e58bba5e3308514b9fe0372}{eyesJ}}.zero();}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00118}00118\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00119}00119\ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_acd87de86f5e1a7f3d05096858925d28b}{genOn}}=\textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00120}00120\ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_a4ce61451007a73e2f20c233a08984822}{saccadeUnderWayOld}}=\textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00121}00121\ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00122}00122\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00123}00123\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00124}00124\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00125}\mbox{\hyperlink{classEyePinvRefGen_ac29c676c3208672a87b89be584073253}{00125}}\ \mbox{\hyperlink{classEyePinvRefGen_ac29c676c3208672a87b89be584073253}{EyePinvRefGen::\string~EyePinvRefGen}}()}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00126}00126\ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00127}00127\ \ \ \ \ \textcolor{keyword}{delete}\ \mbox{\hyperlink{classEyePinvRefGen_ac22af2bd3deab566503cbbf7b61ebe32}{neck}};}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00128}00128\ \ \ \ \ \textcolor{keyword}{delete}\ \mbox{\hyperlink{classGazeComponent_af0d811689807c394a6e9c6d49ca29c1d}{eyeL}};}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00129}00129\ \ \ \ \ \textcolor{keyword}{delete}\ \mbox{\hyperlink{classGazeComponent_aa94da445b35148d2b6bdbe9244cc46c1}{eyeR}};}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00130}00130\ \ \ \ \ \textcolor{keyword}{delete}\ \mbox{\hyperlink{classEyePinvRefGen_a076e533e887a7398044edf3e0abb1c8b}{imu}};}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00131}00131\ \ \ \ \ \textcolor{keyword}{delete}\ \mbox{\hyperlink{classEyePinvRefGen_a38bf84537b309ca95eb9c036cd2be0f1}{I}};}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00132}00132\ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00133}00133\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00134}00134\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00135}00135\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00136}\mbox{\hyperlink{classEyePinvRefGen_a4806c4e185c9746afbc22053cd3b22ee}{00136}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classEyePinvRefGen_a4806c4e185c9746afbc22053cd3b22ee}{EyePinvRefGen::minAllowedVergenceChanged}}()}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00137}00137\ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00138}00138\ \ \ \ \ lock\_guard<mutex>\ lck(\mbox{\hyperlink{classEyePinvRefGen_a256a73ddc9f01a211f8e5d6011a8eff2}{mtx}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00139}00139\ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_a6eb8ad1a94fdff3e22d319e1db11209f}{lim}}(2,0)=\mbox{\hyperlink{classEyePinvRefGen_a770b9677d85782f2396579f6b039cf7c}{commData}}-\/>\mbox{\hyperlink{classExchangeData_acbe44d9ac13590b99d2729c047639760}{minAllowedVergence}};}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00140}00140\ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_a38bf84537b309ca95eb9c036cd2be0f1}{I}}-\/>\mbox{\hyperlink{classiCub_1_1ctrl_1_1Integrator_ac87b4023d04dba162fae49f68f379d48}{setLim}}(\mbox{\hyperlink{classEyePinvRefGen_a6eb8ad1a94fdff3e22d319e1db11209f}{lim}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00141}00141\ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_ae6f8c8cc372b962bcf3ab710a2bc2357}{orig\_lim}}=\mbox{\hyperlink{classEyePinvRefGen_a6eb8ad1a94fdff3e22d319e1db11209f}{lim}};}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00142}00142\ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00143}00143\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00144}00144\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00145}00145\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00146}\mbox{\hyperlink{classEyePinvRefGen_a6f07c54add106cf6a157c12cad887743}{00146}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classEyePinvRefGen_a6f07c54add106cf6a157c12cad887743}{EyePinvRefGen::bindEyes}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ ver)}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00147}00147\ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00148}00148\ \ \ \ \ lock\_guard<mutex>\ lck(\mbox{\hyperlink{classEyePinvRefGen_a256a73ddc9f01a211f8e5d6011a8eff2}{mtx}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00149}00149\ \ \ \ \ \textcolor{keywordflow}{if}\ (ver>=0.0)}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00150}00150\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00151}00151\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ ver\_rad=std::max(\mbox{\hyperlink{namespaceiCub_1_1ctrl_a52299223f405fb68877b56af10f9a3f2}{CTRL\_DEG2RAD}}*ver,\mbox{\hyperlink{classEyePinvRefGen_a770b9677d85782f2396579f6b039cf7c}{commData}}-\/>\mbox{\hyperlink{classExchangeData_acbe44d9ac13590b99d2729c047639760}{minAllowedVergence}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00152}00152\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_a770b9677d85782f2396579f6b039cf7c}{commData}}-\/>\mbox{\hyperlink{classExchangeData_af3fbcecfe39290474dd5db35b27caffa}{eyesBoundVer}}=\mbox{\hyperlink{namespaceiCub_1_1ctrl_a335ee3373d8ec68927b7b42c111fe408}{CTRL\_RAD2DEG}}*ver\_rad;}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00153}00153\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00154}00154\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ block\ pan\ of\ the\ left\ eye}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00155}00155\ \ \ \ \ \ \ \ \ (*chainEyeL)[\mbox{\hyperlink{classEyePinvRefGen_a77d02c2cef51cf59577888ae7e28021a}{nJointsTorso}}+4].setMin(ver\_rad/2.0);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00156}00156\ \ \ \ \ \ \ \ \ (*chainEyeL)[\mbox{\hyperlink{classEyePinvRefGen_a77d02c2cef51cf59577888ae7e28021a}{nJointsTorso}}+4].setMax(ver\_rad/2.0);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00157}00157\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00158}00158\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ block\ pan\ of\ the\ right\ eye}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00159}00159\ \ \ \ \ \ \ \ \ (*chainEyeR)[\mbox{\hyperlink{classEyePinvRefGen_a77d02c2cef51cf59577888ae7e28021a}{nJointsTorso}}+4].setMin(-\/ver\_rad/2.0);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00160}00160\ \ \ \ \ \ \ \ \ (*chainEyeR)[\mbox{\hyperlink{classEyePinvRefGen_a77d02c2cef51cf59577888ae7e28021a}{nJointsTorso}}+4].setMax(-\/ver\_rad/2.0);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00161}00161\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00162}00162\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ change\ the\ limits\ of\ the\ integrator}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00163}00163\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_a6eb8ad1a94fdff3e22d319e1db11209f}{lim}}(1,0)=\mbox{\hyperlink{classEyePinvRefGen_a6eb8ad1a94fdff3e22d319e1db11209f}{lim}}(1,1)=0.0;}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00164}00164\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_a6eb8ad1a94fdff3e22d319e1db11209f}{lim}}(2,0)=\mbox{\hyperlink{classEyePinvRefGen_a6eb8ad1a94fdff3e22d319e1db11209f}{lim}}(2,1)=ver\_rad;}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00165}00165\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_a38bf84537b309ca95eb9c036cd2be0f1}{I}}-\/>\mbox{\hyperlink{classiCub_1_1ctrl_1_1Integrator_ac87b4023d04dba162fae49f68f379d48}{setLim}}(\mbox{\hyperlink{classEyePinvRefGen_a6eb8ad1a94fdff3e22d319e1db11209f}{lim}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00166}00166\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00167}00167\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_adf0dac328b4009405b59902f3416946f}{qd}}[0]=\mbox{\hyperlink{classEyePinvRefGen_a8bcaf8165d7f0c0307ca7827ea61c109}{fbHead}}[3];}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00168}00168\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_adf0dac328b4009405b59902f3416946f}{qd}}[1]=0.0;}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00169}00169\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_adf0dac328b4009405b59902f3416946f}{qd}}[2]=ver\_rad;}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00170}00170\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_a38bf84537b309ca95eb9c036cd2be0f1}{I}}-\/>\mbox{\hyperlink{classiCub_1_1ctrl_1_1Integrator_a48b2d6de0cc287577635232b21c03dc1}{reset}}(\mbox{\hyperlink{classEyePinvRefGen_adf0dac328b4009405b59902f3416946f}{qd}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00171}00171\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00172}00172\ \ \ \ \ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}eyes\ constrained\ at\ vergence\ \%g\ deg"{}},\mbox{\hyperlink{classEyePinvRefGen_a770b9677d85782f2396579f6b039cf7c}{commData}}-\/>\mbox{\hyperlink{classExchangeData_af3fbcecfe39290474dd5db35b27caffa}{eyesBoundVer}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00173}00173\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_a95d39fba755eaef7962a365d5dbd04ab}{ctrl}}-\/>\mbox{\hyperlink{classController_a7d83a4330f60774e754b4243e626a89d}{look}}(\mbox{\hyperlink{classEyePinvRefGen_ab977bda7725839268c57d76de77d1b58}{fp}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00174}00174\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00175}00175\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00176}00176\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00177}00177\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00178}00178\ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00179}00179\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00180}00180\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00181}00181\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00182}\mbox{\hyperlink{classEyePinvRefGen_a508fee99eb1af9b5a98f47f571941f24}{00182}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classEyePinvRefGen_a508fee99eb1af9b5a98f47f571941f24}{EyePinvRefGen::clearEyes}}()}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00183}00183\ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00184}00184\ \ \ \ \ lock\_guard<mutex>\ lck(\mbox{\hyperlink{classEyePinvRefGen_a256a73ddc9f01a211f8e5d6011a8eff2}{mtx}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00185}00185\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classEyePinvRefGen_a770b9677d85782f2396579f6b039cf7c}{commData}}-\/>\mbox{\hyperlink{classExchangeData_af3fbcecfe39290474dd5db35b27caffa}{eyesBoundVer}}>=0.0)}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00186}00186\ \ \ \ \ \{\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00187}00187\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_a770b9677d85782f2396579f6b039cf7c}{commData}}-\/>\mbox{\hyperlink{classExchangeData_af3fbcecfe39290474dd5db35b27caffa}{eyesBoundVer}}=-\/1.0;}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00188}00188\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00189}00189\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ reinstate\ pan\ bound\ of\ the\ left\ eye}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00190}00190\ \ \ \ \ \ \ \ \ (*chainEyeL)[\mbox{\hyperlink{classEyePinvRefGen_a77d02c2cef51cf59577888ae7e28021a}{nJointsTorso}}+4].setMin(\mbox{\hyperlink{classEyePinvRefGen_aec86c8a55590cd6863242cf046e29483}{orig\_eye\_pan\_min}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00191}00191\ \ \ \ \ \ \ \ \ (*chainEyeL)[\mbox{\hyperlink{classEyePinvRefGen_a77d02c2cef51cf59577888ae7e28021a}{nJointsTorso}}+4].setMax(\mbox{\hyperlink{classEyePinvRefGen_a2b294e6f51e3c3b25715c5c9ac90bc30}{orig\_eye\_pan\_max}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00192}00192\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00193}00193\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ reinstate\ pan\ bound\ of\ the\ right\ eye}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00194}00194\ \ \ \ \ \ \ \ \ (*chainEyeR)[\mbox{\hyperlink{classEyePinvRefGen_a77d02c2cef51cf59577888ae7e28021a}{nJointsTorso}}+4].setMin(\mbox{\hyperlink{classEyePinvRefGen_aec86c8a55590cd6863242cf046e29483}{orig\_eye\_pan\_min}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00195}00195\ \ \ \ \ \ \ \ \ (*chainEyeR)[\mbox{\hyperlink{classEyePinvRefGen_a77d02c2cef51cf59577888ae7e28021a}{nJointsTorso}}+4].setMax(\mbox{\hyperlink{classEyePinvRefGen_a2b294e6f51e3c3b25715c5c9ac90bc30}{orig\_eye\_pan\_max}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00196}00196\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00197}00197\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ reinstate\ the\ limits\ of\ the\ integrator}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00198}00198\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_a6eb8ad1a94fdff3e22d319e1db11209f}{lim}}=\mbox{\hyperlink{classEyePinvRefGen_ae6f8c8cc372b962bcf3ab710a2bc2357}{orig\_lim}};}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00199}00199\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_a38bf84537b309ca95eb9c036cd2be0f1}{I}}-\/>\mbox{\hyperlink{classiCub_1_1ctrl_1_1Integrator_ac87b4023d04dba162fae49f68f379d48}{setLim}}(\mbox{\hyperlink{classEyePinvRefGen_a6eb8ad1a94fdff3e22d319e1db11209f}{lim}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00200}00200\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00201}00201\ \ \ \ \ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}eyes\ cleared"{}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00202}00202\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00203}00203\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00204}00204\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00205}00205\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00206}00206\ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00207}00207\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00208}00208\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00209}00209\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00210}\mbox{\hyperlink{classEyePinvRefGen_a5f2d7fcce434c482d8ad820541ea18a7}{00210}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classEyePinvRefGen_a5f2d7fcce434c482d8ad820541ea18a7}{EyePinvRefGen::manageBindEyes}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ ver)}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00211}00211\ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00212}00212\ \ \ \ \ \textcolor{keywordflow}{if}\ (!\mbox{\hyperlink{classEyePinvRefGen_a6f07c54add106cf6a157c12cad887743}{bindEyes}}(ver))}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00213}00213\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_a508fee99eb1af9b5a98f47f571941f24}{clearEyes}}();}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00214}00214\ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00215}00215\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00216}00216\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00217}00217\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00218}\mbox{\hyperlink{classEyePinvRefGen_a50fbbd1345c3b0f032a80d44dac995ff}{00218}}\ Vector\ \mbox{\hyperlink{classEyePinvRefGen_a50fbbd1345c3b0f032a80d44dac995ff}{EyePinvRefGen::getCounterRotGain}}()}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00219}00219\ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00220}00220\ \ \ \ \ lock\_guard<mutex>\ lck(\mbox{\hyperlink{classEyePinvRefGen_a256a73ddc9f01a211f8e5d6011a8eff2}{mtx}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00221}00221\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classEyePinvRefGen_a21c79ede65f24335ca28f8c14a965556}{counterRotGain}};}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00222}00222\ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00223}00223\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00224}00224\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00225}00225\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00226}\mbox{\hyperlink{classEyePinvRefGen_ad1e4799a2fca39914d923b3a0236e98b}{00226}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classEyePinvRefGen_ad1e4799a2fca39914d923b3a0236e98b}{EyePinvRefGen::setCounterRotGain}}(\textcolor{keyword}{const}\ Vector\ \&gain)}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00227}00227\ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00228}00228\ \ \ \ \ lock\_guard<mutex>\ lck(\mbox{\hyperlink{classEyePinvRefGen_a256a73ddc9f01a211f8e5d6011a8eff2}{mtx}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00229}00229\ \ \ \ \ \textcolor{keywordtype}{size\_t}\ len=std::min(\mbox{\hyperlink{classEyePinvRefGen_a21c79ede65f24335ca28f8c14a965556}{counterRotGain}}.length(),gain.length());}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00230}00230\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<len;\ i++)}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00231}00231\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_a21c79ede65f24335ca28f8c14a965556}{counterRotGain}}[i]=gain[i];}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00232}00232\ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}counter-\/rotation\ gains\ set\ to\ (\%s)"{}},\mbox{\hyperlink{classEyePinvRefGen_a21c79ede65f24335ca28f8c14a965556}{counterRotGain}}.toString(3,3).c\_str());}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00233}00233\ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00234}00234\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00235}00235\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00236}00236\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00237}\mbox{\hyperlink{classEyePinvRefGen_aba4836ca8cf09e507df0d9300d87c080}{00237}}\ Vector\ \mbox{\hyperlink{classEyePinvRefGen_aba4836ca8cf09e507df0d9300d87c080}{EyePinvRefGen::getEyesCounterVelocity}}(\textcolor{keyword}{const}\ Matrix\ \&eyesJ,\ \textcolor{keyword}{const}\ Vector\ \&\mbox{\hyperlink{pcap__wrapper__linux_8cpp_ae44275d34c468c2018022eafb08b7179}{fp}})}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00238}00238\ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00239}00239\ \ \ \ \ \textcolor{comment}{//\ **********\ implement\ VOR}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00240}00240\ \ \ \ \ Matrix\ \mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}}=\mbox{\hyperlink{classEyePinvRefGen_a076e533e887a7398044edf3e0abb1c8b}{imu}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a0b503aeeb58dc5cb228c174bf8500599}{getH}}(cat(\mbox{\hyperlink{classEyePinvRefGen_a7b88d5c88d3c3e462c7ed573c45c118e}{fbTorso}},\mbox{\hyperlink{classEyePinvRefGen_a8bcaf8165d7f0c0307ca7827ea61c109}{fbHead}}.subVector(0,2)));}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00241}00241\ \ \ \ \ \mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}}(0,3)=\mbox{\hyperlink{classEyePinvRefGen_ab977bda7725839268c57d76de77d1b58}{fp}}[0]-\/\mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}}(0,3);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00242}00242\ \ \ \ \ \mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}}(1,3)=\mbox{\hyperlink{classEyePinvRefGen_ab977bda7725839268c57d76de77d1b58}{fp}}[1]-\/\mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}}(1,3);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00243}00243\ \ \ \ \ \mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}}(2,3)=\mbox{\hyperlink{classEyePinvRefGen_ab977bda7725839268c57d76de77d1b58}{fp}}[2]-\/\mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}}(2,3);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00244}00244\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00245}00245\ \ \ \ \ \textcolor{comment}{//\ gyro\ rate\ [rad/s]}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00246}00246\ \ \ \ \ Vector\ gyro\{\mbox{\hyperlink{classEyePinvRefGen_a770b9677d85782f2396579f6b039cf7c}{commData}}-\/>\mbox{\hyperlink{classExchangeData_a4d5923f50ac7d6b6c5901e43ae692e31}{get\_gyro}}().first\};}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00247}00247\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00248}00248\ \ \ \ \ \textcolor{comment}{//\ filter\ out\ the\ noise\ on\ the\ gyro\ readouts}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00249}00249\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{group__Maths_ga791f0548018b3597da95e70a3b226806}{norm}}(gyro)<\mbox{\hyperlink{classEyePinvRefGen_a770b9677d85782f2396579f6b039cf7c}{commData}}-\/>\mbox{\hyperlink{classExchangeData_a73ebff6451576c8750e328ea4b5569dd}{gyro\_noise\_threshold}})}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00250}00250\ \ \ \ \ \ \ \ \ gyro=0.0;}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00251}00251\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00252}00252\ \ \ \ \ Vector\ vor\_fprelv=(gyro[0]*\mbox{\hyperlink{group__Maths_gaf7eef875cc229edd04aaa3e8fcbad989}{cross}}(\mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}},0,\mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}},3)+gyro[1]*\mbox{\hyperlink{group__Maths_gaf7eef875cc229edd04aaa3e8fcbad989}{cross}}(\mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}},1,\mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}},3)+gyro[2]*\mbox{\hyperlink{group__Maths_gaf7eef875cc229edd04aaa3e8fcbad989}{cross}}(\mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}},2,\mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}},3));}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00253}00253\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00254}00254\ \ \ \ \ \textcolor{comment}{//\ **********\ implement\ OCR}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00255}00255\ \ \ \ \ \mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}}=\mbox{\hyperlink{classEyePinvRefGen_a3cee274dbbc4802f71145019e95dad32}{chainNeck}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a0b503aeeb58dc5cb228c174bf8500599}{getH}}();}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00256}00256\ \ \ \ \ Vector\ fph=\mbox{\hyperlink{classEyePinvRefGen_ab977bda7725839268c57d76de77d1b58}{fp}};}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00257}00257\ \ \ \ \ fph.push\_back(1.0);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00258}00258\ \ \ \ \ fph=SE3inv(\mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}})*fph;}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00259}00259\ \ \ \ \ Matrix\ HN=eye(4,4);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00260}00260\ \ \ \ \ HN.setSubcol(fph,0,3);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00261}00261\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00262}00262\ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_a3cee274dbbc4802f71145019e95dad32}{chainNeck}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a107e361a000db942f9a452acf3c9b020}{setHN}}(HN);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00263}00263\ \ \ \ \ Vector\ ocr\_fprelv=\mbox{\hyperlink{classEyePinvRefGen_a3cee274dbbc4802f71145019e95dad32}{chainNeck}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a14f7045854b4a7bebaad26fd08df35e3}{GeoJacobian}}()*\mbox{\hyperlink{classEyePinvRefGen_a770b9677d85782f2396579f6b039cf7c}{commData}}-\/>\mbox{\hyperlink{classExchangeData_a3dfb1192055fec01c828a97c6c911f09}{get\_v}}().subVector(0,2);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00264}00264\ \ \ \ \ ocr\_fprelv=ocr\_fprelv.subVector(0,2);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00265}00265\ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_a3cee274dbbc4802f71145019e95dad32}{chainNeck}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a107e361a000db942f9a452acf3c9b020}{setHN}}(eye(4,4));}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00266}00266\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00267}00267\ \ \ \ \ \textcolor{comment}{//\ **********\ blend\ the\ contributions}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00268}00268\ \ \ \ \ \textcolor{keywordflow}{return}\ -\/1.0*(pinv(\mbox{\hyperlink{classEyePinvRefGen_af779741c4e58bba5e3308514b9fe0372}{eyesJ}})*(\mbox{\hyperlink{classEyePinvRefGen_a21c79ede65f24335ca28f8c14a965556}{counterRotGain}}[0]*vor\_fprelv+\mbox{\hyperlink{classEyePinvRefGen_a21c79ede65f24335ca28f8c14a965556}{counterRotGain}}[1]*ocr\_fprelv));}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00269}00269\ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00270}00270\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00271}00271\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00272}00272\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00273}\mbox{\hyperlink{classEyePinvRefGen_a9e5cb3f1d93be4fba1a91e928bea3571}{00273}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classEyePinvRefGen_a9e5cb3f1d93be4fba1a91e928bea3571}{EyePinvRefGen::threadInit}}()}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00274}00274\ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00275}00275\ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}Starting\ Pseudoinverse\ Reference\ Generator\ at\ \%d\ ms"{}},\mbox{\hyperlink{classEyePinvRefGen_af76729b89275f4c96bd4303bde8a4d86}{period}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00276}00276\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00277}00277\ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_afc48f4334a2b13e0593ef6269bcbb565}{saccadesRxTargets}}=0;}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00278}00278\ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_ac7b23105e5ec95cbc27d1f6bba221756}{saccadesClock}}=Time::now();}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00279}00279\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00280}00280\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00281}00281\ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00282}00282\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00283}00283\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00284}00284\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00285}\mbox{\hyperlink{classEyePinvRefGen_a7ccce506e0705515f4ffd030e4bb185d}{00285}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classEyePinvRefGen_a7ccce506e0705515f4ffd030e4bb185d}{EyePinvRefGen::threadRelease}}()}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00286}00286\ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00287}00287\ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00288}00288\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00289}00289\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00290}00290\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00291}\mbox{\hyperlink{classEyePinvRefGen_a526ec9d9a59e25dac4149731390ef0d2}{00291}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classEyePinvRefGen_a526ec9d9a59e25dac4149731390ef0d2}{EyePinvRefGen::afterStart}}(\textcolor{keywordtype}{bool}\ s)}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00292}00292\ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00293}00293\ \ \ \ \ \textcolor{keywordflow}{if}\ (s)}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00294}00294\ \ \ \ \ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}Pseudoinverse\ Reference\ Generator\ started\ successfully"{}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00295}00295\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00296}00296\ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}Pseudoinverse\ Reference\ Generator\ did\ not\ start!"{}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00297}00297\ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00298}00298\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00299}00299\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00300}00300\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00301}\mbox{\hyperlink{classEyePinvRefGen_a45a47b1aed3e4fa2614e656bbb977c3a}{00301}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classEyePinvRefGen_a45a47b1aed3e4fa2614e656bbb977c3a}{EyePinvRefGen::run}}()}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00302}00302\ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00303}00303\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classEyePinvRefGen_acd87de86f5e1a7f3d05096858925d28b}{genOn}})}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00304}00304\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00305}00305\ \ \ \ \ \ \ \ \ lock\_guard<mutex>\ lck(\mbox{\hyperlink{classEyePinvRefGen_a256a73ddc9f01a211f8e5d6011a8eff2}{mtx}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00306}00306\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ timeStamp;}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00307}00307\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00308}00308\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ read\ encoders}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00309}00309\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_a91c67f2856c92fd4af2bbed36fff8cef}{getFeedback}}(\mbox{\hyperlink{classEyePinvRefGen_a7b88d5c88d3c3e462c7ed573c45c118e}{fbTorso}},\mbox{\hyperlink{classEyePinvRefGen_a8bcaf8165d7f0c0307ca7827ea61c109}{fbHead}},\mbox{\hyperlink{classEyePinvRefGen_a588b827086ce86418140aed2101a7f84}{drvTorso}},\mbox{\hyperlink{classEyePinvRefGen_ad36aecd4bac88b3a824107450894bca9}{drvHead}},\mbox{\hyperlink{classEyePinvRefGen_a770b9677d85782f2396579f6b039cf7c}{commData}},\&timeStamp);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00310}00310\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_a9b1cdf3ae02aff58afd72d1a98021593}{updateTorsoBlockedJoints}}(\mbox{\hyperlink{classEyePinvRefGen_a3cee274dbbc4802f71145019e95dad32}{chainNeck}},\mbox{\hyperlink{classEyePinvRefGen_a7b88d5c88d3c3e462c7ed573c45c118e}{fbTorso}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00311}00311\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_a9b1cdf3ae02aff58afd72d1a98021593}{updateTorsoBlockedJoints}}(\mbox{\hyperlink{classEyePinvRefGen_aba5db5b508f3357b24824bfa1e9367b2}{chainEyeL}},\mbox{\hyperlink{classEyePinvRefGen_a7b88d5c88d3c3e462c7ed573c45c118e}{fbTorso}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00312}00312\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_a9b1cdf3ae02aff58afd72d1a98021593}{updateTorsoBlockedJoints}}(\mbox{\hyperlink{classEyePinvRefGen_a97851bfd9b07b6e3cd020e3f52d2d329}{chainEyeR}},\mbox{\hyperlink{classEyePinvRefGen_a7b88d5c88d3c3e462c7ed573c45c118e}{fbTorso}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00313}00313\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00314}00314\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ get\ current\ target}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00315}00315\ \ \ \ \ \ \ \ \ Vector\ xd=\mbox{\hyperlink{classEyePinvRefGen_a770b9677d85782f2396579f6b039cf7c}{commData}}-\/>\mbox{\hyperlink{classExchangeData_ad152a69e3f243d53e867b45806f14520}{port\_xd}}-\/>\mbox{\hyperlink{classxdPort_a4fe148c0fb2a3d08288f3975dee44a73}{get\_xd}}();}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00316}00316\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00317}00317\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ update\ neck\ chain}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00318}00318\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_a3cee274dbbc4802f71145019e95dad32}{chainNeck}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a9232068a0e37c01c09ce31c93ab9be42}{setAng}}(\mbox{\hyperlink{classEyePinvRefGen_a77d02c2cef51cf59577888ae7e28021a}{nJointsTorso}}+0,\mbox{\hyperlink{classEyePinvRefGen_a8bcaf8165d7f0c0307ca7827ea61c109}{fbHead}}[0]);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00319}00319\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_a3cee274dbbc4802f71145019e95dad32}{chainNeck}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a9232068a0e37c01c09ce31c93ab9be42}{setAng}}(\mbox{\hyperlink{classEyePinvRefGen_a77d02c2cef51cf59577888ae7e28021a}{nJointsTorso}}+1,\mbox{\hyperlink{classEyePinvRefGen_a8bcaf8165d7f0c0307ca7827ea61c109}{fbHead}}[1]);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00320}00320\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_a3cee274dbbc4802f71145019e95dad32}{chainNeck}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a9232068a0e37c01c09ce31c93ab9be42}{setAng}}(\mbox{\hyperlink{classEyePinvRefGen_a77d02c2cef51cf59577888ae7e28021a}{nJointsTorso}}+2,\mbox{\hyperlink{classEyePinvRefGen_a8bcaf8165d7f0c0307ca7827ea61c109}{fbHead}}[2]);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00321}00321\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00322}00322\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ ask\ for\ saccades\ (if\ possible)}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00323}00323\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classEyePinvRefGen_a770b9677d85782f2396579f6b039cf7c}{commData}}-\/>\mbox{\hyperlink{classExchangeData_adc362d43eba6982405573fa0ca18a921}{saccadesOn}}\ \&\&\ (\mbox{\hyperlink{classEyePinvRefGen_afc48f4334a2b13e0593ef6269bcbb565}{saccadesRxTargets}}!=\mbox{\hyperlink{classEyePinvRefGen_a770b9677d85782f2396579f6b039cf7c}{commData}}-\/>\mbox{\hyperlink{classExchangeData_ad152a69e3f243d53e867b45806f14520}{port\_xd}}-\/>\mbox{\hyperlink{classxdPort_a129eb75a8a2f56531a7dbb2f44e5eb91}{get\_rx}}())\ \&\&}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00324}00324\ \ \ \ \ \ \ \ \ \ \ \ \ !\mbox{\hyperlink{classEyePinvRefGen_a770b9677d85782f2396579f6b039cf7c}{commData}}-\/>\mbox{\hyperlink{classExchangeData_aec3ca5779ab142992d183c961c536b77}{saccadeUnderway}}\ \&\&\ (Time::now()-\/\mbox{\hyperlink{classEyePinvRefGen_ac7b23105e5ec95cbc27d1f6bba221756}{saccadesClock}}>\mbox{\hyperlink{classEyePinvRefGen_a770b9677d85782f2396579f6b039cf7c}{commData}}-\/>\mbox{\hyperlink{classExchangeData_a8cc6660f3f8a53afc45072fa7572896c}{saccadesInhibitionPeriod}}))}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00325}00325\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00326}00326\ \ \ \ \ \ \ \ \ \ \ \ \ Vector\ fph=xd;\ fph.push\_back(1.0);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00327}00327\ \ \ \ \ \ \ \ \ \ \ \ \ fph=SE3inv(\mbox{\hyperlink{classEyePinvRefGen_a3cee274dbbc4802f71145019e95dad32}{chainNeck}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a0b503aeeb58dc5cb228c174bf8500599}{getH}}())*fph;\ fph[3]=0.0;}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00328}00328\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ rot=\mbox{\hyperlink{namespaceiCub_1_1ctrl_a335ee3373d8ec68927b7b42c111fe408}{CTRL\_RAD2DEG}}*acos(fph[2]/\mbox{\hyperlink{group__Maths_ga791f0548018b3597da95e70a3b226806}{norm}}(fph));\ fph[3]=1.0;}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00329}00329\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00330}00330\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ estimate\ geometrically\ the\ target\ tilt\ and\ pan\ of\ the\ eyes}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00331}00331\ \ \ \ \ \ \ \ \ \ \ \ \ Vector\ ang(3,0.0);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00332}00332\ \ \ \ \ \ \ \ \ \ \ \ \ ang[0]=-\/atan2(fph[1],fabs(fph[2]));}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00333}00333\ \ \ \ \ \ \ \ \ \ \ \ \ ang[1]=atan2(fph[0],fph[2]);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00334}00334\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00335}00335\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ enforce\ joints\ bounds}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00336}00336\ \ \ \ \ \ \ \ \ \ \ \ \ ang[0]=\mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_ac5ed384388ea1d12d65a38b44870351c}{sat}}(ang[0],\mbox{\hyperlink{classEyePinvRefGen_a6eb8ad1a94fdff3e22d319e1db11209f}{lim}}(0,0),\mbox{\hyperlink{classEyePinvRefGen_a6eb8ad1a94fdff3e22d319e1db11209f}{lim}}(0,1));}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00337}00337\ \ \ \ \ \ \ \ \ \ \ \ \ ang[1]=\mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_ac5ed384388ea1d12d65a38b44870351c}{sat}}(ang[1],\mbox{\hyperlink{classEyePinvRefGen_a6eb8ad1a94fdff3e22d319e1db11209f}{lim}}(1,0),\mbox{\hyperlink{classEyePinvRefGen_a6eb8ad1a94fdff3e22d319e1db11209f}{lim}}(1,1));}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00338}00338\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00339}00339\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ favor\ the\ smooth-\/pursuit\ in\ case\ saccades\ are\ small}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00340}00340\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (rot>\mbox{\hyperlink{classEyePinvRefGen_a770b9677d85782f2396579f6b039cf7c}{commData}}-\/>\mbox{\hyperlink{classExchangeData_a0ab74913316999a62f871b0aac9b86c3}{saccadesActivationAngle}})}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00341}00341\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00342}00342\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ init\ vergence}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00343}00343\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ang[2]=\mbox{\hyperlink{classEyePinvRefGen_a8bcaf8165d7f0c0307ca7827ea61c109}{fbHead}}[5];}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00344}00344\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00345}00345\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ get\ rid\ of\ eyes\ tilt}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00346}00346\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Vector\ axis(4);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00347}00347\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ axis[0]=1.0;\ axis[1]=0.0;\ axis[2]=0.0;\ axis[3]=-\/ang[0];}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00348}00348\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ fph=axis2dcm(axis)*fph;}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00349}00349\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00350}00350\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ go\ on\ iff\ the\ point\ is\ in\ front\ of\ us}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00351}00351\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (fph[2]>0.0)}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00352}00352\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00353}00353\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ L,R;}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00354}00354\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00355}00355\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ estimate\ geometrically\ the\ target\ vergence\ Vg=L-\/R\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00356}00356\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (fph[0]>=\mbox{\hyperlink{classEyePinvRefGen_a0a265421db1367e5aea79d1ce4cceca7}{eyesHalfBaseline}})}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00357}00357\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00358}00358\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ L=\mbox{\hyperlink{XSensMTx_8cpp_ae71449b1cc6e6250b91f539153a7a0d3}{M\_PI}}/2.0-\/atan2(fph[2],fph[0]+\mbox{\hyperlink{classEyePinvRefGen_a0a265421db1367e5aea79d1ce4cceca7}{eyesHalfBaseline}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00359}00359\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ R=\mbox{\hyperlink{XSensMTx_8cpp_ae71449b1cc6e6250b91f539153a7a0d3}{M\_PI}}/2.0-\/atan2(fph[2],fph[0]-\/\mbox{\hyperlink{classEyePinvRefGen_a0a265421db1367e5aea79d1ce4cceca7}{eyesHalfBaseline}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00360}00360\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00361}00361\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (fph[0]>-\/\mbox{\hyperlink{classEyePinvRefGen_a0a265421db1367e5aea79d1ce4cceca7}{eyesHalfBaseline}})}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00362}00362\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00363}00363\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ L=\mbox{\hyperlink{XSensMTx_8cpp_ae71449b1cc6e6250b91f539153a7a0d3}{M\_PI}}/2.0-\/atan2(fph[2],fph[0]+\mbox{\hyperlink{classEyePinvRefGen_a0a265421db1367e5aea79d1ce4cceca7}{eyesHalfBaseline}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00364}00364\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ R=-\/(\mbox{\hyperlink{XSensMTx_8cpp_ae71449b1cc6e6250b91f539153a7a0d3}{M\_PI}}/2.0-\/atan2(fph[2],\mbox{\hyperlink{classEyePinvRefGen_a0a265421db1367e5aea79d1ce4cceca7}{eyesHalfBaseline}}-\/fph[0]));}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00365}00365\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00366}00366\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00367}00367\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00368}00368\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ L=-\/(\mbox{\hyperlink{XSensMTx_8cpp_ae71449b1cc6e6250b91f539153a7a0d3}{M\_PI}}/2.0-\/atan2(fph[2],-\/fph[0]-\/\mbox{\hyperlink{classEyePinvRefGen_a0a265421db1367e5aea79d1ce4cceca7}{eyesHalfBaseline}}));}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00369}00369\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ R=-\/(\mbox{\hyperlink{XSensMTx_8cpp_ae71449b1cc6e6250b91f539153a7a0d3}{M\_PI}}/2.0-\/atan2(fph[2],\mbox{\hyperlink{classEyePinvRefGen_a0a265421db1367e5aea79d1ce4cceca7}{eyesHalfBaseline}}-\/fph[0]));}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00370}00370\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00371}00371\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00372}00372\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ang[2]=L-\/R;}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00373}00373\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00374}00374\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00375}00375\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ enforce\ joints\ bounds}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00376}00376\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ang[2]=\mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_ac5ed384388ea1d12d65a38b44870351c}{sat}}(ang[2],\mbox{\hyperlink{classEyePinvRefGen_a6eb8ad1a94fdff3e22d319e1db11209f}{lim}}(2,0),\mbox{\hyperlink{classEyePinvRefGen_a6eb8ad1a94fdff3e22d319e1db11209f}{lim}}(2,1));}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00377}00377\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00378}00378\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_a770b9677d85782f2396579f6b039cf7c}{commData}}-\/>\mbox{\hyperlink{classExchangeData_a7a0b3f0198286e2d8eb83301576aae6f}{set\_qd}}(3,ang[0]);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00379}00379\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_a770b9677d85782f2396579f6b039cf7c}{commData}}-\/>\mbox{\hyperlink{classExchangeData_a7a0b3f0198286e2d8eb83301576aae6f}{set\_qd}}(4,ang[1]);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00380}00380\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_a770b9677d85782f2396579f6b039cf7c}{commData}}-\/>\mbox{\hyperlink{classExchangeData_a7a0b3f0198286e2d8eb83301576aae6f}{set\_qd}}(5,ang[2]);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00381}00381\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00382}00382\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Vector\ vel(3,\mbox{\hyperlink{solver_8h_a88434d3eace44deb23addea0734dcb7b}{SACCADES\_VEL}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00383}00383\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_a95d39fba755eaef7962a365d5dbd04ab}{ctrl}}-\/>\mbox{\hyperlink{classController_a938ab0853e39efd7f1c19ed8564c7305}{doSaccade}}(ang,vel);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00384}00384\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_ac7b23105e5ec95cbc27d1f6bba221756}{saccadesClock}}=Time::now();}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00385}00385\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00386}00386\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00387}00387\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00388}00388\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ update\ eyes\ chains\ for\ convergence\ purpose}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00389}00389\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_a94cbcea50b86689af24efe08167b3ec2}{updateNeckBlockedJoints}}(\mbox{\hyperlink{classEyePinvRefGen_aba5db5b508f3357b24824bfa1e9367b2}{chainEyeL}},\mbox{\hyperlink{classEyePinvRefGen_a8bcaf8165d7f0c0307ca7827ea61c109}{fbHead}});\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_a94cbcea50b86689af24efe08167b3ec2}{updateNeckBlockedJoints}}(\mbox{\hyperlink{classEyePinvRefGen_a97851bfd9b07b6e3cd020e3f52d2d329}{chainEyeR}},\mbox{\hyperlink{classEyePinvRefGen_a8bcaf8165d7f0c0307ca7827ea61c109}{fbHead}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00390}00390\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_aba5db5b508f3357b24824bfa1e9367b2}{chainEyeL}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a9232068a0e37c01c09ce31c93ab9be42}{setAng}}(\mbox{\hyperlink{classEyePinvRefGen_a77d02c2cef51cf59577888ae7e28021a}{nJointsTorso}}+3,\mbox{\hyperlink{classEyePinvRefGen_adf0dac328b4009405b59902f3416946f}{qd}}[0]);\ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_a97851bfd9b07b6e3cd020e3f52d2d329}{chainEyeR}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a9232068a0e37c01c09ce31c93ab9be42}{setAng}}(\mbox{\hyperlink{classEyePinvRefGen_a77d02c2cef51cf59577888ae7e28021a}{nJointsTorso}}+3,\mbox{\hyperlink{classEyePinvRefGen_adf0dac328b4009405b59902f3416946f}{qd}}[0]);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00391}00391\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_aba5db5b508f3357b24824bfa1e9367b2}{chainEyeL}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a9232068a0e37c01c09ce31c93ab9be42}{setAng}}(\mbox{\hyperlink{classEyePinvRefGen_a77d02c2cef51cf59577888ae7e28021a}{nJointsTorso}}+4,\mbox{\hyperlink{classEyePinvRefGen_adf0dac328b4009405b59902f3416946f}{qd}}[1]+\mbox{\hyperlink{classEyePinvRefGen_adf0dac328b4009405b59902f3416946f}{qd}}[2]/2.0);\ \mbox{\hyperlink{classEyePinvRefGen_a97851bfd9b07b6e3cd020e3f52d2d329}{chainEyeR}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a9232068a0e37c01c09ce31c93ab9be42}{setAng}}(\mbox{\hyperlink{classEyePinvRefGen_a77d02c2cef51cf59577888ae7e28021a}{nJointsTorso}}+4,\mbox{\hyperlink{classEyePinvRefGen_adf0dac328b4009405b59902f3416946f}{qd}}[1]-\/\mbox{\hyperlink{classEyePinvRefGen_adf0dac328b4009405b59902f3416946f}{qd}}[2]/2.0);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00392}00392\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00393}00393\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ converge\ on\ target}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00394}00394\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classiCub_1_1iKin_1_1CartesianHelper_a69ba39d3b515dfc6b8a8a5577204a5b9}{CartesianHelper::computeFixationPointData}}(*\mbox{\hyperlink{classEyePinvRefGen_aba5db5b508f3357b24824bfa1e9367b2}{chainEyeL}},*\mbox{\hyperlink{classEyePinvRefGen_a97851bfd9b07b6e3cd020e3f52d2d329}{chainEyeR}},\mbox{\hyperlink{classEyePinvRefGen_ab977bda7725839268c57d76de77d1b58}{fp}},\mbox{\hyperlink{classEyePinvRefGen_af779741c4e58bba5e3308514b9fe0372}{eyesJ}}))}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00395}00395\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00396}00396\ \ \ \ \ \ \ \ \ \ \ \ \ Vector\ v=\mbox{\hyperlink{solver_8h_aa61fdc0d77a43a52fa95e1fadec17322}{EYEPINVREFGEN\_GAIN}}*(pinv(\mbox{\hyperlink{classEyePinvRefGen_af779741c4e58bba5e3308514b9fe0372}{eyesJ}})*(xd-\/\mbox{\hyperlink{classEyePinvRefGen_ab977bda7725839268c57d76de77d1b58}{fp}}));}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00397}00397\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00398}00398\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ update\ eyes\ chains\ in\ actual\ configuration\ for\ velocity\ compensation}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00399}00399\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_aba5db5b508f3357b24824bfa1e9367b2}{chainEyeL}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a9232068a0e37c01c09ce31c93ab9be42}{setAng}}(\mbox{\hyperlink{classEyePinvRefGen_a77d02c2cef51cf59577888ae7e28021a}{nJointsTorso}}+3,\mbox{\hyperlink{classEyePinvRefGen_a8bcaf8165d7f0c0307ca7827ea61c109}{fbHead}}[3]);\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_a97851bfd9b07b6e3cd020e3f52d2d329}{chainEyeR}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a9232068a0e37c01c09ce31c93ab9be42}{setAng}}(\mbox{\hyperlink{classEyePinvRefGen_a77d02c2cef51cf59577888ae7e28021a}{nJointsTorso}}+3,\mbox{\hyperlink{classEyePinvRefGen_a8bcaf8165d7f0c0307ca7827ea61c109}{fbHead}}[3]);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00400}00400\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_aba5db5b508f3357b24824bfa1e9367b2}{chainEyeL}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a9232068a0e37c01c09ce31c93ab9be42}{setAng}}(\mbox{\hyperlink{classEyePinvRefGen_a77d02c2cef51cf59577888ae7e28021a}{nJointsTorso}}+4,\mbox{\hyperlink{classEyePinvRefGen_a8bcaf8165d7f0c0307ca7827ea61c109}{fbHead}}[4]+\mbox{\hyperlink{classEyePinvRefGen_a8bcaf8165d7f0c0307ca7827ea61c109}{fbHead}}[5]/2.0);\ \mbox{\hyperlink{classEyePinvRefGen_a97851bfd9b07b6e3cd020e3f52d2d329}{chainEyeR}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a9232068a0e37c01c09ce31c93ab9be42}{setAng}}(\mbox{\hyperlink{classEyePinvRefGen_a77d02c2cef51cf59577888ae7e28021a}{nJointsTorso}}+4,\mbox{\hyperlink{classEyePinvRefGen_a8bcaf8165d7f0c0307ca7827ea61c109}{fbHead}}[4]-\/\mbox{\hyperlink{classEyePinvRefGen_a8bcaf8165d7f0c0307ca7827ea61c109}{fbHead}}[5]/2.0);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00401}00401\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00402}00402\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ compensate\ neck\ rotation\ at\ eyes\ level}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00403}00403\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ ((\mbox{\hyperlink{classEyePinvRefGen_a770b9677d85782f2396579f6b039cf7c}{commData}}-\/>\mbox{\hyperlink{classExchangeData_af3fbcecfe39290474dd5db35b27caffa}{eyesBoundVer}}>=0.0)\ ||\ !\mbox{\hyperlink{classiCub_1_1iKin_1_1CartesianHelper_a69ba39d3b515dfc6b8a8a5577204a5b9}{CartesianHelper::computeFixationPointData}}(*\mbox{\hyperlink{classEyePinvRefGen_aba5db5b508f3357b24824bfa1e9367b2}{chainEyeL}},*\mbox{\hyperlink{classEyePinvRefGen_a97851bfd9b07b6e3cd020e3f52d2d329}{chainEyeR}},\mbox{\hyperlink{classEyePinvRefGen_ab977bda7725839268c57d76de77d1b58}{fp}},\mbox{\hyperlink{classEyePinvRefGen_af779741c4e58bba5e3308514b9fe0372}{eyesJ}}))}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00404}00404\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_a770b9677d85782f2396579f6b039cf7c}{commData}}-\/>\mbox{\hyperlink{classExchangeData_aecc09f6ae1d9e59f52001f688f19d021}{set\_counterv}}(\mbox{\hyperlink{compute__ekf__sym_8m_a35baefda5ec044ac7c1f5a41815b5b45}{zeros}}((\textcolor{keywordtype}{int})\mbox{\hyperlink{classEyePinvRefGen_adf0dac328b4009405b59902f3416946f}{qd}}.length()));}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00405}00405\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00406}00406\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_a770b9677d85782f2396579f6b039cf7c}{commData}}-\/>\mbox{\hyperlink{classExchangeData_aecc09f6ae1d9e59f52001f688f19d021}{set\_counterv}}(\mbox{\hyperlink{classEyePinvRefGen_aba4836ca8cf09e507df0d9300d87c080}{getEyesCounterVelocity}}(\mbox{\hyperlink{classEyePinvRefGen_af779741c4e58bba5e3308514b9fe0372}{eyesJ}},\mbox{\hyperlink{classEyePinvRefGen_ab977bda7725839268c57d76de77d1b58}{fp}}));}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00407}00407\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00408}00408\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ reset\ eyes\ controller\ and\ integral\ upon\ saccades\ transition\ on=>off}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00409}00409\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classEyePinvRefGen_a4ce61451007a73e2f20c233a08984822}{saccadeUnderWayOld}}\ \&\&\ !\mbox{\hyperlink{classEyePinvRefGen_a770b9677d85782f2396579f6b039cf7c}{commData}}-\/>\mbox{\hyperlink{classExchangeData_aec3ca5779ab142992d183c961c536b77}{saccadeUnderway}})}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00410}00410\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00411}00411\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_a95d39fba755eaef7962a365d5dbd04ab}{ctrl}}-\/>\mbox{\hyperlink{classController_ab0e76d9c44cc50eed372e47705832c85}{resetCtrlEyes}}();}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00412}00412\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00413}00413\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_adf0dac328b4009405b59902f3416946f}{qd}}[0]=\mbox{\hyperlink{classEyePinvRefGen_a8bcaf8165d7f0c0307ca7827ea61c109}{fbHead}}[3];}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00414}00414\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_adf0dac328b4009405b59902f3416946f}{qd}}[1]=\mbox{\hyperlink{classEyePinvRefGen_a8bcaf8165d7f0c0307ca7827ea61c109}{fbHead}}[4];}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00415}00415\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_adf0dac328b4009405b59902f3416946f}{qd}}[2]=\mbox{\hyperlink{classEyePinvRefGen_a8bcaf8165d7f0c0307ca7827ea61c109}{fbHead}}[5];}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00416}00416\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_a38bf84537b309ca95eb9c036cd2be0f1}{I}}-\/>\mbox{\hyperlink{classiCub_1_1ctrl_1_1Integrator_a48b2d6de0cc287577635232b21c03dc1}{reset}}(\mbox{\hyperlink{classEyePinvRefGen_adf0dac328b4009405b59902f3416946f}{qd}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00417}00417\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00418}00418\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00419}00419\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ update\ reference}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00420}00420\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_adf0dac328b4009405b59902f3416946f}{qd}}=\mbox{\hyperlink{classEyePinvRefGen_a38bf84537b309ca95eb9c036cd2be0f1}{I}}-\/>\mbox{\hyperlink{classiCub_1_1ctrl_1_1Integrator_a258d1f29ff3e98ce46e0835d6a7f29e0}{integrate}}(v+\mbox{\hyperlink{classEyePinvRefGen_a770b9677d85782f2396579f6b039cf7c}{commData}}-\/>\mbox{\hyperlink{classExchangeData_aaec5f5e1fc01f95d8b055e685f54ceed}{get\_counterv}}());}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00421}00421\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00422}00422\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00423}00423\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_a770b9677d85782f2396579f6b039cf7c}{commData}}-\/>\mbox{\hyperlink{classExchangeData_aecc09f6ae1d9e59f52001f688f19d021}{set\_counterv}}(\mbox{\hyperlink{compute__ekf__sym_8m_a35baefda5ec044ac7c1f5a41815b5b45}{zeros}}((\textcolor{keywordtype}{int})\mbox{\hyperlink{classEyePinvRefGen_adf0dac328b4009405b59902f3416946f}{qd}}.length()));}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00424}00424\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00425}00425\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ set\ a\ new\ target\ position}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00426}00426\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_a770b9677d85782f2396579f6b039cf7c}{commData}}-\/>\mbox{\hyperlink{classExchangeData_a5a64368ad5215ec47b79309cef3ef0a6}{set\_xd}}(xd);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00427}00427\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_a770b9677d85782f2396579f6b039cf7c}{commData}}-\/>\mbox{\hyperlink{classExchangeData_ae92c372382276c20194c9ed88485c474}{set\_x}}(\mbox{\hyperlink{classEyePinvRefGen_ab977bda7725839268c57d76de77d1b58}{fp}},timeStamp);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00428}00428\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_a770b9677d85782f2396579f6b039cf7c}{commData}}-\/>\mbox{\hyperlink{classExchangeData_a5a262cc7f8d2d5b8a77fc79034c27157}{set\_fpFrame}}(\mbox{\hyperlink{classEyePinvRefGen_a3cee274dbbc4802f71145019e95dad32}{chainNeck}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a0b503aeeb58dc5cb228c174bf8500599}{getH}}());}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00429}00429\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!\mbox{\hyperlink{classEyePinvRefGen_a770b9677d85782f2396579f6b039cf7c}{commData}}-\/>\mbox{\hyperlink{classExchangeData_aec3ca5779ab142992d183c961c536b77}{saccadeUnderway}})}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00430}00430\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00431}00431\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_a770b9677d85782f2396579f6b039cf7c}{commData}}-\/>\mbox{\hyperlink{classExchangeData_a7a0b3f0198286e2d8eb83301576aae6f}{set\_qd}}(3,\mbox{\hyperlink{classEyePinvRefGen_adf0dac328b4009405b59902f3416946f}{qd}}[0]);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00432}00432\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_a770b9677d85782f2396579f6b039cf7c}{commData}}-\/>\mbox{\hyperlink{classExchangeData_a7a0b3f0198286e2d8eb83301576aae6f}{set\_qd}}(4,\mbox{\hyperlink{classEyePinvRefGen_adf0dac328b4009405b59902f3416946f}{qd}}[1]);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00433}00433\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_a770b9677d85782f2396579f6b039cf7c}{commData}}-\/>\mbox{\hyperlink{classExchangeData_a7a0b3f0198286e2d8eb83301576aae6f}{set\_qd}}(5,\mbox{\hyperlink{classEyePinvRefGen_adf0dac328b4009405b59902f3416946f}{qd}}[2]);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00434}00434\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00435}00435\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00436}00436\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ latch\ the\ saccades\ status}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00437}00437\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_a4ce61451007a73e2f20c233a08984822}{saccadeUnderWayOld}}=\mbox{\hyperlink{classEyePinvRefGen_a770b9677d85782f2396579f6b039cf7c}{commData}}-\/>\mbox{\hyperlink{classExchangeData_aec3ca5779ab142992d183c961c536b77}{saccadeUnderway}};}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00438}00438\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen_afc48f4334a2b13e0593ef6269bcbb565}{saccadesRxTargets}}=\mbox{\hyperlink{classEyePinvRefGen_a770b9677d85782f2396579f6b039cf7c}{commData}}-\/>\mbox{\hyperlink{classExchangeData_ad152a69e3f243d53e867b45806f14520}{port\_xd}}-\/>\mbox{\hyperlink{classxdPort_a129eb75a8a2f56531a7dbb2f44e5eb91}{get\_rx}}();}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00439}00439\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00440}00440\ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00441}00441\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00442}00442\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00443}00443\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00444}\mbox{\hyperlink{classEyePinvRefGen_a81c3b5af5f9d10a5ad9877a57220bbbd}{00444}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classEyePinvRefGen_a81c3b5af5f9d10a5ad9877a57220bbbd}{EyePinvRefGen::suspend}}()}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00445}00445\ \{\ \ \ \ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00446}00446\ \ \ \ \ PeriodicThread::suspend();}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00447}00447\ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}Pseudoinverse\ Reference\ Generator\ has\ been\ suspended!"{}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00448}00448\ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00449}00449\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00450}00450\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00451}00451\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00452}\mbox{\hyperlink{classEyePinvRefGen_ae2ee47167c76a373ec6f38d64503b572}{00452}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classEyePinvRefGen_ae2ee47167c76a373ec6f38d64503b572}{EyePinvRefGen::resume}}()}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00453}00453\ \{\ \ \ \ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00454}00454\ \ \ \ \ PeriodicThread::resume();}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00455}00455\ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}Pseudoinverse\ Reference\ Generator\ has\ been\ resumed!"{}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00456}00456\ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00457}00457\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00458}00458\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00459}00459\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00460}\mbox{\hyperlink{classSolver_a018ee343117db51a0a59c2b883e02ac2}{00460}}\ \mbox{\hyperlink{classSolver_a018ee343117db51a0a59c2b883e02ac2}{Solver::Solver}}(PolyDriver\ *\_drvTorso,\ PolyDriver\ *\_drvHead,\ \mbox{\hyperlink{classExchangeData}{ExchangeData}}\ *\_commData,}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00461}00461\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyePinvRefGen}{EyePinvRefGen}}\ *\_eyesRefGen,\ \mbox{\hyperlink{classLocalizer}{Localizer}}\ *\_loc,\ \mbox{\hyperlink{classController}{Controller}}\ *\_ctrl,}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00462}00462\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ \_period)\ :}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00463}00463\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ PeriodicThread((double)\_period/1000.0),\ drvTorso(\_drvTorso),\ \ \ \ \ drvHead(\_drvHead),}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00464}00464\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ commData(\_commData),\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ eyesRefGen(\_eyesRefGen),\ loc(\_loc),}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00465}00465\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ctrl(\_ctrl),\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ period(\_period),\ \ \ \ \ \ \ \ \ Ts(\_period/1000.0)}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00466}00466\ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00467}00467\ \ \ \ \ \textcolor{comment}{//\ Instantiate\ objects}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00468}00468\ \ \ \ \ \mbox{\hyperlink{classSolver_a4906c5b72a49ed2993248cf5787a96ba}{neck}}=\textcolor{keyword}{new}\ \mbox{\hyperlink{classiCub_1_1iKin_1_1iCubHeadCenter}{iCubHeadCenter}}(\textcolor{stringliteral}{"{}right\_v"{}}+\mbox{\hyperlink{classSolver_a4a2ef6a1a4190cc4f13aee140a2bbefd}{commData}}-\/>\mbox{\hyperlink{classExchangeData_adf93c0deb256c3fdd716c7b32fb356c2}{head\_version}}.\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinLimbVersion_af39d2441eed8c2bc7935c3eca2766edb}{get\_version}}());}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00469}00469\ \ \ \ \ \mbox{\hyperlink{classGazeComponent_af0d811689807c394a6e9c6d49ca29c1d}{eyeL}}=\textcolor{keyword}{new}\ \mbox{\hyperlink{classiCub_1_1iKin_1_1iCubEye}{iCubEye}}(\textcolor{stringliteral}{"{}left\_v"{}}+\mbox{\hyperlink{classSolver_a4a2ef6a1a4190cc4f13aee140a2bbefd}{commData}}-\/>\mbox{\hyperlink{classExchangeData_adf93c0deb256c3fdd716c7b32fb356c2}{head\_version}}.\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinLimbVersion_af39d2441eed8c2bc7935c3eca2766edb}{get\_version}}());}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00470}00470\ \ \ \ \ \mbox{\hyperlink{classGazeComponent_aa94da445b35148d2b6bdbe9244cc46c1}{eyeR}}=\textcolor{keyword}{new}\ \mbox{\hyperlink{classiCub_1_1iKin_1_1iCubEye}{iCubEye}}(\textcolor{stringliteral}{"{}right\_v"{}}+\mbox{\hyperlink{classSolver_a4a2ef6a1a4190cc4f13aee140a2bbefd}{commData}}-\/>\mbox{\hyperlink{classExchangeData_adf93c0deb256c3fdd716c7b32fb356c2}{head\_version}}.\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinLimbVersion_af39d2441eed8c2bc7935c3eca2766edb}{get\_version}}());}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00471}00471\ \ \ \ \ \mbox{\hyperlink{classSolver_aa2fd72b4a1bf818062cc7f7fdadc876a}{imu}}=\textcolor{keyword}{new}\ \mbox{\hyperlink{classiCub_1_1iKin_1_1iCubInertialSensor}{iCubInertialSensor}}(\mbox{\hyperlink{classSolver_a4a2ef6a1a4190cc4f13aee140a2bbefd}{commData}}-\/>\mbox{\hyperlink{classExchangeData_adf93c0deb256c3fdd716c7b32fb356c2}{head\_version}}.\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinLimbVersion_af39d2441eed8c2bc7935c3eca2766edb}{get\_version}}());}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00472}00472\ \ \ \ \ \mbox{\hyperlink{classSolver_afd20c11ace5e182ae3c0712abd7e7067}{torsoVel}}=\textcolor{keyword}{new}\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1AWLinEstimator}{AWLinEstimator}}(16,0.5);\ \ \ \ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00473}00473\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00474}00474\ \ \ \ \ \textcolor{comment}{//\ remove\ constraints\ on\ the\ links:\ logging\ purpose}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00475}00475\ \ \ \ \ \mbox{\hyperlink{classSolver_aa2fd72b4a1bf818062cc7f7fdadc876a}{imu}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_ae52c86ba3b5e0b5dd938f591d69e29ad}{setAllConstraints}}(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00476}00476\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00477}00477\ \ \ \ \ \textcolor{comment}{//\ block\ neck\ dofs}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00478}00478\ \ \ \ \ \mbox{\hyperlink{classGazeComponent_af0d811689807c394a6e9c6d49ca29c1d}{eyeL}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_ad600a7548dcd3dc5cf51839d8da5a899}{blockLink}}(3,0.0);\ \mbox{\hyperlink{classGazeComponent_aa94da445b35148d2b6bdbe9244cc46c1}{eyeR}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_ad600a7548dcd3dc5cf51839d8da5a899}{blockLink}}(3,0.0);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00479}00479\ \ \ \ \ \mbox{\hyperlink{classGazeComponent_af0d811689807c394a6e9c6d49ca29c1d}{eyeL}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_ad600a7548dcd3dc5cf51839d8da5a899}{blockLink}}(4,0.0);\ \mbox{\hyperlink{classGazeComponent_aa94da445b35148d2b6bdbe9244cc46c1}{eyeR}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_ad600a7548dcd3dc5cf51839d8da5a899}{blockLink}}(4,0.0);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00480}00480\ \ \ \ \ \mbox{\hyperlink{classGazeComponent_af0d811689807c394a6e9c6d49ca29c1d}{eyeL}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_ad600a7548dcd3dc5cf51839d8da5a899}{blockLink}}(5,0.0);\ \mbox{\hyperlink{classGazeComponent_aa94da445b35148d2b6bdbe9244cc46c1}{eyeR}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_ad600a7548dcd3dc5cf51839d8da5a899}{blockLink}}(5,0.0);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00481}00481\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00482}00482\ \ \ \ \ \textcolor{comment}{//\ Get\ the\ chain\ objects}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00483}00483\ \ \ \ \ \mbox{\hyperlink{classSolver_a5f5dbcd865561105abeee7aebb759356}{chainNeck}}=\mbox{\hyperlink{classSolver_a4906c5b72a49ed2993248cf5787a96ba}{neck}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinLimb_ae0c121656774905c58b668b450417f0e}{asChain}}();}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00484}00484\ \ \ \ \ \mbox{\hyperlink{classSolver_a9ba6b9b87dfea61a648f61a846d78f90}{chainEyeL}}=\mbox{\hyperlink{classGazeComponent_af0d811689807c394a6e9c6d49ca29c1d}{eyeL}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinLimb_ae0c121656774905c58b668b450417f0e}{asChain}}();\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00485}00485\ \ \ \ \ \mbox{\hyperlink{classSolver_a84d8b40c8ca18f3b4892e06e13ec934d}{chainEyeR}}=\mbox{\hyperlink{classGazeComponent_aa94da445b35148d2b6bdbe9244cc46c1}{eyeR}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinLimb_ae0c121656774905c58b668b450417f0e}{asChain}}();}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00486}00486\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00487}00487\ \ \ \ \ \mbox{\hyperlink{classSolver_acd565680fd6a8e791cfff0d812bedb83}{invNeck}}=\textcolor{keyword}{new}\ \mbox{\hyperlink{classGazeIpOptMin}{GazeIpOptMin}}(*\mbox{\hyperlink{classSolver_a5f5dbcd865561105abeee7aebb759356}{chainNeck}},1\mbox{\hyperlink{compute__ekf__fast_8m_a08a4415e9d594ff960030b921d42b91e}{e}}-\/3,1\mbox{\hyperlink{compute__ekf__fast_8m_a08a4415e9d594ff960030b921d42b91e}{e}}-\/3,20);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00488}00488\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00489}00489\ \ \ \ \ \textcolor{comment}{//\ add\ aligning\ matrices\ read\ from\ configuration\ file}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00490}00490\ \ \ \ \ \mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_a5843d21a62043a1bbd9b7a18808f15ee}{getAlignHN}}(\mbox{\hyperlink{classSolver_a4a2ef6a1a4190cc4f13aee140a2bbefd}{commData}}-\/>\mbox{\hyperlink{classExchangeData_a03b5bd4c0e0f77ffbb9e520fbd3dd3bd}{rf\_cameras}},\textcolor{stringliteral}{"{}ALIGN\_KIN\_LEFT"{}},\mbox{\hyperlink{classGazeComponent_af0d811689807c394a6e9c6d49ca29c1d}{eyeL}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinLimb_ae0c121656774905c58b668b450417f0e}{asChain}}());}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00491}00491\ \ \ \ \ \mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_a5843d21a62043a1bbd9b7a18808f15ee}{getAlignHN}}(\mbox{\hyperlink{classSolver_a4a2ef6a1a4190cc4f13aee140a2bbefd}{commData}}-\/>\mbox{\hyperlink{classExchangeData_a03b5bd4c0e0f77ffbb9e520fbd3dd3bd}{rf\_cameras}},\textcolor{stringliteral}{"{}ALIGN\_KIN\_RIGHT"{}},\mbox{\hyperlink{classGazeComponent_aa94da445b35148d2b6bdbe9244cc46c1}{eyeR}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinLimb_ae0c121656774905c58b668b450417f0e}{asChain}}());}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00492}00492\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00493}00493\ \ \ \ \ \textcolor{comment}{//\ overwrite\ aligning\ matrices\ iff\ specified\ through\ tweak\ values}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00494}00494\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classSolver_a4a2ef6a1a4190cc4f13aee140a2bbefd}{commData}}-\/>\mbox{\hyperlink{classExchangeData_a93e469abe4a5e36b669b3598d40c1533}{tweakOverwrite}})}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00495}00495\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00496}00496\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_a5843d21a62043a1bbd9b7a18808f15ee}{getAlignHN}}(\mbox{\hyperlink{classSolver_a4a2ef6a1a4190cc4f13aee140a2bbefd}{commData}}-\/>\mbox{\hyperlink{classExchangeData_ab09a6ebb162ab38afbd2ec3518dcd192}{rf\_tweak}},\textcolor{stringliteral}{"{}ALIGN\_KIN\_LEFT"{}},\mbox{\hyperlink{classGazeComponent_af0d811689807c394a6e9c6d49ca29c1d}{eyeL}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinLimb_ae0c121656774905c58b668b450417f0e}{asChain}}());}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00497}00497\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_a5843d21a62043a1bbd9b7a18808f15ee}{getAlignHN}}(\mbox{\hyperlink{classSolver_a4a2ef6a1a4190cc4f13aee140a2bbefd}{commData}}-\/>\mbox{\hyperlink{classExchangeData_ab09a6ebb162ab38afbd2ec3518dcd192}{rf\_tweak}},\textcolor{stringliteral}{"{}ALIGN\_KIN\_RIGHT"{}},\mbox{\hyperlink{classGazeComponent_aa94da445b35148d2b6bdbe9244cc46c1}{eyeR}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinLimb_ae0c121656774905c58b668b450417f0e}{asChain}}());}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00498}00498\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00499}00499\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00500}00500\ \ \ \ \ \textcolor{comment}{//\ read\ number\ of\ joints}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00501}00501\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classSolver_aaedaf1f11d9e4eacf72a283f55a33195}{drvTorso}}!=\textcolor{keyword}{nullptr})}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00502}00502\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00503}00503\ \ \ \ \ \ \ \ \ IEncoders\ *encTorso;\ \mbox{\hyperlink{classSolver_aaedaf1f11d9e4eacf72a283f55a33195}{drvTorso}}-\/>view(encTorso);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00504}00504\ \ \ \ \ \ \ \ \ encTorso-\/>getAxes(\&\mbox{\hyperlink{classSolver_aaae0541d3a6204e98c8c98ed4f312df8}{nJointsTorso}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00505}00505\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00506}00506\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00507}00507\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSolver_aaae0541d3a6204e98c8c98ed4f312df8}{nJointsTorso}}=3;}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00508}00508\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00509}00509\ \ \ \ \ IEncoders\ *encHead;\ \mbox{\hyperlink{classSolver_a2acefca0c718b1281fb4ac68fa987c58}{drvHead}}-\/>view(encHead);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00510}00510\ \ \ \ \ encHead-\/>getAxes(\&\mbox{\hyperlink{classSolver_a3cf1c80b500dc1b52da710db4b3b9e3c}{nJointsHead}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00511}00511\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00512}00512\ \ \ \ \ \textcolor{comment}{//\ joints\ bounds\ alignment}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00513}00513\ \ \ \ \ \mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_aaef08c17e655887a92240009158d3a1c}{alignJointsBounds}}(\mbox{\hyperlink{classSolver_a5f5dbcd865561105abeee7aebb759356}{chainNeck}},\mbox{\hyperlink{classSolver_aaedaf1f11d9e4eacf72a283f55a33195}{drvTorso}},\mbox{\hyperlink{classSolver_a2acefca0c718b1281fb4ac68fa987c58}{drvHead}},\mbox{\hyperlink{classSolver_a4a2ef6a1a4190cc4f13aee140a2bbefd}{commData}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00514}00514\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00515}00515\ \ \ \ \ \textcolor{comment}{//\ read\ starting\ position}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00516}00516\ \ \ \ \ \mbox{\hyperlink{classSolver_ad5b900148d34fec6036e412acc846806}{fbTorso}}.resize(\mbox{\hyperlink{classSolver_aaae0541d3a6204e98c8c98ed4f312df8}{nJointsTorso}},0.0);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00517}00517\ \ \ \ \ \mbox{\hyperlink{classSolver_a7105bb38ba21f9a8823edd562e68bc8e}{fbHead}}.resize(\mbox{\hyperlink{classSolver_a3cf1c80b500dc1b52da710db4b3b9e3c}{nJointsHead}},0.0);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00518}00518\ \ \ \ \ \mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_a91c67f2856c92fd4af2bbed36fff8cef}{getFeedback}}(\mbox{\hyperlink{classSolver_ad5b900148d34fec6036e412acc846806}{fbTorso}},\mbox{\hyperlink{classSolver_a7105bb38ba21f9a8823edd562e68bc8e}{fbHead}},\mbox{\hyperlink{classSolver_aaedaf1f11d9e4eacf72a283f55a33195}{drvTorso}},\mbox{\hyperlink{classSolver_a2acefca0c718b1281fb4ac68fa987c58}{drvHead}},\mbox{\hyperlink{classSolver_a4a2ef6a1a4190cc4f13aee140a2bbefd}{commData}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00519}00519\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00520}00520\ \ \ \ \ \mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_a4b628bb572f8e0179d6f822c090b75c7}{copyJointsBounds}}(\mbox{\hyperlink{classSolver_a5f5dbcd865561105abeee7aebb759356}{chainNeck}},\mbox{\hyperlink{classSolver_a9ba6b9b87dfea61a648f61a846d78f90}{chainEyeL}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00521}00521\ \ \ \ \ \mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_a4b628bb572f8e0179d6f822c090b75c7}{copyJointsBounds}}(\mbox{\hyperlink{classSolver_a9ba6b9b87dfea61a648f61a846d78f90}{chainEyeL}},\mbox{\hyperlink{classSolver_a84d8b40c8ca18f3b4892e06e13ec934d}{chainEyeR}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00522}00522\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00523}00523\ \ \ \ \ \textcolor{comment}{//\ store\ neck\ pitch/roll/yaw\ bounds}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00524}00524\ \ \ \ \ \mbox{\hyperlink{classSolver_a4d60f2f72e17071d039fdc9313d1b180}{neckPitchMin}}=(*chainNeck)[3].getMin();}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00525}00525\ \ \ \ \ \mbox{\hyperlink{classSolver_af437a74e3dbbed57638098f70a50575b}{neckPitchMax}}=(*chainNeck)[3].getMax();}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00526}00526\ \ \ \ \ \mbox{\hyperlink{classSolver_a39575746764698c011736123ce9a1b43}{neckRollMin}}\ =(*chainNeck)[4].getMin();}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00527}00527\ \ \ \ \ \mbox{\hyperlink{classSolver_adf18fe49f1cb5b14de58ea0371d406d4}{neckRollMax}}\ =(*chainNeck)[4].getMax();}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00528}00528\ \ \ \ \ \mbox{\hyperlink{classSolver_a5f66ea09272f611b1dcd60129d14ed3a}{neckYawMin}}\ \ =(*chainNeck)[5].getMin();}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00529}00529\ \ \ \ \ \mbox{\hyperlink{classSolver_ada98567016468f8adc5e5e5c9bc14edb}{neckYawMax}}\ \ =(*chainNeck)[5].getMax();}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00530}00530\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00531}00531\ \ \ \ \ \mbox{\hyperlink{classSolver_a7b7f8c249035658e4d7bbf6b69c6988b}{neckPos}}.resize(3);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00532}00532\ \ \ \ \ \mbox{\hyperlink{classSolver_af634998a5358509eb9c8f529040a3c70}{gazePos}}.resize(3);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00533}00533\ \ \ \ \ \mbox{\hyperlink{classSolver_a8cbff488f2ef73e02635324ed951454b}{updateAngles}}();}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00534}00534\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00535}00535\ \ \ \ \ \mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_a9b1cdf3ae02aff58afd72d1a98021593}{updateTorsoBlockedJoints}}(\mbox{\hyperlink{classSolver_a5f5dbcd865561105abeee7aebb759356}{chainNeck}},\mbox{\hyperlink{classSolver_ad5b900148d34fec6036e412acc846806}{fbTorso}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00536}00536\ \ \ \ \ \mbox{\hyperlink{classSolver_a5f5dbcd865561105abeee7aebb759356}{chainNeck}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a9232068a0e37c01c09ce31c93ab9be42}{setAng}}(3,\mbox{\hyperlink{classSolver_a7105bb38ba21f9a8823edd562e68bc8e}{fbHead}}[0]);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00537}00537\ \ \ \ \ \mbox{\hyperlink{classSolver_a5f5dbcd865561105abeee7aebb759356}{chainNeck}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a9232068a0e37c01c09ce31c93ab9be42}{setAng}}(4,\mbox{\hyperlink{classSolver_a7105bb38ba21f9a8823edd562e68bc8e}{fbHead}}[1]);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00538}00538\ \ \ \ \ \mbox{\hyperlink{classSolver_a5f5dbcd865561105abeee7aebb759356}{chainNeck}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a9232068a0e37c01c09ce31c93ab9be42}{setAng}}(5,\mbox{\hyperlink{classSolver_a7105bb38ba21f9a8823edd562e68bc8e}{fbHead}}[2]);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00539}00539\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00540}00540\ \ \ \ \ \mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_a9b1cdf3ae02aff58afd72d1a98021593}{updateTorsoBlockedJoints}}(\mbox{\hyperlink{classSolver_a9ba6b9b87dfea61a648f61a846d78f90}{chainEyeL}},\mbox{\hyperlink{classSolver_ad5b900148d34fec6036e412acc846806}{fbTorso}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00541}00541\ \ \ \ \ \mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_a9b1cdf3ae02aff58afd72d1a98021593}{updateTorsoBlockedJoints}}(\mbox{\hyperlink{classSolver_a84d8b40c8ca18f3b4892e06e13ec934d}{chainEyeR}},\mbox{\hyperlink{classSolver_ad5b900148d34fec6036e412acc846806}{fbTorso}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00542}00542\ \ \ \ \ \mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_a94cbcea50b86689af24efe08167b3ec2}{updateNeckBlockedJoints}}(\mbox{\hyperlink{classSolver_a9ba6b9b87dfea61a648f61a846d78f90}{chainEyeL}},\mbox{\hyperlink{classSolver_a7105bb38ba21f9a8823edd562e68bc8e}{fbHead}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00543}00543\ \ \ \ \ \mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_a94cbcea50b86689af24efe08167b3ec2}{updateNeckBlockedJoints}}(\mbox{\hyperlink{classSolver_a84d8b40c8ca18f3b4892e06e13ec934d}{chainEyeR}},\mbox{\hyperlink{classSolver_a7105bb38ba21f9a8823edd562e68bc8e}{fbHead}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00544}00544\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00545}00545\ \ \ \ \ Vector\ eyePos(2);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00546}00546\ \ \ \ \ eyePos[0]=\mbox{\hyperlink{classSolver_af634998a5358509eb9c8f529040a3c70}{gazePos}}[0];}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00547}00547\ \ \ \ \ eyePos[1]=\mbox{\hyperlink{classSolver_af634998a5358509eb9c8f529040a3c70}{gazePos}}[1]+\mbox{\hyperlink{classSolver_af634998a5358509eb9c8f529040a3c70}{gazePos}}[2]/2.0;}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00548}00548\ \ \ \ \ \mbox{\hyperlink{classSolver_a9ba6b9b87dfea61a648f61a846d78f90}{chainEyeL}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a9232068a0e37c01c09ce31c93ab9be42}{setAng}}(eyePos);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00549}00549\ \ \ \ \ eyePos[1]=\mbox{\hyperlink{classSolver_af634998a5358509eb9c8f529040a3c70}{gazePos}}[1]-\/\mbox{\hyperlink{classSolver_af634998a5358509eb9c8f529040a3c70}{gazePos}}[2]/2.0;}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00550}00550\ \ \ \ \ \mbox{\hyperlink{classSolver_a84d8b40c8ca18f3b4892e06e13ec934d}{chainEyeR}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a9232068a0e37c01c09ce31c93ab9be42}{setAng}}(eyePos);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00551}00551\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00552}00552\ \ \ \ \ \mbox{\hyperlink{classSolver_aa6f82784be42a00f8624d37a862a7e88}{neckAngleUserTolerance}}=0.0;}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00553}00553\ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00554}00554\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00555}00555\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00556}00556\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00557}\mbox{\hyperlink{classSolver_aba52d3c92fafceb6fe39f937f2d73db3}{00557}}\ \mbox{\hyperlink{classSolver_aba52d3c92fafceb6fe39f937f2d73db3}{Solver::\string~Solver}}()}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00558}00558\ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00559}00559\ \ \ \ \ \textcolor{keyword}{delete}\ \mbox{\hyperlink{classSolver_a4906c5b72a49ed2993248cf5787a96ba}{neck}};}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00560}00560\ \ \ \ \ \textcolor{keyword}{delete}\ \mbox{\hyperlink{classGazeComponent_af0d811689807c394a6e9c6d49ca29c1d}{eyeL}};}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00561}00561\ \ \ \ \ \textcolor{keyword}{delete}\ \mbox{\hyperlink{classGazeComponent_aa94da445b35148d2b6bdbe9244cc46c1}{eyeR}};}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00562}00562\ \ \ \ \ \textcolor{keyword}{delete}\ \mbox{\hyperlink{classSolver_aa2fd72b4a1bf818062cc7f7fdadc876a}{imu}};}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00563}00563\ \ \ \ \ \textcolor{keyword}{delete}\ \mbox{\hyperlink{classSolver_afd20c11ace5e182ae3c0712abd7e7067}{torsoVel}};}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00564}00564\ \ \ \ \ \textcolor{keyword}{delete}\ \mbox{\hyperlink{classSolver_acd565680fd6a8e791cfff0d812bedb83}{invNeck}};}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00565}00565\ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00566}00566\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00567}00567\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00568}00568\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00569}\mbox{\hyperlink{classSolver_a2d7cd47c193cfbdb09592dc61c3fd285}{00569}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classSolver_a2d7cd47c193cfbdb09592dc61c3fd285}{Solver::bindNeckPitch}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ min\_deg,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ max\_deg)}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00570}00570\ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00571}00571\ \ \ \ \ lock\_guard<mutex>\ lck(\mbox{\hyperlink{classSolver_a4bf9a56a3c9dff38a254ee8160b6a289}{mtx}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00572}00572\ \ \ \ \ \textcolor{keywordtype}{double}\ min\_rad=\mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_ac5ed384388ea1d12d65a38b44870351c}{sat}}(\mbox{\hyperlink{namespaceiCub_1_1ctrl_a52299223f405fb68877b56af10f9a3f2}{CTRL\_DEG2RAD}}*min\_deg,\mbox{\hyperlink{classSolver_a4d60f2f72e17071d039fdc9313d1b180}{neckPitchMin}},\mbox{\hyperlink{classSolver_af437a74e3dbbed57638098f70a50575b}{neckPitchMax}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00573}00573\ \ \ \ \ \textcolor{keywordtype}{double}\ max\_rad=\mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_ac5ed384388ea1d12d65a38b44870351c}{sat}}(\mbox{\hyperlink{namespaceiCub_1_1ctrl_a52299223f405fb68877b56af10f9a3f2}{CTRL\_DEG2RAD}}*max\_deg,\mbox{\hyperlink{classSolver_a4d60f2f72e17071d039fdc9313d1b180}{neckPitchMin}},\mbox{\hyperlink{classSolver_af437a74e3dbbed57638098f70a50575b}{neckPitchMax}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00574}00574\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00575}00575\ \ \ \ \ (*chainNeck)(0).setMin(min\_rad);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00576}00576\ \ \ \ \ (*chainNeck)(0).setMax(max\_rad);\ \ \ \ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00577}00577\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00578}00578\ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}neck\ pitch\ constrained\ in\ [\%g,\%g]\ deg"{}},min\_deg,max\_deg);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00579}00579\ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00580}00580\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00581}00581\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00582}00582\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00583}\mbox{\hyperlink{classSolver_afd56fa32f9b873bd741286e575be92ee}{00583}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classSolver_afd56fa32f9b873bd741286e575be92ee}{Solver::bindNeckRoll}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ min\_deg,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ max\_deg)}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00584}00584\ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00585}00585\ \ \ \ \ lock\_guard<mutex>\ lck(\mbox{\hyperlink{classSolver_a4bf9a56a3c9dff38a254ee8160b6a289}{mtx}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00586}00586\ \ \ \ \ \textcolor{keywordtype}{double}\ min\_rad=\mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_ac5ed384388ea1d12d65a38b44870351c}{sat}}(\mbox{\hyperlink{namespaceiCub_1_1ctrl_a52299223f405fb68877b56af10f9a3f2}{CTRL\_DEG2RAD}}*min\_deg,\mbox{\hyperlink{classSolver_a39575746764698c011736123ce9a1b43}{neckRollMin}},\mbox{\hyperlink{classSolver_adf18fe49f1cb5b14de58ea0371d406d4}{neckRollMax}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00587}00587\ \ \ \ \ \textcolor{keywordtype}{double}\ max\_rad=\mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_ac5ed384388ea1d12d65a38b44870351c}{sat}}(\mbox{\hyperlink{namespaceiCub_1_1ctrl_a52299223f405fb68877b56af10f9a3f2}{CTRL\_DEG2RAD}}*max\_deg,\mbox{\hyperlink{classSolver_a39575746764698c011736123ce9a1b43}{neckRollMin}},\mbox{\hyperlink{classSolver_adf18fe49f1cb5b14de58ea0371d406d4}{neckRollMax}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00588}00588\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00589}00589\ \ \ \ \ (*chainNeck)(1).setMin(min\_rad);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00590}00590\ \ \ \ \ (*chainNeck)(1).setMax(max\_rad);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00591}00591\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00592}00592\ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}neck\ roll\ constrained\ in\ [\%g,\%g]\ deg"{}},min\_deg,max\_deg);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00593}00593\ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00594}00594\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00595}00595\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00596}00596\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00597}\mbox{\hyperlink{classSolver_aa07c3466850ae956df67ad29b0a78d13}{00597}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classSolver_aa07c3466850ae956df67ad29b0a78d13}{Solver::bindNeckYaw}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ min\_deg,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ max\_deg)}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00598}00598\ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00599}00599\ \ \ \ \ lock\_guard<mutex>\ lck(\mbox{\hyperlink{classSolver_a4bf9a56a3c9dff38a254ee8160b6a289}{mtx}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00600}00600\ \ \ \ \ \textcolor{keywordtype}{double}\ min\_rad=\mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_ac5ed384388ea1d12d65a38b44870351c}{sat}}(\mbox{\hyperlink{namespaceiCub_1_1ctrl_a52299223f405fb68877b56af10f9a3f2}{CTRL\_DEG2RAD}}*min\_deg,\mbox{\hyperlink{classSolver_a5f66ea09272f611b1dcd60129d14ed3a}{neckYawMin}},\mbox{\hyperlink{classSolver_ada98567016468f8adc5e5e5c9bc14edb}{neckYawMax}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00601}00601\ \ \ \ \ \textcolor{keywordtype}{double}\ max\_rad=\mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_ac5ed384388ea1d12d65a38b44870351c}{sat}}(\mbox{\hyperlink{namespaceiCub_1_1ctrl_a52299223f405fb68877b56af10f9a3f2}{CTRL\_DEG2RAD}}*max\_deg,\mbox{\hyperlink{classSolver_a5f66ea09272f611b1dcd60129d14ed3a}{neckYawMin}},\mbox{\hyperlink{classSolver_ada98567016468f8adc5e5e5c9bc14edb}{neckYawMax}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00602}00602\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00603}00603\ \ \ \ \ (*chainNeck)(2).setMin(min\_rad);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00604}00604\ \ \ \ \ (*chainNeck)(2).setMax(max\_rad);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00605}00605\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00606}00606\ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}neck\ yaw\ constrained\ in\ [\%g,\%g]\ deg"{}},min\_deg,max\_deg);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00607}00607\ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00608}00608\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00609}00609\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00610}00610\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00611}\mbox{\hyperlink{classSolver_a4b7fba3550aae06e026ff2f909db801c}{00611}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classSolver_a4b7fba3550aae06e026ff2f909db801c}{Solver::getCurNeckPitchRange}}(\textcolor{keywordtype}{double}\ \&min\_deg,\ \textcolor{keywordtype}{double}\ \&max\_deg)}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00612}00612\ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00613}00613\ \ \ \ \ lock\_guard<mutex>\ lck(\mbox{\hyperlink{classSolver_a4bf9a56a3c9dff38a254ee8160b6a289}{mtx}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00614}00614\ \ \ \ \ min\_deg=\mbox{\hyperlink{namespaceiCub_1_1ctrl_a335ee3373d8ec68927b7b42c111fe408}{CTRL\_RAD2DEG}}*(*chainNeck)(0).getMin();}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00615}00615\ \ \ \ \ max\_deg=\mbox{\hyperlink{namespaceiCub_1_1ctrl_a335ee3373d8ec68927b7b42c111fe408}{CTRL\_RAD2DEG}}*(*chainNeck)(0).getMax();}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00616}00616\ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00617}00617\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00618}00618\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00619}00619\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00620}\mbox{\hyperlink{classSolver_acaa67f8c26653ec3d0363d5921994808}{00620}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classSolver_acaa67f8c26653ec3d0363d5921994808}{Solver::getCurNeckRollRange}}(\textcolor{keywordtype}{double}\ \&min\_deg,\ \textcolor{keywordtype}{double}\ \&max\_deg)}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00621}00621\ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00622}00622\ \ \ \ \ lock\_guard<mutex>\ lck(\mbox{\hyperlink{classSolver_a4bf9a56a3c9dff38a254ee8160b6a289}{mtx}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00623}00623\ \ \ \ \ min\_deg=\mbox{\hyperlink{namespaceiCub_1_1ctrl_a335ee3373d8ec68927b7b42c111fe408}{CTRL\_RAD2DEG}}*(*chainNeck)(1).getMin();}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00624}00624\ \ \ \ \ max\_deg=\mbox{\hyperlink{namespaceiCub_1_1ctrl_a335ee3373d8ec68927b7b42c111fe408}{CTRL\_RAD2DEG}}*(*chainNeck)(1).getMax();}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00625}00625\ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00626}00626\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00627}00627\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00628}00628\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00629}\mbox{\hyperlink{classSolver_a2e269416e0e7d7b5d79588a0f2aeb6e7}{00629}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classSolver_a2e269416e0e7d7b5d79588a0f2aeb6e7}{Solver::getCurNeckYawRange}}(\textcolor{keywordtype}{double}\ \&min\_deg,\ \textcolor{keywordtype}{double}\ \&max\_deg)}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00630}00630\ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00631}00631\ \ \ \ \ lock\_guard<mutex>\ lck(\mbox{\hyperlink{classSolver_a4bf9a56a3c9dff38a254ee8160b6a289}{mtx}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00632}00632\ \ \ \ \ min\_deg=\mbox{\hyperlink{namespaceiCub_1_1ctrl_a335ee3373d8ec68927b7b42c111fe408}{CTRL\_RAD2DEG}}*(*chainNeck)(2).getMin();}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00633}00633\ \ \ \ \ max\_deg=\mbox{\hyperlink{namespaceiCub_1_1ctrl_a335ee3373d8ec68927b7b42c111fe408}{CTRL\_RAD2DEG}}*(*chainNeck)(2).getMax();}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00634}00634\ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00635}00635\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00636}00636\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00637}00637\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00638}\mbox{\hyperlink{classSolver_aa12f147990f2b1742072d812cb6ad6bd}{00638}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classSolver_aa12f147990f2b1742072d812cb6ad6bd}{Solver::clearNeckPitch}}()}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00639}00639\ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00640}00640\ \ \ \ \ lock\_guard<mutex>\ lck(\mbox{\hyperlink{classSolver_a4bf9a56a3c9dff38a254ee8160b6a289}{mtx}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00641}00641\ \ \ \ \ (*chainNeck)(0).setMin(\mbox{\hyperlink{classSolver_a4d60f2f72e17071d039fdc9313d1b180}{neckPitchMin}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00642}00642\ \ \ \ \ (*chainNeck)(0).setMax(\mbox{\hyperlink{classSolver_af437a74e3dbbed57638098f70a50575b}{neckPitchMax}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00643}00643\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00644}00644\ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}neck\ pitch\ cleared"{}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00645}00645\ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00646}00646\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00647}00647\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00648}00648\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00649}\mbox{\hyperlink{classSolver_a69d99eff69ce204386cfaad4fb4c1881}{00649}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classSolver_a69d99eff69ce204386cfaad4fb4c1881}{Solver::clearNeckRoll}}()}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00650}00650\ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00651}00651\ \ \ \ \ lock\_guard<mutex>\ lck(\mbox{\hyperlink{classSolver_a4bf9a56a3c9dff38a254ee8160b6a289}{mtx}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00652}00652\ \ \ \ \ (*chainNeck)(1).setMin(\mbox{\hyperlink{classSolver_a39575746764698c011736123ce9a1b43}{neckRollMin}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00653}00653\ \ \ \ \ (*chainNeck)(1).setMax(\mbox{\hyperlink{classSolver_adf18fe49f1cb5b14de58ea0371d406d4}{neckRollMax}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00654}00654\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00655}00655\ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}neck\ roll\ cleared"{}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00656}00656\ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00657}00657\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00658}00658\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00659}00659\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00660}\mbox{\hyperlink{classSolver_a374e8bd808289d4cfd7d03615a1808b6}{00660}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classSolver_a374e8bd808289d4cfd7d03615a1808b6}{Solver::clearNeckYaw}}()}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00661}00661\ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00662}00662\ \ \ \ \ lock\_guard<mutex>\ lck(\mbox{\hyperlink{classSolver_a4bf9a56a3c9dff38a254ee8160b6a289}{mtx}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00663}00663\ \ \ \ \ (*chainNeck)(2).setMin(\mbox{\hyperlink{classSolver_a5f66ea09272f611b1dcd60129d14ed3a}{neckYawMin}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00664}00664\ \ \ \ \ (*chainNeck)(2).setMax(\mbox{\hyperlink{classSolver_ada98567016468f8adc5e5e5c9bc14edb}{neckYawMax}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00665}00665\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00666}00666\ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}neck\ yaw\ cleared"{}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00667}00667\ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00668}00668\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00669}00669\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00670}00670\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00671}\mbox{\hyperlink{classSolver_a87128d791462144ae2e5bd91fb2632ed}{00671}}\ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{classSolver_a87128d791462144ae2e5bd91fb2632ed}{Solver::getNeckAngleUserTolerance}}()\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00672}00672\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00673}00673\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classSolver_aa6f82784be42a00f8624d37a862a7e88}{neckAngleUserTolerance}};}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00674}00674\ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00675}00675\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00676}00676\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00677}00677\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00678}\mbox{\hyperlink{classSolver_aaa45e18b1235297554d10949ca4d8e14}{00678}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classSolver_aaa45e18b1235297554d10949ca4d8e14}{Solver::setNeckAngleUserTolerance}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ angle)}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00679}00679\ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00680}00680\ \ \ \ \ \mbox{\hyperlink{classSolver_aa6f82784be42a00f8624d37a862a7e88}{neckAngleUserTolerance}}=fabs(angle);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00681}00681\ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00682}00682\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00683}00683\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00684}00684\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00685}\mbox{\hyperlink{classSolver_a8cbff488f2ef73e02635324ed951454b}{00685}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classSolver_a8cbff488f2ef73e02635324ed951454b}{Solver::updateAngles}}()}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00686}00686\ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00687}00687\ \ \ \ \ \mbox{\hyperlink{classSolver_a7b7f8c249035658e4d7bbf6b69c6988b}{neckPos}}[0]=\mbox{\hyperlink{classSolver_a7105bb38ba21f9a8823edd562e68bc8e}{fbHead}}[0];}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00688}00688\ \ \ \ \ \mbox{\hyperlink{classSolver_a7b7f8c249035658e4d7bbf6b69c6988b}{neckPos}}[1]=\mbox{\hyperlink{classSolver_a7105bb38ba21f9a8823edd562e68bc8e}{fbHead}}[1];}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00689}00689\ \ \ \ \ \mbox{\hyperlink{classSolver_a7b7f8c249035658e4d7bbf6b69c6988b}{neckPos}}[2]=\mbox{\hyperlink{classSolver_a7105bb38ba21f9a8823edd562e68bc8e}{fbHead}}[2];}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00690}00690\ \ \ \ \ \mbox{\hyperlink{classSolver_af634998a5358509eb9c8f529040a3c70}{gazePos}}[0]=\mbox{\hyperlink{classSolver_a7105bb38ba21f9a8823edd562e68bc8e}{fbHead}}[3];}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00691}00691\ \ \ \ \ \mbox{\hyperlink{classSolver_af634998a5358509eb9c8f529040a3c70}{gazePos}}[1]=\mbox{\hyperlink{classSolver_a7105bb38ba21f9a8823edd562e68bc8e}{fbHead}}[4];}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00692}00692\ \ \ \ \ \mbox{\hyperlink{classSolver_af634998a5358509eb9c8f529040a3c70}{gazePos}}[2]=\mbox{\hyperlink{classSolver_a7105bb38ba21f9a8823edd562e68bc8e}{fbHead}}[5];}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00693}00693\ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00694}00694\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00695}00695\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00696}00696\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00697}\mbox{\hyperlink{classSolver_a9028458d91e9e8c34fb5e8d7793299f4}{00697}}\ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{classSolver_a9028458d91e9e8c34fb5e8d7793299f4}{Solver::neckTargetRotAngle}}(\textcolor{keyword}{const}\ Vector\ \&xd)}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00698}00698\ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00699}00699\ \ \ \ \ Matrix\ \mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}}=\mbox{\hyperlink{classSolver_a4a2ef6a1a4190cc4f13aee140a2bbefd}{commData}}-\/>\mbox{\hyperlink{classExchangeData_ac58f28c693f4c16e5e93385201ad998a}{get\_fpFrame}}();}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00700}00700\ \ \ \ \ Vector\ xdh=xd;\ xdh.push\_back(1.0);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00701}00701\ \ \ \ \ xdh=SE3inv(\mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}})*xdh;\ xdh[3]=0.0;}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00702}00702\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00703}00703\ \ \ \ \ \textcolor{keywordflow}{return}\ (\mbox{\hyperlink{namespaceiCub_1_1ctrl_a335ee3373d8ec68927b7b42c111fe408}{CTRL\_RAD2DEG}}*acos(xdh[2]/\mbox{\hyperlink{group__Maths_ga791f0548018b3597da95e70a3b226806}{norm}}(xdh)));}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00704}00704\ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00705}00705\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00706}00706\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00707}00707\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00708}\mbox{\hyperlink{classSolver_a718e67b5ca6a40789dc454784265af38}{00708}}\ Vector\ \mbox{\hyperlink{classSolver_a718e67b5ca6a40789dc454784265af38}{Solver::computeTargetUserTolerance}}(\textcolor{keyword}{const}\ Vector\ \&xd)}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00709}00709\ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00710}00710\ \ \ \ \ Matrix\ \mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}}=\mbox{\hyperlink{classSolver_a4a2ef6a1a4190cc4f13aee140a2bbefd}{commData}}-\/>\mbox{\hyperlink{classExchangeData_ac58f28c693f4c16e5e93385201ad998a}{get\_fpFrame}}();}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00711}00711\ \ \ \ \ Vector\ \mbox{\hyperlink{show__eyes__axes_8m_a25ed1bcb423b0b7200f485fc5ff71c8e}{z}}(3,0.0);\ \mbox{\hyperlink{show__eyes__axes_8m_a25ed1bcb423b0b7200f485fc5ff71c8e}{z}}[2]=1.0;}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00712}00712\ \ \ \ \ Vector\ xdh=xd;\ xdh.push\_back(1.0);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00713}00713\ \ \ \ \ xdh=SE3inv(\mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}})*xdh;}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00714}00714\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00715}00715\ \ \ \ \ Vector\ xdh3=xdh;\ xdh3.pop\_back();}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00716}00716\ \ \ \ \ Vector\ rot=\mbox{\hyperlink{group__Maths_gaf7eef875cc229edd04aaa3e8fcbad989}{cross}}(xdh3,\mbox{\hyperlink{show__eyes__axes_8m_a25ed1bcb423b0b7200f485fc5ff71c8e}{z}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00717}00717\ \ \ \ \ \textcolor{keywordtype}{double}\ r=\mbox{\hyperlink{group__Maths_ga791f0548018b3597da95e70a3b226806}{norm}}(rot);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00718}00718\ \ \ \ \ \textcolor{keywordflow}{if}\ (r<\mbox{\hyperlink{iKinHlp_8h_ad96d567c794896443606bb6b292ecf62}{IKIN\_ALMOST\_ZERO}})}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00719}00719\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ xd;}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00720}00720\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00721}00721\ \ \ \ \ rot=rot/r;}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00722}00722\ \ \ \ \ rot.push\_back(\mbox{\hyperlink{classSolver_aa6f82784be42a00f8624d37a862a7e88}{neckAngleUserTolerance}}*\mbox{\hyperlink{namespaceiCub_1_1ctrl_a52299223f405fb68877b56af10f9a3f2}{CTRL\_DEG2RAD}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00723}00723\ \ \ \ \ rot=\mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}}*(axis2dcm(rot)*xdh);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00724}00724\ \ \ \ \ rot.pop\_back();}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00725}00725\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00726}00726\ \ \ \ \ \textcolor{keywordflow}{return}\ rot;}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00727}00727\ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00728}00728\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00729}00729\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00730}00730\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00731}\mbox{\hyperlink{classSolver_a3d75db4350b995e20a03135c1ec05e82}{00731}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classSolver_a3d75db4350b995e20a03135c1ec05e82}{Solver::threadInit}}()}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00732}00732\ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00733}00733\ \ \ \ \ \textcolor{comment}{//\ Initialization}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00734}00734\ \ \ \ \ Vector\ \mbox{\hyperlink{pcap__wrapper__linux_8cpp_ae44275d34c468c2018022eafb08b7179}{fp}};}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00735}00735\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1iKin_1_1CartesianHelper_a69ba39d3b515dfc6b8a8a5577204a5b9}{CartesianHelper::computeFixationPointData}}(*\mbox{\hyperlink{classSolver_a9ba6b9b87dfea61a648f61a846d78f90}{chainEyeL}},*\mbox{\hyperlink{classSolver_a84d8b40c8ca18f3b4892e06e13ec934d}{chainEyeR}},\mbox{\hyperlink{pcap__wrapper__linux_8cpp_ae44275d34c468c2018022eafb08b7179}{fp}});\ \ \ \ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00736}00736\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00737}00737\ \ \ \ \ \textcolor{comment}{//\ init\ commData\ structure}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00738}00738\ \ \ \ \ \mbox{\hyperlink{classSolver_a4a2ef6a1a4190cc4f13aee140a2bbefd}{commData}}-\/>\mbox{\hyperlink{classExchangeData_ad152a69e3f243d53e867b45806f14520}{port\_xd}}-\/>\mbox{\hyperlink{classxdPort_a3e1c973575ce71852ac06a626fa6192b}{init}}(\mbox{\hyperlink{pcap__wrapper__linux_8cpp_ae44275d34c468c2018022eafb08b7179}{fp}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00739}00739\ \ \ \ \ \mbox{\hyperlink{classSolver_a4a2ef6a1a4190cc4f13aee140a2bbefd}{commData}}-\/>\mbox{\hyperlink{classExchangeData_a5a64368ad5215ec47b79309cef3ef0a6}{set\_xd}}(\mbox{\hyperlink{pcap__wrapper__linux_8cpp_ae44275d34c468c2018022eafb08b7179}{fp}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00740}00740\ \ \ \ \ \mbox{\hyperlink{classSolver_a4a2ef6a1a4190cc4f13aee140a2bbefd}{commData}}-\/>\mbox{\hyperlink{classExchangeData_a7a0b3f0198286e2d8eb83301576aae6f}{set\_qd}}(\mbox{\hyperlink{classSolver_a7105bb38ba21f9a8823edd562e68bc8e}{fbHead}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00741}00741\ \ \ \ \ \mbox{\hyperlink{classSolver_a4a2ef6a1a4190cc4f13aee140a2bbefd}{commData}}-\/>\mbox{\hyperlink{classExchangeData_ae92c372382276c20194c9ed88485c474}{set\_x}}(\mbox{\hyperlink{pcap__wrapper__linux_8cpp_ae44275d34c468c2018022eafb08b7179}{fp}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00742}00742\ \ \ \ \ \mbox{\hyperlink{classSolver_a4a2ef6a1a4190cc4f13aee140a2bbefd}{commData}}-\/>\mbox{\hyperlink{classExchangeData_a8a5bb1edbd49197f523b497139ba0448}{set\_q}}(\mbox{\hyperlink{classSolver_a7105bb38ba21f9a8823edd562e68bc8e}{fbHead}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00743}00743\ \ \ \ \ \mbox{\hyperlink{classSolver_a4a2ef6a1a4190cc4f13aee140a2bbefd}{commData}}-\/>\mbox{\hyperlink{classExchangeData_aff0d570d956076d7ebe34a22456d7d1f}{set\_torso}}(\mbox{\hyperlink{classSolver_ad5b900148d34fec6036e412acc846806}{fbTorso}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00744}00744\ \ \ \ \ \mbox{\hyperlink{classSolver_a4a2ef6a1a4190cc4f13aee140a2bbefd}{commData}}-\/>\mbox{\hyperlink{classExchangeData_ad95c87948d15f01ad6152856b144088b}{resize\_v}}((\textcolor{keywordtype}{int})\mbox{\hyperlink{classSolver_a7105bb38ba21f9a8823edd562e68bc8e}{fbHead}}.length(),0.0);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00745}00745\ \ \ \ \ \mbox{\hyperlink{classSolver_a4a2ef6a1a4190cc4f13aee140a2bbefd}{commData}}-\/>\mbox{\hyperlink{classExchangeData_ab867a54a65df05da9eae5cd1cb0a70dc}{resize\_counterv}}(3,0.0);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00746}00746\ \ \ \ \ \mbox{\hyperlink{classSolver_a4a2ef6a1a4190cc4f13aee140a2bbefd}{commData}}-\/>\mbox{\hyperlink{classExchangeData_a5a262cc7f8d2d5b8a77fc79034c27157}{set\_fpFrame}}(\mbox{\hyperlink{classSolver_a5f5dbcd865561105abeee7aebb759356}{chainNeck}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a0b503aeeb58dc5cb228c174bf8500599}{getH}}());\ \ \ \ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00747}00747\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00748}00748\ \ \ \ \ \textcolor{comment}{//\ use\ eyes\ pseudoinverse\ reference\ generator}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00749}00749\ \ \ \ \ \mbox{\hyperlink{classSolver_a50fa50258e7bfcb338406696ed6b4fba}{eyesRefGen}}-\/>\mbox{\hyperlink{classEyePinvRefGen_a6dc36c1ccd91449f55b13e457a88b355}{enable}}();}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00750}00750\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00751}00751\ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}Starting\ Solver\ at\ \%d\ ms"{}},\mbox{\hyperlink{classSolver_a01a1abe5dddd12afb0d952e50e467d4a}{period}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00752}00752\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00753}00753\ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00754}00754\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00755}00755\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00756}00756\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00757}\mbox{\hyperlink{classSolver_a0de6cb7e6f9dd55ea894fed9953e5196}{00757}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classSolver_a0de6cb7e6f9dd55ea894fed9953e5196}{Solver::threadRelease}}()}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00758}00758\ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00759}00759\ \ \ \ \ \mbox{\hyperlink{classSolver_a50fa50258e7bfcb338406696ed6b4fba}{eyesRefGen}}-\/>\mbox{\hyperlink{classEyePinvRefGen_ab6bfa67eea7e860cbf9fdce6127b4a73}{disable}}();}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00760}00760\ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00761}00761\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00762}00762\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00763}00763\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00764}\mbox{\hyperlink{classSolver_adb58ee7e92f7401ca0ecfb3c4eb69a6f}{00764}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classSolver_adb58ee7e92f7401ca0ecfb3c4eb69a6f}{Solver::afterStart}}(\textcolor{keywordtype}{bool}\ s)}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00765}00765\ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00766}00766\ \ \ \ \ \textcolor{keywordflow}{if}\ (s)}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00767}00767\ \ \ \ \ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}Solver\ started\ successfully"{}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00768}00768\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00769}00769\ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}Solver\ did\ not\ start!"{}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00770}00770\ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00771}00771\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00772}00772\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00773}00773\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00774}\mbox{\hyperlink{classSolver_a1d92e972c8c54a5458d5b432625fbac1}{00774}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classSolver_a1d92e972c8c54a5458d5b432625fbac1}{Solver::run}}()}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00775}00775\ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00776}00776\ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{enum}\ \{\ ctrl\_off,\ ctrl\_wait,\ ctrl\_on\ \}\ cstate;}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00777}00777\ \ \ \ \ \textcolor{keyword}{static}\ cstate\ state\_=ctrl\_off;}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00778}00778\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00779}00779\ \ \ \ \ lock\_guard<mutex>\ lck(\mbox{\hyperlink{classSolver_a4bf9a56a3c9dff38a254ee8160b6a289}{mtx}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00780}00780\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00781}00781\ \ \ \ \ \textcolor{comment}{//\ get\ the\ current\ target}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00782}00782\ \ \ \ \ Vector\ xd=\mbox{\hyperlink{classSolver_a4a2ef6a1a4190cc4f13aee140a2bbefd}{commData}}-\/>\mbox{\hyperlink{classExchangeData_ad152a69e3f243d53e867b45806f14520}{port\_xd}}-\/>\mbox{\hyperlink{classxdPort_a002453a7adcfb43a4caa5cca68204f51}{get\_xdDelayed}}();}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00783}00783\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00784}00784\ \ \ \ \ \textcolor{comment}{//\ update\ the\ target\ straightaway\ }}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00785}00785\ \ \ \ \ \mbox{\hyperlink{classSolver_a4a2ef6a1a4190cc4f13aee140a2bbefd}{commData}}-\/>\mbox{\hyperlink{classExchangeData_a5a64368ad5215ec47b79309cef3ef0a6}{set\_xd}}(xd);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00786}00786\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00787}00787\ \ \ \ \ \textcolor{comment}{//\ read\ encoders}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00788}00788\ \ \ \ \ \mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_a91c67f2856c92fd4af2bbed36fff8cef}{getFeedback}}(\mbox{\hyperlink{classSolver_ad5b900148d34fec6036e412acc846806}{fbTorso}},\mbox{\hyperlink{classSolver_a7105bb38ba21f9a8823edd562e68bc8e}{fbHead}},\mbox{\hyperlink{classSolver_aaedaf1f11d9e4eacf72a283f55a33195}{drvTorso}},\mbox{\hyperlink{classSolver_a2acefca0c718b1281fb4ac68fa987c58}{drvHead}},\mbox{\hyperlink{classSolver_a4a2ef6a1a4190cc4f13aee140a2bbefd}{commData}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00789}00789\ \ \ \ \ \mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_a9b1cdf3ae02aff58afd72d1a98021593}{updateTorsoBlockedJoints}}(\mbox{\hyperlink{classSolver_a5f5dbcd865561105abeee7aebb759356}{chainNeck}},\mbox{\hyperlink{classSolver_ad5b900148d34fec6036e412acc846806}{fbTorso}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00790}00790\ \ \ \ \ \mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_a9b1cdf3ae02aff58afd72d1a98021593}{updateTorsoBlockedJoints}}(\mbox{\hyperlink{classSolver_a9ba6b9b87dfea61a648f61a846d78f90}{chainEyeL}},\mbox{\hyperlink{classSolver_ad5b900148d34fec6036e412acc846806}{fbTorso}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00791}00791\ \ \ \ \ \mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_a9b1cdf3ae02aff58afd72d1a98021593}{updateTorsoBlockedJoints}}(\mbox{\hyperlink{classSolver_a84d8b40c8ca18f3b4892e06e13ec934d}{chainEyeR}},\mbox{\hyperlink{classSolver_ad5b900148d34fec6036e412acc846806}{fbTorso}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00792}00792\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00793}00793\ \ \ \ \ \mbox{\hyperlink{classSolver_afd20c11ace5e182ae3c0712abd7e7067}{torsoVel}}-\/>\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a21862d23b86690cd3990bfca2e91880c}{feedData}}(\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyElement}{AWPolyElement}}(\mbox{\hyperlink{classSolver_ad5b900148d34fec6036e412acc846806}{fbTorso}},Time::now()));}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00794}00794\ \ \ \ \ \textcolor{keywordtype}{bool}\ torsoChanged=(\mbox{\hyperlink{group__Maths_ga791f0548018b3597da95e70a3b226806}{norm}}(\mbox{\hyperlink{classSolver_afd20c11ace5e182ae3c0712abd7e7067}{torsoVel}}-\/>\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a0dc22d3239efc6d0e5288a8ad6c9b221}{estimate}}())>\mbox{\hyperlink{solver_8h_a7706506ccdd9a8019e93471f5967ad65}{NECKSOLVER\_ACTIVATIONANGLE\_JOINTS}}*\mbox{\hyperlink{namespaceiCub_1_1ctrl_a52299223f405fb68877b56af10f9a3f2}{CTRL\_DEG2RAD}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00795}00795\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00796}00796\ \ \ \ \ \textcolor{comment}{//\ update\ kinematics}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00797}00797\ \ \ \ \ \mbox{\hyperlink{classSolver_a8cbff488f2ef73e02635324ed951454b}{updateAngles}}();}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00798}00798\ \ \ \ \ \mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_a94cbcea50b86689af24efe08167b3ec2}{updateNeckBlockedJoints}}(\mbox{\hyperlink{classSolver_a9ba6b9b87dfea61a648f61a846d78f90}{chainEyeL}},\mbox{\hyperlink{classSolver_a7105bb38ba21f9a8823edd562e68bc8e}{fbHead}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00799}00799\ \ \ \ \ \mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_a94cbcea50b86689af24efe08167b3ec2}{updateNeckBlockedJoints}}(\mbox{\hyperlink{classSolver_a84d8b40c8ca18f3b4892e06e13ec934d}{chainEyeR}},\mbox{\hyperlink{classSolver_a7105bb38ba21f9a8823edd562e68bc8e}{fbHead}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00800}00800\ \ \ \ \ \mbox{\hyperlink{classSolver_a5f5dbcd865561105abeee7aebb759356}{chainNeck}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a9232068a0e37c01c09ce31c93ab9be42}{setAng}}(\mbox{\hyperlink{classSolver_a7b7f8c249035658e4d7bbf6b69c6988b}{neckPos}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00801}00801\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00802}00802\ \ \ \ \ \textcolor{comment}{//\ hereafter\ accumulate\ solving\ conditions:\ the\ order\ does\ matter}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00803}00803\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00804}00804\ \ \ \ \ \textcolor{comment}{//\ 1)\ compute\ the\ angular\ distance}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00805}00805\ \ \ \ \ \textcolor{keywordtype}{double}\ theta=\mbox{\hyperlink{classSolver_a9028458d91e9e8c34fb5e8d7793299f4}{neckTargetRotAngle}}(xd);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00806}00806\ \ \ \ \ \textcolor{keywordtype}{bool}\ doSolve=(theta>\mbox{\hyperlink{solver_8h_af2e98d52ecbb6839d6e00d3aefd33977}{NECKSOLVER\_ACTIVATIONANGLE}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00807}00807\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00808}00808\ \ \ \ \ \textcolor{comment}{//\ 2)\ skip\ if\ controller\ is\ active\ and\ no\ torso\ motion\ is\ detected}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00809}00809\ \ \ \ \ doSolve\&=!(\mbox{\hyperlink{classSolver_a4a2ef6a1a4190cc4f13aee140a2bbefd}{commData}}-\/>\mbox{\hyperlink{classExchangeData_ac0a765e739eced49b00b289661c25aa1}{ctrlActive}}\ \&\&\ !torsoChanged);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00810}00810\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00811}00811\ \ \ \ \ \textcolor{comment}{//\ 3)\ skip\ if\ controller\ is\ inactive\ and\ we\ are\ not\ in\ tracking\ mode}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00812}00812\ \ \ \ \ doSolve\&=\mbox{\hyperlink{classSolver_a4a2ef6a1a4190cc4f13aee140a2bbefd}{commData}}-\/>\mbox{\hyperlink{classExchangeData_ac0a765e739eced49b00b289661c25aa1}{ctrlActive}}\ ||\ \mbox{\hyperlink{classSolver_a4a2ef6a1a4190cc4f13aee140a2bbefd}{commData}}-\/>\mbox{\hyperlink{classExchangeData_a4300d6ff299defa056ea0aeccd30a249}{trackingModeOn}};}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00813}00813\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00814}00814\ \ \ \ \ \textcolor{comment}{//\ 4)\ solve\ straightaway\ if\ we\ are\ in\ tracking\ mode\ and\ torso\ motion\ is\ detected}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00815}00815\ \ \ \ \ doSolve|=\mbox{\hyperlink{classSolver_a4a2ef6a1a4190cc4f13aee140a2bbefd}{commData}}-\/>\mbox{\hyperlink{classExchangeData_a4300d6ff299defa056ea0aeccd30a249}{trackingModeOn}}\ \&\&\ torsoChanged;}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00816}00816\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00817}00817\ \ \ \ \ \textcolor{comment}{//\ 5)\ solve\ straightaway\ if\ the\ target\ has\ changed}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00818}00818\ \ \ \ \ doSolve|=\mbox{\hyperlink{classSolver_a4a2ef6a1a4190cc4f13aee140a2bbefd}{commData}}-\/>\mbox{\hyperlink{classExchangeData_ad152a69e3f243d53e867b45806f14520}{port\_xd}}-\/>\mbox{\hyperlink{classxdPort_ac9f7f026e256795d2ebdd9bbeee38340}{get\_newDelayed}}();}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00819}00819\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00820}00820\ \ \ \ \ \textcolor{comment}{//\ 6)\ skip\ if\ the\ angle\ to\ target\ is\ lower\ than\ the\ user\ tolerance}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00821}00821\ \ \ \ \ doSolve\&=(theta>\mbox{\hyperlink{classSolver_aa6f82784be42a00f8624d37a862a7e88}{neckAngleUserTolerance}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00822}00822\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00823}00823\ \ \ \ \ \textcolor{comment}{//\ clear\ triggers}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00824}00824\ \ \ \ \ \mbox{\hyperlink{classSolver_a4a2ef6a1a4190cc4f13aee140a2bbefd}{commData}}-\/>\mbox{\hyperlink{classExchangeData_ad152a69e3f243d53e867b45806f14520}{port\_xd}}-\/>\mbox{\hyperlink{classxdPort_ac9f7f026e256795d2ebdd9bbeee38340}{get\_newDelayed}}()=\textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00825}00825\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00826}00826\ \ \ \ \ \textcolor{comment}{//\ call\ the\ solver\ for\ neck}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00827}00827\ \ \ \ \ \textcolor{keywordflow}{if}\ (doSolve)}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00828}00828\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00829}00829\ \ \ \ \ \ \ \ \ Vector\ gDir(3,0.0);\ gDir[2]=-\/1.0;}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00830}00830\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classSolver_a4a2ef6a1a4190cc4f13aee140a2bbefd}{commData}}-\/>\mbox{\hyperlink{classExchangeData_a3e40d8ef1b911434671ce278f51bec03}{stabilizationOn}})}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00831}00831\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00832}00832\ \ \ \ \ \ \ \ \ \ \ \ \ Vector\ \mbox{\hyperlink{dataTypes_8h_ae0191316140fce1e08c6f21b0a2dbf0a}{acc}}=-\/1.0*\mbox{\hyperlink{classSolver_a4a2ef6a1a4190cc4f13aee140a2bbefd}{commData}}-\/>\mbox{\hyperlink{classExchangeData_a97fb7fc2e84a2fca76902f7a40196406}{get\_accel}}().first;}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00833}00833\ \ \ \ \ \ \ \ \ \ \ \ \ Matrix\ \mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}}=\mbox{\hyperlink{classSolver_aa2fd72b4a1bf818062cc7f7fdadc876a}{imu}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a0b503aeeb58dc5cb228c174bf8500599}{getH}}(cat(\mbox{\hyperlink{classSolver_ad5b900148d34fec6036e412acc846806}{fbTorso}},\mbox{\hyperlink{classSolver_a7105bb38ba21f9a8823edd562e68bc8e}{fbHead}}.subVector(0,2)));}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00834}00834\ \ \ \ \ \ \ \ \ \ \ \ \ gDir=\mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}}.submatrix(0,2,0,2)*\mbox{\hyperlink{dataTypes_8h_ae0191316140fce1e08c6f21b0a2dbf0a}{acc}};}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00835}00835\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00836}00836\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00837}00837\ \ \ \ \ \ \ \ \ Vector\ xdUserTol=\mbox{\hyperlink{classSolver_a718e67b5ca6a40789dc454784265af38}{computeTargetUserTolerance}}(xd);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00838}00838\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSolver_a7b7f8c249035658e4d7bbf6b69c6988b}{neckPos}}=\mbox{\hyperlink{classSolver_acd565680fd6a8e791cfff0d812bedb83}{invNeck}}-\/>\mbox{\hyperlink{classGazeIpOptMin_aa1d709e2e9b2474455679b47789702ad}{solve}}(\mbox{\hyperlink{classSolver_a7b7f8c249035658e4d7bbf6b69c6988b}{neckPos}},xdUserTol,gDir);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00839}00839\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00840}00840\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ update\ neck\ pitch,roll,yaw\ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00841}00841\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSolver_a4a2ef6a1a4190cc4f13aee140a2bbefd}{commData}}-\/>\mbox{\hyperlink{classExchangeData_a7a0b3f0198286e2d8eb83301576aae6f}{set\_qd}}(0,\mbox{\hyperlink{classSolver_a7b7f8c249035658e4d7bbf6b69c6988b}{neckPos}}[0]);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00842}00842\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSolver_a4a2ef6a1a4190cc4f13aee140a2bbefd}{commData}}-\/>\mbox{\hyperlink{classExchangeData_a7a0b3f0198286e2d8eb83301576aae6f}{set\_qd}}(1,\mbox{\hyperlink{classSolver_a7b7f8c249035658e4d7bbf6b69c6988b}{neckPos}}[1]);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00843}00843\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSolver_a4a2ef6a1a4190cc4f13aee140a2bbefd}{commData}}-\/>\mbox{\hyperlink{classExchangeData_a7a0b3f0198286e2d8eb83301576aae6f}{set\_qd}}(2,\mbox{\hyperlink{classSolver_a7b7f8c249035658e4d7bbf6b69c6988b}{neckPos}}[2]);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00844}00844\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSolver_a4a2ef6a1a4190cc4f13aee140a2bbefd}{commData}}-\/>\mbox{\hyperlink{classExchangeData_ad0ff163eb0ab96f35f3de1fcadd78f3a}{neckSolveCnt}}++;}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00845}00845\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00846}00846\ \ \ \ \ \ \ \ \ state\_=ctrl\_wait;}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00847}00847\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00848}00848\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00849}00849\ \ \ \ \ \textcolor{keywordflow}{if}\ (state\_==ctrl\_off)}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00850}00850\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00851}00851\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ keep\ neck\ targets\ equal\ to\ current\ angles}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00852}00852\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ to\ avoid\ glitches\ in\ the\ control,}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00853}00853\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ especially\ during\ stabilization}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00854}00854\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSolver_a4a2ef6a1a4190cc4f13aee140a2bbefd}{commData}}-\/>\mbox{\hyperlink{classExchangeData_a7a0b3f0198286e2d8eb83301576aae6f}{set\_qd}}(0,\mbox{\hyperlink{classSolver_a7b7f8c249035658e4d7bbf6b69c6988b}{neckPos}}[0]);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00855}00855\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSolver_a4a2ef6a1a4190cc4f13aee140a2bbefd}{commData}}-\/>\mbox{\hyperlink{classExchangeData_a7a0b3f0198286e2d8eb83301576aae6f}{set\_qd}}(1,\mbox{\hyperlink{classSolver_a7b7f8c249035658e4d7bbf6b69c6988b}{neckPos}}[1]);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00856}00856\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSolver_a4a2ef6a1a4190cc4f13aee140a2bbefd}{commData}}-\/>\mbox{\hyperlink{classExchangeData_a7a0b3f0198286e2d8eb83301576aae6f}{set\_qd}}(2,\mbox{\hyperlink{classSolver_a7b7f8c249035658e4d7bbf6b69c6988b}{neckPos}}[2]);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00857}00857\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00858}00858\ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (state\_==ctrl\_wait)}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00859}00859\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00860}00860\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classSolver_a4a2ef6a1a4190cc4f13aee140a2bbefd}{commData}}-\/>\mbox{\hyperlink{classExchangeData_ac0a765e739eced49b00b289661c25aa1}{ctrlActive}})}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00861}00861\ \ \ \ \ \ \ \ \ \ \ \ \ state\_=ctrl\_on;}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00862}00862\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00863}00863\ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (state\_==ctrl\_on)}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00864}00864\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00865}00865\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!\mbox{\hyperlink{classSolver_a4a2ef6a1a4190cc4f13aee140a2bbefd}{commData}}-\/>\mbox{\hyperlink{classExchangeData_ac0a765e739eced49b00b289661c25aa1}{ctrlActive}})}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00866}00866\ \ \ \ \ \ \ \ \ \ \ \ \ state\_=ctrl\_off;}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00867}00867\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00868}00868\ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00869}00869\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00870}00870\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00871}00871\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00872}\mbox{\hyperlink{classSolver_a5ba53d2e45e42114e8cdd980cf108b98}{00872}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classSolver_a5ba53d2e45e42114e8cdd980cf108b98}{Solver::suspend}}()}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00873}00873\ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00874}00874\ \ \ \ \ \mbox{\hyperlink{classSolver_a4a2ef6a1a4190cc4f13aee140a2bbefd}{commData}}-\/>\mbox{\hyperlink{classExchangeData_ad152a69e3f243d53e867b45806f14520}{port\_xd}}-\/>\mbox{\hyperlink{classxdPort_a3b72d4639f79549c5ba8a6cf2430a857}{lock}}();}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00875}00875\ \ \ \ \ PeriodicThread::suspend();}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00876}00876\ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}Solver\ has\ been\ suspended!"{}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00877}00877\ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00878}00878\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00879}00879\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00880}00880\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00881}\mbox{\hyperlink{classSolver_ac6e2bfed80d6e3de9c01e6ec69a235ae}{00881}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classSolver_ac6e2bfed80d6e3de9c01e6ec69a235ae}{Solver::resume}}()}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00882}00882\ \{}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00883}00883\ \ \ \ \ lock\_guard<mutex>\ lck(\mbox{\hyperlink{classSolver_a4bf9a56a3c9dff38a254ee8160b6a289}{mtx}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00884}00884\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00885}00885\ \ \ \ \ \textcolor{comment}{//\ read\ encoders}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00886}00886\ \ \ \ \ \mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_a91c67f2856c92fd4af2bbed36fff8cef}{getFeedback}}(\mbox{\hyperlink{classSolver_ad5b900148d34fec6036e412acc846806}{fbTorso}},\mbox{\hyperlink{classSolver_a7105bb38ba21f9a8823edd562e68bc8e}{fbHead}},\mbox{\hyperlink{classSolver_aaedaf1f11d9e4eacf72a283f55a33195}{drvTorso}},\mbox{\hyperlink{classSolver_a2acefca0c718b1281fb4ac68fa987c58}{drvHead}},\mbox{\hyperlink{classSolver_a4a2ef6a1a4190cc4f13aee140a2bbefd}{commData}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00887}00887\ \ \ \ \ \mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_a9b1cdf3ae02aff58afd72d1a98021593}{updateTorsoBlockedJoints}}(\mbox{\hyperlink{classSolver_a5f5dbcd865561105abeee7aebb759356}{chainNeck}},\mbox{\hyperlink{classSolver_ad5b900148d34fec6036e412acc846806}{fbTorso}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00888}00888\ \ \ \ \ \mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_a9b1cdf3ae02aff58afd72d1a98021593}{updateTorsoBlockedJoints}}(\mbox{\hyperlink{classSolver_a9ba6b9b87dfea61a648f61a846d78f90}{chainEyeL}},\mbox{\hyperlink{classSolver_ad5b900148d34fec6036e412acc846806}{fbTorso}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00889}00889\ \ \ \ \ \mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_a9b1cdf3ae02aff58afd72d1a98021593}{updateTorsoBlockedJoints}}(\mbox{\hyperlink{classSolver_a84d8b40c8ca18f3b4892e06e13ec934d}{chainEyeR}},\mbox{\hyperlink{classSolver_ad5b900148d34fec6036e412acc846806}{fbTorso}});\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00890}00890\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00891}00891\ \ \ \ \ \textcolor{comment}{//\ update\ kinematics}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00892}00892\ \ \ \ \ \mbox{\hyperlink{classSolver_a8cbff488f2ef73e02635324ed951454b}{updateAngles}}();}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00893}00893\ \ \ \ \ \mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_a94cbcea50b86689af24efe08167b3ec2}{updateNeckBlockedJoints}}(\mbox{\hyperlink{classSolver_a9ba6b9b87dfea61a648f61a846d78f90}{chainEyeL}},\mbox{\hyperlink{classSolver_a7105bb38ba21f9a8823edd562e68bc8e}{fbHead}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00894}00894\ \ \ \ \ \mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_a94cbcea50b86689af24efe08167b3ec2}{updateNeckBlockedJoints}}(\mbox{\hyperlink{classSolver_a84d8b40c8ca18f3b4892e06e13ec934d}{chainEyeR}},\mbox{\hyperlink{classSolver_a7105bb38ba21f9a8823edd562e68bc8e}{fbHead}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00895}00895\ \ \ \ \ \mbox{\hyperlink{classSolver_a5f5dbcd865561105abeee7aebb759356}{chainNeck}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a9232068a0e37c01c09ce31c93ab9be42}{setAng}}(\mbox{\hyperlink{classSolver_a7b7f8c249035658e4d7bbf6b69c6988b}{neckPos}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00896}00896\ \ \ \ \ \mbox{\hyperlink{classSolver_a9ba6b9b87dfea61a648f61a846d78f90}{chainEyeL}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a9232068a0e37c01c09ce31c93ab9be42}{setAng}}(\mbox{\hyperlink{classSolver_aaae0541d3a6204e98c8c98ed4f312df8}{nJointsTorso}}+3,\mbox{\hyperlink{classSolver_af634998a5358509eb9c8f529040a3c70}{gazePos}}[0]);\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSolver_a84d8b40c8ca18f3b4892e06e13ec934d}{chainEyeR}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a9232068a0e37c01c09ce31c93ab9be42}{setAng}}(\mbox{\hyperlink{classSolver_aaae0541d3a6204e98c8c98ed4f312df8}{nJointsTorso}}+3,\mbox{\hyperlink{classSolver_af634998a5358509eb9c8f529040a3c70}{gazePos}}[0]);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00897}00897\ \ \ \ \ \mbox{\hyperlink{classSolver_a9ba6b9b87dfea61a648f61a846d78f90}{chainEyeL}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a9232068a0e37c01c09ce31c93ab9be42}{setAng}}(\mbox{\hyperlink{classSolver_aaae0541d3a6204e98c8c98ed4f312df8}{nJointsTorso}}+4,\mbox{\hyperlink{classSolver_af634998a5358509eb9c8f529040a3c70}{gazePos}}[1]+\mbox{\hyperlink{classSolver_af634998a5358509eb9c8f529040a3c70}{gazePos}}[2]/2.0);\ \mbox{\hyperlink{classSolver_a84d8b40c8ca18f3b4892e06e13ec934d}{chainEyeR}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a9232068a0e37c01c09ce31c93ab9be42}{setAng}}(\mbox{\hyperlink{classSolver_aaae0541d3a6204e98c8c98ed4f312df8}{nJointsTorso}}+4,\mbox{\hyperlink{classSolver_af634998a5358509eb9c8f529040a3c70}{gazePos}}[1]-\/\mbox{\hyperlink{classSolver_af634998a5358509eb9c8f529040a3c70}{gazePos}}[2]/2.0);}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00898}00898\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00899}00899\ \ \ \ \ \mbox{\hyperlink{classSolver_afd20c11ace5e182ae3c0712abd7e7067}{torsoVel}}-\/>\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a7628b39f6695860eb84b0efc4060833f}{reset}}();\ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00900}00900\ \ \ \ \ \mbox{\hyperlink{classSolver_a4a2ef6a1a4190cc4f13aee140a2bbefd}{commData}}-\/>\mbox{\hyperlink{classExchangeData_ad152a69e3f243d53e867b45806f14520}{port\_xd}}-\/>\mbox{\hyperlink{classxdPort_a530b155c7e80cd6921abf41fb6d34365}{unlock}}();}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00901}00901\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00902}00902\ \ \ \ \ PeriodicThread::resume();}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00903}00903\ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}Solver\ has\ been\ resumed!"{}});}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00904}00904\ \}}
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00905}00905\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00906}00906\ }
+\DoxyCodeLine{\Hypertarget{solver_8cpp_source_l00907}00907\ }
+
+\end{DoxyCode}

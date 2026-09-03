@@ -1,0 +1,162 @@
+\doxysection{lmlibindirect.\+cpp}
+\hypertarget{lmlibindirect_8cpp_source}{}\label{lmlibindirect_8cpp_source}\index{icub-\/tutorials/src/learningMachines/lmlibindirect.cpp@{icub-\/tutorials/src/learningMachines/lmlibindirect.cpp}}
+\mbox{\hyperlink{lmlibindirect_8cpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00001}00001\ \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00002}00002\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2007-\/2009\ Arjan\ Gijsberts}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00003}00003\ \textcolor{comment}{\ *\ CopyPolicy:\ Released\ under\ the\ terms\ of\ the\ GNU\ GPL\ v2.0.}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00004}00004\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00005}00005\ \textcolor{comment}{\ *\ Example\ code\ how\ to\ use\ the\ learningMachine\ library\ in\ an\ indirect\ manner.}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00006}00006\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00007}00007\ \textcolor{preprocessor}{\#include\ <iostream>}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00008}00008\ \textcolor{preprocessor}{\#include\ <stdexcept>}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00009}00009\ \textcolor{preprocessor}{\#include\ <cmath>}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00010}00010\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{RLSLearner_8h}{iCub/learningMachine/RLSLearner.h}}>}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00011}00011\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{RandomFeature_8h}{iCub/learningMachine/RandomFeature.h}}>}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00012}00012\ \textcolor{preprocessor}{\#include\ <yarp/sig/Vector.h>}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00013}00013\ \textcolor{preprocessor}{\#include\ <yarp/os/Property.h>}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00014}00014\ \textcolor{preprocessor}{\#include\ <yarp/math/Math.h>}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00015}00015\ \textcolor{preprocessor}{\#include\ <yarp/math/Rand.h>}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00016}00016\ }
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00017}\mbox{\hyperlink{lmlibindirect_8cpp_a3acffbd305ee72dcd4593c0d8af64a4f}{00017}}\ \textcolor{preprocessor}{\#define\ MIN(a,\ b)\ \ \ ((a\ <\ b)\ ?\ a\ :\ b)}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00018}00018\ }
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00019}\mbox{\hyperlink{lmlibindirect_8cpp_ac3a1aebd6f12d430c79547db1169b687}{00019}}\ \textcolor{preprocessor}{\#define\ NO\_TRAIN\ \ \ \ 1000}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00020}\mbox{\hyperlink{lmlibindirect_8cpp_a21ad75f2d70a3d82560483fde9a668fb}{00020}}\ \textcolor{preprocessor}{\#define\ NO\_TEST\ \ \ \ \ 1000}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00021}\mbox{\hyperlink{lmlibindirect_8cpp_aa5b32968761a02aed2c52200945fbc6a}{00021}}\ \textcolor{preprocessor}{\#define\ NOISE\_MIN\ \ -\/0.05}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00022}\mbox{\hyperlink{lmlibindirect_8cpp_a4d0ce98efc84b342515e9abadbc0e8ec}{00022}}\ \textcolor{preprocessor}{\#define\ NOISE\_MAX\ \ \ 0.05}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00023}00023\ }
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00024}00024\ }
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00025}00025\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceiCub_1_1learningmachine}{iCub::learningmachine}};}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00026}00026\ \textcolor{keyword}{using\ namespace\ }yarp::os;}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00027}00027\ \textcolor{keyword}{using\ namespace\ }yarp::sig;}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00028}00028\ \textcolor{keyword}{using\ namespace\ }yarp::math;}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00029}00029\ }
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00030}00030\ \textcolor{comment}{//\ taken\ from\ LWPR\ example\ code}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00031}\mbox{\hyperlink{lmlibindirect_8cpp_a53883975450bbbcf97a95e28ff2a6088}{00031}}\ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{lmlibindirect_8cpp_a53883975450bbbcf97a95e28ff2a6088}{cross}}(\textcolor{keywordtype}{double}\ \mbox{\hyperlink{compute__ekf__sym_8m_ac39b33361203e68d7820336db48d45e6}{x1}},\ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{compute__ekf__fast_8m_aab2463cd078f7c5368f6eb80f5a549b8}{x2}})\ \{}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00032}00032\ \ \ \mbox{\hyperlink{compute__ekf__sym_8m_ac39b33361203e68d7820336db48d45e6}{x1}}\ *=\ \mbox{\hyperlink{compute__ekf__sym_8m_ac39b33361203e68d7820336db48d45e6}{x1}};}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00033}00033\ \ \ \mbox{\hyperlink{compute__ekf__fast_8m_aab2463cd078f7c5368f6eb80f5a549b8}{x2}}\ *=\ \mbox{\hyperlink{compute__ekf__fast_8m_aab2463cd078f7c5368f6eb80f5a549b8}{x2}};}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00034}00034\ \ \ \textcolor{keywordtype}{double}\ a\ =\ std::exp(-\/10\ *\ \mbox{\hyperlink{compute__ekf__sym_8m_ac39b33361203e68d7820336db48d45e6}{x1}});}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00035}00035\ \ \ \textcolor{keywordtype}{double}\ b\ =\ std::exp(-\/50\ *\ \mbox{\hyperlink{compute__ekf__fast_8m_aab2463cd078f7c5368f6eb80f5a549b8}{x2}});}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00036}00036\ \ \ \textcolor{keywordtype}{double}\ c\ =\ 1.25\ *\ std::exp(-\/5\ *\ (\mbox{\hyperlink{compute__ekf__sym_8m_ac39b33361203e68d7820336db48d45e6}{x1}}\ +\ \mbox{\hyperlink{compute__ekf__fast_8m_aab2463cd078f7c5368f6eb80f5a549b8}{x2}}));}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00037}00037\ \ \ \textcolor{keywordflow}{return}\ (a\ >\ b)\ ?\ ((a\ >\ c)\ ?\ a\ :\ c)\ :\ ((b\ >\ c)\ ?\ b\ :\ c);}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00038}00038\ \}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00039}00039\ }
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00040}\mbox{\hyperlink{lmlibindirect_8cpp_abae296633b1696476d3c0cb6746dffbf}{00040}}\ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{lmlibindirect_8cpp_abae296633b1696476d3c0cb6746dffbf}{sin2d}}(\textcolor{keywordtype}{double}\ \mbox{\hyperlink{compute__ekf__sym_8m_ac39b33361203e68d7820336db48d45e6}{x1}},\ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{compute__ekf__fast_8m_aab2463cd078f7c5368f6eb80f5a549b8}{x2}})\ \{}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00041}00041\ \ \ \textcolor{keywordflow}{return}\ std::sin(\mbox{\hyperlink{compute__ekf__sym_8m_ac39b33361203e68d7820336db48d45e6}{x1}}\ +\ \mbox{\hyperlink{compute__ekf__fast_8m_aab2463cd078f7c5368f6eb80f5a549b8}{x2}});}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00042}00042\ \}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00043}00043\ }
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00044}\mbox{\hyperlink{lmlibindirect_8cpp_aad08c71c6fea791f60508f1eb75483d2}{00044}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{lmlibindirect_8cpp_aad08c71c6fea791f60508f1eb75483d2}{elementProd}}(\textcolor{keyword}{const}\ Vector\&\ v1,\ Vector\&\ v2)\ \{}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00045}00045\ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{size\_t}\ i\ =\ 0;\ i\ <\ \mbox{\hyperlink{lmlibindirect_8cpp_a3acffbd305ee72dcd4593c0d8af64a4f}{MIN}}(v1.size(),\ v2.size());\ i++)\ \{}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00046}00046\ \ \ \ \ v2[i]\ =\ v1[i]\ *\ v2[i];}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00047}00047\ \ \ \}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00048}00048\ \}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00049}00049\ }
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00050}\mbox{\hyperlink{lmlibindirect_8cpp_a8614ac1c43903ffeed4b43315a391ed6}{00050}}\ Vector\ \mbox{\hyperlink{lmlibindirect_8cpp_a8614ac1c43903ffeed4b43315a391ed6}{elementDiv}}(\textcolor{keyword}{const}\ Vector\&\ v,\ \textcolor{keywordtype}{double}\ d)\ \{}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00051}00051\ \ \ Vector\ ret(v.size());}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00052}00052\ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{size\_t}\ i\ =\ 0;\ i\ <\ v.size();\ i++)\ \{}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00053}00053\ \ \ \ \ ret[i]\ =\ (d\ ==\ 0.)\ ?\ v[i]\ :\ v[i]\ /\ d;}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00054}00054\ \ \ \}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00055}00055\ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00056}00056\ \}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00057}00057\ }
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00058}00058\ }
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00059}\mbox{\hyperlink{lmlibindirect_8cpp_afb399af928baf50c0feb93f496e5901a}{00059}}\ std::pair<Vector,\ Vector>\ \mbox{\hyperlink{lmlibindirect_8cpp_afb399af928baf50c0feb93f496e5901a}{createSample}}()\ \{}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00060}00060\ \ \ std::pair<Vector,\ Vector>\ sample;}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00061}00061\ \ \ sample.first.resize(2);}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00062}00062\ \ \ sample.second.resize(2);}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00063}00063\ \ \ sample.first[0]\ =\ Rand::scalar(-\/1,\ +1);}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00064}00064\ \ \ sample.first[1]\ =\ Rand::scalar(-\/1,\ +1);}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00065}00065\ \ \ sample.second[0]\ =\ \mbox{\hyperlink{lmlibindirect_8cpp_abae296633b1696476d3c0cb6746dffbf}{sin2d}}(sample.first[0],\ sample.first[1]);}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00066}00066\ \ \ sample.second[1]\ =\ \mbox{\hyperlink{lmlibindirect_8cpp_a53883975450bbbcf97a95e28ff2a6088}{cross}}(sample.first[0],\ sample.first[1]);}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00067}00067\ \ \ \textcolor{keywordflow}{return}\ sample;}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00068}00068\ \}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00069}00069\ }
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00070}00070\ \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00071}00071\ \textcolor{comment}{\ *\ This\ example\ shows\ how\ LearningMachine\ classes\ can\ be\ used\ in\ a\ indirect}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00072}00072\ \textcolor{comment}{\ *\ manner\ in\ your\ code.\ In\ this\ context,\ this\ means\ that\ the\ YARP\ configuration}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00073}00073\ \textcolor{comment}{\ *\ mechanism\ is\ used\ and\ instances\ are\ of\ the\ abstract\ base\ type.\ This}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00074}00074\ \textcolor{comment}{\ *\ facilitates\ easy\ migration\ to\ other\ learning\ methods.\ Please\ see\ all}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00075}00075\ \textcolor{comment}{\ *\ direct/indirect/portable\ examples\ to\ have\ an\ idea\ which\ method\ suits\ your}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00076}00076\ \textcolor{comment}{\ *\ application\ best.}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00077}00077\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00078}00078\ \textcolor{comment}{\ *\ Please\ keep\ in\ mind\ that\ the\ purpose\ is\ to\ demonstrate\ how\ to\ interface\ with}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00079}00079\ \textcolor{comment}{\ *\ the\ learningMachine\ library.\ The\ synthetic\ data\ used\ in\ this\ example\ is}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00080}00080\ \textcolor{comment}{\ *\ utterly\ useless.}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00081}00081\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00082}00082\ }
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00083}\mbox{\hyperlink{lmlibindirect_8cpp_a3c04138a5bfe5d72780bb7e82a18e627}{00083}}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{icub-tutorials_2src_2anyRobotCartesianInterface_2src_2fakeRobot_2main_8cpp_ae66f6b31b5ad750f1fe042a706a4e3d4}{main}}(\textcolor{keywordtype}{int}\ argc,\ \textcolor{keywordtype}{char}**\ argv)\ \{}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00084}00084\ \ \ Vector\ trainMSE(2);}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00085}00085\ \ \ Vector\ testMSE(2);}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00086}00086\ \ \ Vector\ noise\_min(2);}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00087}00087\ \ \ Vector\ noise\_max(2);}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00088}00088\ }
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00089}00089\ \ \ std::cout\ <<\ \textcolor{stringliteral}{"{}LearningMachine\ library\ example\ (indirect)"{}}\ <<\ std::endl;}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00090}00090\ }
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00091}00091\ \ \ \textcolor{comment}{//\ create\ Regularized\ Least\ Squares\ learner}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00092}00092\ \ \ \textcolor{comment}{//\ we\ need\ pointers\ here!}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00093}00093\ \ \ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1IMachineLearner}{IMachineLearner}}*\ rls\ =\ \textcolor{keyword}{new}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1RLSLearner}{RLSLearner}}();}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00094}00094\ \ \ Property\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}(\textcolor{stringliteral}{"{}(dom\ 250)\ (cod\ 2)\ (lambda\ 0.5)"{}});}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00095}00095\ \ \ rls-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1IMachineLearner_a12dc4eec53eaa4884dfb67406a208a55}{configure}}(\mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}});}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00096}00096\ \ \ std::cout\ <<\ \textcolor{stringliteral}{"{}Learner:"{}}\ <<\ std::endl\ <<\ rls-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1IMachineLearner_a7cc90a0711a61a079c779bddebf94594}{getInfo}}()\ <<\ std::endl;}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00097}00097\ }
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00098}00098\ \ \ \textcolor{comment}{//\ create\ Random\ Feature\ transformer}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00099}00099\ \ \ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1ITransformer}{ITransformer}}*\ rf\ =\ \textcolor{keyword}{new}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1RandomFeature}{RandomFeature}}();}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00100}00100\ \ \ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.fromString(\textcolor{stringliteral}{"{}(dom\ 2)\ (cod\ 250)\ (gamma\ 16.0)"{}},\ \textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00101}00101\ \ \ rf-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1ITransformer_a3fdcb9811aaa9bb29250425efb5c19dc}{configure}}(\mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}});}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00102}00102\ \ \ std::cout\ <<\ \textcolor{stringliteral}{"{}Transformer:"{}}\ <<\ std::endl\ <<\ rf-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1ITransformer_a9c3f7589548b993ea0c3a92027b2e447}{getInfo}}()\ <<\ std::endl;}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00103}00103\ }
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00104}00104\ }
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00105}00105\ \ \ \textcolor{comment}{//\ create\ and\ feed\ training\ samples}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00106}00106\ \ \ noise\_min\ =\ \mbox{\hyperlink{lmlibindirect_8cpp_aa5b32968761a02aed2c52200945fbc6a}{NOISE\_MIN}};}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00107}00107\ \ \ noise\_max\ =\ \mbox{\hyperlink{lmlibindirect_8cpp_a4d0ce98efc84b342515e9abadbc0e8ec}{NOISE\_MAX}};}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00108}00108\ }
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00109}00109\ \ \ trainMSE\ =\ 0.0;}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00110}00110\ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i\ =\ 0;\ i\ <\ \mbox{\hyperlink{lmlibindirect_8cpp_ac3a1aebd6f12d430c79547db1169b687}{NO\_TRAIN}};\ i++)\ \{}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00111}00111\ \ \ \ \ \textcolor{comment}{//\ create\ a\ new\ training\ sample}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00112}00112\ \ \ \ \ std::pair<Vector,\ Vector>\ sample\ =\ \mbox{\hyperlink{lmlibindirect_8cpp_afb399af928baf50c0feb93f496e5901a}{createSample}}();}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00113}00113\ }
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00114}00114\ \ \ \ \ \textcolor{comment}{//\ add\ some\ noise\ to\ output\ for\ training}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00115}00115\ \ \ \ \ Vector\ noisyOutput\ =\ sample.second\ +\ Rand::vector(noise\_min,\ noise\_max);}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00116}00116\ }
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00117}00117\ \ \ \ \ \textcolor{comment}{//\ transform\ input\ using\ RF}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00118}00118\ \ \ \ \ Vector\ transInput\ =\ rf-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1ITransformer_a5e76e97574583d92e72fcd8abdcefb78}{transform}}(sample.first);}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00119}00119\ }
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00120}00120\ \ \ \ \ \textcolor{comment}{//\ make\ prediction\ before\ feeding\ full\ sample}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00121}00121\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1Prediction}{Prediction}}\ prediction\ =\ rls-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1IMachineLearner_a7118f9fa69b43e519c42ce125c70f5c8}{predict}}(transInput);}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00122}00122\ \ \ \ \ \textcolor{comment}{//std::cout\ <<\ "{}Predict:\ "{}\ <<\ prediction.toString()\ <<\ std::endl;}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00123}00123\ \ \ \ \ Vector\ diff\ =\ prediction.\mbox{\hyperlink{classiCub_1_1learningmachine_1_1Prediction_affd3e50f1466283df3ba8cff2c06f2eb}{getPrediction}}()\ -\/\ sample.second;}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00124}00124\ \ \ \ \ \mbox{\hyperlink{lmlibindirect_8cpp_aad08c71c6fea791f60508f1eb75483d2}{elementProd}}(diff,\ diff);}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00125}00125\ \ \ \ \ trainMSE\ =\ trainMSE\ +\ diff;}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00126}00126\ }
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00127}00127\ \ \ \ \ \textcolor{comment}{//\ train\ on\ complete\ sample\ with\ noisy\ output}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00128}00128\ \ \ \ \ rls-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1IMachineLearner_a966cad73ccbce571d21840d91190b183}{feedSample}}(transInput,\ noisyOutput);}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00129}00129\ \ \ \}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00130}00130\ \ \ trainMSE\ =\ \mbox{\hyperlink{lmlibindirect_8cpp_a8614ac1c43903ffeed4b43315a391ed6}{elementDiv}}(trainMSE,\ \mbox{\hyperlink{lmlibindirect_8cpp_ac3a1aebd6f12d430c79547db1169b687}{NO\_TRAIN}});}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00131}00131\ \ \ std::cout\ <<\ \textcolor{stringliteral}{"{}Train\ MSE:\ "{}}\ <<\ trainMSE.toString()\ <<\ std::endl;}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00132}00132\ }
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00133}00133\ \ \ \textcolor{comment}{//\ predict\ test\ samples}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00134}00134\ \ \ testMSE\ =\ 0.;}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00135}00135\ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i\ =\ 0;\ i\ <\ \mbox{\hyperlink{lmlibindirect_8cpp_a21ad75f2d70a3d82560483fde9a668fb}{NO\_TEST}};\ i++)\ \{}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00136}00136\ \ \ \ \ \textcolor{comment}{//\ create\ a\ new\ testing\ sample}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00137}00137\ \ \ \ \ std::pair<Vector,\ Vector>\ sample\ =\ \mbox{\hyperlink{lmlibindirect_8cpp_afb399af928baf50c0feb93f496e5901a}{createSample}}();}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00138}00138\ }
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00139}00139\ \ \ \ \ \textcolor{comment}{//\ transform\ input\ using\ RF}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00140}00140\ \ \ \ \ Vector\ transInput\ =\ rf-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1ITransformer_a5e76e97574583d92e72fcd8abdcefb78}{transform}}(sample.first);}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00141}00141\ }
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00142}00142\ \ \ \ \ \textcolor{comment}{//\ make\ prediction}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00143}00143\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1Prediction}{Prediction}}\ prediction\ =\ rls-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1IMachineLearner_a7118f9fa69b43e519c42ce125c70f5c8}{predict}}(transInput);}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00144}00144\ \ \ \ \ Vector\ diff\ =\ prediction.\mbox{\hyperlink{classiCub_1_1learningmachine_1_1Prediction_affd3e50f1466283df3ba8cff2c06f2eb}{getPrediction}}()\ -\/\ sample.second;}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00145}00145\ \ \ \ \ \mbox{\hyperlink{lmlibindirect_8cpp_aad08c71c6fea791f60508f1eb75483d2}{elementProd}}(diff,\ diff);}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00146}00146\ \ \ \ \ \textcolor{comment}{//std::cout\ <<\ "{}Sample:\ "{}\ <<\ sample.input\ <<}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00147}00147\ \ \ \ \ testMSE\ =\ testMSE\ +\ diff;}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00148}00148\ \ \ \}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00149}00149\ \ \ testMSE\ =\ \mbox{\hyperlink{lmlibindirect_8cpp_a8614ac1c43903ffeed4b43315a391ed6}{elementDiv}}(testMSE,\ \mbox{\hyperlink{lmlibindirect_8cpp_a21ad75f2d70a3d82560483fde9a668fb}{NO\_TEST}});}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00150}00150\ \ \ std::cout\ <<\ \textcolor{stringliteral}{"{}Test\ MSE:\ "{}}\ <<\ testMSE.toString()\ <<\ std::endl;}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00151}00151\ }
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00152}00152\ \ \ \textcolor{keyword}{delete}\ rls;}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00153}00153\ \ \ \textcolor{keyword}{delete}\ rf;}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00154}00154\ \}}
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00155}00155\ }
+\DoxyCodeLine{\Hypertarget{lmlibindirect_8cpp_source_l00156}00156\ }
+
+\end{DoxyCode}

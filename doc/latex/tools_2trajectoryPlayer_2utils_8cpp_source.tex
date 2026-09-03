@@ -1,0 +1,349 @@
+\doxysection{utils.\+cpp}
+\hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source}{}\label{tools_2trajectoryPlayer_2utils_8cpp_source}\index{icub-\/main/src/tools/trajectoryPlayer/utils.cpp@{icub-\/main/src/tools/trajectoryPlayer/utils.cpp}}
+\mbox{\hyperlink{tools_2trajectoryPlayer_2utils_8cpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00001}00001\ \textcolor{comment}{/*\ }}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00002}00002\ \textcolor{comment}{\ *\ Copyright\ (C)2013\ \ iCub\ Facility\ -\/\ Istituto\ Italiano\ di\ Tecnologia}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00003}00003\ \textcolor{comment}{\ *\ Author:\ Marco\ Randazzo}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00004}00004\ \textcolor{comment}{\ *\ email:\ \ marco.randazzo@iit.it}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00005}00005\ \textcolor{comment}{\ *\ website:\ www.robotcub.org}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00006}00006\ \textcolor{comment}{\ *\ Permission\ is\ granted\ to\ copy,\ distribute,\ and/or\ modify\ this\ program}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00007}00007\ \textcolor{comment}{\ *\ under\ the\ terms\ of\ the\ GNU\ General\ Public\ License,\ version\ 2\ or\ any}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00008}00008\ \textcolor{comment}{\ *\ later\ version\ published\ by\ the\ Free\ Software\ Foundation.}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00009}00009\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00010}00010\ \textcolor{comment}{\ *\ A\ copy\ of\ the\ license\ can\ be\ found\ at}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00011}00011\ \textcolor{comment}{\ *\ http://www.robotcub.org/icub/license/gpl.txt}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00012}00012\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00013}00013\ \textcolor{comment}{\ *\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00014}00014\ \textcolor{comment}{\ *\ WITHOUT\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00015}00015\ \textcolor{comment}{\ *\ MERCHANTABILITY\ or\ FITNESS\ FOR\ A\ PARTICULAR\ PURPOSE.\ See\ the\ GNU\ General}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00016}00016\ \textcolor{comment}{\ *\ Public\ License\ for\ more\ details}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00017}00017\ \textcolor{comment}{*/}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00018}00018\ }
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00019}00019\ \textcolor{preprocessor}{\#include\ <yarp/os/Network.h>}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00020}00020\ \textcolor{preprocessor}{\#include\ <yarp/os/Time.h>}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00021}00021\ \textcolor{preprocessor}{\#include\ <yarp/os/Log.h>}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00022}00022\ \textcolor{preprocessor}{\#include\ <yarp/os/LogStream.h>}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00023}00023\ \textcolor{preprocessor}{\#include\ <yarp/os/BufferedPort.h>}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00024}00024\ \textcolor{preprocessor}{\#include\ <yarp/sig/Vector.h>}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00025}00025\ \textcolor{preprocessor}{\#include\ <yarp/math/Math.h>}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00026}00026\ }
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00027}00027\ \textcolor{preprocessor}{\#include\ <yarp/dev/ControlBoardInterfaces.h>}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00028}00028\ \textcolor{preprocessor}{\#include\ <yarp/dev/PolyDriver.h>}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00029}00029\ \textcolor{preprocessor}{\#include\ <yarp/os/PeriodicThread.h>}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00030}00030\ \textcolor{preprocessor}{\#include\ <yarp/os/Thread.h>}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00031}00031\ }
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00032}00032\ \textcolor{preprocessor}{\#include\ <fstream>}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00033}00033\ \textcolor{preprocessor}{\#include\ <iostream>}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00034}00034\ \textcolor{preprocessor}{\#include\ <iomanip>}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00035}00035\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00036}00036\ \textcolor{preprocessor}{\#include\ <vector>}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00037}00037\ \textcolor{preprocessor}{\#include\ <deque>}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00038}00038\ }
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00039}00039\ \textcolor{keyword}{using\ namespace\ }std;}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00040}00040\ \textcolor{keyword}{using\ namespace\ }yarp::os;}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00041}00041\ \textcolor{keyword}{using\ namespace\ }yarp::sig;}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00042}00042\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceyarp_1_1dev}{yarp::dev}};}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00043}00043\ \textcolor{keyword}{using\ namespace\ }yarp::math;}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00044}00044\ }
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00045}00045\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{tools_2trajectoryPlayer_2utils_8h}{utils.h}}"{}}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00046}00046\ }
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00047}00047\ \textcolor{comment}{//\ ********************\ ACTION\ CLASS}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00048}00048\ }
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00049}\mbox{\hyperlink{classaction__struct_a1255264ae74849c3055dbd848e593c67}{00049}}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{classaction__struct_a1255264ae74849c3055dbd848e593c67}{action\_struct::get\_n\_joints}}()}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00050}00050\ \{\ }
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00051}00051\ \ \ \ \ \textcolor{keywordflow}{return}\ N\_JOINTS;}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00052}00052\ \}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00053}00053\ }
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00054}\mbox{\hyperlink{classaction__struct_acd826e8070bf3e77bd5e9b1ae14763fa}{00054}}\ \mbox{\hyperlink{classaction__struct_acd826e8070bf3e77bd5e9b1ae14763fa}{action\_struct::action\_struct}}(\textcolor{keywordtype}{int}\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}})}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00055}00055\ \{}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00056}00056\ \ \ \ \ N\_JOINTS\ =\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}};}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00057}00057\ \ \ \ \ \mbox{\hyperlink{classaction__struct_ab38f03d20fb2656acd56cb3c0afe6a71}{q\_joints}}\ =\ \textcolor{keyword}{new}\ \textcolor{keywordtype}{double}\ [N\_JOINTS];}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00058}00058\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i=0;\ i<N\_JOINTS;\ i++)\ \mbox{\hyperlink{classaction__struct_ab38f03d20fb2656acd56cb3c0afe6a71}{q\_joints}}[i]=0.0;}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00059}00059\ \ \ \ \ \mbox{\hyperlink{classaction__struct_af2d273e8fb8eff69091293eaf519eb87}{tag}}\ =\ \textcolor{stringliteral}{"{}UNKNOWN"{}};}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00060}00060\ \}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00061}00061\ }
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00062}\mbox{\hyperlink{classaction__struct_ad43655d8ae57925525cae19a1adf5102}{00062}}\ \mbox{\hyperlink{classaction__struct_acd826e8070bf3e77bd5e9b1ae14763fa}{action\_struct::action\_struct}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{classaction__struct}{action\_struct}}\&\ as)}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00063}00063\ \{}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00064}00064\ \ \ \ \ N\_JOINTS\ =\ as.N\_JOINTS;}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00065}00065\ \ \ \ \ \mbox{\hyperlink{classaction__struct_adb14a86adda318b428e26fe0d504bde7}{counter}}\ =\ as.\mbox{\hyperlink{classaction__struct_adb14a86adda318b428e26fe0d504bde7}{counter}};}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00066}00066\ \ \ \ \ \mbox{\hyperlink{classaction__struct_ae200b8fde7fbc03bcb3bb37b880694ac}{time}}\ =\ as.\mbox{\hyperlink{classaction__struct_ae200b8fde7fbc03bcb3bb37b880694ac}{time}};}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00067}00067\ \ \ \ \ \mbox{\hyperlink{classaction__struct_af2d273e8fb8eff69091293eaf519eb87}{tag}}\ =\ as.\mbox{\hyperlink{classaction__struct_af2d273e8fb8eff69091293eaf519eb87}{tag}};}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00068}00068\ \ \ \ \ \mbox{\hyperlink{classaction__struct_ab38f03d20fb2656acd56cb3c0afe6a71}{q\_joints}}\ =\ \textcolor{keyword}{new}\ \textcolor{keywordtype}{double}\ [N\_JOINTS];}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00069}00069\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i=0;\ i<\ N\_JOINTS;\ i++)}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00070}00070\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00071}00071\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classaction__struct_ab38f03d20fb2656acd56cb3c0afe6a71}{q\_joints}}[i]=as.\mbox{\hyperlink{classaction__struct_ab38f03d20fb2656acd56cb3c0afe6a71}{q\_joints}}[i];}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00072}00072\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00073}00073\ \}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00074}00074\ }
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00075}\mbox{\hyperlink{classaction__struct_a5ed2b5c9f611dea76e1b2e1617a3c9ec}{00075}}\ \mbox{\hyperlink{classaction__struct}{action\_struct}}\ \&\ \mbox{\hyperlink{classaction__struct_a5ed2b5c9f611dea76e1b2e1617a3c9ec}{action\_struct::operator=}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{classaction__struct}{action\_struct}}\ \&\ as)}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00076}00076\ \{}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00077}00077\ \ \ \ \ \textcolor{keywordflow}{if}(\textcolor{keyword}{this}\ ==\ \&as)}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00078}00078\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00079}00079\ \ \ \ \ N\_JOINTS\ =\ as.N\_JOINTS;}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00080}00080\ \ \ \ \ \mbox{\hyperlink{classaction__struct_adb14a86adda318b428e26fe0d504bde7}{counter}}\ =\ as.\mbox{\hyperlink{classaction__struct_adb14a86adda318b428e26fe0d504bde7}{counter}};}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00081}00081\ \ \ \ \ \mbox{\hyperlink{classaction__struct_ae200b8fde7fbc03bcb3bb37b880694ac}{time}}\ =\ as.\mbox{\hyperlink{classaction__struct_ae200b8fde7fbc03bcb3bb37b880694ac}{time}};}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00082}00082\ \ \ \ \ \mbox{\hyperlink{classaction__struct_af2d273e8fb8eff69091293eaf519eb87}{tag}}\ =\ as.\mbox{\hyperlink{classaction__struct_af2d273e8fb8eff69091293eaf519eb87}{tag}};}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00083}00083\ \ \ \ \ \mbox{\hyperlink{classaction__struct_ab38f03d20fb2656acd56cb3c0afe6a71}{q\_joints}}\ =\ \textcolor{keyword}{new}\ \textcolor{keywordtype}{double}\ [N\_JOINTS];}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00084}00084\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i=0;\ i<\ N\_JOINTS;\ i++)}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00085}00085\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00086}00086\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classaction__struct_ab38f03d20fb2656acd56cb3c0afe6a71}{q\_joints}}[i]=as.\mbox{\hyperlink{classaction__struct_ab38f03d20fb2656acd56cb3c0afe6a71}{q\_joints}}[i];}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00087}00087\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00088}00088\ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00089}00089\ \}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00090}00090\ }
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00091}\mbox{\hyperlink{classaction__struct_a6f2da26ed823aaddebd3bce937e3ddb9}{00091}}\ \mbox{\hyperlink{classaction__struct_a6f2da26ed823aaddebd3bce937e3ddb9}{action\_struct::\string~action\_struct}}()}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00092}00092\ \{}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00093}00093\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classaction__struct_ab38f03d20fb2656acd56cb3c0afe6a71}{q\_joints}})}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00094}00094\ \ \ \ \ \{\ }
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00095}00095\ \ \ \ \ \ \ \ \ \textcolor{keyword}{delete}\ []\mbox{\hyperlink{classaction__struct_ab38f03d20fb2656acd56cb3c0afe6a71}{q\_joints}};}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00096}00096\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classaction__struct_ab38f03d20fb2656acd56cb3c0afe6a71}{q\_joints}}\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00097}00097\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00098}00098\ \}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00099}00099\ }
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00100}\mbox{\hyperlink{classaction__class_a99622db5c8538807fc62495503aedd87}{00100}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classaction__class_a99622db5c8538807fc62495503aedd87}{action\_class::clear}}()}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00101}00101\ \{}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00102}00102\ \ \ \ \ \mbox{\hyperlink{classaction__class_af3d9e25a73f35deb5376d1c692413395}{forever}}\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00103}00103\ \ \ \ \ \mbox{\hyperlink{classaction__class_af46bcad314f57e0aa04aa308fb79a24f}{current\_action}}\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00104}00104\ \ \ \ \ \mbox{\hyperlink{classaction__class_afa2c291ddd2fab949f67e063d5aa6365}{current\_status}}\ =\ \mbox{\hyperlink{tools_2trajectoryPlayer_2utils_8h_a55966d8fd3ce9d5110d814b527a32ddf}{ACTION\_IDLE}};}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00105}00105\ \ \ \ \ \mbox{\hyperlink{classaction__class_aed181e27d5cccd5fdf079a2589e01a99}{action\_vector}}.clear();}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00106}00106\ \}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00107}00107\ }
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00108}\mbox{\hyperlink{classaction__class_a4e74195afcdc1d6b9adc0996fc464ed4}{00108}}\ \mbox{\hyperlink{classaction__class_a4e74195afcdc1d6b9adc0996fc464ed4}{action\_class::action\_class}}()}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00109}00109\ \{}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00110}00110\ \ \ \ \ \mbox{\hyperlink{classaction__class_a99622db5c8538807fc62495503aedd87}{clear}}();}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00111}00111\ \}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00112}00112\ }
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00113}\mbox{\hyperlink{classaction__class_aea7bc89f57d5f1081c553fe987b32356}{00113}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classaction__class_aea7bc89f57d5f1081c553fe987b32356}{action\_class::print}}()}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00114}00114\ \{}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00115}00115\ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{classaction__class_a1076c079855710c3054325dca6105666}{action\_it}}=\mbox{\hyperlink{classaction__class_aed181e27d5cccd5fdf079a2589e01a99}{action\_vector}}.begin();\ \mbox{\hyperlink{classaction__class_a1076c079855710c3054325dca6105666}{action\_it}}<\mbox{\hyperlink{classaction__class_aed181e27d5cccd5fdf079a2589e01a99}{action\_vector}}.end();\ \mbox{\hyperlink{classaction__class_a1076c079855710c3054325dca6105666}{action\_it}}++)}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00116}00116\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00117}00117\ \ \ \ \ \ \ \ \ yInfo\ (\textcolor{stringliteral}{"{}\%d\ \%f\ "{}},\mbox{\hyperlink{classaction__class_a1076c079855710c3054325dca6105666}{action\_it}}-\/>counter,\mbox{\hyperlink{classaction__class_a1076c079855710c3054325dca6105666}{action\_it}}-\/>time);}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00118}00118\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i=0;\ i<\ \mbox{\hyperlink{classaction__class_a1076c079855710c3054325dca6105666}{action\_it}}-\/>get\_n\_joints();\ i++)}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00119}00119\ \ \ \ \ \ \ \ \ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}\%f\ "{}},\ \mbox{\hyperlink{classaction__class_a1076c079855710c3054325dca6105666}{action\_it}}-\/>q\_joints[i]);}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00120}00120\ \ \ \ \ \ \ \ \ yInfo\ (\textcolor{stringliteral}{"{}\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00121}00121\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00122}00122\ \}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00123}00123\ }
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00124}\mbox{\hyperlink{classaction__class_affa79de06fd453112405a16944d31274}{00124}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classaction__class_affa79de06fd453112405a16944d31274}{action\_class::openFile}}(\textcolor{keywordtype}{string}\ filename,\ \textcolor{keywordtype}{int}\ n\_joints)}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00125}00125\ \{}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00126}00126\ \ \ \ \ \textcolor{keywordtype}{bool}\ ret\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00127}00127\ \ \ \ \ FILE*\ data\_file\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00128}00128\ \ \ \ \ data\_file\ =\ fopen(filename.c\_str(),\textcolor{stringliteral}{"{}r"{}});}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00129}00129\ \ \ \ \ \textcolor{keywordflow}{if}\ (data\_file!=NULL)}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00130}00130\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00131}00131\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}*\ bb\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00132}00132\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ \ \ line\ =0;}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00133}00133\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{do}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00134}00134\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00135}00135\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ command\_line[1024];}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00136}00136\ \ \ \ \ \ \ \ \ \ \ \ \ bb\ =\ fgets\ (command\_line,\ 1024,\ data\_file);}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00137}00137\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (bb\ ==\ 0)\ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00138}00138\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//if(!parseCommandLine(command\_line,\ line++))}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00139}00139\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ if(!parseCommandLineFixTime(command\_line,\ line++,\ 1.0/25.0))\ //25hz}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00140}00140\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(!\mbox{\hyperlink{classaction__class_a8af4f880c12576904380960ac3cbcfb7}{parseCommandLineFixTime}}(command\_line,\ line++,\ 1.0/50.0,\ n\_joints))\ \textcolor{comment}{//50hz}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00141}00141\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00142}00142\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yError\ (\textcolor{stringliteral}{"{}error\ parsing\ file,\ line\ \%d\(\backslash\)n"{}},\ line);}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00143}00143\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ret\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00144}00144\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00145}00145\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00146}00146\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00147}00147\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (1);}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00148}00148\ }
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00149}00149\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{sine_8m_a14e2cbac46a5d611bf112b1f4beb7021}{fclose}}\ (data\_file);}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00150}00150\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00151}00151\ \ \ \ \ \textcolor{keywordflow}{else}\ }
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00152}00152\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00153}00153\ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}unable\ to\ find\ file\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00154}00154\ \ \ \ \ \ \ \ \ ret\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00155}00155\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00156}00156\ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00157}00157\ \}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00158}00158\ }
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00159}\mbox{\hyperlink{classaction__class_a8af4f880c12576904380960ac3cbcfb7}{00159}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classaction__class_a8af4f880c12576904380960ac3cbcfb7}{action\_class::parseCommandLineFixTime}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ command\_line,\ \textcolor{keywordtype}{int}\ line,\ \textcolor{keywordtype}{double}\ fixTime,\ \textcolor{keywordtype}{int}\ n\_joints)}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00160}00160\ \{}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00161}00161\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{int}\ count\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00162}00162\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{sine_8m_adf373d0d082773c69f688bdb3a56d6aa}{time}}\ =0.0;}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00163}00163\ \ \ \ \ \mbox{\hyperlink{classaction__struct}{action\_struct}}\ tmp\_action(n\_joints);}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00164}00164\ }
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00165}00165\ \ \ \ \ tmp\_action.\mbox{\hyperlink{classaction__struct_adb14a86adda318b428e26fe0d504bde7}{counter}}\ =\ count;\ count\ =\ count\ +\ 1;}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00166}00166\ \ \ \ \ tmp\_action.\mbox{\hyperlink{classaction__struct_ae200b8fde7fbc03bcb3bb37b880694ac}{time}}\ \ \ \ =\ \mbox{\hyperlink{sine_8m_adf373d0d082773c69f688bdb3a56d6aa}{time}};\ \ \mbox{\hyperlink{sine_8m_adf373d0d082773c69f688bdb3a56d6aa}{time}}\ =\ \mbox{\hyperlink{sine_8m_adf373d0d082773c69f688bdb3a56d6aa}{time}}+fixTime;}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00167}00167\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00168}00168\ \ \ \ \ \textcolor{keywordtype}{char}*\ tok;}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00169}00169\ \ \ \ \ \textcolor{keywordtype}{size\_t}\ ss\ =\ strlen(command\_line);}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00170}00170\ \ \ \ \ \textcolor{keywordtype}{char}*\ cline\ =\ \textcolor{keyword}{new}\ \textcolor{keywordtype}{char}\ [ss];}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00171}00171\ \ \ \ \ strcpy(cline,command\_line);}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00172}00172\ \ \ \ \ tok\ =\ strtok\ (cline,\textcolor{stringliteral}{"{}\ "{}});}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00173}00173\ \ \ \ \ \textcolor{keywordtype}{int}\ i=0;}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00174}00174\ \ \ \ \ \textcolor{keywordtype}{int}\ joints\_count\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00175}00175\ \ \ \ \ \textcolor{keywordflow}{while}\ (tok\ !=\ 0\ \&\&\ joints\_count\ <\ n\_joints)}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00176}00176\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00177}00177\ \ \ \ \ \ \ \ \ sscanf(tok,\ \textcolor{stringliteral}{"{}\%lf"{}},\ \&tmp\_action.\mbox{\hyperlink{classaction__struct_ab38f03d20fb2656acd56cb3c0afe6a71}{q\_joints}}[i++]);}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00178}00178\ \ \ \ \ \ \ \ \ tok\ =\ strtok\ (NULL,\textcolor{stringliteral}{"{}\ "{}});}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00179}00179\ \ \ \ \ \ \ \ \ joints\_count++;}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00180}00180\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00181}00181\ }
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00182}00182\ \ \ \ \ \textcolor{comment}{//insertion\ in\ the\ vector\ based\ on\ the\ timestamp}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00183}00183\ \ \ \ \ \textcolor{comment}{/*for\ (action\_it=action\_vector.begin();\ action\_it<action\_vector.end();\ action\_it++)}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00184}00184\ \textcolor{comment}{\ \ \ \ \{}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00185}00185\ \textcolor{comment}{\ \ \ \ \ \ \ \ if\ (tmp\_action.time\ >\ action\_it-\/>time)\ break;}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00186}00186\ \textcolor{comment}{\ \ \ \ \}}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00187}00187\ \textcolor{comment}{\ \ \ \ action\_vector.insert(action\_it,tmp\_action);*/}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00188}00188\ }
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00189}00189\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classaction__class_aed181e27d5cccd5fdf079a2589e01a99}{action\_vector}}.size()==0)\ }
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00190}00190\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00191}00191\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classaction__class_aed181e27d5cccd5fdf079a2589e01a99}{action\_vector}}.push\_back(tmp\_action);}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00192}00192\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00193}00193\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00194}00194\ }
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00195}00195\ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{classaction__class_a1076c079855710c3054325dca6105666}{action\_it}}=\mbox{\hyperlink{classaction__class_aed181e27d5cccd5fdf079a2589e01a99}{action\_vector}}.end()-\/1;\ \mbox{\hyperlink{classaction__class_a1076c079855710c3054325dca6105666}{action\_it}}>=\mbox{\hyperlink{classaction__class_aed181e27d5cccd5fdf079a2589e01a99}{action\_vector}}.begin();\ \mbox{\hyperlink{classaction__class_a1076c079855710c3054325dca6105666}{action\_it}}-\/-\/)}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00196}00196\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00197}00197\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (tmp\_action.\mbox{\hyperlink{classaction__struct_ae200b8fde7fbc03bcb3bb37b880694ac}{time}}\ >\ \mbox{\hyperlink{classaction__class_a1076c079855710c3054325dca6105666}{action\_it}}-\/>time)\ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00198}00198\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00199}00199\ \ \ \ \ \mbox{\hyperlink{classaction__class_aed181e27d5cccd5fdf079a2589e01a99}{action\_vector}}.insert(\mbox{\hyperlink{classaction__class_a1076c079855710c3054325dca6105666}{action\_it}}+1,tmp\_action);}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00200}00200\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00201}00201\ \}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00202}00202\ }
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00203}\mbox{\hyperlink{classaction__class_ab6ebaee80ccca684fcabcc77e6d55770}{00203}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classaction__class_ab6ebaee80ccca684fcabcc77e6d55770}{action\_class::parseCommandLine}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ command\_line,\ \textcolor{keywordtype}{int}\ line,\ \textcolor{keywordtype}{int}\ n\_joints)}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00204}00204\ \{}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00205}00205\ \ \ \ \ \mbox{\hyperlink{classaction__struct}{action\_struct}}\ tmp\_action(n\_joints);}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00206}00206\ \ \ \ \ \textcolor{comment}{//use\ strtok\ for\ runtime-\/defined\ number\ of\ entries}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00207}00207\ \ \ \ \ \textcolor{keywordtype}{char}\ command\_line\_format\ [1000];}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00208}00208\ \ \ \ \ sprintf(command\_line\_format,\ \textcolor{stringliteral}{"{}\%\%d\ \%\%lf\ \ \ \ "{}});}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00209}00209\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i\ =\ 0;\ i\ <\ n\_joints;\ i++)}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00210}00210\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00211}00211\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{size\_t}\ off\ =\ strlen(command\_line\_format);}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00212}00212\ \ \ \ \ \ \ \ \ sprintf(command\_line\_format+off,\ \textcolor{stringliteral}{"{}\%\%lf\ "{}});}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00213}00213\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00214}00214\ }
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00215}00215\ \ \ \ \ \textcolor{keywordtype}{int}\ ret\ =\ sscanf(command\_line,\ \textcolor{stringliteral}{"{}\%d\ \%lf\ \ \ \ \%lf\ \%lf\ \%lf\ \%lf\ \%lf\ \%lf"{}},\ }
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00216}00216\ \ \ \ \ \&tmp\_action.\mbox{\hyperlink{classaction__struct_adb14a86adda318b428e26fe0d504bde7}{counter}},}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00217}00217\ \ \ \ \ \&tmp\_action.\mbox{\hyperlink{classaction__struct_ae200b8fde7fbc03bcb3bb37b880694ac}{time}},}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00218}00218\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00219}00219\ \ \ \ \ \&tmp\_action.\mbox{\hyperlink{classaction__struct_ab38f03d20fb2656acd56cb3c0afe6a71}{q\_joints}}[0],}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00220}00220\ \ \ \ \ \&tmp\_action.\mbox{\hyperlink{classaction__struct_ab38f03d20fb2656acd56cb3c0afe6a71}{q\_joints}}[1],}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00221}00221\ \ \ \ \ \&tmp\_action.\mbox{\hyperlink{classaction__struct_ab38f03d20fb2656acd56cb3c0afe6a71}{q\_joints}}[2],}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00222}00222\ \ \ \ \ \&tmp\_action.\mbox{\hyperlink{classaction__struct_ab38f03d20fb2656acd56cb3c0afe6a71}{q\_joints}}[3],}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00223}00223\ \ \ \ \ \&tmp\_action.\mbox{\hyperlink{classaction__struct_ab38f03d20fb2656acd56cb3c0afe6a71}{q\_joints}}[4],}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00224}00224\ \ \ \ \ \&tmp\_action.\mbox{\hyperlink{classaction__struct_ab38f03d20fb2656acd56cb3c0afe6a71}{q\_joints}}[5]}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00225}00225\ \ \ \ \ );}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00226}00226\ }
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00227}00227\ \ \ \ \ \textcolor{keywordflow}{if}\ (ret\ ==\ n\_joints+2)\ }
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00228}00228\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00229}00229\ \ \ \ \ \ \ \ \ \textcolor{comment}{//insertion\ in\ the\ vector\ based\ on\ the\ timestamp}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00230}00230\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{classaction__class_a1076c079855710c3054325dca6105666}{action\_it}}=\mbox{\hyperlink{classaction__class_aed181e27d5cccd5fdf079a2589e01a99}{action\_vector}}.begin();\ \mbox{\hyperlink{classaction__class_a1076c079855710c3054325dca6105666}{action\_it}}<\mbox{\hyperlink{classaction__class_aed181e27d5cccd5fdf079a2589e01a99}{action\_vector}}.end();\ \mbox{\hyperlink{classaction__class_a1076c079855710c3054325dca6105666}{action\_it}}++)}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00231}00231\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (tmp\_action.\mbox{\hyperlink{classaction__struct_ae200b8fde7fbc03bcb3bb37b880694ac}{time}}\ >\ \mbox{\hyperlink{classaction__class_a1076c079855710c3054325dca6105666}{action\_it}}-\/>time)\ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00232}00232\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classaction__class_aed181e27d5cccd5fdf079a2589e01a99}{action\_vector}}.insert(\mbox{\hyperlink{classaction__class_a1076c079855710c3054325dca6105666}{action\_it}},tmp\_action);}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00233}00233\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00234}00234\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00235}00235\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00236}00236\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00237}00237\ \}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00238}00238\ }
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00239}00239\ }
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00240}00240\ \textcolor{comment}{//\ ********************\ ROBOT\ DRIVER\ CLASS}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00241}\mbox{\hyperlink{classrobotDriver_a348ce3be41b47df86d7a35a4ef5e4ef9}{00241}}\ \mbox{\hyperlink{classrobotDriver_a348ce3be41b47df86d7a35a4ef5e4ef9}{robotDriver::robotDriver}}()}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00242}00242\ \{}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00243}00243\ \ \ \ \ drvOptions\_ll.clear();}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00244}00244\ \ \ \ \ drv\_ll\ \ =\ 0;}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00245}00245\ \ \ \ \ ipos\_ll\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00246}00246\ \ \ \ \ iposdir\_ll\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00247}00247\ \ \ \ \ ipid\_ll\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00248}00248\ \ \ \ \ icmd\_ll\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00249}00249\ \ \ \ \ ienc\_ll\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00250}00250\ \ \ \ \ \mbox{\hyperlink{classrobotDriver_a48ec7b5178deffa722918a57494eacce}{n\_joints}}\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00251}00251\ }
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00252}00252\ \ \ \ \ verbose=1;}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00253}00253\ \ \ \ \ drv\_connected=\textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00254}00254\ \}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00255}00255\ }
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00256}\mbox{\hyperlink{classrobotDriver_a9ffd27078fb137c06fe096d5c8c9f718}{00256}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classrobotDriver_a9ffd27078fb137c06fe096d5c8c9f718}{robotDriver::configure}}(\textcolor{keyword}{const}\ Property\ \&copt)}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00257}00257\ \{}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00258}00258\ \ \ \ \ \textcolor{keywordtype}{bool}\ ret=\textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00259}00259\ \ \ \ \ Property\ \&options=\textcolor{keyword}{const\_cast<}Property\ \&\textcolor{keyword}{>}\ (copt);}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00260}00260\ }
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00261}00261\ \ \ \ \ drvOptions\_ll.put(\textcolor{stringliteral}{"{}device"{}},\textcolor{stringliteral}{"{}remote\_controlboard"{}});}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00262}00262\ }
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00263}00263\ \ \ \ \ \textcolor{keywordflow}{if}\ (!options.check(\textcolor{stringliteral}{"{}robot"{}}))\ \{\ yError()\ <<\ \textcolor{stringliteral}{"{}Missing\ robot\ parameter"{}};\ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};\ \}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00264}00264\ \ \ \ \ \textcolor{keywordflow}{if}\ (!options.check(\textcolor{stringliteral}{"{}part"{}}))\ \{\ yError()\ <<\ \textcolor{stringliteral}{"{}Missing\ part\ parameter"{}};\ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};\ \}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00265}00265\ }
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00266}00266\ \ \ \ \ \textcolor{keywordtype}{string}\ remote\_ll;}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00267}00267\ \ \ \ \ \textcolor{keywordtype}{string}\ local\_ll;}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00268}00268\ \ \ \ \ remote\_ll\ =\ string(\textcolor{stringliteral}{"{}/"{}})\ +\ string(options.find(\textcolor{stringliteral}{"{}robot"{}}).asString())\ +\ string(\textcolor{stringliteral}{"{}/"{}})\ +string(options.find(\textcolor{stringliteral}{"{}part"{}}).asString());}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00269}00269\ \ \ \ \ local\_ll\ \ =\ string(\textcolor{stringliteral}{"{}/"{}})\ +\ string(\textcolor{stringliteral}{"{}trajectoryPlayer"{}})\ +\ string(\textcolor{stringliteral}{"{}/"{}})\ +\ string(options.find(\textcolor{stringliteral}{"{}part"{}}).asString());}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00270}00270\ \ \ \ \ drvOptions\_ll.put(\textcolor{stringliteral}{"{}remote"{}},remote\_ll.c\_str());}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00271}00271\ \ \ \ \ drvOptions\_ll.put(\textcolor{stringliteral}{"{}local"{}},local\_ll.c\_str());}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00272}00272\ }
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00273}00273\ \ \ \ \ \textcolor{keywordflow}{if}\ (verbose)}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00274}00274\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00275}00275\ \ \ \ \ \ \ \ \ yDebug()\ <<\ \textcolor{stringliteral}{"{}driver\ options:\(\backslash\)n"{}}\ <<\ drvOptions\_ll.toString().c\_str();}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00276}00276\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00277}00277\ }
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00278}00278\ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00279}00279\ \}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00280}00280\ }
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00281}\mbox{\hyperlink{classrobotDriver_abbce3816cfcc8a69d2c41a7fec7fd081}{00281}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classrobotDriver_abbce3816cfcc8a69d2c41a7fec7fd081}{robotDriver::init}}()}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00282}00282\ \{}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00283}00283\ \ \ \ \ drv\_ll=\textcolor{keyword}{new}\ PolyDriver(drvOptions\_ll);}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00284}00284\ }
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00285}00285\ \ \ \ \ \textcolor{keywordflow}{if}\ (drv\_ll-\/>isValid())}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00286}00286\ \ \ \ \ \ \ \ \ drv\_connected\ =\ drv\_ll-\/>view(ipos\_ll)\ \&\&\ drv\_ll-\/>view(iposdir\_ll)\ \&\&\ drv\_ll-\/>view(ienc\_ll)\ \&\&\ drv\_ll-\/>view(ipid\_ll)\ \&\&\ drv\_ll-\/>view(imotenc\_ll)\ \&\&\ drv\_ll-\/>view(icmd\_ll);}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00287}00287\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00288}00288\ \ \ \ \ \ \ \ \ drv\_connected=\textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00289}00289\ }
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00290}00290\ \ \ \ \ \textcolor{keywordflow}{if}\ (!drv\_connected)}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00291}00291\ \ \ \ \ \{\ \ }
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00292}00292\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (drv\_ll)}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00293}00293\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00294}00294\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{delete}\ drv\_ll;}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00295}00295\ \ \ \ \ \ \ \ \ \ \ \ \ drv\_ll=0;}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00296}00296\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00297}00297\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00298}00298\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00299}00299\ }
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00300}00300\ \ \ \ \ \textcolor{comment}{//get\ the\ number\ of\ the\ joints}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00301}00301\ \ \ \ \ ienc\_ll-\/>getAxes(\&\mbox{\hyperlink{classrobotDriver_a48ec7b5178deffa722918a57494eacce}{n\_joints}});}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00302}00302\ }
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00303}00303\ \ \ \ \ \textcolor{comment}{//set\ the\ initial\ reference\ speeds}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00304}00304\ \ \ \ \ \textcolor{keywordtype}{double}*\ speeds\ =\ \textcolor{keyword}{new}\ \textcolor{keywordtype}{double}\ [\mbox{\hyperlink{classrobotDriver_a48ec7b5178deffa722918a57494eacce}{n\_joints}}];}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00305}00305\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i=0;\ i<\mbox{\hyperlink{classrobotDriver_a48ec7b5178deffa722918a57494eacce}{n\_joints}};\ i++)\ speeds[i]\ =\ 20.0;}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00306}00306\ \ \ \ \ ipos\_ll-\/>setRefSpeeds(speeds);}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00307}00307\ }
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00308}00308\ \ \ \ \ \textcolor{comment}{//dbg\_connected\ is\ optional,\ so\ it\ has\ not\ to\ be\ returned}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00309}00309\ \ \ \ \ \textcolor{keywordflow}{return}\ drv\_connected;}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00310}00310\ \}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00311}00311\ }
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00312}\mbox{\hyperlink{classrobotDriver_aecb0a1fafaf2be598dd6f04fcd532bbc}{00312}}\ \mbox{\hyperlink{classrobotDriver_aecb0a1fafaf2be598dd6f04fcd532bbc}{robotDriver::\string~robotDriver}}()}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00313}00313\ \{}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00314}00314\ \ \ \ \ \textcolor{keywordflow}{if}\ (drv\_ll)}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00315}00315\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00316}00316\ \ \ \ \ \ \ \ \ \textcolor{keyword}{delete}\ drv\_ll;}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00317}00317\ \ \ \ \ \ \ \ \ drv\_ll=0;}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00318}00318\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00319}00319\ \}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00320}00320\ }
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00321}\mbox{\hyperlink{classrobotDriver_a57cde95cf2c6cdffe64bbd86e8489007}{00321}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classrobotDriver_a57cde95cf2c6cdffe64bbd86e8489007}{robotDriver::setControlMode}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ j,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ mode)}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00322}00322\ \{}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00323}00323\ \ \ \ \ \textcolor{keywordflow}{if}\ (!icmd\_ll)\ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00324}00324\ \ \ \ \ \textcolor{keywordflow}{return}\ icmd\_ll-\/>setControlMode(\mbox{\hyperlink{classrobotDriver_a1a072d56cb1268e329531cf94ce8fada}{joints\_map}}[j],\ mode);}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00325}00325\ \}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00326}00326\ }
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00327}\mbox{\hyperlink{classrobotDriver_a1b8061c0add1a54f64ee31fcbe75a19f}{00327}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classrobotDriver_a1b8061c0add1a54f64ee31fcbe75a19f}{robotDriver::setPosition}}(\textcolor{keywordtype}{int}\ j,\ \textcolor{keywordtype}{double}\ ref)}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00328}00328\ \{}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00329}00329\ \ \ \ \ \textcolor{keywordflow}{if}\ (!iposdir\_ll)\ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00330}00330\ \ \ \ \ \textcolor{keywordflow}{return}\ iposdir\_ll-\/>setPosition(\mbox{\hyperlink{classrobotDriver_a1a072d56cb1268e329531cf94ce8fada}{joints\_map}}[j],\ ref);}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00331}00331\ \}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00332}00332\ }
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00333}\mbox{\hyperlink{classrobotDriver_a907c041195836512a8ddaa4ad647762b}{00333}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classrobotDriver_a907c041195836512a8ddaa4ad647762b}{robotDriver::getEncoder}}(\textcolor{keywordtype}{int}\ j,\ \textcolor{keywordtype}{double}\ *v)}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00334}00334\ \{}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00335}00335\ \ \ \ \ \textcolor{keywordflow}{if}\ (!ienc\_ll)\ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00336}00336\ \ \ \ \ \textcolor{keywordflow}{return}\ ienc\_ll-\/>getEncoder(\mbox{\hyperlink{classrobotDriver_a1a072d56cb1268e329531cf94ce8fada}{joints\_map}}[j],\ v);}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00337}00337\ \}}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00338}00338\ }
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00339}\mbox{\hyperlink{classrobotDriver_ae5a46db880e9caad37a1e4bce2becd0f}{00339}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classrobotDriver_ae5a46db880e9caad37a1e4bce2becd0f}{robotDriver::positionMove}}(\textcolor{keywordtype}{int}\ j,\ \textcolor{keywordtype}{double}\ v)}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00340}00340\ \{}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00341}00341\ \ \ \ \ \textcolor{keywordflow}{if}\ (!ipos\_ll)\ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00342}00342\ \ \ \ \ \textcolor{keywordflow}{return}\ ipos\_ll-\/>positionMove(\mbox{\hyperlink{classrobotDriver_a1a072d56cb1268e329531cf94ce8fada}{joints\_map}}[j],\ v);}
+\DoxyCodeLine{\Hypertarget{tools_2trajectoryPlayer_2utils_8cpp_source_l00343}00343\ \}}
+
+\end{DoxyCode}

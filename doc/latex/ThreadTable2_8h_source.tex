@@ -1,0 +1,185 @@
+\doxysection{Thread\+Table2.\+h}
+\hypertarget{ThreadTable2_8h_source}{}\label{ThreadTable2_8h_source}\index{icub-\/main/src/libraries/icubmod/canBusMotionControl/ThreadTable2.h@{icub-\/main/src/libraries/icubmod/canBusMotionControl/ThreadTable2.h}}
+\mbox{\hyperlink{ThreadTable2_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00001}00001\ \textcolor{comment}{//\ -\/*-\/\ mode:C++;\ tab-\/width:4;\ c-\/basic-\/offset:4;\ indent-\/tabs-\/mode:nil\ -\/*-\/}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00002}00002\ }
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00003}00003\ \textcolor{comment}{/*\ }}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00004}00004\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2008\ The\ RobotCub\ Consortium}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00005}00005\ \textcolor{comment}{\ *\ Author:\ Lorenzo\ Natale}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00006}00006\ \textcolor{comment}{\ *\ website:\ www.robotcub.org}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00007}00007\ \textcolor{comment}{\ *\ Permission\ is\ granted\ to\ copy,\ distribute,\ and/or\ modify\ this\ program}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00008}00008\ \textcolor{comment}{\ *\ under\ the\ terms\ of\ the\ GNU\ General\ Public\ License,\ version\ 2\ or\ any}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00009}00009\ \textcolor{comment}{\ *\ later\ version\ published\ by\ the\ Free\ Software\ Foundation.}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00010}00010\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00011}00011\ \textcolor{comment}{\ *\ A\ copy\ of\ the\ license\ can\ be\ found\ at}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00012}00012\ \textcolor{comment}{\ *\ http://www.robotcub.org/icub/license/gpl.txt}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00013}00013\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00014}00014\ \textcolor{comment}{\ *\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00015}00015\ \textcolor{comment}{\ *\ WITHOUT\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00016}00016\ \textcolor{comment}{\ *\ MERCHANTABILITY\ or\ FITNESS\ FOR\ A\ PARTICULAR\ PURPOSE.\ See\ the\ GNU\ General}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00017}00017\ \textcolor{comment}{\ *\ Public\ License\ for\ more\ details}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00018}00018\ \textcolor{comment}{*/}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00019}00019\ }
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00020}00020\ \textcolor{preprocessor}{\#ifndef\ \_\_THREADTABLE2\_\_}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00021}00021\ \textcolor{preprocessor}{\#define\ \_\_THREADTABLE2\_\_}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00022}00022\ }
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00023}00023\ \textcolor{preprocessor}{\#include\ <mutex>}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00024}00024\ \textcolor{preprocessor}{\#include\ <condition\_variable>}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00025}00025\ \textcolor{preprocessor}{\#include\ <ace/config.h>}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00026}00026\ \textcolor{preprocessor}{\#include\ <ace/Thread.h>}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00027}00027\ \textcolor{preprocessor}{\#include\ <yarp/dev/CanBusInterface.h>}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00028}00028\ }
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00029}00029\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{canControlConstants_8h}{canControlConstants.h}}"{}}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00030}00030\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{canControlUtils_8h}{canControlUtils.h}}"{}}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00031}00031\ }
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00032}\mbox{\hyperlink{classThreadTable2}{00032}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classThreadTable2}{ThreadTable2}}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00033}00033\ \{}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00034}00034\ \textcolor{keyword}{private}:}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00035}00035\ \ \ \ \ \textcolor{keywordtype}{int}\ \_pending;}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00036}00036\ \ \ \ \ \textcolor{keywordtype}{int}\ \_timedOut;}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00037}00037\ \ \ \ \ yarp::dev::CanBuffer\ \_replies;}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00038}00038\ \ \ \ \ yarp::dev::ICanBufferFactory\ *ic;}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00039}00039\ \ \ \ \ std::mutex\ mtx\_synch;}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00040}00040\ \ \ \ \ std::condition\_variable\ cv\_synch;}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00041}00041\ \ \ \ \ \textcolor{keywordtype}{int}\ \_replied;}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00042}00042\ \ \ \ \ ACE\_thread\_t\ \_handle;}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00043}00043\ \ \ \ \ std::mutex\ \_mutex;}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00044}00044\ }
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00045}00045\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ lock()}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00046}00046\ \ \ \ \ \{\ \_mutex.lock();\ \}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00047}00047\ }
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00048}00048\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ unlock()}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00049}00049\ \ \ \ \ \{\ \_mutex.unlock();\ \}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00050}00050\ }
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00051}00051\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00052}00052\ \ \ \ \ \mbox{\hyperlink{classThreadTable2_afb1ad391b0469125d47bc105de19329f}{ThreadTable2}}();}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00053}00053\ \ \ \ \ \mbox{\hyperlink{classThreadTable2_ac8dd4099cf070ed570e7833505e188de}{\string~ThreadTable2}}();}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00054}00054\ }
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00055}00055\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classThreadTable2_a2129ef023b358d00c5b30de7176f2b3e}{clear}}();}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00056}00056\ }
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00057}00057\ \ \ \ \ \textcolor{comment}{//\ initialize,\ need\ factory\ to\ create\ internal\ buffer\ of\ }}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00058}00058\ \ \ \ \ \textcolor{comment}{//\ messages\ which\ will\ store\ replies}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00059}00059\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classThreadTable2_ad587753d0094a5c6a2346b1ee0f2eca1}{init}}(yarp::dev::ICanBufferFactory\ *i);}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00060}00060\ }
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00061}00061\ \ \ \ \ \textcolor{comment}{//\ set\ number\ of\ pending\ requests,\ reset}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00062}00062\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classThreadTable2_adba368aea4ee8d37742e332ed2f4f26e}{setPending}}(\textcolor{keywordtype}{int}\ pend);}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00063}00063\ }
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00064}00064\ \ \ \ \ \textcolor{comment}{//\ wait\ on\ semaphore,\ usually\ thread\ sleeps\ here\ after}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00065}00065\ \ \ \ \ \textcolor{comment}{//\ has\ issued\ a\ list\ of\ requests\ to\ the\ can\ }}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00066}\mbox{\hyperlink{classThreadTable2_a47cdedbcf45603cf2a45f1758472fbc7}{00066}}\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classThreadTable2_a47cdedbcf45603cf2a45f1758472fbc7}{synch}}()}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00067}00067\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00068}00068\ \ \ \ \ \ \ \ \ std::unique\_lock<std::mutex>\ lck(mtx\_synch);}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00069}00069\ \ \ \ \ \ \ \ \ cv\_synch.wait(lck);}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00070}00070\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00071}00071\ }
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00072}00072\ \ \ \ \ \textcolor{comment}{//\ true\ if\ there\ are\ pending\ requests}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00073}\mbox{\hyperlink{classThreadTable2_af910c080482755c273d696f57c230b98}{00073}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classThreadTable2_af910c080482755c273d696f57c230b98}{pending}}()}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00074}00074\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00075}00075\ \ \ \ \ \ \ \ \ lock();}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00076}00076\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ ret=(\_pending\ !=\ 0)\ ?\ \textcolor{keyword}{true}:\textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00077}00077\ \ \ \ \ \ \ \ \ unlock();}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00078}00078\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00079}00079\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00080}00080\ }
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00081}00081\ \ \ \ \ \textcolor{comment}{//\ true\ if\ at\ least\ one\ time\ out\ occurred}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00082}\mbox{\hyperlink{classThreadTable2_af31e5328380be26902f2c1853ce2cb29}{00082}}\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classThreadTable2_af31e5328380be26902f2c1853ce2cb29}{timedOut}}()}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00083}00083\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00084}00084\ \ \ \ \ \ \ \ \ \ \ \ \ lock();}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00085}00085\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ ret=(\_timedOut!=0)?\textcolor{keyword}{true}:\textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00086}00086\ \ \ \ \ \ \ \ \ \ \ \ \ unlock();}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00087}00087\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00088}00088\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00089}00089\ }
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00090}00090\ \ \ \ \ \textcolor{comment}{//\ notify\ that\ one\ of\ the\ requests\ timed\ out}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00091}00091\ \ \ \ \ \textcolor{comment}{//\ if\ no\ other\ requests\ are\ pending\ the\ waiting\ thread}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00092}00092\ \ \ \ \ \textcolor{comment}{//\ is\ released}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00093}00093\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classThreadTable2_a42190aa0dd2d82764f64c35f5f99f78c}{timeout}}();}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00094}00094\ }
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00095}00095\ \ \ \ \ \textcolor{comment}{//\ push\ a\ reply,\ thread\ safe}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00096}00096\ \ \ \ \ \textcolor{comment}{//\ wake\ up\ wating\ thread\ when\ all\ messages\ are\ received}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00097}00097\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classThreadTable2_aba06db494b5ba3dbb3223f235fb28743}{push}}(\textcolor{keyword}{const}\ yarp::dev::CanMessage\ \&m);}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00098}00098\ }
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00099}\mbox{\hyperlink{classThreadTable2_ae217326fcf9e5b9f34cc6b9cb70207e1}{00099}}\ \ \ \ \ ACE\_thread\_t\ \&\mbox{\hyperlink{classThreadTable2_ae217326fcf9e5b9f34cc6b9cb70207e1}{handle}}()}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00100}00100\ \ \ \ \ \{\ \textcolor{keywordflow}{return}\ \_handle;\ \}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00101}00101\ }
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00102}00102\ }
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00103}00103\ \ \ \ \ \textcolor{comment}{//get\ can\ message\ from\ joint\ number}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00104}00104\ \ \ \ \ \textcolor{keyword}{inline}\ yarp::dev::CanMessage\ *\mbox{\hyperlink{classThreadTable2_a5ac48ab511cfb6e31f9b32ba005374b6}{getByJoint}}(\textcolor{keywordtype}{int}\ j,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{char}\ *destInv);}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00105}00105\ }
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00106}00106\ \ \ \ \ \textcolor{comment}{//get\ n-\/nth\ message\ in\ the\ list\ of\ replies}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00107}00107\ \ \ \ \ \textcolor{keyword}{inline}\ yarp::dev::CanMessage\ *\mbox{\hyperlink{classThreadTable2_afbbc874a92650328926f44d8638dc618}{get}}(\textcolor{keywordtype}{int}\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}});}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00108}00108\ \};}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00109}00109\ }
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00110}\mbox{\hyperlink{classThreadTable2_afbbc874a92650328926f44d8638dc618}{00110}}\ yarp::dev::CanMessage\ *\mbox{\hyperlink{classThreadTable2_afbbc874a92650328926f44d8638dc618}{ThreadTable2::get}}(\textcolor{keywordtype}{int}\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}})}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00111}00111\ \{}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00112}00112\ \ \ \ \ \textcolor{keywordflow}{if}\ (n<0\ ||\ n>=\_replied)}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00113}00113\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ 0;}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00114}00114\ }
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00115}00115\ \ \ \ \ \textcolor{keywordflow}{return}\ \&\_replies[\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}];}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00116}00116\ \}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00117}00117\ }
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00118}\mbox{\hyperlink{classThreadTable2_a5ac48ab511cfb6e31f9b32ba005374b6}{00118}}\ yarp::dev::CanMessage\ *\mbox{\hyperlink{classThreadTable2_a5ac48ab511cfb6e31f9b32ba005374b6}{ThreadTable2::getByJoint}}(\textcolor{keywordtype}{int}\ j,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{char}\ *destInv)}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00119}00119\ \{}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00120}00120\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ k=0;k<\_replied;k++)}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00121}00121\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{canControlUtils_8h_a22d86c76c1c95a75d3dc8f370f3fa5e5}{getJoint}}(\_replies[k],\ destInv)==j)}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00122}00122\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \&\_replies[k];}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00123}00123\ \ \ \ \ \textcolor{keywordflow}{return}\ 0;}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00124}00124\ \}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00125}00125\ }
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00126}\mbox{\hyperlink{classThreadTable2_aba06db494b5ba3dbb3223f235fb28743}{00126}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classThreadTable2_aba06db494b5ba3dbb3223f235fb28743}{ThreadTable2::push}}(\textcolor{keyword}{const}\ yarp::dev::CanMessage\ \&m)}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00127}00127\ \{}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00128}00128\ \ \ \ \ lock();}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00129}00129\ \ \ \ \ \textcolor{keywordflow}{if}\ (\_replied>=\mbox{\hyperlink{EsdMessageSniffer_8cpp_a6821bafc3c88dfb2e433a095df9940c6}{BUF\_SIZE}})}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00130}00130\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00131}00131\ \ \ \ \ \ \ \ \ \ \ \ \ unlock();}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00132}00132\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//the\ message\ buffer\ is\ full\ -\/-\/\ this\ means\ that\ too\ many\ messages}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00133}00133\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//have\ been\ requested.\ Check\ the\ following\ calls:}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00134}00134\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ t-\/>setPending(r.\_writeMessages);}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00135}00135\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ t-\/>synch();}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00136}00136\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ the\ buffer\ should\ be\ large\ enough\ to\ match\ the\ worst\ case\ }}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00137}00137\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ i.e.\ the\ largest\ value\ of\ \_writeMessages}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00138}00138\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Increase\ BUF\_SIZE\ accordingly.}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00139}00139\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{saveNetwork_8m_a0eba6f64b9c26507a877bcb0c4f270e2}{fprintf}}(stderr,\ \textcolor{stringliteral}{"{}Warning:\ buffer\ full\ in\ ThreadTable2,\ increase\ value\ of\ BUF\_SIZE\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00140}00140\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};\ }
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00141}00141\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00142}00142\ }
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00143}00143\ \ \ \ \ \_replies[\_replied]=m;}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00144}00144\ }
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00145}00145\ \ \ \ \ \_replied++;}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00146}00146\ \ \ \ \ \_pending-\/-\/;}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00147}00147\ \ \ \ \ \textcolor{keywordflow}{if}\ (\_pending==0)}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00148}00148\ \ \ \ \ \ \ \ \ cv\_synch.notify\_one();}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00149}00149\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00150}00150\ \ \ \ \ unlock();}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00151}00151\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00152}00152\ \}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00153}00153\ }
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00154}\mbox{\hyperlink{classThreadTable2_a42190aa0dd2d82764f64c35f5f99f78c}{00154}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classThreadTable2_a42190aa0dd2d82764f64c35f5f99f78c}{ThreadTable2::timeout}}()}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00155}00155\ \{}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00156}00156\ \ \ \ \ lock();}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00157}00157\ \ \ \ \ \_replied++;}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00158}00158\ \ \ \ \ \_pending-\/-\/;}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00159}00159\ \ \ \ \ \_timedOut++;}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00160}00160\ \ \ \ \ \textcolor{keywordflow}{if}\ (\_pending==0)}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00161}00161\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00162}00162\ \ \ \ \ \ \ \ \ \ \ \ \ cv\_synch.notify\_one();}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00163}00163\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00164}00164\ \ \ \ \ unlock();}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00165}00165\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00166}00166\ \}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00167}00167\ }
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00168}\mbox{\hyperlink{classThreadTable2_adba368aea4ee8d37742e332ed2f4f26e}{00168}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classThreadTable2_adba368aea4ee8d37742e332ed2f4f26e}{ThreadTable2::setPending}}(\textcolor{keywordtype}{int}\ pend)}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00169}00169\ \{}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00170}00170\ \ \ \ \ lock();}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00171}00171\ \ \ \ \ \_pending=pend;}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00172}00172\ \ \ \ \ \_replied=0;}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00173}00173\ \ \ \ \ \_timedOut=0;}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00174}00174\ \ \ \ \ unlock();}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00175}00175\ \}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00176}00176\ }
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00177}00177\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00178}00178\ }
+\DoxyCodeLine{\Hypertarget{ThreadTable2_8h_source_l00179}00179\ }
+
+\end{DoxyCode}

@@ -1,0 +1,374 @@
+\doxysection{Dual\+Cam\+Calib\+Module.\+cpp}
+\hypertarget{DualCamCalibModule_8cpp_source}{}\label{DualCamCalibModule_8cpp_source}\index{icub-\/main/src/modules/dualCamCalib/src/DualCamCalibModule.cpp@{icub-\/main/src/modules/dualCamCalib/src/DualCamCalibModule.cpp}}
+\mbox{\hyperlink{DualCamCalibModule_8cpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00001}00001\ \textcolor{comment}{//\ -\/*-\/\ mode:C++;\ tab-\/width:4;\ c-\/basic-\/offset:4;\ indent-\/tabs-\/mode:nil\ -\/*-\/}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00002}00002\ }
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00003}00003\ \textcolor{comment}{//\ Copyright\ (C)\ 2015\ Istituto\ Italiano\ di\ Tecnologia\ -\/\ iCub\ Facility}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00004}00004\ \textcolor{comment}{//\ Author:\ Marco\ Randazzo\ <marco.randazzo@iit.it>}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00005}00005\ \textcolor{comment}{//\ CopyPolicy:\ Released\ under\ the\ terms\ of\ the\ GNU\ GPL\ v2.0.}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00006}00006\ }
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00007}00007\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{DualCamCalibModule_8h}{iCub/DualCamCalibModule.h}}>}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00008}00008\ \textcolor{preprocessor}{\#include\ <yarp/os/Network.h>}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00009}00009\ }
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00010}00010\ \textcolor{keyword}{using\ namespace\ }std;}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00011}00011\ \textcolor{keyword}{using\ namespace\ }yarp::os;}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00012}00012\ \textcolor{keyword}{using\ namespace\ }yarp::sig;}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00013}00013\ }
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00014}00014\ \mbox{\hyperlink{classCamCalibModule_a07d76f261424de4e206c902e05a4f323}{CamCalibModule::CamCalibModule}}()}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00015}00015\ \{}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00016}00016\ \ \ \ \ calibToolLeft\ =\ NULL;}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00017}00017\ \ \ \ \ calibToolRight\ =\ NULL;}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00018}00018\ \ \ \ \ align=ALIGN\_WIDTH;}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00019}00019\ \ \ \ \ requested\_fps=0;}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00020}00020\ \ \ \ \ time\_lastOut=yarp::os::Time::now();}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00021}00021\ \ \ \ \ dualImage\_mode\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00022}00022\ \}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00023}00023\ }
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00024}00024\ \mbox{\hyperlink{classCamCalibModule_a34f8d4eb888988ebf85f66ab67c0a5ae}{CamCalibModule::\string~CamCalibModule}}()}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00025}00025\ \{}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00026}00026\ \ \ \ \ calibToolLeft\ =\ NULL;}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00027}00027\ \ \ \ \ calibToolRight\ =\ NULL;}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00028}00028\ \}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00029}00029\ }
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00030}00030\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classCamCalibModule_a65b4a50ae79604d92e67c4ec4ee2dfa6}{CamCalibModule::configure}}(yarp::os::ResourceFinder\ \&rf)}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00031}00031\ \{}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00032}00032\ \ \ \ \ \textcolor{keywordtype}{string}\ str\ =\ rf.check(\textcolor{stringliteral}{"{}name"{}},\ Value(\textcolor{stringliteral}{"{}/camCalib"{}}),\ \textcolor{stringliteral}{"{}module\ name\ (string)"{}}).asString();}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00033}00033\ \ \ \ \ verboseExecTime\ =\ rf.check(\textcolor{stringliteral}{"{}verboseExecTime"{}});}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00034}00034\ }
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00035}00035\ \ \ \ \ \textcolor{keywordflow}{if}\ \ \ \ \ \ (rf.check(\textcolor{stringliteral}{"{}w\_align"{}}))\ align=ALIGN\_WIDTH;}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00036}00036\ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (rf.check(\textcolor{stringliteral}{"{}h\_align"{}}))\ align=ALIGN\_HEIGHT;}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00037}00037\ }
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00038}00038\ \ \ \ \ \textcolor{keywordflow}{if}\ (rf.check(\textcolor{stringliteral}{"{}fps"{}}))}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00039}00039\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00040}00040\ \ \ \ \ \ \ \ \ requested\_fps=rf.find(\textcolor{stringliteral}{"{}fps"{}}).asFloat64();}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00041}00041\ \ \ \ \ \ \ \ \ yInfo()\ <<\ \textcolor{stringliteral}{"{}Module\ will\ run\ at\ "{}}\ <<\ requested\_fps;}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00042}00042\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00043}00043\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00044}00044\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00045}00045\ \ \ \ \ \ \ \ \ yInfo()\ <<\ \textcolor{stringliteral}{"{}Module\ will\ run\ at\ max\ fps"{}};}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00046}00046\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00047}00047\ }
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00048}00048\ \ \ \ \ setName(str.c\_str());\ \textcolor{comment}{//\ modulePortName}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00049}00049\ }
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00050}00050\ \ \ \ \ Bottle\ botLeftConfig(rf.toString().c\_str());}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00051}00051\ \ \ \ \ Bottle\ botRightConfig(rf.toString().c\_str());}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00052}00052\ }
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00053}00053\ \ \ \ \ \textcolor{keywordtype}{string}\ strLeftGroup\ =\ \textcolor{stringliteral}{"{}CAMERA\_CALIBRATION\_LEFT"{}};}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00054}00054\ \ \ \ \ \textcolor{keywordflow}{if}\ (botLeftConfig.check(strLeftGroup.c\_str()))}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00055}00055\ \ \ \ \ \{\ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00056}00056\ \ \ \ \ \ \ \ \ Bottle\ \&group=botLeftConfig.findGroup(strLeftGroup.c\_str(),\textcolor{keywordtype}{string}(\textcolor{stringliteral}{"{}Loading\ configuration\ from\ group\ "{}}\ +\ strLeftGroup).c\_str());}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00057}00057\ \ \ \ \ \ \ \ \ botLeftConfig.fromString(group.toString());}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00058}00058\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00059}00059\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00060}00060\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00061}00061\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}Group\ "{}}\ <<\ strLeftGroup\ <<\ \textcolor{stringliteral}{"{}\ not\ found."{}};}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00062}00062\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00063}00063\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00064}00064\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00065}00065\ \ \ \ \ \textcolor{keywordtype}{string}\ strRightGroup\ =\ \textcolor{stringliteral}{"{}CAMERA\_CALIBRATION\_RIGHT"{}};}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00066}00066\ \ \ \ \ \textcolor{keywordflow}{if}\ (botRightConfig.check(strRightGroup.c\_str()))}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00067}00067\ \ \ \ \ \{\ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00068}00068\ \ \ \ \ \ \ \ \ Bottle\ \&group=botRightConfig.findGroup(strRightGroup.c\_str(),\textcolor{keywordtype}{string}(\textcolor{stringliteral}{"{}Loading\ configuration\ from\ group\ "{}}\ +\ strRightGroup).c\_str());}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00069}00069\ \ \ \ \ \ \ \ \ botRightConfig.fromString(group.toString());}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00070}00070\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00071}00071\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00072}00072\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00073}00073\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}Group\ "{}}\ <<\ strRightGroup\ <<\ \textcolor{stringliteral}{"{}\ not\ found."{}};}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00074}00074\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00075}00075\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00076}00076\ }
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00077}00077\ \ \ \ \ \textcolor{keywordtype}{string}\ calibToolLeftName\ \ =\ botLeftConfig.check(\textcolor{stringliteral}{"{}projection"{}},\ Value(\textcolor{stringliteral}{"{}pinhole"{}}),\ \textcolor{stringliteral}{"{}Projection/mapping\ applied\ to\ calibrated\ image\ [projection|spherical]\ (string)."{}}).asString().c\_str();}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00078}00078\ \ \ \ \ \textcolor{keywordtype}{string}\ calibToolRightName\ =\ botRightConfig.check(\textcolor{stringliteral}{"{}projection"{}},\ Value(\textcolor{stringliteral}{"{}pinhole"{}}),\ \textcolor{stringliteral}{"{}Projection/mapping\ applied\ to\ calibrated\ image\ [projection|spherical]\ (string)."{}}).asString().c\_str();}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00079}00079\ }
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00080}00080\ \ \ \ \ calibToolLeft\ =\ \mbox{\hyperlink{classCalibToolFactories_a67e41afce87e71c0e883a484e8b83e20}{CalibToolFactories::getPool}}().\mbox{\hyperlink{classCalibToolFactories_aa3fa14af89ab130cc17de1afca2a34bc}{get}}(calibToolLeftName.c\_str());}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00081}00081\ \ \ \ \ \textcolor{keywordflow}{if}\ (calibToolLeft!=NULL)}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00082}00082\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00083}00083\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}}\ =\ calibToolLeft-\/>\mbox{\hyperlink{classICalibTool_a6ec931cc9fdc3de6e6f3d926ee3090da}{open}}(botLeftConfig);}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00084}00084\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!\mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}})}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00085}00085\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00086}00086\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{delete}\ calibToolLeft;}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00087}00087\ \ \ \ \ \ \ \ \ \ \ \ \ calibToolLeft\ =\ NULL;}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00088}00088\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00089}00089\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00090}00090\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00091}00091\ \ \ \ \ calibToolRight\ =\ \mbox{\hyperlink{classCalibToolFactories_a67e41afce87e71c0e883a484e8b83e20}{CalibToolFactories::getPool}}().\mbox{\hyperlink{classCalibToolFactories_aa3fa14af89ab130cc17de1afca2a34bc}{get}}(calibToolRightName.c\_str());}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00092}00092\ \ \ \ \ \textcolor{keywordflow}{if}\ (calibToolRight!=NULL)}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00093}00093\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00094}00094\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}}\ =\ calibToolRight-\/>\mbox{\hyperlink{classICalibTool_a6ec931cc9fdc3de6e6f3d926ee3090da}{open}}(botRightConfig);}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00095}00095\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!\mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}})}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00096}00096\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00097}00097\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{delete}\ calibToolRight;}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00098}00098\ \ \ \ \ \ \ \ \ \ \ \ \ calibToolRight\ =\ NULL;}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00099}00099\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00100}00100\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00101}00101\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00102}00102\ }
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00103}00103\ \ \ \ \ \textcolor{keywordflow}{if}(rf.check(\textcolor{stringliteral}{"{}dual"{}}))}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00104}00104\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00105}00105\ \ \ \ \ \ \ \ \ dualImage\_mode\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00106}00106\ \ \ \ \ \ \ \ \ yInfo()\ <<\ \textcolor{stringliteral}{"{}Dual\ mode\ activate!!"{}};}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00107}00107\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00108}00108\ }
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00109}00109\ \ \ \ \ \textcolor{keywordflow}{if}(dualImage\_mode)}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00110}00110\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00111}00111\ \ \ \ \ \ \ \ \ leftImage\ \ =\ \textcolor{keyword}{new}\ yarp::sig::ImageOf<yarp::sig::PixelRgb>;}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00112}00112\ \ \ \ \ \ \ \ \ rightImage\ =\ \textcolor{keyword}{new}\ yarp::sig::ImageOf<yarp::sig::PixelRgb>;}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00113}00113\ }
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00114}00114\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ open\ a\ single\ port\ with\ name\ /dual:i}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00115}00115\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (yarp::os::Network::exists(getName(\textcolor{stringliteral}{"{}/dual:i"{}})))}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00116}00116\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00117}00117\ \ \ \ \ \ \ \ \ \ \ \ \ yWarning()\ <<\ \textcolor{stringliteral}{"{}port\ "{}}\ <<\ getName(\textcolor{stringliteral}{"{}/dual:i"{}})\ <<\ \textcolor{stringliteral}{"{}\ already\ in\ use"{}};}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00118}00118\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00119}00119\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(!\ imageInLeft.open(getName(\textcolor{stringliteral}{"{}/dual:i"{}}))\ )}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00120}00120\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00121}00121\ \ \ \ \ \ \ \ \ imageInLeft.setStrict(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00122}00122\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00123}00123\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00124}00124\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00125}00125\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (yarp::os::Network::exists(getName(\textcolor{stringliteral}{"{}/left:i"{}})))}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00126}00126\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00127}00127\ \ \ \ \ \ \ \ \ \ \ \ \ yWarning()\ <<\ \textcolor{stringliteral}{"{}port\ "{}}\ <<\ getName(\textcolor{stringliteral}{"{}/left:i"{}})\ <<\ \textcolor{stringliteral}{"{}\ already\ in\ use"{}};}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00128}00128\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00129}00129\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (yarp::os::Network::exists(getName(\textcolor{stringliteral}{"{}/right:i"{}})))}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00130}00130\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00131}00131\ \ \ \ \ \ \ \ \ \ \ \ \ yWarning()\ <<\ \textcolor{stringliteral}{"{}port\ "{}}\ <<\ getName(\textcolor{stringliteral}{"{}/right:i"{}})\ <<\ \textcolor{stringliteral}{"{}\ already\ in\ use"{}};}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00132}00132\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00133}00133\ \ \ \ \ \ \ \ \ imageInLeft.open(getName(\textcolor{stringliteral}{"{}/left:i"{}}));}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00134}00134\ \ \ \ \ \ \ \ \ imageInRight.open(getName(\textcolor{stringliteral}{"{}/right:i"{}}));}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00135}00135\ \ \ \ \ \ \ \ \ imageInLeft.setStrict(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00136}00136\ \ \ \ \ \ \ \ \ imageInRight.setStrict(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00137}00137\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00138}00138\ }
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00139}00139\ \ \ \ \ \textcolor{keywordflow}{if}\ (yarp::os::Network::exists(getName(\textcolor{stringliteral}{"{}/out"{}})))}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00140}00140\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00141}00141\ \ \ \ \ \ \ \ \ yWarning()\ <<\ \textcolor{stringliteral}{"{}port\ "{}}\ <<\ getName(\textcolor{stringliteral}{"{}/out"{}})\ <<\ \textcolor{stringliteral}{"{}\ already\ in\ use"{}};}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00142}00142\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00143}00143\ \ \ \ \ \textcolor{keywordflow}{if}\ (yarp::os::Network::exists(getName(\textcolor{stringliteral}{"{}/conf"{}})))}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00144}00144\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00145}00145\ \ \ \ \ \ \ \ \ yWarning()\ <<\ \textcolor{stringliteral}{"{}port\ "{}}\ <<\ getName(\textcolor{stringliteral}{"{}/conf"{}})\ <<\ \textcolor{stringliteral}{"{}\ already\ in\ use"{}};}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00146}00146\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00147}00147\ \ \ \ \ imageOut.open(getName(\textcolor{stringliteral}{"{}/out:o"{}}));}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00148}00148\ \ \ \ \ configPort.open(getName(\textcolor{stringliteral}{"{}/conf"{}}));}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00149}00149\ \ \ \ \ attach(configPort);}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00150}00150\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00151}00151\ \}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00152}00152\ }
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00153}00153\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classCamCalibModule_adf40110e8b08112cf4117d61f3db6ed6}{CamCalibModule::close}}()}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00154}00154\ \{}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00155}00155\ \ \ \ \ yTrace();}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00156}00156\ \ \ \ \ imageInLeft.close();}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00157}00157\ \ \ \ \ \textcolor{keywordflow}{if}(!dualImage\_mode)}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00158}00158\ \ \ \ \ \ \ \ \ imageInRight.close();}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00159}00159\ \ \ \ \ imageOut.close();}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00160}00160\ \ \ \ \ configPort.close();}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00161}00161\ \ \ \ \ \textcolor{keywordflow}{if}\ (calibToolLeft\ !=\ NULL)}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00162}00162\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00163}00163\ \ \ \ \ \ \ \ \ calibToolLeft-\/>\mbox{\hyperlink{classICalibTool_a15dc2f7f14e2a929279de8433db1c1ff}{close}}();}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00164}00164\ \ \ \ \ \ \ \ \ \textcolor{keyword}{delete}\ calibToolLeft;}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00165}00165\ \ \ \ \ \ \ \ \ calibToolLeft\ =\ NULL;}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00166}00166\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00167}00167\ \ \ \ \ \textcolor{keywordflow}{if}\ (calibToolRight\ !=\ NULL)}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00168}00168\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00169}00169\ \ \ \ \ \ \ \ \ calibToolRight-\/>\mbox{\hyperlink{classICalibTool_a15dc2f7f14e2a929279de8433db1c1ff}{close}}();}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00170}00170\ \ \ \ \ \ \ \ \ \textcolor{keyword}{delete}\ calibToolRight;}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00171}00171\ \ \ \ \ \ \ \ \ calibToolRight\ =\ NULL;}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00172}00172\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00173}00173\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00174}00174\ \}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00175}00175\ }
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00176}00176\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classCamCalibModule_a3c980bc4b12f9f55a74631188cda4279}{CamCalibModule::interruptModule}}()}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00177}00177\ \{}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00178}00178\ \ \ \ \ imageInLeft.interrupt();}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00179}00179\ \ \ \ \ \textcolor{keywordflow}{if}(!dualImage\_mode)}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00180}00180\ \ \ \ \ \ \ \ \ imageInRight.interrupt();}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00181}00181\ \ \ \ \ imageOut.interrupt();}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00182}00182\ \ \ \ \ configPort.interrupt();}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00183}00183\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00184}00184\ \}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00185}00185\ }
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00186}00186\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classCamCalibModule_aa615cadf33c5f79231bbd5dc0cbba11f}{CamCalibModule::updateModule}}()}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00187}00187\ \{}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00188}00188\ \ \ \ \ \textcolor{keywordtype}{bool}\ lready=\textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00189}00189\ \ \ \ \ \textcolor{keywordtype}{bool}\ rready=\textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00190}00190\ \ \ \ \ \textcolor{keywordtype}{bool}\ init=\textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00191}00191\ }
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00192}00192\ \ \ \ \ \textcolor{keywordtype}{int}\ dual\_rowsize\_pixels,\ dual\_height\_pixels,\ single\_rowsize\_pixels;}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00193}00193\ \ \ \ \ \textcolor{keywordtype}{int}\ dual\_rowsize\_bytes,\ \ single\_rowsize\_bytes;}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00194}00194\ }
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00195}00195\ \ \ \ \ \textcolor{keywordtype}{int}\ outw\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00196}00196\ \ \ \ \ \textcolor{keywordtype}{int}\ outh\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00197}00197\ }
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00198}00198\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{char}\ *left\_raw,\ *right\_raw,\ *dual\_raw;}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00199}00199\ }
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00200}00200\ \ \ \ \ \textcolor{keywordflow}{if}(dualImage\_mode)}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00201}00201\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00202}00202\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ read\ the\ dual\ image\ and\ split\ it\ up\ into\ 2\ separated\ images\ for\ calibration}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00203}00203\ \ \ \ \ \ \ \ \ yarp::sig::ImageOf<yarp::sig::PixelRgb>*\ dual\ =\ imageInLeft.read();}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00204}00204\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(dual\ ==\ NULL)}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00205}00205\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00206}00206\ \ \ \ \ \ \ \ \ \ \ \ \ yarp::os::Time::delay(0.001);}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00207}00207\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00208}00208\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00209}00209\ }
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00210}00210\ \ \ \ \ \ \ \ \ dual\_rowsize\_pixels\ =\ dual-\/>width();}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00211}00211\ \ \ \ \ \ \ \ \ single\_rowsize\_pixels\ =\ dual\_rowsize\_pixels/2;}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00212}00212\ \ \ \ \ \ \ \ \ dual\_height\_pixels\ =\ dual-\/>height();}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00213}00213\ }
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00214}00214\ \ \ \ \ \ \ \ \ dual\_rowsize\_bytes\ =\ dual-\/>getRowSize();}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00215}00215\ \ \ \ \ \ \ \ \ single\_rowsize\_bytes\ =\ dual\_rowsize\_bytes/2;}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00216}00216\ }
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00217}00217\ \ \ \ \ \ \ \ \ leftImage-\/>resize(dual\_rowsize\_pixels/2,\ dual\_height\_pixels);}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00218}00218\ \ \ \ \ \ \ \ \ rightImage-\/>resize(dual\_rowsize\_pixels/2,\ dual\_height\_pixels);}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00219}00219\ }
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00220}00220\ \ \ \ \ \ \ \ \ leftImage-\/>setQuantum(dual-\/>getQuantum());}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00221}00221\ \ \ \ \ \ \ \ \ rightImage-\/>setQuantum(dual-\/>getQuantum());}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00222}00222\ }
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00223}00223\ \ \ \ \ \ \ \ \ left\_raw\ \ =\ leftImage-\/>getRawImage();}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00224}00224\ \ \ \ \ \ \ \ \ right\_raw\ =\ rightImage-\/>getRawImage();}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00225}00225\ \ \ \ \ \ \ \ \ dual\_raw\ \ =\ dual-\/>getRawImage();}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00226}00226\ }
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00227}00227\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ \mbox{\hyperlink{compute__ekf__sym_8m_a5e36941b3d856737e81516acd45edc50}{h}}=0;\ \mbox{\hyperlink{compute__ekf__sym_8m_a5e36941b3d856737e81516acd45edc50}{h}}<dual\_height\_pixels;\ \mbox{\hyperlink{compute__ekf__sym_8m_a5e36941b3d856737e81516acd45edc50}{h}}++)}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00228}00228\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00229}00229\ \ \ \ \ \ \ \ \ \ \ \ \ memcpy(left\_raw+(\mbox{\hyperlink{compute__ekf__sym_8m_a5e36941b3d856737e81516acd45edc50}{h}}*single\_rowsize\_bytes),\ \ dual\_raw+(\mbox{\hyperlink{compute__ekf__sym_8m_a5e36941b3d856737e81516acd45edc50}{h}}*dual\_rowsize\_bytes),\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ single\_rowsize\_bytes);}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00230}00230\ \ \ \ \ \ \ \ \ \ \ \ \ memcpy(right\_raw+(\mbox{\hyperlink{compute__ekf__sym_8m_a5e36941b3d856737e81516acd45edc50}{h}}*single\_rowsize\_bytes),\ dual\_raw+(\mbox{\hyperlink{compute__ekf__sym_8m_a5e36941b3d856737e81516acd45edc50}{h}}*dual\_rowsize\_bytes)\ +\ single\_rowsize\_bytes,\ \ single\_rowsize\_bytes);}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00231}00231\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00232}00232\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00233}00233\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00234}00234\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00235}00235\ \ \ \ \ \ \ \ \ leftImage\ \ =\ imageInLeft.read(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00236}00236\ \ \ \ \ \ \ \ \ rightImage\ =\ imageInRight.read(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00237}00237\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00238}00238\ }
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00239}00239\ \ \ \ \ yarp::sig::ImageOf<yarp::sig::PixelRgb>\ \&calibratedImgOut=imageOut.prepare();}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00240}00240\ }
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00241}00241\ \ \ \ \ \textcolor{keywordflow}{if}\ (calibToolLeft!=NULL\ \&\&\ leftImage!=NULL)}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00242}00242\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00243}00243\ \ \ \ \ \ \ \ \ calibToolLeft-\/>\mbox{\hyperlink{classICalibTool_aecd704ecfd4dc6fef71cb674e00b2de1}{apply}}(*leftImage,calibratedImgLeft);}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00244}00244\ \ \ \ \ \ \ \ \ lready=\textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00245}00245\ }
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00246}00246\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (init==\textcolor{keyword}{false})}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00247}00247\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00248}00248\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (align\ ==\ ALIGN\_WIDTH)}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00249}00249\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00250}00250\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ outw\ =\ calibratedImgLeft.width()*2;}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00251}00251\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ outh\ =\ calibratedImgLeft.height();}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00252}00252\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00253}00253\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (align==ALIGN\_HEIGHT)}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00254}00254\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00255}00255\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ outw\ =\ calibratedImgLeft.width();}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00256}00256\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ outh\ =\ calibratedImgLeft.height()*2;}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00257}00257\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00258}00258\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00259}00259\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00260}00260\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}Invalid\ alignment"{}};}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00261}00261\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00262}00262\ \ \ \ \ \ \ \ \ \ \ \ \ calibratedImgOut.copy(calibratedImgLeft,outw,outh);}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00263}00263\ \ \ \ \ \ \ \ \ \ \ \ \ init=\textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00264}00264\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00265}00265\ }
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00266}00266\ \ \ \ \ \ \ \ \ calibratedImgOut.resize(outw,\ outh);}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00267}00267\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ r=0;\ r<calibratedImgLeft.height();\ r++)}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00268}00268\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ c=0;\ c<calibratedImgLeft.width();\ c++)}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00269}00269\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00270}00270\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{char}\ *pixel\ =\ calibratedImgOut.getPixelAddress(c,r);}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00271}00271\ }
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00272}00272\ \ \ \ \ \ \ \ \ \ \ \ \ pixel[0]\ =\ *(calibratedImgLeft.getPixelAddress(c,r)+0);}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00273}00273\ \ \ \ \ \ \ \ \ \ \ \ \ pixel[1]\ =\ *(calibratedImgLeft.getPixelAddress(c,r)+1);}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00274}00274\ \ \ \ \ \ \ \ \ \ \ \ \ pixel[2]\ =\ *(calibratedImgLeft.getPixelAddress(c,r)+2);}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00275}00275\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00276}00276\ }
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00277}00277\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00278}00278\ \ \ \ \ \textcolor{keywordflow}{if}\ (calibToolRight!=NULL\ \&\&\ rightImage!=NULL)}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00279}00279\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00280}00280\ \ \ \ \ \ \ \ \ calibToolRight-\/>\mbox{\hyperlink{classICalibTool_aecd704ecfd4dc6fef71cb674e00b2de1}{apply}}(*rightImage,calibratedImgRight);}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00281}00281\ \ \ \ \ \ \ \ \ rready=\textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00282}00282\ }
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00283}00283\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (init==\textcolor{keyword}{false})}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00284}00284\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00285}00285\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ outw\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00286}00286\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ outh\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00287}00287\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (align\ ==\ ALIGN\_WIDTH)}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00288}00288\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00289}00289\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ outw\ =\ calibratedImgLeft.width()*2;}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00290}00290\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ outh\ =\ calibratedImgLeft.height();}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00291}00291\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00292}00292\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (align==ALIGN\_HEIGHT)}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00293}00293\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00294}00294\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ outw\ =\ calibratedImgLeft.width();}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00295}00295\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ outh\ =\ calibratedImgLeft.height()*2;}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00296}00296\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00297}00297\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00298}00298\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00299}00299\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}Invalid\ alignment"{}};}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00300}00300\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00301}00301\ \ \ \ \ \ \ \ \ \ \ \ \ calibratedImgOut.copy(calibratedImgRight,outw,outh);}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00302}00302\ \ \ \ \ \ \ \ \ \ \ \ \ init=\textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00303}00303\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00304}00304\ }
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00305}00305\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ r=0;\ r<calibratedImgLeft.height();\ r++)}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00306}00306\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ c=0;\ c<calibratedImgLeft.width();\ c++)}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00307}00307\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00308}00308\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ cp\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00309}00309\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ rp\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00310}00310\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \ \ \ \ \ (align\ ==\ ALIGN\_WIDTH)\ \ \{cp\ =\ c+calibratedImgLeft.width();\ \ rp\ =\ r;\}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00311}00311\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (align\ ==\ ALIGN\_HEIGHT)\ \{cp\ =\ c;\ rp\ =\ r+calibratedImgLeft.height();\}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00312}00312\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{char}\ *pixel\ =\ calibratedImgOut.getPixelAddress(cp,rp);}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00313}00313\ \ \ \ \ \ \ \ \ \ \ \ \ pixel[0]\ =\ *(calibratedImgRight.getPixelAddress(c,r)+0);}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00314}00314\ \ \ \ \ \ \ \ \ \ \ \ \ pixel[1]\ =\ *(calibratedImgRight.getPixelAddress(c,r)+1);}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00315}00315\ \ \ \ \ \ \ \ \ \ \ \ \ pixel[2]\ =\ *(calibratedImgRight.getPixelAddress(c,r)+2);}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00316}00316\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00317}00317\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00318}00318\ }
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00319}00319\ \ \ \ \ \textcolor{keywordflow}{if}\ (requested\_fps==0)}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00320}00320\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00321}00321\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (lready==\textcolor{keyword}{true}\ ||\ rready==\textcolor{keyword}{true})}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00322}00322\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00323}00323\ \ \ \ \ \ \ \ \ \ \ \ \ imageOut.writeStrict();}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00324}00324\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ diffOut\ =\ yarp::os::Time::now()\ -\/time\_lastOut;}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00325}00325\ \ \ \ \ \ \ \ \ \ \ \ \ time\_lastOut\ =\ yarp::os::Time::now();}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00326}00326\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (verboseExecTime)\ yDebug\ (\textcolor{stringliteral}{"{}\%f"{}},\ diffOut);}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00327}00327\ \ \ \ \ \ \ \ \ \ \ \ \ lready=\textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00328}00328\ \ \ \ \ \ \ \ \ \ \ \ \ rready=\textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00329}00329\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00330}00330\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00331}00331\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00332}00332\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00333}00333\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ diffOut\ =\ yarp::os::Time::now()\ -\/\ time\_lastOut;}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00334}00334\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (diffOut>(1/requested\_fps))}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00335}00335\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00336}00336\ \ \ \ \ \ \ \ \ \ \ \ \ imageOut.writeStrict();}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00337}00337\ \ \ \ \ \ \ \ \ \ \ \ \ time\_lastOut\ =\ yarp::os::Time::now();}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00338}00338\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (verboseExecTime)\ yDebug\ (\textcolor{stringliteral}{"{}\%f"{}},\ diffOut);}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00339}00339\ \ \ \ \ \ \ \ \ \ \ \ \ lready=\textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00340}00340\ \ \ \ \ \ \ \ \ \ \ \ \ rready=\textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00341}00341\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00342}00342\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00343}00343\ }
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00344}00344\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00345}00345\ \}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00346}00346\ }
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00347}00347\ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{classCamCalibModule_ade14b968eae1152264ca7e048da63188}{CamCalibModule::getPeriod}}()}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00348}00348\ \{}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00349}00349\ \ \ \textcolor{keywordflow}{return}\ 0.0;}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00350}00350\ \}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00351}00351\ }
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00352}00352\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classCamCalibModule_a4ab7f8a02b3c15f0c0d66fc619c39036}{CamCalibModule::respond}}(\textcolor{keyword}{const}\ Bottle\&\ command,\ Bottle\&\ reply)\ }
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00353}00353\ \{}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00354}00354\ \ \ \ \ reply.clear();\ }
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00355}00355\ }
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00356}00356\ \ \ \ \ \textcolor{keywordflow}{if}\ (command.get(0).asString()==\textcolor{stringliteral}{"{}quit"{}})\ }
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00357}00357\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00358}00358\ \ \ \ \ \ \ \ \ reply.addString(\textcolor{stringliteral}{"{}quitting"{}});}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00359}00359\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00360}00360\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00361}00361\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00362}00362\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00363}00363\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}command\ not\ known\ -\/\ type\ help\ for\ more\ info"{}};}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00364}00364\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00365}00365\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00366}00366\ \}}
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00367}00367\ }
+\DoxyCodeLine{\Hypertarget{DualCamCalibModule_8cpp_source_l00368}00368\ }
+
+\end{DoxyCode}

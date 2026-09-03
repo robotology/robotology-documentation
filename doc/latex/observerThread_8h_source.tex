@@ -1,0 +1,349 @@
+\doxysection{observer\+Thread.\+h}
+\hypertarget{observerThread_8h_source}{}\label{observerThread_8h_source}\index{icub-\/main/src/modules/wholeBodyDynamics/observerThread.h@{icub-\/main/src/modules/wholeBodyDynamics/observerThread.h}}
+\mbox{\hyperlink{observerThread_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00001}00001\ \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00002}00002\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2011\ RobotCub\ Consortium,\ European\ Commission\ FP6\ Project\ IST-\/004370}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00003}00003\ \textcolor{comment}{\ *\ Author:\ Marco\ Randazzo,\ Matteo\ Fumagalli}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00004}00004\ \textcolor{comment}{\ *\ email:\ \ marco.randazzo@iit.it}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00005}00005\ \textcolor{comment}{\ *\ website:\ www.robotcub.org}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00006}00006\ \textcolor{comment}{\ *\ Permission\ is\ granted\ to\ copy,\ distribute,\ and/or\ modify\ this\ program}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00007}00007\ \textcolor{comment}{\ *\ under\ the\ terms\ of\ the\ GNU\ General\ Public\ License,\ version\ 2\ or\ any}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00008}00008\ \textcolor{comment}{\ *\ later\ version\ published\ by\ the\ Free\ Software\ Foundation.}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00009}00009\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00010}00010\ \textcolor{comment}{\ *\ A\ copy\ of\ the\ license\ can\ be\ found\ at}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00011}00011\ \textcolor{comment}{\ *\ http://www.robotcub.org/icub/license/gpl.txt}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00012}00012\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00013}00013\ \textcolor{comment}{\ *\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00014}00014\ \textcolor{comment}{\ *\ WITHOUT\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00015}00015\ \textcolor{comment}{\ *\ MERCHANTABILITY\ or\ FITNESS\ FOR\ A\ PARTICULAR\ PURPOSE.\ See\ the\ GNU\ General}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00016}00016\ \textcolor{comment}{\ *\ Public\ License\ for\ more\ details}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00017}00017\ \textcolor{comment}{*/}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00018}00018\ }
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00019}00019\ \textcolor{preprocessor}{\#ifndef\ OBSERVER\_THREAD}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00020}00020\ \textcolor{preprocessor}{\#define\ OBSERVER\_THREAD}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00021}00021\ }
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00022}00022\ \textcolor{preprocessor}{\#include\ <yarp/os/all.h>}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00023}00023\ \textcolor{preprocessor}{\#include\ <yarp/sig/all.h>}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00024}00024\ \textcolor{preprocessor}{\#include\ <yarp/dev/all.h>}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00025}00025\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{math_8h}{iCub/ctrl/math.h}}>}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00026}00026\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{adaptWinPolyEstimator_8h}{iCub/ctrl/adaptWinPolyEstimator.h}}>}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00027}00027\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{iDyn_8h}{iCub/iDyn/iDyn.h}}>}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00028}00028\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{iDynBody_8h}{iCub/iDyn/iDynBody.h}}>}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00029}00029\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{skinContactList_8h}{iCub/skinDynLib/skinContactList.h}}>}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00030}00030\ }
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00031}00031\ \textcolor{preprocessor}{\#include\ <iostream>}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00032}00032\ \textcolor{preprocessor}{\#include\ <iomanip>}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00033}00033\ \textcolor{preprocessor}{\#include\ <cstring>}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00034}00034\ \textcolor{preprocessor}{\#include\ <list>}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00035}00035\ }
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00036}00036\ \textcolor{keyword}{using\ namespace\ }yarp::os;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00037}00037\ \textcolor{keyword}{using\ namespace\ }yarp::sig;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00038}00038\ \textcolor{keyword}{using\ namespace\ }yarp::math;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00039}00039\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceyarp_1_1dev}{yarp::dev}};}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00040}00040\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceiCub_1_1ctrl}{iCub::ctrl}};}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00041}00041\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceiCub_1_1iDyn}{iCub::iDyn}};}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00042}00042\ \textcolor{keyword}{using\ namespace\ }std;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00043}00043\ }
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00044}\mbox{\hyperlink{observerThread_8h_a65e6c6ba3653a128f6dcaf049c1c81fd}{00044}}\ \textcolor{keyword}{constexpr}\ int8\_t\ \mbox{\hyperlink{observerThread_8h_a65e6c6ba3653a128f6dcaf049c1c81fd}{MAX\_JN}}\ =\ 12;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00045}\mbox{\hyperlink{observerThread_8h_a2dcf7c208929eb76d0f74e4e7a3f5c53}{00045}}\ \textcolor{keyword}{constexpr}\ int8\_t\ \mbox{\hyperlink{observerThread_8h_a2dcf7c208929eb76d0f74e4e7a3f5c53}{MAX\_FILTER\_ORDER}}\ =\ 6;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00046}\mbox{\hyperlink{observerThread_8h_aa1111036531ee1e5b0e3765ffc99bd33}{00046}}\ \textcolor{keyword}{constexpr}\ float\_t\ \mbox{\hyperlink{observerThread_8h_aa1111036531ee1e5b0e3765ffc99bd33}{SKIN\_EVENTS\_TIMEOUT}}\ =\ 0.2F;\ \ \ \ \ \textcolor{comment}{//\ max\ time\ (in\ sec)\ a\ contact\ is\ kept\ without\ reading\ anything\ from\ the\ skin\ events\ port}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00047}00047\ }
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00048}\mbox{\hyperlink{observerThread_8h_a314e728fcd25c89c20cb03b841fd1559a97207f3457ed3b04ca92ff55d1aec3d6}{00048}}\ \textcolor{keyword}{enum}\ \mbox{\hyperlink{gravityThread_8h_a314e728fcd25c89c20cb03b841fd1559}{thread\_status\_enum}}\ \{\mbox{\hyperlink{observerThread_8h_a314e728fcd25c89c20cb03b841fd1559a7e4a42e3b6dd63708c64cf3db6f69566}{STATUS\_OK}}=0,\ \mbox{\hyperlink{observerThread_8h_a314e728fcd25c89c20cb03b841fd1559a97207f3457ed3b04ca92ff55d1aec3d6}{STATUS\_DISCONNECTED}}\};}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00049}\mbox{\hyperlink{observerThread_8h_a92d97c65baedc4dd8705566e385fa4b6a563de7c8cf670a2bd8faca708f7fac3e}{00049}}\ \textcolor{keyword}{enum}\ \mbox{\hyperlink{observerThread_8h_a92d97c65baedc4dd8705566e385fa4b6}{calib\_enum}}\ \{\mbox{\hyperlink{observerThread_8h_a92d97c65baedc4dd8705566e385fa4b6a563de7c8cf670a2bd8faca708f7fac3e}{CALIB\_ALL}}=0,\ \mbox{\hyperlink{observerThread_8h_a92d97c65baedc4dd8705566e385fa4b6a3866987cb820945790d38103f3e3c283}{CALIB\_ARMS}},\ \mbox{\hyperlink{observerThread_8h_a92d97c65baedc4dd8705566e385fa4b6a06484ec0dda99683f2d543e67e36482a}{CALIB\_LEGS}},\ \mbox{\hyperlink{observerThread_8h_a92d97c65baedc4dd8705566e385fa4b6a46144a1f13c12832e7abc355b019b4da}{CALIB\_FEET}}\};}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00050}00050\ }
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00051}00051\ \textcolor{comment}{//\ struct\ version}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00052}00052\ \textcolor{comment}{//\ \{}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00053}00053\ \textcolor{comment}{//\ \ \ \ \ int\ head\_version;}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00054}00054\ \textcolor{comment}{//\ \ \ \ \ int\ legs\_version;}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00055}00055\ \textcolor{comment}{//\ \};}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00056}00056\ }
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00057}00057\ \textcolor{comment}{//\ filter}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00058}00058\ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{observerThread_8h_a08532774c08c047708fd2ae24fcab029}{lpf\_ord1\_3hz}}(\textcolor{keywordtype}{double}\ input,\ \textcolor{keywordtype}{int}\ j);}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00059}00059\ }
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00060}\mbox{\hyperlink{classiCubStatus}{00060}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classiCubStatus}{iCubStatus}}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00061}00061\ \{}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00062}00062\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00063}\mbox{\hyperlink{classiCubStatus_aee6bd3dd88aa233b83c7a8eb187d2ea4}{00063}}\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{classiCubStatus_aee6bd3dd88aa233b83c7a8eb187d2ea4}{timestamp}};}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00064}\mbox{\hyperlink{classiCubStatus_a91db40f29b849a10fbce0fd7aa0fa80c}{00064}}\ \ \ \ \ Vector\ \mbox{\hyperlink{classiCubStatus_a761a15256eee552f369155d7551b99c5}{all\_q\_up}},\ \mbox{\hyperlink{classiCubStatus_ac7ed15ce2a2bd8cca2d87683892c8b94}{all\_dq\_up}},\ \mbox{\hyperlink{classiCubStatus_a91db40f29b849a10fbce0fd7aa0fa80c}{all\_d2q\_up}};}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00065}\mbox{\hyperlink{classiCubStatus_a5224e5f5dbc1381e3bb6f73c7766ab9c}{00065}}\ \ \ \ \ Vector\ \mbox{\hyperlink{classiCubStatus_a2afa6d44f78424132ba9d227b185d892}{all\_q\_low}},\ \mbox{\hyperlink{classiCubStatus_a65cb9c67c929ceb9adf2b017be35991e}{all\_dq\_low}},\ \mbox{\hyperlink{classiCubStatus_a5224e5f5dbc1381e3bb6f73c7766ab9c}{all\_d2q\_low}};}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00066}00066\ }
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00067}\mbox{\hyperlink{classiCubStatus_a0931a68a107a19f57247d35b5f6eb0f1}{00067}}\ \ \ \ \ Vector\ \mbox{\hyperlink{classiCubStatus_a0931a68a107a19f57247d35b5f6eb0f1}{ft\_arm\_left}};}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00068}\mbox{\hyperlink{classiCubStatus_a77d3bbabcbb67382ba88202d4013acff}{00068}}\ \ \ \ \ Vector\ \mbox{\hyperlink{classiCubStatus_a77d3bbabcbb67382ba88202d4013acff}{ft\_arm\_right}};}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00069}\mbox{\hyperlink{classiCubStatus_a088edd24b29a10d9a1cc5256a2dc32f7}{00069}}\ \ \ \ \ Vector\ \mbox{\hyperlink{classiCubStatus_a088edd24b29a10d9a1cc5256a2dc32f7}{ft\_leg\_left}};}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00070}\mbox{\hyperlink{classiCubStatus_ae4ece600976c240d494f7811920334a0}{00070}}\ \ \ \ \ Vector\ \mbox{\hyperlink{classiCubStatus_ae4ece600976c240d494f7811920334a0}{ft\_leg\_right}};}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00071}\mbox{\hyperlink{classiCubStatus_a48660b8d1f7c6b792a2f6b0b27b53b24}{00071}}\ \ \ \ \ Vector\ \mbox{\hyperlink{classiCubStatus_a48660b8d1f7c6b792a2f6b0b27b53b24}{ft\_foot\_left}};}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00072}\mbox{\hyperlink{classiCubStatus_a2add7ff015d7c57098636f9b5466b9ba}{00072}}\ \ \ \ \ Vector\ \mbox{\hyperlink{classiCubStatus_a2add7ff015d7c57098636f9b5466b9ba}{ft\_foot\_right}};}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00073}00073\ }
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00074}\mbox{\hyperlink{classiCubStatus_a4b72733d95d7a3549685ecc6d52d8bc5}{00074}}\ \ \ \ \ Vector\ \mbox{\hyperlink{classiCubStatus_a0e2c30c8fbd03235fe42a439f04b2be6}{inertial\_w0}},\mbox{\hyperlink{classiCubStatus_ad01311e81dda0d13ef2896d6d579ec8c}{inertial\_dw0}},\mbox{\hyperlink{classiCubStatus_a4b72733d95d7a3549685ecc6d52d8bc5}{inertial\_d2p0}};}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00075}00075\ }
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00076}\mbox{\hyperlink{classiCubStatus_ab556af1bc12521db7e8347ce18d64995}{00076}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCubStatus_ab556af1bc12521db7e8347ce18d64995}{iCub\_not\_moving}}\{\};}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00077}00077\ }
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00078}\mbox{\hyperlink{classiCubStatus_af7ab748e904aa01aa97453d12cd99240}{00078}}\ \ \ \ \ \mbox{\hyperlink{classiCubStatus_af7ab748e904aa01aa97453d12cd99240}{iCubStatus}}\ ()}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00079}00079\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00080}00080\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCubStatus_aee6bd3dd88aa233b83c7a8eb187d2ea4}{timestamp}}=0;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00081}00081\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCubStatus_a0931a68a107a19f57247d35b5f6eb0f1}{ft\_arm\_left}}=0;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00082}00082\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCubStatus_a77d3bbabcbb67382ba88202d4013acff}{ft\_arm\_right}}=0;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00083}00083\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCubStatus_a088edd24b29a10d9a1cc5256a2dc32f7}{ft\_leg\_left}}=0;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00084}00084\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCubStatus_ae4ece600976c240d494f7811920334a0}{ft\_leg\_right}}=0;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00085}00085\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCubStatus_a48660b8d1f7c6b792a2f6b0b27b53b24}{ft\_foot\_left}}=0;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00086}00086\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCubStatus_a2add7ff015d7c57098636f9b5466b9ba}{ft\_foot\_right}}=0;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00087}00087\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCubStatus_a0e2c30c8fbd03235fe42a439f04b2be6}{inertial\_w0}}.resize(3);\ \ \ \ \ \mbox{\hyperlink{classiCubStatus_a0e2c30c8fbd03235fe42a439f04b2be6}{inertial\_w0}}.zero();}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00088}00088\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCubStatus_ad01311e81dda0d13ef2896d6d579ec8c}{inertial\_dw0}}.resize(3);\ \ \ \ \mbox{\hyperlink{classiCubStatus_ad01311e81dda0d13ef2896d6d579ec8c}{inertial\_dw0}}.zero();}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00089}00089\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCubStatus_a4b72733d95d7a3549685ecc6d52d8bc5}{inertial\_d2p0}}.resize(3);\ \ \ \mbox{\hyperlink{classiCubStatus_a4b72733d95d7a3549685ecc6d52d8bc5}{inertial\_d2p0}}.zero();}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00090}00090\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCubStatus_a761a15256eee552f369155d7551b99c5}{all\_q\_up}}.resize(3+7+7);\ \ \ \ \mbox{\hyperlink{classiCubStatus_a761a15256eee552f369155d7551b99c5}{all\_q\_up}}.zero();}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00091}00091\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCubStatus_ac7ed15ce2a2bd8cca2d87683892c8b94}{all\_dq\_up}}.resize(3+7+7);\ \ \ \mbox{\hyperlink{classiCubStatus_ac7ed15ce2a2bd8cca2d87683892c8b94}{all\_dq\_up}}.zero();}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00092}00092\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCubStatus_a91db40f29b849a10fbce0fd7aa0fa80c}{all\_d2q\_up}}.resize(3+7+7);\ \ \mbox{\hyperlink{classiCubStatus_a91db40f29b849a10fbce0fd7aa0fa80c}{all\_d2q\_up}}.zero();}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00093}00093\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCubStatus_a2afa6d44f78424132ba9d227b185d892}{all\_q\_low}}.resize(3+6+6);\ \ \ \mbox{\hyperlink{classiCubStatus_a2afa6d44f78424132ba9d227b185d892}{all\_q\_low}}.zero();}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00094}00094\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCubStatus_a65cb9c67c929ceb9adf2b017be35991e}{all\_dq\_low}}.resize(3+6+6);\ \ \mbox{\hyperlink{classiCubStatus_a65cb9c67c929ceb9adf2b017be35991e}{all\_dq\_low}}.zero();}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00095}00095\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCubStatus_a5224e5f5dbc1381e3bb6f73c7766ab9c}{all\_d2q\_low}}.resize(3+6+6);\ \mbox{\hyperlink{classiCubStatus_a5224e5f5dbc1381e3bb6f73c7766ab9c}{all\_d2q\_low}}.zero();}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00096}00096\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCubStatus_a0931a68a107a19f57247d35b5f6eb0f1}{ft\_arm\_left}}.resize(6);\ \ \ \ \ \mbox{\hyperlink{classiCubStatus_a0931a68a107a19f57247d35b5f6eb0f1}{ft\_arm\_left}}.zero();}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00097}00097\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCubStatus_a77d3bbabcbb67382ba88202d4013acff}{ft\_arm\_right}}.resize(6);\ \ \ \ \mbox{\hyperlink{classiCubStatus_a77d3bbabcbb67382ba88202d4013acff}{ft\_arm\_right}}.zero();}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00098}00098\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCubStatus_a088edd24b29a10d9a1cc5256a2dc32f7}{ft\_leg\_left}}.resize(6);\ \ \ \ \ \mbox{\hyperlink{classiCubStatus_a088edd24b29a10d9a1cc5256a2dc32f7}{ft\_leg\_left}}.zero();}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00099}00099\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCubStatus_ae4ece600976c240d494f7811920334a0}{ft\_leg\_right}}.resize(6);\ \ \ \ \mbox{\hyperlink{classiCubStatus_ae4ece600976c240d494f7811920334a0}{ft\_leg\_right}}.zero();}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00100}00100\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCubStatus_a48660b8d1f7c6b792a2f6b0b27b53b24}{ft\_foot\_left}}.resize(6);\ \ \ \ \mbox{\hyperlink{classiCubStatus_a48660b8d1f7c6b792a2f6b0b27b53b24}{ft\_foot\_left}}.zero();}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00101}00101\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCubStatus_a2add7ff015d7c57098636f9b5466b9ba}{ft\_foot\_right}}.resize(6);\ \ \ \mbox{\hyperlink{classiCubStatus_a2add7ff015d7c57098636f9b5466b9ba}{ft\_foot\_right}}.zero();}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00102}00102\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00103}00103\ }
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00104}\mbox{\hyperlink{classiCubStatus_af4bdc9167d708b0f48a6a77036d2b59e}{00104}}\ \ \ \ \ Vector\ \mbox{\hyperlink{classiCubStatus_af4bdc9167d708b0f48a6a77036d2b59e}{get\_q\_head}}()\ \ \ \ \{\textcolor{keywordflow}{return}\ \mbox{\hyperlink{classiCubStatus_a761a15256eee552f369155d7551b99c5}{all\_q\_up}}.subVector(0,2);\}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00105}\mbox{\hyperlink{classiCubStatus_af6bb2f5319ebbb3e327fd8c77b3af302}{00105}}\ \ \ \ \ Vector\ \mbox{\hyperlink{classiCubStatus_af6bb2f5319ebbb3e327fd8c77b3af302}{get\_dq\_head}}()\ \ \ \{\textcolor{keywordflow}{return}\ \mbox{\hyperlink{classiCubStatus_ac7ed15ce2a2bd8cca2d87683892c8b94}{all\_dq\_up}}.subVector(0,2);\}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00106}\mbox{\hyperlink{classiCubStatus_ac98390d1d0dd4dc968337929a7f48c36}{00106}}\ \ \ \ \ Vector\ \mbox{\hyperlink{classiCubStatus_ac98390d1d0dd4dc968337929a7f48c36}{get\_d2q\_head}}()\ \ \{\textcolor{keywordflow}{return}\ \mbox{\hyperlink{classiCubStatus_a91db40f29b849a10fbce0fd7aa0fa80c}{all\_d2q\_up}}.subVector(0,2);\}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00107}\mbox{\hyperlink{classiCubStatus_a2980ce24252ed29d1146978dbcee8b8c}{00107}}\ \ \ \ \ Vector\ \mbox{\hyperlink{classiCubStatus_a2980ce24252ed29d1146978dbcee8b8c}{get\_q\_larm}}()\ \ \ \ \{\textcolor{keywordflow}{return}\ \mbox{\hyperlink{classiCubStatus_a761a15256eee552f369155d7551b99c5}{all\_q\_up}}.subVector(3,9);\}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00108}\mbox{\hyperlink{classiCubStatus_a333a10a0394fbf7ea98bdb4f876b15b8}{00108}}\ \ \ \ \ Vector\ \mbox{\hyperlink{classiCubStatus_a333a10a0394fbf7ea98bdb4f876b15b8}{get\_dq\_larm}}()\ \ \ \{\textcolor{keywordflow}{return}\ \mbox{\hyperlink{classiCubStatus_ac7ed15ce2a2bd8cca2d87683892c8b94}{all\_dq\_up}}.subVector(3,9);\}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00109}\mbox{\hyperlink{classiCubStatus_adfe73ab205a2622df330ccff4653e988}{00109}}\ \ \ \ \ Vector\ \mbox{\hyperlink{classiCubStatus_adfe73ab205a2622df330ccff4653e988}{get\_d2q\_larm}}()\ \ \{\textcolor{keywordflow}{return}\ \mbox{\hyperlink{classiCubStatus_a91db40f29b849a10fbce0fd7aa0fa80c}{all\_d2q\_up}}.subVector(3,9);\}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00110}\mbox{\hyperlink{classiCubStatus_aceb1e1f8a128efae0ed989c38b76d460}{00110}}\ \ \ \ \ Vector\ \mbox{\hyperlink{classiCubStatus_aceb1e1f8a128efae0ed989c38b76d460}{get\_q\_rarm}}()\ \ \ \ \{\textcolor{keywordflow}{return}\ \mbox{\hyperlink{classiCubStatus_a761a15256eee552f369155d7551b99c5}{all\_q\_up}}.subVector(10,16);\}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00111}\mbox{\hyperlink{classiCubStatus_a446755575779fc95d868f389d2703bb7}{00111}}\ \ \ \ \ Vector\ \mbox{\hyperlink{classiCubStatus_a446755575779fc95d868f389d2703bb7}{get\_dq\_rarm}}()\ \ \ \{\textcolor{keywordflow}{return}\ \mbox{\hyperlink{classiCubStatus_ac7ed15ce2a2bd8cca2d87683892c8b94}{all\_dq\_up}}.subVector(10,16);\}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00112}\mbox{\hyperlink{classiCubStatus_abf3befc0e0013545cfc1696d17f279db}{00112}}\ \ \ \ \ Vector\ \mbox{\hyperlink{classiCubStatus_abf3befc0e0013545cfc1696d17f279db}{get\_d2q\_rarm}}()\ \ \{\textcolor{keywordflow}{return}\ \mbox{\hyperlink{classiCubStatus_a91db40f29b849a10fbce0fd7aa0fa80c}{all\_d2q\_up}}.subVector(10,16);\}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00113}\mbox{\hyperlink{classiCubStatus_a9f0f6feee29ec92b006303af15886e50}{00113}}\ \ \ \ \ Vector\ \mbox{\hyperlink{classiCubStatus_a9f0f6feee29ec92b006303af15886e50}{get\_q\_torso}}()\ \ \ \{\textcolor{keywordflow}{return}\ \mbox{\hyperlink{classiCubStatus_a2afa6d44f78424132ba9d227b185d892}{all\_q\_low}}.subVector(0,2);\}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00114}\mbox{\hyperlink{classiCubStatus_a002a4a643dc3519e513a8a1ca09652ee}{00114}}\ \ \ \ \ Vector\ \mbox{\hyperlink{classiCubStatus_a002a4a643dc3519e513a8a1ca09652ee}{get\_dq\_torso}}()\ \ \{\textcolor{keywordflow}{return}\ \mbox{\hyperlink{classiCubStatus_a65cb9c67c929ceb9adf2b017be35991e}{all\_dq\_low}}.subVector(0,2);\}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00115}\mbox{\hyperlink{classiCubStatus_af2ad8f81b40fcc843b6af67bc0044423}{00115}}\ \ \ \ \ Vector\ \mbox{\hyperlink{classiCubStatus_af2ad8f81b40fcc843b6af67bc0044423}{get\_d2q\_torso}}()\ \{\textcolor{keywordflow}{return}\ \mbox{\hyperlink{classiCubStatus_a5224e5f5dbc1381e3bb6f73c7766ab9c}{all\_d2q\_low}}.subVector(0,2);\}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00116}\mbox{\hyperlink{classiCubStatus_abcf8596d0e387f4721ac746e0911691a}{00116}}\ \ \ \ \ Vector\ \mbox{\hyperlink{classiCubStatus_abcf8596d0e387f4721ac746e0911691a}{get\_q\_lleg}}()\ \ \ \ \{\textcolor{keywordflow}{return}\ \mbox{\hyperlink{classiCubStatus_a2afa6d44f78424132ba9d227b185d892}{all\_q\_low}}.subVector(3,8);\}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00117}\mbox{\hyperlink{classiCubStatus_aee0ace4409a2bc8be0fd1130ad138e3e}{00117}}\ \ \ \ \ Vector\ \mbox{\hyperlink{classiCubStatus_aee0ace4409a2bc8be0fd1130ad138e3e}{get\_dq\_lleg}}()\ \ \ \{\textcolor{keywordflow}{return}\ \mbox{\hyperlink{classiCubStatus_a65cb9c67c929ceb9adf2b017be35991e}{all\_dq\_low}}.subVector(3,8);\}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00118}\mbox{\hyperlink{classiCubStatus_ad1d5f5e472f7172417f9e47e52c31b01}{00118}}\ \ \ \ \ Vector\ \mbox{\hyperlink{classiCubStatus_ad1d5f5e472f7172417f9e47e52c31b01}{get\_d2q\_lleg}}()\ \ \{\textcolor{keywordflow}{return}\ \mbox{\hyperlink{classiCubStatus_a5224e5f5dbc1381e3bb6f73c7766ab9c}{all\_d2q\_low}}.subVector(3,8);\}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00119}\mbox{\hyperlink{classiCubStatus_ac8f5706e76043a7a8fbfc62b422874bb}{00119}}\ \ \ \ \ Vector\ \mbox{\hyperlink{classiCubStatus_ac8f5706e76043a7a8fbfc62b422874bb}{get\_q\_rleg}}()\ \ \ \ \{\textcolor{keywordflow}{return}\ \mbox{\hyperlink{classiCubStatus_a2afa6d44f78424132ba9d227b185d892}{all\_q\_low}}.subVector(9,14);\}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00120}\mbox{\hyperlink{classiCubStatus_abce7e2ff5952aebf9f52d7a44dba7547}{00120}}\ \ \ \ \ Vector\ \mbox{\hyperlink{classiCubStatus_abce7e2ff5952aebf9f52d7a44dba7547}{get\_dq\_rleg}}()\ \ \ \{\textcolor{keywordflow}{return}\ \mbox{\hyperlink{classiCubStatus_a65cb9c67c929ceb9adf2b017be35991e}{all\_dq\_low}}.subVector(9,14);\}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00121}\mbox{\hyperlink{classiCubStatus_a54ebf80364d5239e7de073b1c9b88ce0}{00121}}\ \ \ \ \ Vector\ \mbox{\hyperlink{classiCubStatus_a54ebf80364d5239e7de073b1c9b88ce0}{get\_d2q\_rleg}}()\ \ \{\textcolor{keywordflow}{return}\ \mbox{\hyperlink{classiCubStatus_a5224e5f5dbc1381e3bb6f73c7766ab9c}{all\_d2q\_low}}.subVector(9,14);\}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00122}00122\ }
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00123}00123\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCubStatus_a3922eea3d2ce14b4c498d22ca46aaae1}{checkIcubNotMoving}}();}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00124}00124\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCubStatus_ae89c8edfd94602955604775392094046}{dump}}\ (FILE*\ \mbox{\hyperlink{compute__ekf__sym_8m_a633de4b0c14ca52ea2432a3c8a5c4c31}{f}});}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00125}00125\ }
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00126}00126\ \};}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00127}00127\ }
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00128}00128\ \textcolor{comment}{//\ class\ inverseDynamics:\ class\ for\ reading\ from\ Vrow\ and\ providing\ FT\ on\ an\ output\ port}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00129}\mbox{\hyperlink{classinverseDynamics}{00129}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classinverseDynamics}{inverseDynamics}}:\ \textcolor{keyword}{public}\ PeriodicThread}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00130}00130\ \{}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00131}00131\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00132}\mbox{\hyperlink{classinverseDynamics_ab6ea9e9021a20cd3864e5e04d838b2a8}{00132}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \ \ \ \ \ \ \mbox{\hyperlink{classinverseDynamics_ab6ea9e9021a20cd3864e5e04d838b2a8}{com\_enabled}};}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00133}\mbox{\hyperlink{classinverseDynamics_a7ee1c0e2c6415979e5cd609685b3aa28}{00133}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \ \ \ \ \ \ \mbox{\hyperlink{classinverseDynamics_a7ee1c0e2c6415979e5cd609685b3aa28}{com\_vel\_enabled}};}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00134}\mbox{\hyperlink{classinverseDynamics_a6ca790edb50ad6ee4ee5d6510dfd9489}{00134}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \ \ \ \ \ \ \mbox{\hyperlink{classinverseDynamics_a6ca790edb50ad6ee4ee5d6510dfd9489}{dummy\_ft}};}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00135}\mbox{\hyperlink{classinverseDynamics_a1827b7ffe1f90418beb95f5457c5ded8}{00135}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \ \ \ \ \ \ \mbox{\hyperlink{classinverseDynamics_a1827b7ffe1f90418beb95f5457c5ded8}{w0\_dw0\_enabled}};}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00136}\mbox{\hyperlink{classinverseDynamics_a83e9c42981522bde6d2d76a59f3ad45d}{00136}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \ \ \ \ \ \ \mbox{\hyperlink{classinverseDynamics_a83e9c42981522bde6d2d76a59f3ad45d}{dumpvel\_enabled}};}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00137}\mbox{\hyperlink{classinverseDynamics_a253f265a4f2a15a0cfe85a48d4f6c431}{00137}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \ \ \ \ \ \ \mbox{\hyperlink{classinverseDynamics_a253f265a4f2a15a0cfe85a48d4f6c431}{auto\_drift\_comp}};}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00138}\mbox{\hyperlink{classinverseDynamics_a3d2147d7dbdbe37448dec176c0c959e3}{00138}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \ \ \ \ \ \ \mbox{\hyperlink{classinverseDynamics_a3d2147d7dbdbe37448dec176c0c959e3}{default\_ee\_cont}};}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00139}\mbox{\hyperlink{classinverseDynamics_a0680b99b245399e13cf40dbbb763e143}{00139}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \ \ \ \ \ \ \mbox{\hyperlink{classinverseDynamics_a0680b99b245399e13cf40dbbb763e143}{add\_legs\_once}};}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00140}00140\ }
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00141}00141\ \textcolor{keyword}{private}:}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00142}00142\ \ \ \ \ \textcolor{keywordtype}{string}\ \ \ \ \ \ robot\_name;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00143}00143\ \ \ \ \ \textcolor{keywordtype}{string}\ \ \ \ \ \ local\_name;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00144}00144\ \ \ \ \ \textcolor{keywordtype}{bool}\ \ \ \ \ \ \ \ autoconnect;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00145}00145\ \ \ \ \ \mbox{\hyperlink{structiCub_1_1iDyn_1_1version__tag}{version\_tag}}\ icub\_type;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00146}00146\ }
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00147}00147\ \ \ \ \ PolyDriver\ *ddAL;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00148}00148\ \ \ \ \ PolyDriver\ *ddAR;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00149}00149\ \ \ \ \ PolyDriver\ *ddH;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00150}00150\ \ \ \ \ IEncoders\ \ *iencs\_arm\_left;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00151}00151\ \ \ \ \ IEncoders\ \ *iencs\_arm\_right;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00152}00152\ \ \ \ \ IEncoders\ \ *iencs\_head;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00153}00153\ \ \ \ \ IInteractionMode\ *iint\_arm\_left;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00154}00154\ \ \ \ \ IInteractionMode\ *iint\_arm\_right;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00155}00155\ \ \ \ \ IInteractionMode\ *iint\_head;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00156}00156\ \ \ \ \ IControlMode\ *icmd\_arm\_left;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00157}00157\ \ \ \ \ IControlMode\ *icmd\_arm\_right;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00158}00158\ \ \ \ \ IControlMode\ *icmd\_head;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00159}00159\ \ \ \ \ ISixAxisForceTorqueSensors*\ m\_left\_arm\_FT\{\textcolor{keyword}{nullptr}\};}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00160}00160\ \ \ \ \ ISixAxisForceTorqueSensors*\ m\_right\_arm\_FT\{\textcolor{keyword}{nullptr}\};}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00161}00161\ \ \ \ \ ISixAxisForceTorqueSensors*\ m\_left\_leg\_FT\{\textcolor{keyword}{nullptr}\};}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00162}00162\ \ \ \ \ ISixAxisForceTorqueSensors*\ m\_right\_leg\_FT\{\textcolor{keyword}{nullptr}\};}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00163}00163\ }
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00164}00164\ }
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00165}00165\ \ \ \ \ PolyDriver\ *ddLL;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00166}00166\ \ \ \ \ PolyDriver\ *ddLR;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00167}00167\ \ \ \ \ PolyDriver\ *ddT;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00168}00168\ \ \ \ \ IEncoders\ \ *iencs\_leg\_left;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00169}00169\ \ \ \ \ IEncoders\ \ *iencs\_leg\_right;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00170}00170\ \ \ \ \ IEncoders\ \ *iencs\_torso;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00171}00171\ \ \ \ \ IInteractionMode\ *iint\_leg\_left;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00172}00172\ \ \ \ \ IInteractionMode\ *iint\_leg\_right;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00173}00173\ \ \ \ \ IInteractionMode\ *iint\_torso;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00174}00174\ \ \ \ \ IControlMode\ *icmd\_leg\_left;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00175}00175\ \ \ \ \ IControlMode\ *icmd\_leg\_right;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00176}00176\ \ \ \ \ IControlMode\ *icmd\_torso;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00177}00177\ }
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00178}00178\ \ \ \ \ \textcolor{keywordtype}{string}\ part;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00179}00179\ }
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00180}00180\ \ \ \ \ \textcolor{keyword}{const}\ \ \textcolor{keywordtype}{long}\ \textcolor{keywordtype}{double}\ zero\_sens\_tolerance;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00181}00181\ \ \ \ \ \textcolor{keywordtype}{double}\ skinContactsTimestamp;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00182}00182\ }
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00183}00183\ \ \ \ \ \textcolor{comment}{//input\ ports}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00184}00184\ \ \ \ \ BufferedPort<Vector>\ *port\_inertial\_thread;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00185}00185\ \ \ \ \ BufferedPort<iCub::skinDynLib::skinContactList>\ *port\_skin\_contacts;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00186}00186\ }
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00187}00187\ \ \ \ \ \textcolor{comment}{//output\ ports}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00188}00188\ \ \ \ \ BufferedPort<Bottle>\ *port\_RATorques;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00189}00189\ \ \ \ \ BufferedPort<Bottle>\ *port\_RLTorques;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00190}00190\ \ \ \ \ BufferedPort<Bottle>\ *port\_RWTorques;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00191}00191\ \ \ \ \ BufferedPort<Bottle>\ *port\_LATorques;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00192}00192\ \ \ \ \ BufferedPort<Bottle>\ *port\_LLTorques;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00193}00193\ \ \ \ \ BufferedPort<Bottle>\ *port\_LWTorques;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00194}00194\ \ \ \ \ BufferedPort<Bottle>\ *port\_TOTorques;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00195}00195\ \ \ \ \ BufferedPort<Bottle>\ *port\_HDTorques;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00196}00196\ \ \ \ \ BufferedPort<Vector>\ *port\_external\_wrench\_RA;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00197}00197\ \ \ \ \ BufferedPort<Vector>\ *port\_external\_wrench\_LA;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00198}00198\ \ \ \ \ BufferedPort<Vector>\ *port\_external\_wrench\_RL;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00199}00199\ \ \ \ \ BufferedPort<Vector>\ *port\_external\_wrench\_LL;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00200}00200\ \ \ \ \ BufferedPort<Vector>\ *port\_external\_wrench\_RF;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00201}00201\ \ \ \ \ BufferedPort<Vector>\ *port\_external\_wrench\_LF;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00202}00202\ \ \ \ \ BufferedPort<Vector>\ *port\_external\_cartesian\_wrench\_RA;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00203}00203\ \ \ \ \ BufferedPort<Vector>\ *port\_external\_cartesian\_wrench\_LA;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00204}00204\ \ \ \ \ BufferedPort<Vector>\ *port\_external\_cartesian\_wrench\_RL;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00205}00205\ \ \ \ \ BufferedPort<Vector>\ *port\_external\_cartesian\_wrench\_LL;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00206}00206\ \ \ \ \ BufferedPort<Vector>\ *port\_external\_cartesian\_wrench\_RF;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00207}00207\ \ \ \ \ BufferedPort<Vector>\ *port\_external\_cartesian\_wrench\_LF;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00208}00208\ \ \ \ \ BufferedPort<Vector>\ *port\_sensor\_wrench\_RL;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00209}00209\ \ \ \ \ BufferedPort<Vector>\ *port\_sensor\_wrench\_LL;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00210}00210\ \ \ \ \ BufferedPort<Vector>\ *port\_model\_wrench\_RL;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00211}00211\ \ \ \ \ BufferedPort<Vector>\ *port\_model\_wrench\_LL;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00212}00212\ \ \ \ \ BufferedPort<Vector>\ *port\_external\_wrench\_TO;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00213}00213\ \ \ \ \ BufferedPort<Vector>\ *port\_com\_all;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00214}00214\ \ \ \ \ BufferedPort<Vector>\ *port\_com\_all\_foot;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00215}00215\ \ \ \ \ BufferedPort<Vector>\ *port\_com\_lb;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00216}00216\ \ \ \ \ BufferedPort<Vector>\ *port\_com\_ub;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00217}00217\ \ \ \ \ BufferedPort<Vector>\ *port\_com\_la;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00218}00218\ \ \ \ \ BufferedPort<Vector>\ *port\_com\_ra;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00219}00219\ \ \ \ \ BufferedPort<Vector>\ *port\_com\_ll;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00220}00220\ \ \ \ \ BufferedPort<Vector>\ *port\_com\_rl;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00221}00221\ \ \ \ \ BufferedPort<Vector>\ *port\_com\_hd;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00222}00222\ \ \ \ \ BufferedPort<Vector>\ *port\_com\_to;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00223}00223\ \ \ \ \ BufferedPort<Vector>\ *port\_monitor;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00224}00224\ \ \ \ \ BufferedPort<iCub::skinDynLib::skinContactList>\ *port\_contacts;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00225}00225\ \ \ \ \ BufferedPort<Vector>\ *port\_dumpvel;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00226}00226\ \ \ \ \ BufferedPort<Vector>\ *port\_COM\_vel;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00227}00227\ \ \ \ \ BufferedPort<Matrix>\ *port\_COM\_Jacobian;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00228}00228\ \ \ \ \ BufferedPort<Vector>\ *port\_all\_velocities;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00229}00229\ \ \ \ \ BufferedPort<Vector>\ *port\_all\_positions;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00230}00230\ \ \ \ \ BufferedPort<Matrix>\ *port\_root\_position\_mat;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00231}00231\ \ \ \ \ BufferedPort<Vector>\ *port\_root\_position\_vec;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00232}00232\ }
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00233}00233\ \ \ \ \ \textcolor{comment}{//\ ports\ outputing\ the\ external\ dynamics\ seen\ at\ the\ F/T\ sensor}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00234}00234\ \ \ \ \ BufferedPort<Vector>\ *port\_external\_ft\_arm\_left;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00235}00235\ \ \ \ \ BufferedPort<Vector>\ *port\_external\_ft\_arm\_right;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00236}00236\ \ \ \ \ BufferedPort<Vector>\ *port\_external\_ft\_leg\_left;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00237}00237\ \ \ \ \ BufferedPort<Vector>\ *port\_external\_ft\_leg\_right;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00238}00238\ \ \ \ \ yarp::os::Stamp\ timestamp;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00239}00239\ }
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00240}00240\ \ \ \ \ \textcolor{keywordtype}{bool}\ first;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00241}00241\ \ \ \ \ \mbox{\hyperlink{gravityThread_8h_a314e728fcd25c89c20cb03b841fd1559}{thread\_status\_enum}}\ thread\_status;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00242}00242\ }
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00243}00243\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1AWLinEstimator}{AWLinEstimator}}\ \ *InertialEst;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00244}00244\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1AWLinEstimator}{AWLinEstimator}}\ \ *linEstUp;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00245}00245\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1AWQuadEstimator}{AWQuadEstimator}}\ *quadEstUp;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00246}00246\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1AWLinEstimator}{AWLinEstimator}}\ \ *linEstLow;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00247}00247\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1AWQuadEstimator}{AWQuadEstimator}}\ *quadEstLow;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00248}00248\ }
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00249}00249\ \ \ \ \ \textcolor{keywordtype}{int}\ ctrlJnt;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00250}00250\ \ \ \ \ \textcolor{keywordtype}{int}\ allJnt;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00251}00251\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1iDyn_1_1iCubWholeBody}{iCubWholeBody}}\ *icub;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00252}00252\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1iDyn_1_1iCubWholeBody}{iCubWholeBody}}\ *icub\_sens;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00253}00253\ \ \ \ \ \mbox{\hyperlink{classiCubStatus}{iCubStatus}}\ \ \ \ current\_status;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00254}00254\ }
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00255}00255\ \ \ \ \ \textcolor{keywordtype}{size\_t}\ status\_queue\_size;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00256}00256\ \ \ \ \ list<iCubStatus>\ previous\_status;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00257}00257\ \ \ \ \ list<iCubStatus>\ not\_moving\_status;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00258}00258\ }
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00259}00259\ \ \ \ \ Vector\ encoders\_arm\_left;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00260}00260\ \ \ \ \ Vector\ encoders\_arm\_right;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00261}00261\ \ \ \ \ Vector\ encoders\_head;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00262}00262\ }
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00263}00263\ \ \ \ \ Vector\ encoders\_leg\_left;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00264}00264\ \ \ \ \ Vector\ encoders\_leg\_right;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00265}00265\ \ \ \ \ Vector\ encoders\_torso;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00266}00266\ }
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00267}00267\ \ \ \ \ Vector\ Fend,Muend;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00268}00268\ \ \ \ \ Vector\ F\_LArm,\ F\_RArm;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00269}00269\ \ \ \ \ Vector\ F\_iDyn\_LArm,\ F\_iDyn\_RArm,\ Offset\_LArm,\ Offset\_RArm;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00270}00270\ \ \ \ \ Vector\ F\_ext\_left\_arm,\ F\_ext\_right\_arm,\ F\_ext\_torso;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00271}00271\ \ \ \ \ Vector\ F\_ext\_cartesian\_left\_arm,\ F\_ext\_cartesian\_right\_arm;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00272}00272\ \ \ \ \ Vector\ F\_ext\_left\_leg,\ F\_ext\_right\_leg;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00273}00273\ \ \ \ \ Vector\ F\_ext\_left\_foot,\ F\_ext\_right\_foot;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00274}00274\ \ \ \ \ Vector\ F\_sns\_left\_leg,\ F\_sns\_right\_leg;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00275}00275\ \ \ \ \ Vector\ F\_mdl\_left\_leg,\ F\_mdl\_right\_leg;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00276}00276\ \ \ \ \ Vector\ F\_ext\_cartesian\_left\_leg,\ F\_ext\_cartesian\_right\_leg;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00277}00277\ \ \ \ \ Vector\ F\_ext\_cartesian\_left\_foot,\ F\_ext\_cartesian\_right\_foot;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00278}00278\ \ \ \ \ Vector\ F\_LLeg,\ F\_RLeg;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00279}00279\ \ \ \ \ Vector\ F\_LFoot,\ F\_RFoot;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00280}00280\ \ \ \ \ Vector\ F\_iDyn\_LLeg,\ F\_iDyn\_RLeg,\ Offset\_LLeg,\ Offset\_RLeg;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00281}00281\ \ \ \ \ Vector\ F\_iDyn\_LFoot,\ F\_iDyn\_RFoot,\ Offset\_LFoot,\ Offset\_RFoot;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00282}00282\ \ \ \ \ Matrix\ F\_sens\_up,\ F\_sens\_low,\ F\_ext\_up,\ F\_ext\_low;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00283}00283\ \ \ \ \ Vector\ F\_ext\_sens\_right\_arm,\ F\_ext\_sens\_left\_arm;\ \ \ \ \ \ \ \textcolor{comment}{//\ external\ wrench\ seen\ at\ the\ F/T\ sensors}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00284}00284\ \ \ \ \ Vector\ F\_ext\_sens\_right\_leg,\ F\_ext\_sens\_left\_leg;\ \ \ \ \ \ \ \textcolor{comment}{//\ external\ wrench\ seen\ at\ the\ F/T\ sensors}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00285}00285\ }
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00286}00286\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1skinDynLib_1_1skinContactList}{iCub::skinDynLib::skinContactList}}\ skinContacts;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00287}00287\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1skinDynLib_1_1dynContactList}{iCub::skinDynLib::dynContactList}}\ dynContacts;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00288}00288\ }
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00289}00289\ }
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00290}00290\ \ \ \ \ \textcolor{comment}{//\ icub\ model}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00291}00291\ \ \ \ \ \textcolor{keywordtype}{int}\ comp;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00292}00292\ \ \ \ \ Matrix\ FM\_sens\_up,FM\_sens\_low;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00293}00293\ }
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00294}00294\ \ \ \ \ \textcolor{comment}{//COM\ Jacobian\ Matrix}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00295}00295\ \ \ \ \ Matrix\ com\_jac;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00296}00296\ }
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00297}00297\ \ \ \ \ Vector\ evalVelUp(\textcolor{keyword}{const}\ Vector\ \&\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}});}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00298}00298\ \ \ \ \ Vector\ evalVelLow(\textcolor{keyword}{const}\ Vector\ \&\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}});}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00299}00299\ \ \ \ \ Vector\ eval\_domega(\textcolor{keyword}{const}\ Vector\ \&\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}});}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00300}00300\ \ \ \ \ Vector\ evalAccUp(\textcolor{keyword}{const}\ Vector\ \&\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}});}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00301}00301\ \ \ \ \ Vector\ evalAccLow(\textcolor{keyword}{const}\ Vector\ \&\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}});}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00302}00302\ }
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00303}00303\ \ \ \ \ \textcolor{keywordtype}{void}\ init\_upper();}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00304}00304\ \ \ \ \ \textcolor{keywordtype}{void}\ init\_lower();}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00305}00305\ \ \ \ \ \textcolor{keywordtype}{void}\ setUpperMeasure(\textcolor{keywordtype}{bool}\ \mbox{\hyperlink{dc1394thread_8h_a2421f1f717d58e750a315e6490e73113a38c6a1a08f9c3cdbdbde0685238f5ff4}{\_init}}=\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00306}00306\ \ \ \ \ \textcolor{keywordtype}{void}\ setLowerMeasure(\textcolor{keywordtype}{bool}\ \mbox{\hyperlink{dc1394thread_8h_a2421f1f717d58e750a315e6490e73113a38c6a1a08f9c3cdbdbde0685238f5ff4}{\_init}}=\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00307}00307\ }
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00308}00308\ \ \ \ \ \textcolor{keywordtype}{void}\ addSkinContacts();}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00309}00309\ }
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00310}00310\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00311}00311\ \ \ \ \ \mbox{\hyperlink{classinverseDynamics}{inverseDynamics}}(\textcolor{keywordtype}{int}\ \_rate,\ PolyDriver\ *\_ddAL,\ PolyDriver\ *\_ddAR,}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00312}00312\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ PolyDriver\ *\_ddH,\ PolyDriver\ *\_ddLL,\ PolyDriver\ *\_ddLR,}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00313}00313\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ PolyDriver\ *\_ddT,\ \textcolor{keywordtype}{string}\ \_robot\_name,\ \textcolor{keywordtype}{string}\ \_local\_name,}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00314}00314\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structiCub_1_1iDyn_1_1version__tag}{version\_tag}}\ icub\_type,\ \textcolor{keywordtype}{bool}\ \_autoconnect=\textcolor{keyword}{false},}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00315}00315\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ISixAxisForceTorqueSensors*\ m\_left\_arm\_FT\ =\ \textcolor{keyword}{nullptr},}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00316}00316\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ISixAxisForceTorqueSensors*\ m\_right\_arm\_FT\ =\ \textcolor{keyword}{nullptr},}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00317}00317\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ISixAxisForceTorqueSensors*\ m\_left\_leg\_FT\ =\ \textcolor{keyword}{nullptr},}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00318}00318\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ISixAxisForceTorqueSensors*\ m\_right\_leg\_FT\ =\ \textcolor{keyword}{nullptr});}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00319}00319\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classinverseDynamics_adaf0fb7f84c58a78c1caa51702f2fb0f}{threadInit}}()\ \textcolor{keyword}{override};}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00320}00320\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classinverseDynamics_ab0335673f45fa2c173d78e2f1a20d654}{setStiffMode}}();}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00321}\mbox{\hyperlink{classinverseDynamics_ae50f1e0dc2e771f46c739082c6d98103}{00321}}\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{observerThread_8h_a314e728fcd25c89c20cb03b841fd1559}{thread\_status\_enum}}\ \mbox{\hyperlink{classinverseDynamics_ae50f1e0dc2e771f46c739082c6d98103}{getThreadStatus}}()}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00322}00322\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00323}00323\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ thread\_status;}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00324}00324\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00325}00325\ }
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00326}00326\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classinverseDynamics_a87ffd18043446d0d4650b45120cbbdec}{run}}()\ \textcolor{keyword}{override};}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00327}00327\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classinverseDynamics_a00e29ec05aea0c907eeb52e3b40b1620}{threadRelease}}()\ \textcolor{keyword}{override};}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00328}00328\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classinverseDynamics_a84a5e98800bcda6dd00414f130ab43db}{closePort}}(Contactable\ *\_port);}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00329}00329\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classinverseDynamics_ae29a92a6568ae32ca0f1e9b29e9e8ed0}{writeTorque}}(Vector\ \_values,\ \textcolor{keywordtype}{int}\ \_address,\ BufferedPort<Bottle>\ *\_port);}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00330}00330\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ T>\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classinverseDynamics_a6a0d31b0fc0faf4be7d4c5a7ebb80255}{broadcastData}}(\mbox{\hyperlink{compute__ekf__sym_8m_adf1f3edb9115acb0a1e04209b7a9937b}{T}}\&\ \_values,\ BufferedPort<T>\ *\_port);}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00331}00331\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classinverseDynamics_ac164d9594d0c7f36e713422f0bf5808f}{calibrateOffset}}(\mbox{\hyperlink{observerThread_8h_a92d97c65baedc4dd8705566e385fa4b6}{calib\_enum}}\ calib\_code=\mbox{\hyperlink{observerThread_8h_a92d97c65baedc4dd8705566e385fa4b6a563de7c8cf670a2bd8faca708f7fac3e}{CALIB\_ALL}});}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00332}00332\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classinverseDynamics_a8cd813438c473f7770a44a49fa8ee552}{readAndUpdate}}(\textcolor{keywordtype}{bool}\ waitMeasure=\textcolor{keyword}{false},\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{dc1394thread_8h_a2421f1f717d58e750a315e6490e73113a38c6a1a08f9c3cdbdbde0685238f5ff4}{\_init}}=\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00333}00333\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classinverseDynamics_a72412bbb266dc38e6836959c5854255b}{getLowerEncodersSpeedAndAcceleration}}();}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00334}00334\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classinverseDynamics_af82ae415d92b4d736e0cde73ed80432d}{getUpperEncodersSpeedAndAcceleration}}();}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00335}00335\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classinverseDynamics_a79fe48d4c29851ab94cadceb64f6c221}{setZeroJntAngVelAcc}}();}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00336}00336\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classinverseDynamics_a26dcfa95c3ddd330faaca60179b91c61}{sendMonitorData}}();}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00337}00337\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classinverseDynamics_a8dfb3b50293da8e3fa0218e0fe3a6387}{sendVelAccData}}();}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00338}00338\ }
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00339}00339\ \};}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00340}00340\ }
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00341}00341\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00342}00342\ }
+\DoxyCodeLine{\Hypertarget{observerThread_8h_source_l00343}00343\ }
+
+\end{DoxyCode}

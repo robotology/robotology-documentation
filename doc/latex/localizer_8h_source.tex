@@ -1,0 +1,108 @@
+\doxysection{localizer.\+h}
+\hypertarget{localizer_8h_source}{}\label{localizer_8h_source}\index{icub-\/main/src/modules/iKinGazeCtrl/include/iCub/localizer.h@{icub-\/main/src/modules/iKinGazeCtrl/include/iCub/localizer.h}}
+\mbox{\hyperlink{localizer_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00001}00001\ \textcolor{comment}{/*\ }}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00002}00002\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010\ RobotCub\ Consortium,\ European\ Commission\ FP6\ Project\ IST-\/004370}}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00003}00003\ \textcolor{comment}{\ *\ Author:\ Ugo\ Pattacini,\ Alessandro\ Roncone}}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00004}00004\ \textcolor{comment}{\ *\ email:\ \ ugo.pattacini@iit.it,\ alessandro.roncone@iit.it}}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00005}00005\ \textcolor{comment}{\ *\ website:\ www.robotcub.org}}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00006}00006\ \textcolor{comment}{\ *\ Permission\ is\ granted\ to\ copy,\ distribute,\ and/or\ modify\ this\ program}}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00007}00007\ \textcolor{comment}{\ *\ under\ the\ terms\ of\ the\ GNU\ General\ Public\ License,\ version\ 2\ or\ any}}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00008}00008\ \textcolor{comment}{\ *\ later\ version\ published\ by\ the\ Free\ Software\ Foundation.}}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00009}00009\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00010}00010\ \textcolor{comment}{\ *\ A\ copy\ of\ the\ license\ can\ be\ found\ at}}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00011}00011\ \textcolor{comment}{\ *\ http://www.robotcub.org/icub/license/gpl.txt}}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00012}00012\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00013}00013\ \textcolor{comment}{\ *\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but}}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00014}00014\ \textcolor{comment}{\ *\ WITHOUT\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of}}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00015}00015\ \textcolor{comment}{\ *\ MERCHANTABILITY\ or\ FITNESS\ FOR\ A\ PARTICULAR\ PURPOSE.\ See\ the\ GNU\ General}}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00016}00016\ \textcolor{comment}{\ *\ Public\ License\ for\ more\ details}}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00017}00017\ \textcolor{comment}{*/}}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00018}00018\ }
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00019}00019\ \textcolor{preprocessor}{\#ifndef\ \_\_LOCALIZER\_H\_\_}}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00020}00020\ \textcolor{preprocessor}{\#define\ \_\_LOCALIZER\_H\_\_}}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00021}00021\ }
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00022}00022\ \textcolor{preprocessor}{\#include\ <mutex>}}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00023}00023\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00024}00024\ }
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00025}00025\ \textcolor{preprocessor}{\#include\ <yarp/os/all.h>}}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00026}00026\ \textcolor{preprocessor}{\#include\ <yarp/sig/all.h>}}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00027}00027\ \textcolor{preprocessor}{\#include\ <yarp/math/Math.h>}}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00028}00028\ }
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00029}00029\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{pids_8h}{iCub/ctrl/pids.h}}>}}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00030}00030\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{gazeNlp_8h}{iCub/gazeNlp.h}}>}}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00031}00031\ \textcolor{preprocessor}{\#include\ <iCub/utils.h>}}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00032}00032\ }
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00033}00033\ \textcolor{keyword}{using\ namespace\ }std;}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00034}00034\ \textcolor{keyword}{using\ namespace\ }yarp::os;}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00035}00035\ \textcolor{keyword}{using\ namespace\ }yarp::sig;}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00036}00036\ \textcolor{keyword}{using\ namespace\ }yarp::math;}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00037}00037\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceiCub_1_1ctrl}{iCub::ctrl}};}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00038}00038\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceiCub_1_1iKin}{iCub::iKin}};}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00039}00039\ }
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00040}00040\ }
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00041}00041\ \textcolor{comment}{//\ The\ thread\ launched\ by\ the\ application\ which\ is}}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00042}00042\ \textcolor{comment}{//\ in\ charge\ of\ localizing\ target\ 3D\ position\ from}}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00043}00043\ \textcolor{comment}{//\ image\ coordinates.}}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00044}\mbox{\hyperlink{classLocalizer}{00044}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classLocalizer}{Localizer}}\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{classGazeComponent}{GazeComponent}},\ \textcolor{keyword}{public}\ PeriodicThread}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00045}00045\ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00046}00046\ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00047}\mbox{\hyperlink{classLocalizer_aa89424ad6f6641e87a49c4ec91531df5}{00047}}\ \ \ \ \ mutex\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classLocalizer_aa89424ad6f6641e87a49c4ec91531df5}{mtx}};}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00048}\mbox{\hyperlink{classLocalizer_a5489bb0e91a19c7837c9da39d18e4e58}{00048}}\ \ \ \ \ \mbox{\hyperlink{classExchangeData}{ExchangeData}}\ \ \ \ \ \ \ \ \ *\mbox{\hyperlink{classLocalizer_a5489bb0e91a19c7837c9da39d18e4e58}{commData}};}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00049}\mbox{\hyperlink{classLocalizer_a6985fb47feef125be7faabddcec7e920}{00049}}\ \ \ \ \ BufferedPort<Bottle>\ \ \mbox{\hyperlink{classLocalizer_a6985fb47feef125be7faabddcec7e920}{port\_mono}};}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00050}\mbox{\hyperlink{classLocalizer_a4429d115a142229b2099a98fbe643551}{00050}}\ \ \ \ \ BufferedPort<Bottle>\ \ \mbox{\hyperlink{classLocalizer_a4429d115a142229b2099a98fbe643551}{port\_stereo}};}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00051}\mbox{\hyperlink{classLocalizer_aa3add7874c1ac747138b682d8d8629e6}{00051}}\ \ \ \ \ BufferedPort<Bottle>\ \ \mbox{\hyperlink{classLocalizer_aa3add7874c1ac747138b682d8d8629e6}{port\_anglesIn}};}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00052}\mbox{\hyperlink{classLocalizer_aaaa0dd33b0ddcf15e6d44a47f1f53059}{00052}}\ \ \ \ \ BufferedPort<Vector>\ \ \mbox{\hyperlink{classLocalizer_aaaa0dd33b0ddcf15e6d44a47f1f53059}{port\_anglesOut}};}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00053}\mbox{\hyperlink{classLocalizer_ae753b98c3369d78b5f717ea02ccc1708}{00053}}\ \ \ \ \ Stamp\ \mbox{\hyperlink{classLocalizer_ae753b98c3369d78b5f717ea02ccc1708}{txInfo\_ang}};}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00054}00054\ }
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00055}\mbox{\hyperlink{classLocalizer_a521f2f183217bbf0906873a9f611d3c6}{00055}}\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{classLocalizer_a521f2f183217bbf0906873a9f611d3c6}{period}};}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00056}00056\ }
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00057}\mbox{\hyperlink{classLocalizer_a09e41530c0d85d49461a82f39fde77af}{00057}}\ \ \ \ \ Matrix\ \mbox{\hyperlink{classLocalizer_a09e41530c0d85d49461a82f39fde77af}{eyeCAbsFrame}};}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00058}\mbox{\hyperlink{classLocalizer_a41c7e68fe1d3c36c9b2f5285cb467ac7}{00058}}\ \ \ \ \ Matrix\ \mbox{\hyperlink{classLocalizer_a41c7e68fe1d3c36c9b2f5285cb467ac7}{invEyeCAbsFrame}};}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00059}\mbox{\hyperlink{classLocalizer_a01c5af146605e1ad35556ba464f56945}{00059}}\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{classLocalizer_a01c5af146605e1ad35556ba464f56945}{eyesHalfBaseline}};}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00060}00060\ }
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00061}\mbox{\hyperlink{classLocalizer_a6c9883ff1f1626b4d45033e651dbc1af}{00061}}\ \ \ \ \ Matrix\ *\mbox{\hyperlink{classLocalizer_a0079f885a6d43d21405fc42c4101c6a2}{PrjL}},\ *\mbox{\hyperlink{classLocalizer_a6c9883ff1f1626b4d45033e651dbc1af}{invPrjL}};}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00062}\mbox{\hyperlink{classLocalizer_a81ad22375cfcce40c208bf176402b2b8}{00062}}\ \ \ \ \ Matrix\ *\mbox{\hyperlink{classLocalizer_abe89e9359bd0c844c954c70de49d5c7f}{PrjR}},\ *\mbox{\hyperlink{classLocalizer_a81ad22375cfcce40c208bf176402b2b8}{invPrjR}};}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00063}\mbox{\hyperlink{classLocalizer_a9c13f0777ddb404bef6a8563d77158a9}{00063}}\ \ \ \ \ \textcolor{keywordtype}{int}\ \ \ \ \ \mbox{\hyperlink{classLocalizer_a4866be5208c2349c1e7965c974a67a8e}{widthL}},\ \mbox{\hyperlink{classLocalizer_a9c13f0777ddb404bef6a8563d77158a9}{heightL}};}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00064}\mbox{\hyperlink{classLocalizer_a6f6988b8be88245a2318247ea9e224bc}{00064}}\ \ \ \ \ \textcolor{keywordtype}{int}\ \ \ \ \ \mbox{\hyperlink{classLocalizer_ab69882e378e509c699ad5eb9be62782a}{widthR}},\ \mbox{\hyperlink{classLocalizer_a6f6988b8be88245a2318247ea9e224bc}{heightR}};}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00065}\mbox{\hyperlink{classLocalizer_a709517199fc1e4cf28044eaab25dc6ff}{00065}}\ \ \ \ \ \textcolor{keywordtype}{double}\ \ \mbox{\hyperlink{classLocalizer_a709517199fc1e4cf28044eaab25dc6ff}{cxl}},\ \mbox{\hyperlink{classLocalizer_ac9e566d07aa93ede878b4e14d7b7b2ad}{cyl}};}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00066}\mbox{\hyperlink{classLocalizer_a6fc1d75a3d7d6e2f671b0dfd8f198c20}{00066}}\ \ \ \ \ \textcolor{keywordtype}{double}\ \ \mbox{\hyperlink{classLocalizer_a6fc1d75a3d7d6e2f671b0dfd8f198c20}{cxr}},\ \mbox{\hyperlink{classLocalizer_a47bb21198d281493150299dafb293dd4}{cyr}};}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00067}00067\ }
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00068}\mbox{\hyperlink{classLocalizer_a9fe005bd03734ccd1ce385f4cc53030c}{00068}}\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1parallelPID}{parallelPID}}\ *\mbox{\hyperlink{classLocalizer_a9fe005bd03734ccd1ce385f4cc53030c}{pid}};}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00069}\mbox{\hyperlink{classLocalizer_aaf8f926abe31657809f339328d21f85a}{00069}}\ \ \ \ \ \textcolor{keywordtype}{string}\ \mbox{\hyperlink{classLocalizer_aaf8f926abe31657809f339328d21f85a}{dominantEye}};}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00070}00070\ }
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00071}00071\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classLocalizer_a7dd076acfff32dfcd812bbc7fcac0cf5}{handleMonocularInput}}();}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00072}00072\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classLocalizer_a5e1e5c4d47fcaca7f4fbc97e68e589b3}{handleStereoInput}}();}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00073}00073\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classLocalizer_a1768d3ecf342895713d61bb2c6ac0d2e}{handleAnglesInput}}();}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00074}00074\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classLocalizer_ab78c5037b65ec0889b330c0ffcedb504}{handleAnglesOutput}}();}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00075}00075\ }
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00076}00076\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00077}00077\ \ \ \ \ \mbox{\hyperlink{classLocalizer}{Localizer}}(\mbox{\hyperlink{classExchangeData}{ExchangeData}}\ *\_commData,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ \_period);}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00078}00078\ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{classLocalizer_a5a7f7d458283a3d7f19007b9cfa48fec}{\string~Localizer}}();}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00079}00079\ }
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00080}00080\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{classLocalizer_a7be8957a3a01e1628622d03bf2249814}{getDistFromVergence}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ ver);}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00081}00081\ \ \ \ \ \textcolor{keywordtype}{void}\ \ \ \mbox{\hyperlink{classLocalizer_a101ea048aec3fb72e924ac691c7635e2}{getPidOptions}}(Bottle\ \&options);}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00082}00082\ \ \ \ \ \textcolor{keywordtype}{void}\ \ \ \mbox{\hyperlink{classLocalizer_a890e8ed7abe88d857dec4a32affc0d12}{setPidOptions}}(\textcolor{keyword}{const}\ Bottle\ \&options);}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00083}00083\ \ \ \ \ \textcolor{keywordtype}{bool}\ \ \ \mbox{\hyperlink{classLocalizer_ae5cb5d6b0990effd03c2dce912b04472}{projectPoint}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{string}\ \&type,\ \textcolor{keyword}{const}\ Vector\ \&\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}},\ Vector\ \&px);}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00084}00084\ \ \ \ \ \textcolor{keywordtype}{bool}\ \ \ \mbox{\hyperlink{classLocalizer_ae5cb5d6b0990effd03c2dce912b04472}{projectPoint}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{string}\ \&type,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ u,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ v,}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00085}00085\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{show__eyes__axes_8m_a25ed1bcb423b0b7200f485fc5ff71c8e}{z}},\ Vector\ \&\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}});}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00086}00086\ \ \ \ \ \textcolor{keywordtype}{bool}\ \ \ \mbox{\hyperlink{classLocalizer_ae5cb5d6b0990effd03c2dce912b04472}{projectPoint}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{string}\ \&type,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ u,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ v,}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00087}00087\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Vector\ \&plane,\ Vector\ \&\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}});}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00088}00088\ \ \ \ \ \textcolor{keywordtype}{bool}\ \ \ \mbox{\hyperlink{classLocalizer_ac9b186dd1bddff152d37e8724945bffb}{triangulatePoint}}(\textcolor{keyword}{const}\ Vector\ \&pxl,\ \textcolor{keyword}{const}\ Vector\ \&pxr,\ Vector\ \&\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}});}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00089}00089\ \ \ \ \ Vector\ \mbox{\hyperlink{classLocalizer_aed8548adec5ab569994d070b636fd104}{getAbsAngles}}(\textcolor{keyword}{const}\ Vector\ \&\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}});}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00090}00090\ \ \ \ \ Vector\ \mbox{\hyperlink{classLocalizer_a865523ad4d827f3cfdbac9b5491f1080}{get3DPoint}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{string}\ \&type,\ \textcolor{keyword}{const}\ Vector\ \&ang);}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00091}00091\ \ \ \ \ \textcolor{keywordtype}{bool}\ \ \ \mbox{\hyperlink{classLocalizer_ac67358b993322b5be4da515dbb22e496}{getIntrinsicsMatrix}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{string}\ \&type,\ Matrix\ \&M,\ \textcolor{keywordtype}{int}\ \&w,\ \textcolor{keywordtype}{int}\ \&\mbox{\hyperlink{compute__ekf__sym_8m_a5e36941b3d856737e81516acd45edc50}{h}});}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00092}00092\ \ \ \ \ \textcolor{keywordtype}{bool}\ \ \ \mbox{\hyperlink{classLocalizer_a2a1de62a394027463c79b91b15aee9b2}{setIntrinsicsMatrix}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{string}\ \&type,\ \textcolor{keyword}{const}\ Matrix\ \&M,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ w,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{compute__ekf__sym_8m_a5e36941b3d856737e81516acd45edc50}{h}});}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00093}00093\ \ \ \ \ \textcolor{keywordtype}{bool}\ \ \ \mbox{\hyperlink{classLocalizer_af352d9eaa7daba164373173c11d05836}{threadInit}}();}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00094}00094\ \ \ \ \ \textcolor{keywordtype}{void}\ \ \ \mbox{\hyperlink{classLocalizer_a8c117e05803ffe949dad67974b1b02dc}{threadRelease}}();}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00095}00095\ \ \ \ \ \textcolor{keywordtype}{void}\ \ \ \mbox{\hyperlink{classLocalizer_a57a3a04cdfa279a62c54332a871e5b8b}{afterStart}}(\textcolor{keywordtype}{bool}\ s);}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00096}00096\ \ \ \ \ \textcolor{keywordtype}{void}\ \ \ \mbox{\hyperlink{classLocalizer_a8d16aa08cff87fd25a2fb4f0a1b32e96}{run}}();}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00097}00097\ \};}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00098}00098\ }
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00099}00099\ }
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00100}00100\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00101}00101\ }
+\DoxyCodeLine{\Hypertarget{localizer_8h_source_l00102}00102\ }
+
+\end{DoxyCode}

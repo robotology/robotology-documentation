@@ -1,0 +1,106 @@
+\doxysection{Standardizer.\+cpp}
+\hypertarget{Standardizer_8cpp_source}{}\label{Standardizer_8cpp_source}\index{icub-\/main/src/libraries/learningMachine/src/Standardizer.cpp@{icub-\/main/src/libraries/learningMachine/src/Standardizer.cpp}}
+\mbox{\hyperlink{Standardizer_8cpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00001}00001\ \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00002}00002\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2007-\/2011\ RobotCub\ Consortium,\ European\ Commission\ FP6\ Project\ IST-\/004370}}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00003}00003\ \textcolor{comment}{\ *\ author:\ \ Arjan\ Gijsberts}}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00004}00004\ \textcolor{comment}{\ *\ email:\ \ \ arjan.gijsberts@iit.it}}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00005}00005\ \textcolor{comment}{\ *\ website:\ www.robotcub.org}}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00006}00006\ \textcolor{comment}{\ *\ Permission\ is\ granted\ to\ copy,\ distribute,\ and/or\ modify\ this\ program}}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00007}00007\ \textcolor{comment}{\ *\ under\ the\ terms\ of\ the\ GNU\ General\ Public\ License,\ version\ 2\ or\ any}}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00008}00008\ \textcolor{comment}{\ *\ later\ version\ published\ by\ the\ Free\ Software\ Foundation.}}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00009}00009\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00010}00010\ \textcolor{comment}{\ *\ A\ copy\ of\ the\ license\ can\ be\ found\ at}}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00011}00011\ \textcolor{comment}{\ *\ http://www.robotcub.org/icub/license/gpl.txt}}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00012}00012\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00013}00013\ \textcolor{comment}{\ *\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but}}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00014}00014\ \textcolor{comment}{\ *\ WITHOUT\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of}}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00015}00015\ \textcolor{comment}{\ *\ MERCHANTABILITY\ or\ FITNESS\ FOR\ A\ PARTICULAR\ PURPOSE.\ See\ the\ GNU\ General}}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00016}00016\ \textcolor{comment}{\ *\ Public\ License\ for\ more\ details}}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00017}00017\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00018}00018\ }
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00019}00019\ \textcolor{preprocessor}{\#include\ <sstream>}}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00020}00020\ \textcolor{preprocessor}{\#include\ <cmath>}}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00021}00021\ }
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00022}00022\ \textcolor{comment}{//\#include\ <yarp/os/Value.h>}}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00023}00023\ }
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00024}00024\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{Standardizer_8h}{iCub/learningMachine/Standardizer.h}}"{}}}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00025}00025\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{Serialization_8h}{iCub/learningMachine/Serialization.h}}"{}}}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00026}00026\ }
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00027}00027\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceiCub_1_1learningmachine_1_1serialization}{iCub::learningmachine::serialization}};}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00028}00028\ }
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00029}00029\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespaceiCub}{iCub}}\ \{}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00030}00030\ \textcolor{keyword}{namespace\ }learningmachine\ \{}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00031}00031\ }
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00032}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1Standardizer_a1a751417677bed29586bcf205346851e}{00032}}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1Standardizer_a1a751417677bed29586bcf205346851e}{Standardizer::Standardizer}}(\textcolor{keywordtype}{double}\ m,\ \textcolor{keywordtype}{double}\ s)}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00033}00033\ \ \ :\ noSamples(0),\ runningMean(0.),\ runningStd(0.),\ squaredErrors(0.)\ \{}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00034}00034\ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1IScaler_a9bd336962e4430d170b05e2fbeb1a38a}{setName}}(\textcolor{stringliteral}{"{}Standardizer"{}});}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00035}00035\ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1Standardizer_aca235e4526c4b200170481df9c20b350}{setDesiredMean}}(m);}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00036}00036\ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1Standardizer_a99962c53ce94fb4134408dadd7c6bfe8}{setDesiredStd}}(s);}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00037}00037\ \}}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00038}00038\ }
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00039}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1Standardizer_ab482037b22e74d7645b69a234383e437}{00039}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1Standardizer_ab482037b22e74d7645b69a234383e437}{Standardizer::update}}(\textcolor{keywordtype}{double}\ val)\ \{}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00040}00040\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00041}00041\ \textcolor{comment}{\ \ \ \ \ *\ Running\ variance\ calculation,\ taken\ from:}}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00042}00042\ \textcolor{comment}{\ \ \ \ \ *}}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00043}00043\ \textcolor{comment}{\ \ \ \ \ *\ Donald\ E.\ Knuth\ (1998).\ The\ Art\ of\ Computer\ Programming,\ volume\ 2:}}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00044}00044\ \textcolor{comment}{\ \ \ \ \ *\ \ \ Seminumerical\ Algorithms,\ 3rd\ edn.,\ p.\ 232.\ Boston:\ Addison-\/Wesley}}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00045}00045\ \textcolor{comment}{\ \ \ \ \ */}}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00046}00046\ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1Standardizer_aaf048d64f8ff00dbc28013e0b5a708ed}{noSamples}}++;}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00047}00047\ \ \ \ \ \textcolor{keywordtype}{double}\ delta\ =\ val\ -\/\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1Standardizer_acf05b38e1ba2c268d6d3d9e0e549fc28}{runningMean}};}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00048}00048\ \ \ \ \ this-\/>runningMean\ +=\ (delta\ /\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1Standardizer_aaf048d64f8ff00dbc28013e0b5a708ed}{noSamples}});}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00049}00049\ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1Standardizer_a87a0ee0480e7c7e785a565ea722dbf25}{squaredErrors}}\ +=\ (delta\ *\ (val\ -\/\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1Standardizer_acf05b38e1ba2c268d6d3d9e0e549fc28}{runningMean}}));\ \textcolor{comment}{//\ M2\ in\ TAOCP}}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00050}00050\ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1Standardizer_a10a1331d771c7a0026efe4874614d3a4}{runningStd}}\ =\ sqrt(this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1Standardizer_a87a0ee0480e7c7e785a565ea722dbf25}{squaredErrors}}\ /\ (this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1Standardizer_aaf048d64f8ff00dbc28013e0b5a708ed}{noSamples}}\ +\ 1));}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00051}00051\ }
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00052}00052\ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1IScaler_aae5cb5657067cb40c51c745512e3d275}{scale}}\ =\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1Standardizer_a10a1331d771c7a0026efe4874614d3a4}{runningStd}}\ /\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1Standardizer_aa9a43a350efc5ce2dc28e6ef16f05178}{std}};}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00053}00053\ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1IScaler_ae96ac3a10429e5e209966df5c72ccf57}{offset}}\ =\ (this-\/>runningMean\ -\/\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1Standardizer_a2d3eccf6604dda118f86426cbb6a83a4}{mean}})\ *\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1IScaler_aae5cb5657067cb40c51c745512e3d275}{scale}};}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00054}00054\ \}}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00055}00055\ }
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00056}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1Standardizer_a9760839671c5b8080381e89c89dd092b}{00056}}\ std::string\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1Standardizer_a9760839671c5b8080381e89c89dd092b}{Standardizer::getInfo}}()\ \{}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00057}00057\ \ \ \ \ std::ostringstream\ buffer;}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00058}00058\ \ \ \ \ buffer\ <<\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1IScaler_a07042c68827531f9bed56c3d35869e13}{IScaler::getInfo}}()\ <<\ \textcolor{stringliteral}{"{},\ "{}};}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00059}00059\ \ \ \ \ buffer\ <<\ \textcolor{stringliteral}{"{}Input\ Stats:\ "{}}\ <<\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1Standardizer_acf05b38e1ba2c268d6d3d9e0e549fc28}{runningMean}}\ <<\ \textcolor{stringliteral}{"{}\ +/-\/\ "{}}\ <<\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1Standardizer_a10a1331d771c7a0026efe4874614d3a4}{runningStd}}\ <<\ \textcolor{stringliteral}{"{},\ "{}};}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00060}00060\ \ \ \ \ buffer\ <<\ \textcolor{stringliteral}{"{}Desired:\ "{}}\ <<\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1Standardizer_ae8e6f8878c4fb4677dc89889f961b02d}{getDesiredMean}}()\ <<\ \textcolor{stringliteral}{"{}\ +/-\/\ "{}}\ <<\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1Standardizer_a06d609ed8de6cb747a3fbada8d028e21}{getDesiredStd}}();}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00061}00061\ \ \ \ \ \textcolor{keywordflow}{return}\ buffer.str();}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00062}00062\ \}}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00063}00063\ }
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00064}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1Standardizer_a988a4f57b59dd4375616c9b0a5d3d0b5}{00064}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1Standardizer_a988a4f57b59dd4375616c9b0a5d3d0b5}{Standardizer::writeBottle}}(yarp::os::Bottle\&\ bot)\ \{}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00065}00065\ \ \ \ \ bot\ <<\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1Standardizer_aaf048d64f8ff00dbc28013e0b5a708ed}{noSamples}}\ <<\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1Standardizer_a87a0ee0480e7c7e785a565ea722dbf25}{squaredErrors}}\ <<\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1Standardizer_a2d3eccf6604dda118f86426cbb6a83a4}{mean}}\ <<\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1Standardizer_aa9a43a350efc5ce2dc28e6ef16f05178}{std}}}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00066}00066\ \ \ \ \ \ \ \ \ <<\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1Standardizer_acf05b38e1ba2c268d6d3d9e0e549fc28}{runningMean}}\ <<\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1Standardizer_a10a1331d771c7a0026efe4874614d3a4}{runningStd}};}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00067}00067\ }
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00068}00068\ \ \ \ \ \textcolor{comment}{//\ make\ sure\ to\ call\ the\ superclass's\ method}}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00069}00069\ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1IScaler_a8dfcaf17f2787e36ed14ec6f51bbf79f}{IScaler::writeBottle}}(bot);}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00070}00070\ \}}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00071}00071\ }
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00072}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1Standardizer_a94e7bc3931fbcb5f232a34f800743dfb}{00072}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1Standardizer_a94e7bc3931fbcb5f232a34f800743dfb}{Standardizer::readBottle}}(yarp::os::Bottle\&\ bot)\ \{}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00073}00073\ \ \ \ \ \textcolor{comment}{//\ make\ sure\ to\ call\ the\ superclass's\ method\ (will\ reset\ transformer)}}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00074}00074\ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1IScaler_adf66480712e0a7f4d58f8ab815355536}{IScaler::readBottle}}(bot);}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00075}00075\ }
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00076}00076\ \ \ \ \ bot\ >>\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1Standardizer_a10a1331d771c7a0026efe4874614d3a4}{runningStd}}\ >>\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1Standardizer_acf05b38e1ba2c268d6d3d9e0e549fc28}{runningMean}}\ >>\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1Standardizer_aa9a43a350efc5ce2dc28e6ef16f05178}{std}}\ >>\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1Standardizer_a2d3eccf6604dda118f86426cbb6a83a4}{mean}}}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00077}00077\ \ \ \ \ \ \ \ \ >>\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1Standardizer_a87a0ee0480e7c7e785a565ea722dbf25}{squaredErrors}}\ >>\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1Standardizer_aaf048d64f8ff00dbc28013e0b5a708ed}{noSamples}};}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00078}00078\ \}}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00079}00079\ }
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00080}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1Standardizer_aa556d008778a71ffc36fb66ede2398fd}{00080}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1Standardizer_aa556d008778a71ffc36fb66ede2398fd}{Standardizer::configure}}(yarp::os::Searchable\&\ config)\ \{}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00081}00081\ \ \ \ \ \textcolor{keywordtype}{bool}\ success\ =\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1IScaler_af5a5474074fc70351109276c1cde134b}{IScaler::configure}}(config);}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00082}00082\ }
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00083}00083\ \ \ \ \ \textcolor{comment}{//\ set\ the\ desired\ output\ mean\ (double)}}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00084}00084\ \ \ \ \ \textcolor{keywordflow}{if}(config.find(\textcolor{stringliteral}{"{}mean"{}}).isFloat64()\ ||\ config.find(\textcolor{stringliteral}{"{}mean"{}}).isInt32())\ \{}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00085}00085\ \ \ \ \ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1Standardizer_aca235e4526c4b200170481df9c20b350}{setDesiredMean}}(config.find(\textcolor{stringliteral}{"{}mean"{}}).asFloat64());}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00086}00086\ \ \ \ \ \ \ \ \ success\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00087}00087\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00088}00088\ \ \ \ \ \textcolor{comment}{//\ set\ the\ desired\ output\ standard\ deviation\ (double)}}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00089}00089\ \ \ \ \ \textcolor{keywordflow}{if}(config.find(\textcolor{stringliteral}{"{}std"{}}).isFloat64()\ ||\ config.find(\textcolor{stringliteral}{"{}std"{}}).isInt32())\ \{}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00090}00090\ \ \ \ \ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1Standardizer_a99962c53ce94fb4134408dadd7c6bfe8}{setDesiredStd}}(config.find(\textcolor{stringliteral}{"{}std"{}}).asFloat64());}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00091}00091\ \ \ \ \ \ \ \ \ success\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00092}00092\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00093}00093\ }
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00094}00094\ \ \ \ \ \textcolor{keywordflow}{return}\ success;}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00095}00095\ \}}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00096}00096\ }
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00097}00097\ }
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00098}00098\ \}\ \textcolor{comment}{//\ learningmachine}}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00099}00099\ \}\ \textcolor{comment}{//\ iCub}}
+\DoxyCodeLine{\Hypertarget{Standardizer_8cpp_source_l00100}00100\ }
+
+\end{DoxyCode}

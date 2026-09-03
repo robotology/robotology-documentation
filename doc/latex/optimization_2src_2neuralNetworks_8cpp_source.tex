@@ -1,0 +1,429 @@
+\doxysection{neural\+Networks.\+cpp}
+\hypertarget{optimization_2src_2neuralNetworks_8cpp_source}{}\label{optimization_2src_2neuralNetworks_8cpp_source}\index{icub-\/main/src/libraries/optimization/src/neuralNetworks.cpp@{icub-\/main/src/libraries/optimization/src/neuralNetworks.cpp}}
+\mbox{\hyperlink{optimization_2src_2neuralNetworks_8cpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00001}00001\ \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00002}00002\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2013\ iCub\ Facility\ -\/\ Istituto\ Italiano\ di\ Tecnologia}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00003}00003\ \textcolor{comment}{\ *\ Author:\ Ugo\ Pattacini}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00004}00004\ \textcolor{comment}{\ *\ email:\ \ ugo.pattacini@iit.it}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00005}00005\ \textcolor{comment}{\ *\ Permission\ is\ granted\ to\ copy,\ distribute,\ and/or\ modify\ this\ program}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00006}00006\ \textcolor{comment}{\ *\ under\ the\ terms\ of\ the\ GNU\ General\ Public\ License,\ version\ 2\ or\ any}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00007}00007\ \textcolor{comment}{\ *\ later\ version\ published\ by\ the\ Free\ Software\ Foundation.}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00008}00008\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00009}00009\ \textcolor{comment}{\ *\ A\ copy\ of\ the\ license\ can\ be\ found\ at}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00010}00010\ \textcolor{comment}{\ *\ http://www.robotcub.org/icub/license/gpl.txt}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00011}00011\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00012}00012\ \textcolor{comment}{\ *\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00013}00013\ \textcolor{comment}{\ *\ WITHOUT\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00014}00014\ \textcolor{comment}{\ *\ MERCHANTABILITY\ or\ FITNESS\ FOR\ A\ PARTICULAR\ PURPOSE.\ See\ the\ GNU\ General}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00015}00015\ \textcolor{comment}{\ *\ Public\ License\ for\ more\ details}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00016}00016\ \textcolor{comment}{*/}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00017}00017\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00018}00018\ \textcolor{preprocessor}{\#include\ <algorithm>}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00019}00019\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00020}00020\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00021}00021\ \textcolor{preprocessor}{\#include\ <yarp/math/Math.h>}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00022}00022\ \textcolor{preprocessor}{\#include\ <yarp/math/Rand.h>}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00023}00023\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{math_8h}{iCub/ctrl/math.h}}>}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00024}00024\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{optimization_2include_2iCub_2optimization_2neuralNetworks_8h}{iCub/optimization/neuralNetworks.h}}>}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00025}00025\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00026}00026\ \textcolor{preprocessor}{\#include\ <IpTNLP.hpp>}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00027}00027\ \textcolor{preprocessor}{\#include\ <IpIpoptApplication.hpp>}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00028}00028\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00029}\mbox{\hyperlink{optimization_2src_2neuralNetworks_8cpp_a926cbacf129b9291230102f6efbac842}{00029}}\ \textcolor{preprocessor}{\#define\ CAST\_IPOPTAPP(x)\ \ \ \ \ \ \ \ (static\_cast<Ipopt::IpoptApplication*>(x))}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00030}00030\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00031}00031\ \textcolor{keyword}{using\ namespace\ }std;}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00032}00032\ \textcolor{keyword}{using\ namespace\ }yarp::os;}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00033}00033\ \textcolor{keyword}{using\ namespace\ }yarp::sig;}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00034}00034\ \textcolor{keyword}{using\ namespace\ }yarp::math;}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00035}00035\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceiCub_1_1ctrl}{iCub::ctrl}};}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00036}00036\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceiCub_1_1optimization}{iCub::optimization}};}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00037}00037\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00038}00038\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00039}00039\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespaceiCub}{iCub}}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00040}00040\ \{}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00041}00041\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00042}00042\ \textcolor{keyword}{namespace\ }optimization}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00043}00043\ \{}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00044}00044\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00045}00045\ \textcolor{comment}{/****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00046}\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP}{00046}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP}{ff2LayNNTrainNLP}}\ :\ \textcolor{keyword}{public}\ Ipopt::TNLP}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00047}00047\ \{}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00048}00048\ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00049}\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a6ef82d08b94ea79495cc2d1fa9ab7d61}{00049}}\ \ \ \ \ Property\ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a6ef82d08b94ea79495cc2d1fa9ab7d61}{bounds}};}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00050}\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a8149b65fd3e50799f0782ced97534d3d}{00050}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a8149b65fd3e50799f0782ced97534d3d}{randomInit}};}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00051}00051\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00052}\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_ac50aa4ddfb8c79a3993bf2c71adc6bff}{00052}}\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrain}{ff2LayNNTrain}}\ \&\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_ac50aa4ddfb8c79a3993bf2c71adc6bff}{net}};}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00053}\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a92e0692659d9c35fe25af90652c098e0}{00053}}\ \ \ \ \ deque<Vector>\ \&\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a92e0692659d9c35fe25af90652c098e0}{IW}};}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00054}\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a03b4a360e5d953d899d387a6fac2c2ce}{00054}}\ \ \ \ \ deque<Vector>\ \&\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a03b4a360e5d953d899d387a6fac2c2ce}{LW}};}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00055}\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a54f971d39dab6390534281c05c4c23ac}{00055}}\ \ \ \ \ Vector\ \ \ \ \ \ \ \ \&\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a54f971d39dab6390534281c05c4c23ac}{b1}};}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00056}\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a993bd07d80bdfcc8e350d82926391b8d}{00056}}\ \ \ \ \ Vector\ \ \ \ \ \ \ \ \&\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a993bd07d80bdfcc8e350d82926391b8d}{b2}};}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00057}00057\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00058}\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a01dc2aac85d3f2d03e9b2fdee7559a3c}{00058}}\ \ \ \ \ \textcolor{keyword}{const}\ deque<Vector>\ \&\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a01dc2aac85d3f2d03e9b2fdee7559a3c}{in}};}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00059}\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_abcd558a1cd57da080cdceee9091be3af}{00059}}\ \ \ \ \ \textcolor{keyword}{const}\ deque<Vector>\ \&\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_abcd558a1cd57da080cdceee9091be3af}{out}};}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00060}\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a55ebfee5c112d30162dfad5e484a8e62}{00060}}\ \ \ \ \ deque<Vector>\ \&\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a55ebfee5c112d30162dfad5e484a8e62}{pred}};}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00061}\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a43a0106f8818d14879ab5b956dc861d6}{00061}}\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a43a0106f8818d14879ab5b956dc861d6}{error}};}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00062}00062\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00063}00063\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00064}\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a0c88940d29082b7d98a025de892ab68e}{00064}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a0c88940d29082b7d98a025de892ab68e}{getBounds}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{string}\ \&tag,\ \textcolor{keywordtype}{double}\ \&min,\ \textcolor{keywordtype}{double}\ \&max)}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00065}00065\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00066}00066\ \ \ \ \ \ \ \ \ min=-\/1.0;\ max=1.0;}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00067}00067\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (Bottle\ *b=\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a6ef82d08b94ea79495cc2d1fa9ab7d61}{bounds}}.find(tag).asList())}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00068}00068\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00069}00069\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (b-\/>size()>=2)}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00070}00070\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00071}00071\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ min=b-\/>get(0).asFloat64();}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00072}00072\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ max=b-\/>get(1).asFloat64();}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00073}00073\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00074}00074\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00075}00075\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00076}00076\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00077}00077\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00078}00078\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00079}00079\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00080}00080\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00081}\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_affc6a5fa455a9b834c7d318ed61a6ea2}{00081}}\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_affc6a5fa455a9b834c7d318ed61a6ea2}{fillNet}}(\textcolor{keyword}{const}\ Ipopt::Number\ *\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}})}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00082}00082\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00083}00083\ \ \ \ \ \ \ \ \ Ipopt::Index\ k=0;}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00084}00084\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a92e0692659d9c35fe25af90652c098e0}{IW}}.size();\ i++)}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00085}00085\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ j=0;\ j<\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a92e0692659d9c35fe25af90652c098e0}{IW}}.front().length();\ j++,\ k++)}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00086}00086\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a92e0692659d9c35fe25af90652c098e0}{IW}}[i][j]=\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}[k];}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00087}00087\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00088}00088\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a03b4a360e5d953d899d387a6fac2c2ce}{LW}}.size();\ i++)}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00089}00089\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ j=0;\ j<\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a03b4a360e5d953d899d387a6fac2c2ce}{LW}}.front().length();\ j++,\ k++)}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00090}00090\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a03b4a360e5d953d899d387a6fac2c2ce}{LW}}[i][j]=\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}[k];}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00091}00091\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00092}00092\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a54f971d39dab6390534281c05c4c23ac}{b1}}.length();\ i++,\ k++)}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00093}00093\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a54f971d39dab6390534281c05c4c23ac}{b1}}[i]=\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}[k];}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00094}00094\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00095}00095\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a993bd07d80bdfcc8e350d82926391b8d}{b2}}.length();\ i++,\ k++)}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00096}00096\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a993bd07d80bdfcc8e350d82926391b8d}{b2}}[i]=\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}[k];}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00097}00097\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00098}00098\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00099}00099\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00100}\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_ab854b1c9066676f9d487c66d7e40f3dc}{00100}}\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_ab854b1c9066676f9d487c66d7e40f3dc}{fillVar}}(Ipopt::Number\ *\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}},\ \textcolor{keyword}{const}\ Ipopt::Number\ *x\_l,\ \textcolor{keyword}{const}\ Ipopt::Number\ *x\_u)}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00101}00101\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00102}00102\ \ \ \ \ \ \ \ \ Ipopt::Index\ k=0;}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00103}00103\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a92e0692659d9c35fe25af90652c098e0}{IW}}.size();\ i++)}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00104}00104\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ j=0;\ j<\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a92e0692659d9c35fe25af90652c098e0}{IW}}.front().length();\ j++,\ k++)}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00105}00105\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}[k]=std::min(x\_u[k],std::max(\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a92e0692659d9c35fe25af90652c098e0}{IW}}[i][j],x\_l[k]));}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00106}00106\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00107}00107\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a03b4a360e5d953d899d387a6fac2c2ce}{LW}}.size();\ i++)}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00108}00108\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ j=0;\ j<\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a03b4a360e5d953d899d387a6fac2c2ce}{LW}}.front().length();\ j++,\ k++)}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00109}00109\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}[k]=std::min(x\_u[k],std::max(\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a03b4a360e5d953d899d387a6fac2c2ce}{LW}}[i][j],x\_l[k]));}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00110}00110\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00111}00111\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a54f971d39dab6390534281c05c4c23ac}{b1}}.length();\ i++,\ k++)}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00112}00112\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}[k]=std::min(x\_u[k],std::max(\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a54f971d39dab6390534281c05c4c23ac}{b1}}[i],x\_l[k]));}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00113}00113\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00114}00114\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a993bd07d80bdfcc8e350d82926391b8d}{b2}}.length();\ i++,\ k++)}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00115}00115\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}[k]=std::min(x\_u[k],std::max(\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a993bd07d80bdfcc8e350d82926391b8d}{b2}}[i],x\_l[k]));}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00116}00116\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00117}00117\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00118}00118\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00119}00119\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00120}\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a6127ae46048cb804b2566c35e3916545}{00120}}\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a6127ae46048cb804b2566c35e3916545}{ff2LayNNTrainNLP}}(\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrain}{ff2LayNNTrain}}\ \&\_net,\ \textcolor{keyword}{const}\ Property\ \&\_bounds,}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00121}00121\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{bool}\ \_randomInit,\ \textcolor{keyword}{const}\ deque<Vector>\ \&\_in,}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00122}00122\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ deque<Vector>\ \&\_out,\ deque<Vector>\ \&\_pred)\ :}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00123}00123\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_ac50aa4ddfb8c79a3993bf2c71adc6bff}{net}}(\_net),\ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a6ef82d08b94ea79495cc2d1fa9ab7d61}{bounds}}(\_bounds),\ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a8149b65fd3e50799f0782ced97534d3d}{randomInit}}(\_randomInit),}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00124}00124\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a01dc2aac85d3f2d03e9b2fdee7559a3c}{in}}(\_in),\ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_abcd558a1cd57da080cdceee9091be3af}{out}}(\_out),\ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a55ebfee5c112d30162dfad5e484a8e62}{pred}}(\_pred),}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00125}00125\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a92e0692659d9c35fe25af90652c098e0}{IW}}(\_net.get\_IW()),\ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a03b4a360e5d953d899d387a6fac2c2ce}{LW}}(\_net.get\_LW()),}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00126}00126\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a54f971d39dab6390534281c05c4c23ac}{b1}}(\_net.get\_b1()),\ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a993bd07d80bdfcc8e350d82926391b8d}{b2}}(\_net.get\_b2())}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00127}00127\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00128}00128\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a55ebfee5c112d30162dfad5e484a8e62}{pred}}.clear();}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00129}00129\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a43a0106f8818d14879ab5b956dc861d6}{error}}=0.0;\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00130}00130\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00131}00131\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00132}00132\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00133}\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a0759432e27fd33603b09609b7230e830}{00133}}\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a0759432e27fd33603b09609b7230e830}{get\_error}}()\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00134}00134\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00135}00135\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a43a0106f8818d14879ab5b956dc861d6}{error}};}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00136}00136\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00137}00137\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00138}00138\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00139}\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a35a2f6761dbfe92b009c4cf3434e08a9}{00139}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a35a2f6761dbfe92b009c4cf3434e08a9}{get\_nlp\_info}}(Ipopt::Index\ \&\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},\ Ipopt::Index\ \&m,\ Ipopt::Index\ \&nnz\_jac\_g,}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00140}00140\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Index\ \&nnz\_h\_lag,\ IndexStyleEnum\ \&index\_style)}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00141}00141\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00142}00142\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}=\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a92e0692659d9c35fe25af90652c098e0}{IW}}.size()*\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a92e0692659d9c35fe25af90652c098e0}{IW}}.front().length()+\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a03b4a360e5d953d899d387a6fac2c2ce}{LW}}.size()*\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a03b4a360e5d953d899d387a6fac2c2ce}{LW}}.front().length()+\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a54f971d39dab6390534281c05c4c23ac}{b1}}.length()+\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a993bd07d80bdfcc8e350d82926391b8d}{b2}}.length();}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00143}00143\ \ \ \ \ \ \ \ \ m=nnz\_jac\_g=nnz\_h\_lag=0;}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00144}00144\ \ \ \ \ \ \ \ \ index\_style=TNLP::C\_STYLE;}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00145}00145\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00146}00146\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00147}00147\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00148}00148\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00149}00149\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00150}\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a60c78e0dcfffe3b2b99e6a25af1cf104}{00150}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a60c78e0dcfffe3b2b99e6a25af1cf104}{get\_bounds\_info}}(Ipopt::Index\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},\ Ipopt::Number\ *x\_l,\ Ipopt::Number\ *x\_u,}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00151}00151\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Index\ m,\ Ipopt::Number\ *g\_l,\ Ipopt::Number\ *g\_u)}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00152}00152\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00153}00153\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ min\_IW,max\_IW;\ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a0c88940d29082b7d98a025de892ab68e}{getBounds}}(\textcolor{stringliteral}{"{}IW"{}},min\_IW,max\_IW);}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00154}00154\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ min\_LW,max\_LW;\ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a0c88940d29082b7d98a025de892ab68e}{getBounds}}(\textcolor{stringliteral}{"{}LW"{}},min\_LW,max\_LW);}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00155}00155\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ min\_b1,max\_b1;\ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a0c88940d29082b7d98a025de892ab68e}{getBounds}}(\textcolor{stringliteral}{"{}b1"{}},min\_b1,max\_b1);}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00156}00156\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ min\_b2,max\_b2;\ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a0c88940d29082b7d98a025de892ab68e}{getBounds}}(\textcolor{stringliteral}{"{}b2"{}},min\_b2,max\_b2);}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00157}00157\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00158}00158\ \ \ \ \ \ \ \ \ Ipopt::Index\ k=0;}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00159}00159\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a92e0692659d9c35fe25af90652c098e0}{IW}}.size();\ i++)}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00160}00160\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00161}00161\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ j=0;\ j<\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a92e0692659d9c35fe25af90652c098e0}{IW}}.front().length();\ j++,\ k++)}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00162}00162\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00163}00163\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ x\_l[k]=min\_IW;}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00164}00164\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ x\_u[k]=max\_IW;}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00165}00165\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00166}00166\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00167}00167\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00168}00168\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a03b4a360e5d953d899d387a6fac2c2ce}{LW}}.size();\ i++)}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00169}00169\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00170}00170\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ j=0;\ j<\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a03b4a360e5d953d899d387a6fac2c2ce}{LW}}.front().length();\ j++,\ k++)}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00171}00171\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00172}00172\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ x\_l[k]=min\_LW;}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00173}00173\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ x\_u[k]=max\_LW;}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00174}00174\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00175}00175\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00176}00176\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00177}00177\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a54f971d39dab6390534281c05c4c23ac}{b1}}.size();\ i++,\ k++)}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00178}00178\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00179}00179\ \ \ \ \ \ \ \ \ \ \ \ \ x\_l[k]=min\_b1;}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00180}00180\ \ \ \ \ \ \ \ \ \ \ \ \ x\_u[k]=max\_b1;}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00181}00181\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00182}00182\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00183}00183\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a993bd07d80bdfcc8e350d82926391b8d}{b2}}.size();\ i++,\ k++)}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00184}00184\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00185}00185\ \ \ \ \ \ \ \ \ \ \ \ \ x\_l[k]=min\_b2;}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00186}00186\ \ \ \ \ \ \ \ \ \ \ \ \ x\_u[k]=max\_b2;}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00187}00187\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00188}00188\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00189}00189\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00190}00190\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00191}00191\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00192}00192\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00193}\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_afd58d9147b148855246fbf6fde8bb4a1}{00193}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_afd58d9147b148855246fbf6fde8bb4a1}{get\_starting\_point}}(Ipopt::Index\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},\ \textcolor{keywordtype}{bool}\ init\_x,\ Ipopt::Number\ *\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}},}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00194}00194\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ init\_z,\ Ipopt::Number\ *z\_L,\ Ipopt::Number\ *z\_U,}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00195}00195\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Index\ m,\ \textcolor{keywordtype}{bool}\ init\_lambda,\ Ipopt::Number\ *lambda)}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00196}00196\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00197}00197\ \ \ \ \ \ \ \ \ Ipopt::Number\ *x\_l=\textcolor{keyword}{new}\ Ipopt::Number[\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}];}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00198}00198\ \ \ \ \ \ \ \ \ Ipopt::Number\ *x\_u=\textcolor{keyword}{new}\ Ipopt::Number[\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}];}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00199}00199\ \ \ \ \ \ \ \ \ Ipopt::Number\ *g\_l=\textcolor{keyword}{new}\ Ipopt::Number[\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}];}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00200}00200\ \ \ \ \ \ \ \ \ Ipopt::Number\ *g\_u=\textcolor{keyword}{new}\ Ipopt::Number[\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}];}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00201}00201\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00202}00202\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a60c78e0dcfffe3b2b99e6a25af1cf104}{get\_bounds\_info}}(\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},x\_l,x\_u,m,g\_l,g\_u);}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00203}00203\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a8149b65fd3e50799f0782ced97534d3d}{randomInit}})}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00204}00204\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00205}00205\ \ \ \ \ \ \ \ \ \ \ \ \ Rand::init();}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00206}00206\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (Ipopt::Index\ i=0;\ i<\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}};\ i++)}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00207}00207\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}[i]=Rand::scalar(x\_l[i],x\_u[i]);}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00208}00208\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00209}00209\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00210}00210\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_ab854b1c9066676f9d487c66d7e40f3dc}{fillVar}}(\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}},x\_l,x\_u);}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00211}00211\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00212}00212\ \ \ \ \ \ \ \ \ \textcolor{keyword}{delete}[]\ x\_l;}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00213}00213\ \ \ \ \ \ \ \ \ \textcolor{keyword}{delete}[]\ x\_u;}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00214}00214\ \ \ \ \ \ \ \ \ \textcolor{keyword}{delete}[]\ g\_l;}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00215}00215\ \ \ \ \ \ \ \ \ \textcolor{keyword}{delete}[]\ g\_u;}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00216}00216\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00217}00217\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00218}00218\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00219}00219\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00220}00220\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00221}\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_aecf0782cded0b4e91bef092c6c88d892}{00221}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_aecf0782cded0b4e91bef092c6c88d892}{eval\_f}}(Ipopt::Index\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},\ \textcolor{keyword}{const}\ Ipopt::Number\ *\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}},\ \textcolor{keywordtype}{bool}\ new\_x,}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00222}00222\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Number\ \&obj\_value)}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00223}00223\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00224}00224\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_affc6a5fa455a9b834c7d318ed61a6ea2}{fillNet}}(\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}});}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00225}00225\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00226}00226\ \ \ \ \ \ \ \ \ obj\_value=0.0;}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00227}00227\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a01dc2aac85d3f2d03e9b2fdee7559a3c}{in}}.size();\ i++)}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00228}00228\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00229}00229\ \ \ \ \ \ \ \ \ \ \ \ \ Vector\ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a55ebfee5c112d30162dfad5e484a8e62}{pred}}=\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_ac50aa4ddfb8c79a3993bf2c71adc6bff}{net}}.\mbox{\hyperlink{classiCub_1_1ctrl_1_1ff2LayNN_ac4da043b96d6ced321aab1c8503ab3f9}{predict}}(\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a01dc2aac85d3f2d03e9b2fdee7559a3c}{in}}[i]);}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00230}00230\ \ \ \ \ \ \ \ \ \ \ \ \ obj\_value+=\mbox{\hyperlink{group__Maths_ga77ee962cf3363413bca2239f9744198a}{norm2}}(\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_abcd558a1cd57da080cdceee9091be3af}{out}}[i]-\/\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a55ebfee5c112d30162dfad5e484a8e62}{pred}});}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00231}00231\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00232}00232\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00233}00233\ \ \ \ \ \ \ \ \ obj\_value/=\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a01dc2aac85d3f2d03e9b2fdee7559a3c}{in}}.size();}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00234}00234\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00235}00235\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00236}00236\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00237}00237\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00238}\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_aff9c0d22f39a0ee59129d77353eed3ac}{00238}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_aff9c0d22f39a0ee59129d77353eed3ac}{eval\_grad\_f}}(Ipopt::Index\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},\ \textcolor{keyword}{const}\ Ipopt::Number*\ \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}},\ \textcolor{keywordtype}{bool}\ new\_x,}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00239}00239\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Number\ *grad\_f)}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00240}00240\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00241}00241\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00242}00242\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00243}00243\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00244}00244\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00245}\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a089b9641d02bd559f9009ed22ee13470}{00245}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a089b9641d02bd559f9009ed22ee13470}{eval\_g}}(Ipopt::Index\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},\ \textcolor{keyword}{const}\ Ipopt::Number\ *\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}},\ \textcolor{keywordtype}{bool}\ new\_x,}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00246}00246\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Index\ m,\ Ipopt::Number\ *g)}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00247}00247\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00248}00248\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00249}00249\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00250}00250\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00251}00251\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00252}\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_aeae77d22e8aa6d779e3749085f50b81f}{00252}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_aeae77d22e8aa6d779e3749085f50b81f}{eval\_jac\_g}}(Ipopt::Index\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},\ \textcolor{keyword}{const}\ Ipopt::Number\ *\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}},\ \textcolor{keywordtype}{bool}\ new\_x,}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00253}00253\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Index\ m,\ Ipopt::Index\ nele\_jac,\ Ipopt::Index\ *iRow,}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00254}00254\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Index\ *jCol,\ Ipopt::Number\ *values)}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00255}00255\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00256}00256\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00257}00257\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00258}00258\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00259}00259\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00260}\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a73adaff8746c9a703fd8347fbeb4f353}{00260}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a73adaff8746c9a703fd8347fbeb4f353}{eval\_h}}(Ipopt::Index\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},\ \textcolor{keyword}{const}\ Ipopt::Number\ *\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}},\ \textcolor{keywordtype}{bool}\ new\_x,}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00261}00261\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Number\ obj\_factor,\ Ipopt::Index\ m,\ \textcolor{keyword}{const}\ Ipopt::Number\ *lambda,}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00262}00262\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ new\_lambda,\ Ipopt::Index\ nele\_hess,\ Ipopt::Index\ *iRow,}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00263}00263\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Index\ *jCol,\ Ipopt::Number\ *values)}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00264}00264\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00265}00265\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00266}00266\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00267}00267\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00268}00268\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00269}\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a652129f9b3b0a32822ae5d1aa23c7595}{00269}}\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a652129f9b3b0a32822ae5d1aa23c7595}{finalize\_solution}}(Ipopt::SolverReturn\ status,\ Ipopt::Index\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00270}00270\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Ipopt::Number\ *\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}},\ \textcolor{keyword}{const}\ Ipopt::Number\ *z\_L,}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00271}00271\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Ipopt::Number\ *z\_U,\ Ipopt::Index\ m,}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00272}00272\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Ipopt::Number\ *g,\ \textcolor{keyword}{const}\ Ipopt::Number\ *lambda,}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00273}00273\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Number\ obj\_value,\ \textcolor{keyword}{const}\ Ipopt::IpoptData\ *ip\_data,}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00274}00274\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::IpoptCalculatedQuantities\ *ip\_cq)}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00275}00275\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00276}00276\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a43a0106f8818d14879ab5b956dc861d6}{error}}=0.0;}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00277}00277\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a55ebfee5c112d30162dfad5e484a8e62}{pred}}.clear();}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00278}00278\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a01dc2aac85d3f2d03e9b2fdee7559a3c}{in}}.size();\ i++)}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00279}00279\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00280}00280\ \ \ \ \ \ \ \ \ \ \ \ \ Vector\ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a55ebfee5c112d30162dfad5e484a8e62}{pred}}=\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_ac50aa4ddfb8c79a3993bf2c71adc6bff}{net}}.\mbox{\hyperlink{classiCub_1_1ctrl_1_1ff2LayNN_ac4da043b96d6ced321aab1c8503ab3f9}{predict}}(\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a01dc2aac85d3f2d03e9b2fdee7559a3c}{in}}[i]);\ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00281}00281\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a43a0106f8818d14879ab5b956dc861d6}{error}}+=\mbox{\hyperlink{group__Maths_ga77ee962cf3363413bca2239f9744198a}{norm2}}(\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_abcd558a1cd57da080cdceee9091be3af}{out}}[i]-\/\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a55ebfee5c112d30162dfad5e484a8e62}{pred}});}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00282}00282\ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>pred.push\_back(\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a55ebfee5c112d30162dfad5e484a8e62}{pred}});}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00283}00283\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00284}00284\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a43a0106f8818d14879ab5b956dc861d6}{error}}/=\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP_a01dc2aac85d3f2d03e9b2fdee7559a3c}{in}}.size();}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00285}00285\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00286}00286\ \};}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00287}00287\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00288}00288\ \}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00289}00289\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00290}00290\ \}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00291}00291\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00292}00292\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00293}00293\ \textcolor{comment}{/****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00294}\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrain_a02f53820ab7a8a934a5cee48c6aa5fb7}{00294}}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrain_a02f53820ab7a8a934a5cee48c6aa5fb7}{ff2LayNNTrain::ff2LayNNTrain}}()}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00295}00295\ \{}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00296}00296\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrain_a20b15918b33ebff91842759356f3df89}{App}}=\textcolor{keyword}{new}\ Ipopt::IpoptApplication();}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00297}00297\ \ \ \ \ \mbox{\hyperlink{iKinIpOpt_8cpp_a926cbacf129b9291230102f6efbac842}{CAST\_IPOPTAPP}}(\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrain_a20b15918b33ebff91842759356f3df89}{App}})-\/>Options()-\/>SetNumericValue(\textcolor{stringliteral}{"{}tol"{}},1\mbox{\hyperlink{compute__ekf__fast_8m_a08a4415e9d594ff960030b921d42b91e}{e}}-\/8);}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00298}00298\ \ \ \ \ \mbox{\hyperlink{iKinIpOpt_8cpp_a926cbacf129b9291230102f6efbac842}{CAST\_IPOPTAPP}}(\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrain_a20b15918b33ebff91842759356f3df89}{App}})-\/>Options()-\/>SetIntegerValue(\textcolor{stringliteral}{"{}acceptable\_iter"{}},0);}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00299}00299\ \ \ \ \ \mbox{\hyperlink{iKinIpOpt_8cpp_a926cbacf129b9291230102f6efbac842}{CAST\_IPOPTAPP}}(\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrain_a20b15918b33ebff91842759356f3df89}{App}})-\/>Options()-\/>SetStringValue(\textcolor{stringliteral}{"{}mu\_strategy"{}},\textcolor{stringliteral}{"{}adaptive"{}});}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00300}00300\ \ \ \ \ \mbox{\hyperlink{iKinIpOpt_8cpp_a926cbacf129b9291230102f6efbac842}{CAST\_IPOPTAPP}}(\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrain_a20b15918b33ebff91842759356f3df89}{App}})-\/>Options()-\/>SetIntegerValue(\textcolor{stringliteral}{"{}max\_iter"{}},300);}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00301}00301\ \ \ \ \ \mbox{\hyperlink{iKinIpOpt_8cpp_a926cbacf129b9291230102f6efbac842}{CAST\_IPOPTAPP}}(\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrain_a20b15918b33ebff91842759356f3df89}{App}})-\/>Options()-\/>SetStringValue(\textcolor{stringliteral}{"{}nlp\_scaling\_method"{}},\textcolor{stringliteral}{"{}gradient-\/based"{}});}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00302}00302\ \ \ \ \ \mbox{\hyperlink{iKinIpOpt_8cpp_a926cbacf129b9291230102f6efbac842}{CAST\_IPOPTAPP}}(\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrain_a20b15918b33ebff91842759356f3df89}{App}})-\/>Options()-\/>SetStringValue(\textcolor{stringliteral}{"{}hessian\_approximation"{}},\textcolor{stringliteral}{"{}limited-\/memory"{}});}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00303}00303\ \ \ \ \ \mbox{\hyperlink{iKinIpOpt_8cpp_a926cbacf129b9291230102f6efbac842}{CAST\_IPOPTAPP}}(\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrain_a20b15918b33ebff91842759356f3df89}{App}})-\/>Options()-\/>SetStringValue(\textcolor{stringliteral}{"{}jacobian\_approximation"{}},\textcolor{stringliteral}{"{}finite-\/difference-\/values"{}});}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00304}00304\ \ \ \ \ \mbox{\hyperlink{iKinIpOpt_8cpp_a926cbacf129b9291230102f6efbac842}{CAST\_IPOPTAPP}}(\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrain_a20b15918b33ebff91842759356f3df89}{App}})-\/>Options()-\/>SetIntegerValue(\textcolor{stringliteral}{"{}print\_level"{}},0);}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00305}00305\ \ \ \ \ \mbox{\hyperlink{iKinIpOpt_8cpp_a926cbacf129b9291230102f6efbac842}{CAST\_IPOPTAPP}}(\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrain_a20b15918b33ebff91842759356f3df89}{App}})-\/>Options()-\/>SetStringValue(\textcolor{stringliteral}{"{}derivative\_test"{}},\textcolor{stringliteral}{"{}none"{}});}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00306}00306\ \ \ \ \ \mbox{\hyperlink{iKinIpOpt_8cpp_a926cbacf129b9291230102f6efbac842}{CAST\_IPOPTAPP}}(\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrain_a20b15918b33ebff91842759356f3df89}{App}})-\/>Initialize();}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00307}00307\ \}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00308}00308\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00309}00309\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00310}00310\ \textcolor{comment}{/****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00311}\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrain_a5f5f50f0114c1975024cbf1a17c87e48}{00311}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrain_a5f5f50f0114c1975024cbf1a17c87e48}{ff2LayNNTrain::setBounds}}(\textcolor{keyword}{const}\ Property\ \&bounds)}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00312}00312\ \{}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00313}00313\ \ \ \ \ this-\/>bounds=\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrain_a899ce68a47909d5cfc0742028875b24a}{bounds}};}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00314}00314\ \}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00315}00315\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00316}00316\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00317}00317\ \textcolor{comment}{/****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00318}\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrain_a8d6419b462379036bc47045bf56f06ae}{00318}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrain_a8d6419b462379036bc47045bf56f06ae}{ff2LayNNTrain::train}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ numHiddenNodes,}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00319}00319\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ deque<Vector>\ \&in,\ \textcolor{keyword}{const}\ deque<Vector>\ \&\mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}},}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00320}00320\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ deque<Vector>\ \&pred,\ \textcolor{keywordtype}{double}\ \&\mbox{\hyperlink{debugFunctions_8cpp_a7a3172cc98e93d8eadfb9ab30373799e}{error}})}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00321}00321\ \{}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00322}00322\ \ \ \ \ \textcolor{keywordflow}{if}\ ((in.size()==0)\ ||\ (in.size()!=\mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}}.size()))}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00323}00323\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00324}00324\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00325}00325\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ff2LayNN_aa2f1b2415e7a4643236929aa2e4a4b21}{IW}}.clear();}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00326}00326\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ff2LayNN_aa2f1b2415e7a4643236929aa2e4a4b21}{IW}}.assign(numHiddenNodes,Vector(in.front().length(),0.0));}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00327}00327\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ff2LayNN_a4dcceeafe36a42fd0cb614f90e5cbe80}{b1}}.resize(numHiddenNodes,0.0);}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00328}00328\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00329}00329\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ff2LayNN_ae10004076923bfb4943432c0f4bfcf2f}{LW}}.clear();}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00330}00330\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ff2LayNN_ae10004076923bfb4943432c0f4bfcf2f}{LW}}.assign(\mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}}.front().length(),Vector(numHiddenNodes,0.0));}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00331}00331\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ff2LayNN_a49b309f9f99903d483c05bc437369bff}{b2}}.resize(\mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}}.front().length(),0.0);}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00332}00332\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00333}00333\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ff2LayNN_a6d333d25ee65e747e7f111b2fa112632}{inMinMaxX}}.clear();}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00334}00334\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ff2LayNN_a80b3b4f351cfc66ebe378d8b363cceb7}{inMinMaxY}}.clear();}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00335}00335\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00336}00336\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ff2LayNN_aafe3656bac7c70323f273ef3482a7801}{outMinMaxX}}.clear();}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00337}00337\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ff2LayNN_ac55ca80a4c1d4c6c6a28ccafa5f6d8db}{outMinMaxY}}.clear();}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00338}00338\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00339}00339\ \ \ \ \ \textcolor{comment}{//\ seek\ for\ min-\/max\ of\ input\ and\ scale\ it\ in\ [-\/1,1]}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00340}00340\ \ \ \ \ \textcolor{keyword}{const}\ Vector\ \&in\_front=in.front();}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00341}00341\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<in\_front.length();\ i++)}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00342}00342\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00343}00343\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structiCub_1_1ctrl_1_1ff2LayNN_1_1minmax}{minmax}}\ range;}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00344}00344\ \ \ \ \ \ \ \ \ range.\mbox{\hyperlink{structiCub_1_1ctrl_1_1ff2LayNN_1_1minmax_aa818271d9781196eb65d06f355810d32}{min}}=range.\mbox{\hyperlink{structiCub_1_1ctrl_1_1ff2LayNN_1_1minmax_aee535897ca374fcd49d75d9841bc8b42}{max}}=in\_front[i];}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00345}00345\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ff2LayNN_a6d333d25ee65e747e7f111b2fa112632}{inMinMaxX}}.push\_back(range);}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00346}00346\ \ \ \ \ \ \ \ \ range.\mbox{\hyperlink{structiCub_1_1ctrl_1_1ff2LayNN_1_1minmax_aa818271d9781196eb65d06f355810d32}{min}}=-\/1.0;\ range.\mbox{\hyperlink{structiCub_1_1ctrl_1_1ff2LayNN_1_1minmax_aee535897ca374fcd49d75d9841bc8b42}{max}}=1.0;}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00347}00347\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ff2LayNN_a80b3b4f351cfc66ebe378d8b363cceb7}{inMinMaxY}}.push\_back(range);}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00348}00348\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00349}00349\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=1;\ i<in.size();\ i++)}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00350}00350\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00351}00351\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ j=0;\ j<in\_front.length();\ j++)}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00352}00352\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00353}00353\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ff2LayNN_a6d333d25ee65e747e7f111b2fa112632}{inMinMaxX}}[j].min=std::min(\mbox{\hyperlink{classiCub_1_1ctrl_1_1ff2LayNN_a6d333d25ee65e747e7f111b2fa112632}{inMinMaxX}}[j].min,in[i][j]);}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00354}00354\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ff2LayNN_a6d333d25ee65e747e7f111b2fa112632}{inMinMaxX}}[j].max=std::max(\mbox{\hyperlink{classiCub_1_1ctrl_1_1ff2LayNN_a6d333d25ee65e747e7f111b2fa112632}{inMinMaxX}}[j].max,in[i][j]);}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00355}00355\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00356}00356\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00357}00357\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00358}00358\ \ \ \ \ \textcolor{comment}{//\ enlarge\ of\ 10\%}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00359}00359\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<\mbox{\hyperlink{classiCub_1_1ctrl_1_1ff2LayNN_a6d333d25ee65e747e7f111b2fa112632}{inMinMaxX}}.size();\ i++)}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00360}00360\ \ \ \ \ \{\ \ \ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00361}00361\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ff2LayNN_a6d333d25ee65e747e7f111b2fa112632}{inMinMaxX}}[i].min-\/=0.1*fabs(\mbox{\hyperlink{classiCub_1_1ctrl_1_1ff2LayNN_a6d333d25ee65e747e7f111b2fa112632}{inMinMaxX}}[i].min);}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00362}00362\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ff2LayNN_a6d333d25ee65e747e7f111b2fa112632}{inMinMaxX}}[i].max+=0.1*fabs(\mbox{\hyperlink{classiCub_1_1ctrl_1_1ff2LayNN_a6d333d25ee65e747e7f111b2fa112632}{inMinMaxX}}[i].max);}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00363}00363\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00364}00364\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00365}00365\ \ \ \ \ \textcolor{comment}{//\ seek\ for\ min-\/max\ of\ output\ and\ scale\ it\ in\ [-\/1,1]}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00366}00366\ \ \ \ \ \textcolor{keyword}{const}\ Vector\ \&out\_front=\mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}}.front();}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00367}00367\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<out\_front.length();\ i++)}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00368}00368\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00369}00369\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structiCub_1_1ctrl_1_1ff2LayNN_1_1minmax}{minmax}}\ range;}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00370}00370\ \ \ \ \ \ \ \ \ range.\mbox{\hyperlink{structiCub_1_1ctrl_1_1ff2LayNN_1_1minmax_aa818271d9781196eb65d06f355810d32}{min}}=range.\mbox{\hyperlink{structiCub_1_1ctrl_1_1ff2LayNN_1_1minmax_aee535897ca374fcd49d75d9841bc8b42}{max}}=out\_front[i];}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00371}00371\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ff2LayNN_aafe3656bac7c70323f273ef3482a7801}{outMinMaxX}}.push\_back(range);}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00372}00372\ \ \ \ \ \ \ \ \ range.\mbox{\hyperlink{structiCub_1_1ctrl_1_1ff2LayNN_1_1minmax_aa818271d9781196eb65d06f355810d32}{min}}=-\/1.0;\ range.\mbox{\hyperlink{structiCub_1_1ctrl_1_1ff2LayNN_1_1minmax_aee535897ca374fcd49d75d9841bc8b42}{max}}=1.0;}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00373}00373\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ff2LayNN_ac55ca80a4c1d4c6c6a28ccafa5f6d8db}{outMinMaxY}}.push\_back(range);}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00374}00374\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00375}00375\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=1;\ i<\mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}}.size();\ i++)}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00376}00376\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00377}00377\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ j=0;\ j<out\_front.length();\ j++)}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00378}00378\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00379}00379\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ff2LayNN_aafe3656bac7c70323f273ef3482a7801}{outMinMaxX}}[j].min=std::min(\mbox{\hyperlink{classiCub_1_1ctrl_1_1ff2LayNN_aafe3656bac7c70323f273ef3482a7801}{outMinMaxX}}[j].min,\mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}}[i][j]);}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00380}00380\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ff2LayNN_aafe3656bac7c70323f273ef3482a7801}{outMinMaxX}}[j].max=std::max(\mbox{\hyperlink{classiCub_1_1ctrl_1_1ff2LayNN_aafe3656bac7c70323f273ef3482a7801}{outMinMaxX}}[j].max,\mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}}[i][j]);}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00381}00381\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00382}00382\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00383}00383\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00384}00384\ \ \ \ \ \textcolor{comment}{//\ enlarge\ of\ 10\%}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00385}00385\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<\mbox{\hyperlink{classiCub_1_1ctrl_1_1ff2LayNN_aafe3656bac7c70323f273ef3482a7801}{outMinMaxX}}.size();\ i++)}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00386}00386\ \ \ \ \ \{\ \ \ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00387}00387\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ff2LayNN_aafe3656bac7c70323f273ef3482a7801}{outMinMaxX}}[i].min-\/=0.1*fabs(\mbox{\hyperlink{classiCub_1_1ctrl_1_1ff2LayNN_aafe3656bac7c70323f273ef3482a7801}{outMinMaxX}}[i].min);}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00388}00388\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ff2LayNN_aafe3656bac7c70323f273ef3482a7801}{outMinMaxX}}[i].max+=0.1*fabs(\mbox{\hyperlink{classiCub_1_1ctrl_1_1ff2LayNN_aafe3656bac7c70323f273ef3482a7801}{outMinMaxX}}[i].max);}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00389}00389\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00390}00390\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00391}00391\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ff2LayNN_a9e5407469e525178100f60a416091be1}{prepare}}();}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00392}00392\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ff2LayNN_a56fad6eb8a121fe58a1a8624ba0af58b}{configured}}=\textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00393}00393\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00394}00394\ \ \ \ \ Ipopt::SmartPtr<ff2LayNNTrainNLP>\ nlp=\textcolor{keyword}{new}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP}{ff2LayNNTrainNLP}}(*\textcolor{keyword}{this},\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrain_a899ce68a47909d5cfc0742028875b24a}{bounds}},\textcolor{keyword}{true},in,\mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}},pred);}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00395}00395\ \ \ \ \ Ipopt::ApplicationReturnStatus\ status=\mbox{\hyperlink{iKinIpOpt_8cpp_a926cbacf129b9291230102f6efbac842}{CAST\_IPOPTAPP}}(\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrain_a20b15918b33ebff91842759356f3df89}{App}})-\/>OptimizeTNLP(GetRawPtr(nlp));}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00396}00396\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00397}00397\ \ \ \ \ \mbox{\hyperlink{debugFunctions_8cpp_a7a3172cc98e93d8eadfb9ab30373799e}{error}}=nlp-\/>get\_error();}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00398}00398\ \ \ \ \ \textcolor{keywordflow}{return}\ (status==Ipopt::Solve\_Succeeded);}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00399}00399\ \}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00400}00400\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00401}00401\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00402}00402\ \textcolor{comment}{/****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00403}\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrain_aa745973c022e8428bc4f68383644c99e}{00403}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrain_aa745973c022e8428bc4f68383644c99e}{ff2LayNNTrain::retrain}}(\textcolor{keyword}{const}\ deque<Vector>\ \&in,\ \textcolor{keyword}{const}\ deque<Vector>\ \&\mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}},}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00404}00404\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ deque<Vector>\ \&pred,\ \textcolor{keywordtype}{double}\ \&\mbox{\hyperlink{debugFunctions_8cpp_a7a3172cc98e93d8eadfb9ab30373799e}{error}})}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00405}00405\ \{}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00406}00406\ \ \ \ \ \textcolor{keywordflow}{if}\ ((in.size()==0)\ ||\ (in.size()!=\mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}}.size())\ ||\ !\mbox{\hyperlink{classiCub_1_1ctrl_1_1ff2LayNN_a56fad6eb8a121fe58a1a8624ba0af58b}{configured}})}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00407}00407\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00408}00408\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00409}00409\ \ \ \ \ Ipopt::SmartPtr<ff2LayNNTrainNLP>\ nlp=\textcolor{keyword}{new}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrainNLP}{ff2LayNNTrainNLP}}(*\textcolor{keyword}{this},\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrain_a899ce68a47909d5cfc0742028875b24a}{bounds}},\textcolor{keyword}{false},in,\mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}},pred);}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00410}00410\ \ \ \ \ Ipopt::ApplicationReturnStatus\ status=\mbox{\hyperlink{iKinIpOpt_8cpp_a926cbacf129b9291230102f6efbac842}{CAST\_IPOPTAPP}}(\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrain_a20b15918b33ebff91842759356f3df89}{App}})-\/>OptimizeTNLP(GetRawPtr(nlp));}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00411}00411\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00412}00412\ \ \ \ \ \mbox{\hyperlink{debugFunctions_8cpp_a7a3172cc98e93d8eadfb9ab30373799e}{error}}=nlp-\/>get\_error();}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00413}00413\ \ \ \ \ \textcolor{keywordflow}{return}\ (status==Ipopt::Solve\_Succeeded);\ \ \ \ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00414}00414\ \}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00415}00415\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00416}00416\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00417}00417\ \textcolor{comment}{/****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00418}\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrain_abc74178ba7246dab34734a06a44136d9}{00418}}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrain_abc74178ba7246dab34734a06a44136d9}{ff2LayNNTrain::\string~ff2LayNNTrain}}()}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00419}00419\ \{}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00420}00420\ \ \ \ \ \textcolor{keyword}{delete}\ \mbox{\hyperlink{iKinIpOpt_8cpp_a926cbacf129b9291230102f6efbac842}{CAST\_IPOPTAPP}}(\mbox{\hyperlink{classiCub_1_1optimization_1_1ff2LayNNTrain_a20b15918b33ebff91842759356f3df89}{App}});}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00421}00421\ \}}
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00422}00422\ }
+\DoxyCodeLine{\Hypertarget{optimization_2src_2neuralNetworks_8cpp_source_l00423}00423\ }
+
+\end{DoxyCode}

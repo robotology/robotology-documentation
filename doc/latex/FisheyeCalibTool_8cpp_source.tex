@@ -1,0 +1,273 @@
+\doxysection{Fisheye\+Calib\+Tool.\+cpp}
+\hypertarget{FisheyeCalibTool_8cpp_source}{}\label{FisheyeCalibTool_8cpp_source}\index{icub-\/main/src/modules/camCalib/src/FisheyeCalibTool.cpp@{icub-\/main/src/modules/camCalib/src/FisheyeCalibTool.cpp}}
+\mbox{\hyperlink{FisheyeCalibTool_8cpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00001}00001\ \textcolor{comment}{//\ Copyright\ (C)\ 2026\ Istituto\ Italiano\ di\ Tecnologia\ (IIT)}}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00002}00002\ \textcolor{comment}{//\ All\ rights\ reserved.}}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00003}00003\ \textcolor{comment}{//}}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00004}00004\ \textcolor{comment}{//\ This\ software\ may\ be\ modified\ and\ distributed\ under\ the\ terms\ of\ the}}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00005}00005\ \textcolor{comment}{//\ BSD-\/3-\/Clause\ license.\ See\ the\ accompanying\ LICENSE\ file\ for\ details.}}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00006}00006\ }
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00007}00007\ \textcolor{preprocessor}{\#include\ <opencv2/calib3d.hpp>}}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00008}00008\ \textcolor{preprocessor}{\#include\ <opencv2/imgproc.hpp>}}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00009}00009\ \ }
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00010}00010\ \textcolor{preprocessor}{\#include\ <algorithm>}}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00011}00011\ \textcolor{preprocessor}{\#include\ <cmath>}}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00012}00012\ \ }
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00013}00013\ \textcolor{preprocessor}{\#include\ <yarp/os/Bottle.h>}}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00014}00014\ \textcolor{preprocessor}{\#include\ <yarp/os/LogStream.h>}}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00015}00015\ \textcolor{preprocessor}{\#include\ <yarp/os/Value.h>}}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00016}00016\ \ }
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00017}00017\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{FisheyeCalibTool_8h}{iCub/FisheyeCalibTool.h}}>}}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00018}00018\ \ }
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00019}00019\ \textcolor{keyword}{using\ }yarp::os::Bottle;}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00020}00020\ \textcolor{keyword}{using\ }yarp::os::Searchable;}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00021}00021\ \textcolor{keyword}{using\ }yarp::sig::ImageOf;}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00022}00022\ \textcolor{keyword}{using\ }yarp::sig::PixelRgb;}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00023}00023\ \ }
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00024}\mbox{\hyperlink{classFisheyeCalibTool_a867349d86fba34df261e83b0675e1e49}{00024}}\ \mbox{\hyperlink{classFisheyeCalibTool_a867349d86fba34df261e83b0675e1e49}{FisheyeCalibTool::FisheyeCalibTool}}()}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00025}00025\ \ \ \ \ :\ previousImageSize(-\/1,\ -\/1)}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00026}00026\ \ \ \ \ ,\ groupName()}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00027}00027\ \ \ \ \ ,\ needInitialization(true)}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00028}00028\ \ \ \ \ ,\ balance(0.0)}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00029}00029\ \ \ \ \ ,\ fovScale(1.0)}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00030}00030\ \ \ \ \ ,\ drawEpipolars(false)}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00031}00031\ \ \ \ \ ,\ epipolarLineStep(48)}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00032}00032\ \{}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00033}00033\ \}}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00034}00034\ \ }
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00035}\mbox{\hyperlink{classFisheyeCalibTool_a7ed5f6b424397e395a14f0695acca09c}{00035}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classFisheyeCalibTool_a7ed5f6b424397e395a14f0695acca09c}{FisheyeCalibTool::open}}(Searchable\&\ config)}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00036}00036\ \{}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00037}00037\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classFisheyeCalibTool_a2834246c74b012825eb7dc57f53104ba}{configure}}(config);}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00038}00038\ \}}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00039}00039\ \ }
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00040}\mbox{\hyperlink{classFisheyeCalibTool_a8ea912f7f045b68e8a233ca242e19725}{00040}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classFisheyeCalibTool_a8ea912f7f045b68e8a233ca242e19725}{FisheyeCalibTool::close}}()}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00041}00041\ \{}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00042}00042\ \ \ \ \ leftMap1.release();}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00043}00043\ \ \ \ \ leftMap2.release();}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00044}00044\ \ \ \ \ rightMap1.release();}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00045}00045\ \ \ \ \ rightMap2.release();}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00046}00046\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00047}00047\ \}}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00048}00048\ \ }
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00049}00049\ \textcolor{keywordtype}{bool}\ FisheyeCalibTool::loadCameraCalibration(\textcolor{keyword}{const}\ Searchable\&\ group,}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00050}00050\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CameraCalibration\&\ camera,}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00051}00051\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::string\&\ groupName)}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00052}00052\ \{}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00053}00053\ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ required[]\ =\ \{\textcolor{stringliteral}{"{}w"{}},\ \textcolor{stringliteral}{"{}h"{}},\ \textcolor{stringliteral}{"{}fx"{}},\ \textcolor{stringliteral}{"{}fy"{}},\ \textcolor{stringliteral}{"{}cx"{}},\ \textcolor{stringliteral}{"{}cy"{}},\ \textcolor{stringliteral}{"{}k1"{}},\ \textcolor{stringliteral}{"{}k2"{}},\ \textcolor{stringliteral}{"{}k3"{}},\ \textcolor{stringliteral}{"{}k4"{}}\};}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00054}00054\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ key\ :\ required)}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00055}00055\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00056}00056\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!group.check(key))}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00057}00057\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00058}00058\ \ \ \ \ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}Stereo\ rectification:\ missing"{}}\ <<\ key\ <<\ \textcolor{stringliteral}{"{}in"{}}\ <<\ groupName;}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00059}00059\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00060}00060\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00061}00061\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00062}00062\ \ }
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00063}00063\ \ \ \ \ camera.calibrationSize\ =\ cv::Size(group.find(\textcolor{stringliteral}{"{}w"{}}).asInt32(),\ group.find(\textcolor{stringliteral}{"{}h"{}}).asInt32());}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00064}00064\ \ \ \ \ \textcolor{keywordflow}{if}\ (camera.calibrationSize.width\ <=\ 0\ ||\ camera.calibrationSize.height\ <=\ 0)}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00065}00065\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00066}00066\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}Stereo\ rectification:\ invalid\ calibration\ size\ in"{}}\ <<\ groupName;}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00067}00067\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00068}00068\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00069}00069\ \ }
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00070}00070\ \ \ \ \ camera.K\ =\ cv::Mat::eye(3,\ 3,\ CV\_64F);}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00071}00071\ \ \ \ \ camera.K.at<\textcolor{keywordtype}{double}>(0,\ 0)\ =\ group.find(\textcolor{stringliteral}{"{}fx"{}}).asFloat64();}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00072}00072\ \ \ \ \ camera.K.at<\textcolor{keywordtype}{double}>(1,\ 1)\ =\ group.find(\textcolor{stringliteral}{"{}fy"{}}).asFloat64();}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00073}00073\ \ \ \ \ camera.K.at<\textcolor{keywordtype}{double}>(0,\ 2)\ =\ group.find(\textcolor{stringliteral}{"{}cx"{}}).asFloat64();}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00074}00074\ \ \ \ \ camera.K.at<\textcolor{keywordtype}{double}>(1,\ 2)\ =\ group.find(\textcolor{stringliteral}{"{}cy"{}}).asFloat64();}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00075}00075\ \ }
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00076}00076\ \ \ \ \ camera.D\ =\ cv::Mat::zeros(4,\ 1,\ CV\_64F);}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00077}00077\ \ \ \ \ camera.D.at<\textcolor{keywordtype}{double}>(0,\ 0)\ =\ group.find(\textcolor{stringliteral}{"{}k1"{}}).asFloat64();}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00078}00078\ \ \ \ \ camera.D.at<\textcolor{keywordtype}{double}>(1,\ 0)\ =\ group.find(\textcolor{stringliteral}{"{}k2"{}}).asFloat64();}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00079}00079\ \ \ \ \ camera.D.at<\textcolor{keywordtype}{double}>(2,\ 0)\ =\ group.find(\textcolor{stringliteral}{"{}k3"{}}).asFloat64();}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00080}00080\ \ \ \ \ camera.D.at<\textcolor{keywordtype}{double}>(3,\ 0)\ =\ group.find(\textcolor{stringliteral}{"{}k4"{}}).asFloat64();}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00081}00081\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00082}00082\ \}}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00083}00083\ \ }
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00084}00084\ \textcolor{keywordtype}{bool}\ FisheyeCalibTool::loadStereoCalibration(\textcolor{keyword}{const}\ Searchable\&\ config)}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00085}00085\ \{}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00086}00086\ \ \ \ \ \textcolor{keywordflow}{if}\ (!config.check(\textcolor{stringliteral}{"{}STEREO\_DISPARITY"{}}))}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00087}00087\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00088}00088\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}Stereo\ rectification:\ [STEREO\_DISPARITY]\ group\ not\ found"{}};}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00089}00089\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00090}00090\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00091}00091\ \ }
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00092}00092\ \ \ \ \ \textcolor{keyword}{const}\ Bottle\&\ stereo\ =\ config.findGroup(\textcolor{stringliteral}{"{}STEREO\_DISPARITY"{}});}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00093}00093\ \ \ \ \ \textcolor{keywordflow}{if}\ (!stereo.check(\textcolor{stringliteral}{"{}HN"{}}))}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00094}00094\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00095}00095\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}Stereo\ rectification:\ HN\ is\ missing\ from\ [STEREO\_DISPARITY]"{}};}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00096}00096\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00097}00097\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00098}00098\ \ }
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00099}00099\ \ \ \ \ \textcolor{keyword}{const}\ Bottle*\ homogeneous\ =\ stereo.find(\textcolor{stringliteral}{"{}HN"{}}).asList();}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00100}00100\ \ \ \ \ \textcolor{keywordflow}{if}\ (homogeneous\ ==\ \textcolor{keyword}{nullptr}\ ||\ homogeneous-\/>size()\ !=\ 16)}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00101}00101\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00102}00102\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}Stereo\ rectification:\ HN\ must\ contain\ a\ 4x4\ homogeneous\ transform"{}};}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00103}00103\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00104}00104\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00105}00105\ \ }
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00106}00106\ \ \ \ \ rotation\ =\ cv::Mat::eye(3,\ 3,\ CV\_64F);}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00107}00107\ \ \ \ \ translation\ =\ cv::Mat::zeros(3,\ 1,\ CV\_64F);}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00108}00108\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ row\ =\ 0;\ row\ <\ 3;\ ++row)}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00109}00109\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00110}00110\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ col\ =\ 0;\ col\ <\ 3;\ ++col)}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00111}00111\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00112}00112\ \ \ \ \ \ \ \ \ \ \ \ \ rotation.at<\textcolor{keywordtype}{double}>(row,\ col)\ =\ homogeneous-\/>get(row\ *\ 4\ +\ col).asFloat64();}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00113}00113\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00114}00114\ \ \ \ \ \ \ \ \ translation.at<\textcolor{keywordtype}{double}>(row,\ 0)\ =\ homogeneous-\/>get(row\ *\ 4\ +\ 3).asFloat64();}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00115}00115\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00116}00116\ \ }
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00117}00117\ \ \ \ \ \textcolor{keywordflow}{if}\ (cv::norm(translation)\ <=\ 1\mbox{\hyperlink{compute__ekf__fast_8m_a08a4415e9d594ff960030b921d42b91e}{e}}-\/12)}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00118}00118\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00119}00119\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}Stereo\ rectification:\ translation\ from\ HN\ is\ zero"{}};}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00120}00120\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00121}00121\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00122}00122\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00123}00123\ \}}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00124}00124\ \ }
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00125}\mbox{\hyperlink{classFisheyeCalibTool_a2834246c74b012825eb7dc57f53104ba}{00125}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classFisheyeCalibTool_a2834246c74b012825eb7dc57f53104ba}{FisheyeCalibTool::configure}}(Searchable\&\ config)}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00126}00126\ \{}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00127}00127\ \ \ \ \ groupName\ =\ config.check(\textcolor{stringliteral}{"{}group"{}},\ yarp::os::Value(\textcolor{stringliteral}{"{}"{}})).asString();}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00128}00128\ \ \ \ \ \textcolor{keywordflow}{if}\ (groupName\ !=\ \textcolor{stringliteral}{"{}CAMERA\_CALIBRATION\_LEFT"{}}\ \&\&\ groupName\ !=\ \textcolor{stringliteral}{"{}CAMERA\_CALIBRATION\_RIGHT"{}})}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00129}00129\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00130}00130\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}Stereo\ rectification\ requires\ -\/-\/group\ CAMERA\_CALIBRATION\_LEFT\ or\ CAMERA\_CALIBRATION\_RIGHT"{}};}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00131}00131\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00132}00132\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00133}00133\ \ \ \ \ \textcolor{keywordflow}{if}\ (!config.check(\textcolor{stringliteral}{"{}CAMERA\_CALIBRATION\_LEFT"{}})\ ||\ !config.check(\textcolor{stringliteral}{"{}CAMERA\_CALIBRATION\_RIGHT"{}}))}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00134}00134\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00135}00135\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}Stereo\ rectification\ requires\ both\ camera\ calibration\ groups"{}};}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00136}00136\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00137}00137\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00138}00138\ \ }
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00139}00139\ \ \ \ \ \textcolor{keyword}{const}\ Bottle\&\ leftGroup\ =\ config.findGroup(\textcolor{stringliteral}{"{}CAMERA\_CALIBRATION\_LEFT"{}});}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00140}00140\ \ \ \ \ \textcolor{keyword}{const}\ Bottle\&\ rightGroup\ =\ config.findGroup(\textcolor{stringliteral}{"{}CAMERA\_CALIBRATION\_RIGHT"{}});}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00141}00141\ \ \ \ \ \textcolor{keywordflow}{if}\ (!loadCameraCalibration(leftGroup,\ leftCamera,\ \textcolor{stringliteral}{"{}CAMERA\_CALIBRATION\_LEFT"{}})}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00142}00142\ \ \ \ \ \ \ \ \ ||\ !loadCameraCalibration(rightGroup,\ rightCamera,\ \textcolor{stringliteral}{"{}CAMERA\_CALIBRATION\_RIGHT"{}})}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00143}00143\ \ \ \ \ \ \ \ \ ||\ !loadStereoCalibration(config))}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00144}00144\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00145}00145\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00146}00146\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00147}00147\ }
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00148}00148\ \ \ \ \ \textcolor{keyword}{const}\ Bottle\&\ selectedGroup\ =\ (groupName\ ==\ \textcolor{stringliteral}{"{}CAMERA\_CALIBRATION\_LEFT"{}})\ ?\ leftGroup\ :\ rightGroup;}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00149}00149\ \ \ \ \ \textcolor{keyword}{const}\ yarp::os::Value\ defaultBalance\ =\ config.check(\textcolor{stringliteral}{"{}rectifyAlpha"{}},\ yarp::os::Value(0.0));}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00150}00150\ \ \ \ \ balance\ =\ config.check(\textcolor{stringliteral}{"{}balance"{}},\ selectedGroup.check(\textcolor{stringliteral}{"{}balance"{}},\ defaultBalance)).asFloat64();}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00151}00151\ \ \ \ \ balance\ =\ std::max(0.0,\ std::min(1.0,\ balance));}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00152}00152\ \ \ \ \ fovScale\ =\ config.check(\textcolor{stringliteral}{"{}fovScale"{}},\ selectedGroup.check(\textcolor{stringliteral}{"{}fovScale"{}},\ yarp::os::Value(1.0))).asFloat64();}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00153}00153\ \ \ \ \ \textcolor{keywordflow}{if}\ (fovScale\ <=\ 0.0)}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00154}00154\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00155}00155\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}Fisheye\ rectification:\ fovScale\ must\ be\ greater\ than\ zero"{}};}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00156}00156\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00157}00157\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00158}00158\ \ \ \ \ drawEpipolars\ =\ config.check(\textcolor{stringliteral}{"{}drawEpipolars"{}},\ yarp::os::Value(\textcolor{keyword}{false})).asBool();}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00159}00159\ \ \ \ \ epipolarLineStep\ =\ config.check(\textcolor{stringliteral}{"{}epipolarLineStep"{}},\ yarp::os::Value(48)).asInt32();}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00160}00160\ \ \ \ \ epipolarLineStep\ =\ epipolarLineStep\ >\ 0\ ?\ epipolarLineStep\ :\ 1;}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00161}00161\ \ \ \ \ previousImageSize\ =\ cv::Size(-\/1,\ -\/1);}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00162}00162\ \ \ \ \ needInitialization\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00163}00163\ \ \ \ \ yDebug()\ <<\ \textcolor{stringliteral}{"{}FisheyeCalibTool\ configured\ with\ balance:"{}}\ <<\ balance\ <<\ \textcolor{stringliteral}{"{}fovScale:"{}}\ <<\ fovScale}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00164}00164\ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ \textcolor{stringliteral}{"{}drawEpipolars:"{}}\ <<\ drawEpipolars\ <<\ \textcolor{stringliteral}{"{}epipolarLineStep:"{}}\ <<\ epipolarLineStep;}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00165}00165\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00166}00166\ \}}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00167}00167\ \ }
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00168}00168\ cv::Mat\ FisheyeCalibTool::scaledCameraMatrix(\textcolor{keyword}{const}\ CameraCalibration\&\ camera,}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00169}00169\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ cv::Size\&\ imageSize)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00170}00170\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00171}00171\ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ scaleX\ =\ \textcolor{keyword}{static\_cast<}\textcolor{keywordtype}{double}\textcolor{keyword}{>}(imageSize.width)\ /\ camera.calibrationSize.width;}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00172}00172\ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ scaleY\ =\ \textcolor{keyword}{static\_cast<}\textcolor{keywordtype}{double}\textcolor{keyword}{>}(imageSize.height)\ /\ camera.calibrationSize.height;}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00173}00173\ \ \ \ \ cv::Mat\ scaled\ =\ camera.K.clone();}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00174}00174\ \ \ \ \ scaled.at<\textcolor{keywordtype}{double}>(0,\ 0)\ *=\ scaleX;}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00175}00175\ \ \ \ \ scaled.at<\textcolor{keywordtype}{double}>(0,\ 2)\ *=\ scaleX;}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00176}00176\ \ \ \ \ scaled.at<\textcolor{keywordtype}{double}>(1,\ 1)\ *=\ scaleY;}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00177}00177\ \ \ \ \ scaled.at<\textcolor{keywordtype}{double}>(1,\ 2)\ *=\ scaleY;}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00178}00178\ \ \ \ \ \textcolor{keywordflow}{return}\ scaled;}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00179}00179\ \}}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00180}00180\ \ }
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00181}00181\ \textcolor{keywordtype}{bool}\ FisheyeCalibTool::initializeMaps(\textcolor{keyword}{const}\ cv::Size\&\ imageSize)}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00182}00182\ \{}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00183}00183\ \ \ \ \ \textcolor{keyword}{const}\ cv::Mat\ leftK\ =\ scaledCameraMatrix(leftCamera,\ imageSize);}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00184}00184\ \ \ \ \ \textcolor{keyword}{const}\ cv::Mat\ rightK\ =\ scaledCameraMatrix(rightCamera,\ imageSize);}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00185}00185\ \ \ \ \ cv::Mat\ leftR;}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00186}00186\ \ \ \ \ cv::Mat\ rightR;}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00187}00187\ \ \ \ \ cv::Mat\ leftP;}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00188}00188\ \ \ \ \ cv::Mat\ rightP;}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00189}00189\ \ \ \ \ cv::Mat\ disparityToDepth;}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00190}00190\ \ \ \ \ cv::fisheye::stereoRectify(leftK,\ leftCamera.D,\ rightK,\ rightCamera.D,\ imageSize,}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00191}00191\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ rotation,\ translation,\ leftR,\ rightR,\ leftP,\ rightP,}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00192}00192\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ disparityToDepth,\ cv::fisheye::CALIB\_ZERO\_DISPARITY,}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00193}00193\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ imageSize,\ balance,\ fovScale);}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00194}00194\ \ }
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00195}00195\ \ \ \ \ \textcolor{keywordflow}{if}\ (leftR.empty()\ ||\ rightR.empty()\ ||\ leftP.empty()\ ||\ rightP.empty())}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00196}00196\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00197}00197\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}Fisheye\ rectification:\ stereoRectify\ returned\ empty\ matrices"{}};}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00198}00198\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00199}00199\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00200}00200\ \ }
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00201}00201\ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ leftFocal\ =\ leftP.at<\textcolor{keywordtype}{double}>(0,\ 0);}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00202}00202\ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ rightFocal\ =\ rightP.at<\textcolor{keywordtype}{double}>(0,\ 0);}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00203}00203\ \ \ \ \ \textcolor{keywordflow}{if}\ (!std::isfinite(leftFocal)\ ||\ !std::isfinite(rightFocal)}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00204}00204\ \ \ \ \ \ \ \ \ ||\ leftFocal\ <\ 1.0\ ||\ rightFocal\ <\ 1.0)}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00205}00205\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00206}00206\ \ \ \ \ \ \ \ \ yWarning()\ <<\ \textcolor{stringliteral}{"{}Fisheye\ rectification:\ stereoRectify\ returned\ an\ invalid\ focal\ length"{}}}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00207}00207\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ leftFocal\ <<\ rightFocal}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00208}00208\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ \textcolor{stringliteral}{"{}-\/\ using\ a\ projection\ matrix\ derived\ from\ the\ original\ intrinsics"{}};}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00209}00209\ \ \ \ \ \ \ \ \ cv::Mat\ commonProjection\ =\ cv::Mat::eye(3,\ 3,\ CV\_64F);}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00210}00210\ \ \ \ \ \ \ \ \ commonProjection.at<\textcolor{keywordtype}{double}>(0,\ 0)\ =\ 0.5\ *\ (leftK.at<\textcolor{keywordtype}{double}>(0,\ 0)\ +\ rightK.at<\textcolor{keywordtype}{double}>(0,\ 0));}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00211}00211\ \ \ \ \ \ \ \ \ commonProjection.at<\textcolor{keywordtype}{double}>(1,\ 1)\ =\ 0.5\ *\ (leftK.at<\textcolor{keywordtype}{double}>(1,\ 1)\ +\ rightK.at<\textcolor{keywordtype}{double}>(1,\ 1));}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00212}00212\ \ \ \ \ \ \ \ \ commonProjection.at<\textcolor{keywordtype}{double}>(0,\ 2)\ =\ 0.5\ *\ (leftK.at<\textcolor{keywordtype}{double}>(0,\ 2)\ +\ rightK.at<\textcolor{keywordtype}{double}>(0,\ 2));}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00213}00213\ \ \ \ \ \ \ \ \ commonProjection.at<\textcolor{keywordtype}{double}>(1,\ 2)\ =\ 0.5\ *\ (leftK.at<\textcolor{keywordtype}{double}>(1,\ 2)\ +\ rightK.at<\textcolor{keywordtype}{double}>(1,\ 2));}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00214}00214\ \ \ \ \ \ \ \ \ leftP\ =\ commonProjection;}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00215}00215\ \ \ \ \ \ \ \ \ rightP\ =\ commonProjection;}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00216}00216\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00217}00217\ }
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00218}00218\ \ \ \ \ \textcolor{keywordflow}{if}(groupName\ ==\ \textcolor{stringliteral}{"{}CAMERA\_CALIBRATION\_LEFT"{}})}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00219}00219\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00220}00220\ \ \ \ \ \ \ \ \ cv::fisheye::initUndistortRectifyMap(leftK,\ leftCamera.D,\ leftR,\ leftP,}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00221}00221\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ imageSize,\ CV\_16SC2,\ leftMap1,\ leftMap2);}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00222}00222\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00223}00223\ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}(groupName\ ==\ \textcolor{stringliteral}{"{}CAMERA\_CALIBRATION\_RIGHT"{}})}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00224}00224\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00225}00225\ \ \ \ \ \ \ \ \ cv::fisheye::initUndistortRectifyMap(rightK,\ rightCamera.D,\ rightR,\ rightP,}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00226}00226\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ imageSize,\ CV\_16SC2,\ rightMap1,\ rightMap2);\ \ \ \ }
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00227}00227\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00228}00228\ }
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00229}00229\ \ \ \ \ previousImageSize\ =\ imageSize;}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00230}00230\ \ \ \ \ needInitialization\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00231}00231\ \ \ \ \ \textcolor{keywordflow}{return}\ (!leftMap1.empty()\ \&\&\ !leftMap2.empty())\ ||\ (!rightMap1.empty()\ \&\&\ !rightMap2.empty());}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00232}00232\ \}}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00233}00233\ \ }
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00234}00234\ \textcolor{keywordtype}{void}\ FisheyeCalibTool::drawEpipolarLines(cv::Mat\&\ image)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00235}00235\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00236}00236\ \ \ \ \ \textcolor{keyword}{const}\ cv::Scalar\ lineColor(0,\ 255,\ 0);}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00237}00237\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ \mbox{\hyperlink{show__eyes__axes_8m_a2fb1c5cf58867b5bbc9a1b145a86f3a0}{y}}\ =\ 0;\ \mbox{\hyperlink{show__eyes__axes_8m_a2fb1c5cf58867b5bbc9a1b145a86f3a0}{y}}\ <\ image.rows;\ \mbox{\hyperlink{show__eyes__axes_8m_a2fb1c5cf58867b5bbc9a1b145a86f3a0}{y}}\ +=\ epipolarLineStep)}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00238}00238\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00239}00239\ \ \ \ \ \ \ \ \ cv::line(image,\ cv::Point(0,\ \mbox{\hyperlink{show__eyes__axes_8m_a2fb1c5cf58867b5bbc9a1b145a86f3a0}{y}}),\ cv::Point(image.cols\ -\/\ 1,\ \mbox{\hyperlink{show__eyes__axes_8m_a2fb1c5cf58867b5bbc9a1b145a86f3a0}{y}}),\ lineColor,\ 1,\ cv::LINE\_AA);}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00240}00240\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00241}00241\ \}}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00242}00242\ \ }
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00243}\mbox{\hyperlink{classFisheyeCalibTool_adb05cd492dd2bdda4be3e8757213ff6b}{00243}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classFisheyeCalibTool_adb05cd492dd2bdda4be3e8757213ff6b}{FisheyeCalibTool::apply}}(\textcolor{keyword}{const}\ ImageOf<PixelRgb>\&\ in,\ ImageOf<PixelRgb>\&\ \mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}})}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00244}00244\ \{}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00245}00245\ \ \ \ \ \textcolor{keyword}{const}\ cv::Size\ imageSize(in.width(),\ in.height());}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00246}00246\ \ \ \ \ \textcolor{keywordflow}{if}\ (needInitialization\ ||\ imageSize\ !=\ previousImageSize)}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00247}00247\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00248}00248\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!initializeMaps(imageSize))}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00249}00249\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00250}00250\ \ \ \ \ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}Fisheye\ calibration:\ unable\ to\ initialize\ maps"{}};}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00251}00251\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}}\ =\ in;}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00252}00252\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00253}00253\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00254}00254\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00255}00255\ }
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00256}00256\ \ \ \ \ \mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}}.resize(in.width(),\ in.height());}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00257}00257\ \ \ \ \ cv::Mat\ input(in.height(),\ in.width(),\ CV\_8UC3,\ in.getRawImage(),\ in.getRowSize());}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00258}00258\ \ \ \ \ cv::Mat\ output(\mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}}.height(),\ \mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}}.width(),\ CV\_8UC3,\ \mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}}.getRawImage(),\ \mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}}.getRowSize());}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00259}00259\ \ \ \ \ \textcolor{keyword}{const}\ cv::Mat\&\ activeMap1\ =\ (groupName\ ==\ \textcolor{stringliteral}{"{}CAMERA\_CALIBRATION\_LEFT"{}})\ ?\ leftMap1\ :\ rightMap1;}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00260}00260\ \ \ \ \ \textcolor{keyword}{const}\ cv::Mat\&\ activeMap2\ =\ (groupName\ ==\ \textcolor{stringliteral}{"{}CAMERA\_CALIBRATION\_LEFT"{}})\ ?\ leftMap2\ :\ rightMap2;}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00261}00261\ \ \ \ \ cv::remap(input,\ output,\ activeMap1,\ activeMap2,\ cv::INTER\_LINEAR,\ cv::BORDER\_CONSTANT);}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00262}00262\ \ \ \ \ \textcolor{keywordflow}{if}\ (drawEpipolars)}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00263}00263\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00264}00264\ \ \ \ \ \ \ \ \ drawEpipolarLines(output);}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00265}00265\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00266}00266\ \}}
+\DoxyCodeLine{\Hypertarget{FisheyeCalibTool_8cpp_source_l00267}00267\ \ }
+
+\end{DoxyCode}

@@ -1,0 +1,152 @@
+\doxysection{main.\+cpp}
+\hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source}{}\label{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source}\index{icub-\/main/src/tools/canBusSniffer/main.cpp@{icub-\/main/src/tools/canBusSniffer/main.cpp}}
+\mbox{\hyperlink{icub-main_2src_2tools_2canBusSniffer_2main_8cpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00001}00001\ \textcolor{comment}{//\ -\/*-\/\ mode:C++;\ tab-\/width:4;\ c-\/basic-\/offset:4;\ indent-\/tabs-\/mode:nil\ -\/*-\/}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00002}00002\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00033}00033\ \textcolor{preprocessor}{\#include\ <stdio.h>}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00034}00034\ \textcolor{preprocessor}{\#include\ <stdlib.h>}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00035}00035\ \textcolor{preprocessor}{\#include\ <yarp/os/Network.h>}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00036}00036\ \textcolor{preprocessor}{\#include\ <yarp/dev/ControlBoardInterfaces.h>}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00037}00037\ \textcolor{preprocessor}{\#include\ <yarp/dev/PolyDriver.h>}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00038}00038\ \textcolor{preprocessor}{\#include\ <yarp/dev/CanBusInterface.h>}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00039}00039\ \textcolor{preprocessor}{\#include\ <yarp/os/Time.h>}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00040}00040\ \textcolor{preprocessor}{\#include\ <yarp/sig/Vector.h>}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00041}00041\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00042}00042\ \textcolor{preprocessor}{\#include\ <yarp/os/PeriodicThread.h>}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00043}00043\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00044}00044\ \textcolor{preprocessor}{\#include\ <iostream>}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00045}00045\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00046}00046\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00047}00047\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceyarp_1_1dev}{yarp::dev}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00048}00048\ \textcolor{keyword}{using\ namespace\ }yarp::sig;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00049}00049\ \textcolor{keyword}{using\ namespace\ }yarp::os;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00050}00050\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceyarp}{yarp}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00051}00051\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00052}\mbox{\hyperlink{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_a83f1dd59c54feeb843f004b14fd029ad}{00052}}\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_a83f1dd59c54feeb843f004b14fd029ad}{SNIFFER\_THREAD\_RATE}}=50;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00053}\mbox{\hyperlink{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_adfa58854961de84fca501133f1fe10bc}{00053}}\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_adfa58854961de84fca501133f1fe10bc}{CAN\_DRIVER\_BUFFER\_SIZE}}=2047;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00054}\mbox{\hyperlink{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_a858693858c6b942c860218001dd4e5b0}{00054}}\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_a858693858c6b942c860218001dd4e5b0}{localBufferSize}}=512;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00055}00055\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00056}00056\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classSnifferThread}{SnifferThread}}:\ \textcolor{keyword}{public}\ PeriodicThread}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00057}00057\ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00058}00058\ \ \ \ \ PolyDriver\ driver;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00059}00059\ \ \ \ \ ICanBus\ *iCanBus;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00060}00060\ \ \ \ \ ICanBufferFactory\ *iBufferFactory;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00061}00061\ \ \ \ \ CanBuffer\ readBuffer;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00062}00062\ \ \ \ \ std::string\ devname;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00063}00063\ \ \ \ \ \textcolor{keywordtype}{int}\ port;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00064}00064\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00065}\mbox{\hyperlink{classSnifferThread_a3d1457fc16e44ab493957e9f6307a45e}{00065}}\ \ \ \ \ \mbox{\hyperlink{classSnifferThread_a3d1457fc16e44ab493957e9f6307a45e}{SnifferThread}}(std::string\ dname,\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}},\ \textcolor{keywordtype}{int}\ r=\mbox{\hyperlink{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_a83f1dd59c54feeb843f004b14fd029ad}{SNIFFER\_THREAD\_RATE}}):\ PeriodicThread((double)r/1000.0)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00066}00066\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00067}00067\ \ \ \ \ \ \ \ \ port=\mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00068}00068\ \ \ \ \ \ \ \ \ devname=dname;\ \ \ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00069}00069\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00070}00070\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00071}\mbox{\hyperlink{classSnifferThread_adc10e89f0d0de8fb5c630f8dff9e5877}{00071}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classSnifferThread_adc10e89f0d0de8fb5c630f8dff9e5877}{threadInit}}()}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00072}00072\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00073}00073\ \ \ \ \ \ \ \ \ Property\ prop;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00074}00074\ \ \ \ \ \ \ \ \ prop.put(\textcolor{stringliteral}{"{}device"{}},\ devname.c\_str());}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00075}00075\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00076}00076\ \ \ \ \ \ \ \ \ prop.put(\textcolor{stringliteral}{"{}CanTxTimeout"{}},\ 500);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00077}00077\ \ \ \ \ \ \ \ \ prop.put(\textcolor{stringliteral}{"{}CanRxTimeout"{}},\ 500);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00078}00078\ \ \ \ \ \ \ \ \ prop.put(\textcolor{stringliteral}{"{}CanDeviceNum"{}},\ port);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00079}00079\ \ \ \ \ \ \ \ \ prop.put(\textcolor{stringliteral}{"{}CanMyAddress"{}},\ 0);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00080}00080\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00081}00081\ \ \ \ \ \ \ \ \ prop.put(\textcolor{stringliteral}{"{}CanTxQueueSize"{}},\ \mbox{\hyperlink{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_adfa58854961de84fca501133f1fe10bc}{CAN\_DRIVER\_BUFFER\_SIZE}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00082}00082\ \ \ \ \ \ \ \ \ prop.put(\textcolor{stringliteral}{"{}CanRxQueueSize"{}},\ \mbox{\hyperlink{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_adfa58854961de84fca501133f1fe10bc}{CAN\_DRIVER\_BUFFER\_SIZE}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00083}00083\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00084}00084\ \ \ \ \ \ \ \ \ driver.open(prop);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00085}00085\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00086}00086\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!driver.isValid())}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00087}00087\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00088}00088\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{saveNetwork_8m_a0eba6f64b9c26507a877bcb0c4f270e2}{fprintf}}(stderr,\ \textcolor{stringliteral}{"{}Error\ opening\ PolyDriver\ check\ parameters\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00089}00089\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00090}00090\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00091}00091\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00092}00092\ \ \ \ \ \ \ \ \ driver.view(iCanBus);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00093}00093\ \ \ \ \ \ \ \ \ driver.view(iBufferFactory);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00094}00094\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00095}00095\ \ \ \ \ \ \ \ \ iCanBus-\/>canSetBaudRate(0);\ \textcolor{comment}{//default\ 1MB/s}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00096}00096\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00097}00097\ \ \ \ \ \ \ \ \ readBuffer=iBufferFactory-\/>createBuffer(\mbox{\hyperlink{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_a858693858c6b942c860218001dd4e5b0}{localBufferSize}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00098}00098\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00099}00099\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00100}00100\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00101}\mbox{\hyperlink{classSnifferThread_a3116b33579f3b6abbfd9da4da88f96d6}{00101}}\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classSnifferThread_a3116b33579f3b6abbfd9da4da88f96d6}{run}}()}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00102}00102\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00103}00103\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ messages=\mbox{\hyperlink{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_a858693858c6b942c860218001dd4e5b0}{localBufferSize}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00104}00104\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ readMessages=0;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00105}00105\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ res=iCanBus-\/>canRead(readBuffer,\ messages,\ \&readMessages);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00106}00106\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (res)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00107}00107\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{saveNetwork_8m_a0eba6f64b9c26507a877bcb0c4f270e2}{fprintf}}(stderr,\ \textcolor{stringliteral}{"{}Read\ \%u\ messages\(\backslash\)n"{}},\ readMessages);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00108}00108\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00109}00109\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{saveNetwork_8m_a0eba6f64b9c26507a877bcb0c4f270e2}{fprintf}}(stderr,\ \textcolor{stringliteral}{"{}Failed\ (read\ \%u\ messages)\(\backslash\)n"{}},\ readMessages);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00110}00110\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00111}00111\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00112}\mbox{\hyperlink{classSnifferThread_a1a71547d6de252b57cb5993a8fd5b03c}{00112}}\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classSnifferThread_a1a71547d6de252b57cb5993a8fd5b03c}{threadRelease}}()}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00113}00113\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00114}00114\ \ \ \ \ \ \ \ \ iBufferFactory-\/>destroyBuffer(readBuffer);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00115}00115\ \ \ \ \ \ \ \ \ driver.close();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00116}00116\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00117}00117\ \};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00118}00118\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00119}00119\ \textcolor{preprocessor}{\#ifdef\ USE\_ICUB\_MOD}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00120}00120\ \textcolor{preprocessor}{\#include\ "{}drivers.h"{}}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00121}00121\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00122}00122\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00123}00123\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00124}\mbox{\hyperlink{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_a0ddf1224851353fc92bfbff6f499fa97}{00124}}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{icub-tutorials_2src_2anyRobotCartesianInterface_2src_2fakeRobot_2main_8cpp_ae66f6b31b5ad750f1fe042a706a4e3d4}{main}}(\textcolor{keywordtype}{int}\ argc,\ \textcolor{keywordtype}{char}\ *argv[])\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00125}00125\ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00126}00126\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00127}00127\ \textcolor{preprocessor}{\#ifdef\ USE\_ICUB\_MOD}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00128}00128\ \ \ \ \ yarp::dev::DriverCollection\ dev;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00129}00129\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00130}00130\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00131}00131\ \ \ \ \ \textcolor{keywordflow}{if}\ (argc!=3\ \&\&\ argc!=5)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00132}00132\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00133}00133\ \ \ \ \ \ \ \ \ std::cout<<\textcolor{stringliteral}{"{}Usage:\ -\/-\/device\ device\_name\ \{ecan|pcan|...\}\(\backslash\)n"{}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00134}00134\ \ \ \ \ \ \ \ \ std::cout<<\textcolor{stringliteral}{"{}Optional:\ -\/-\/port\ \{int\}\ (default\ 0)\(\backslash\)n"{}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00135}00135\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ -\/1;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00136}00136\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00137}00137\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00138}00138\ \ \ \ \ std::string\ p1=std::string(argv[1]);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00139}00139\ \ \ \ \ std::string\ p2=std::string(argv[2]);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00140}00140\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00141}00141\ \ \ \ \ \textcolor{keywordtype}{int}\ port=0;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00142}00142\ \ \ \ \ \textcolor{keywordflow}{if}\ (argc==5)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00143}00143\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00144}00144\ \ \ \ \ \ \ \ \ \ \ \ \ std::string\ tmp=std::string(argv[3]);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00145}00145\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (tmp==\textcolor{stringliteral}{"{}-\/-\/port"{}})}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00146}00146\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00147}00147\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ port=atoi(argv[4]);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00148}00148\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00149}00149\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00150}00150\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00151}00151\ \ \ \ \ \textcolor{keywordflow}{if}\ (p1!=\textcolor{stringliteral}{"{}-\/-\/device"{}})}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00152}00152\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00153}00153\ \ \ \ \ \ \ \ \ std::cout<<\textcolor{stringliteral}{"{}Usage:\ -\/-\/device\ device\_name\ \{ecan|pcan\}\(\backslash\)n"{}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00154}00154\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ -\/1;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00155}00155\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00156}00156\ \ \ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00157}00157\ \ \ \ \ \mbox{\hyperlink{classSnifferThread}{SnifferThread}}\ thread(p2,\ port);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00158}00158\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00159}00159\ \ \ \ \ \textcolor{keywordflow}{if}\ (!thread.start())}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00160}00160\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00161}00161\ \ \ \ \ \ \ \ \ std::cerr<<\textcolor{stringliteral}{"{}Error\ thread\ did\ not\ start,\ quitting\(\backslash\)n"{}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00162}00162\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ -\/1;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00163}00163\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00164}00164\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00165}00165\ \ \ \ \ std::string\ input;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00166}00166\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{icub-main_2src_2tools_2canBusSniffer_2canBusSnifferV5_2main_8cpp_a1d39aac66e12dae50a24cd7a9100ef33}{done}}=\textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00167}00167\ \ \ \ \ \textcolor{keywordflow}{while}(!\mbox{\hyperlink{icub-main_2src_2tools_2canBusSniffer_2canBusSnifferV5_2main_8cpp_a1d39aac66e12dae50a24cd7a9100ef33}{done}})}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00168}00168\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00169}00169\ \ \ \ \ \ \ \ \ std::cin>>input;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00170}00170\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (input==\textcolor{stringliteral}{"{}quit"{}})}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00171}00171\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{icub-main_2src_2tools_2canBusSniffer_2canBusSnifferV5_2main_8cpp_a1d39aac66e12dae50a24cd7a9100ef33}{done}}=\textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00172}00172\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00173}00173\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00174}00174\ \ \ \ \ thread.stop();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00175}00175\ \ \ \ \ \textcolor{keywordflow}{return}\ 0;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2canBusSniffer_2main_8cpp_source_l00176}00176\ \}}
+
+\end{DoxyCode}
