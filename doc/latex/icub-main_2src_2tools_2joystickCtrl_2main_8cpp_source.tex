@@ -1,0 +1,855 @@
+\doxysection{main.\+cpp}
+\hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source}{}\label{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source}\index{icub-\/main/src/tools/joystickCtrl/main.cpp@{icub-\/main/src/tools/joystickCtrl/main.cpp}}
+\mbox{\hyperlink{icub-main_2src_2tools_2joystickCtrl_2main_8cpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00001}00001\ \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00002}00002\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010\ RobotCub\ Consortium,\ European\ Commission\ FP6\ Project\ IST-\/004370}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00003}00003\ \textcolor{comment}{\ *\ Author:\ Marco\ Randazzo}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00004}00004\ \textcolor{comment}{\ *\ email:\ \ marco.randazzo@iit.it}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00005}00005\ \textcolor{comment}{\ *\ website:\ www.robotcub.org}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00006}00006\ \textcolor{comment}{\ *\ Permission\ is\ granted\ to\ copy,\ distribute,\ and/or\ modify\ this\ program}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00007}00007\ \textcolor{comment}{\ *\ under\ the\ terms\ of\ the\ GNU\ General\ Public\ License,\ version\ 2\ or\ any}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00008}00008\ \textcolor{comment}{\ *\ later\ version\ published\ by\ the\ Free\ Software\ Foundation.}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00009}00009\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00010}00010\ \textcolor{comment}{\ *\ A\ copy\ of\ the\ license\ can\ be\ found\ at}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00011}00011\ \textcolor{comment}{\ *\ http://www.robotcub.org/icub/license/gpl.txt}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00012}00012\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00013}00013\ \textcolor{comment}{\ *\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00014}00014\ \textcolor{comment}{\ *\ WITHOUT\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00015}00015\ \textcolor{comment}{\ *\ MERCHANTABILITY\ or\ FITNESS\ FOR\ A\ PARTICULAR\ PURPOSE.\ See\ the\ GNU\ General}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00016}00016\ \textcolor{comment}{\ *\ Public\ License\ for\ more\ details}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00017}00017\ \textcolor{comment}{*/}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00018}00018\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00075}00075\ \textcolor{preprocessor}{\#include\ <yarp/os/Network.h>}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00076}00076\ \textcolor{preprocessor}{\#include\ <yarp/os/RFModule.h>}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00077}00077\ \textcolor{preprocessor}{\#include\ <yarp/os/PeriodicThread.h>}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00078}00078\ \textcolor{preprocessor}{\#include\ <yarp/os/Bottle.h>}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00079}00079\ \textcolor{preprocessor}{\#include\ <yarp/os/BufferedPort.h>}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00080}00080\ \textcolor{preprocessor}{\#include\ <yarp/os/Time.h>}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00081}00081\ \textcolor{preprocessor}{\#include\ <yarp/os/Log.h>}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00082}00082\ \textcolor{preprocessor}{\#include\ <yarp/os/LogStream.h>}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00083}00083\ \textcolor{preprocessor}{\#include\ <yarp/sig/Vector.h>}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00084}00084\ \textcolor{preprocessor}{\#include\ <yarp/math/Math.h>}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00085}00085\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00086}00086\ \textcolor{preprocessor}{\#include\ <yarp/dev/Drivers.h>}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00087}00087\ \textcolor{preprocessor}{\#include\ <yarp/dev/CartesianControl.h>}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00088}00088\ \textcolor{preprocessor}{\#include\ <yarp/dev/PolyDriver.h>}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00089}00089\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00090}00090\ \textcolor{comment}{//\#include\ <gsl/gsl\_math.h>}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00091}00091\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00092}00092\ \textcolor{preprocessor}{\#include\ <iostream>}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00093}00093\ \textcolor{preprocessor}{\#include\ <iomanip>}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00094}00094\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00095}00095\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{math_8h}{math.h}}>}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00096}00096\ \textcolor{preprocessor}{\#include\ <SDL.h>}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00097}00097\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00098}00098\ \textcolor{keyword}{using\ namespace\ }std;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00099}00099\ \textcolor{keyword}{using\ namespace\ }yarp::os;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00100}00100\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceyarp_1_1dev}{yarp::dev}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00101}00101\ \textcolor{keyword}{using\ namespace\ }yarp::sig;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00102}00102\ \textcolor{keyword}{using\ namespace\ }yarp::math;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00103}00103\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00104}\mbox{\hyperlink{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_a3f482d6d79877879dee562279a19a6ee}{00104}}\ \textcolor{preprocessor}{\#define\ PRINT\_STATUS\_PER\ 0.1}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00105}\mbox{\hyperlink{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_a264ad386c43d13682e5f5eb92138e569}{00105}}\ \textcolor{preprocessor}{\#define\ MAX\_AXES\ \ \ \ \ \ \ \ \ 32}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00106}00106\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00107}\mbox{\hyperlink{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_afa231099d07583c3ed0981e0bb665f55aca5fd48d9795f5ccfbc6c2dfa32b7450}{00107}}\ \textcolor{keyword}{enum}\ \{\ \mbox{\hyperlink{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_afa231099d07583c3ed0981e0bb665f55a439679230e5b7eecd87f0a53ad4e2e77}{JTYPE\_UNDEF}}=-\/1,\ \mbox{\hyperlink{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_afa231099d07583c3ed0981e0bb665f55ad13a0aba6441ec58a19a91daf13e6948}{JTYPE\_POLAR}}=0,\ \mbox{\hyperlink{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_afa231099d07583c3ed0981e0bb665f55a5c78c2ee83717d6d017e58a81333f1af}{JTYPE\_CARTESIAN}}=1,\ \mbox{\hyperlink{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_afa231099d07583c3ed0981e0bb665f55a0079fb0990ece1897b8f68bd5a259740}{JTYPE\_CONSTANT}}=2,\ \mbox{\hyperlink{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_afa231099d07583c3ed0981e0bb665f55a4b51a77460be7314d1305719e7b50eb3}{JTYPE\_STRING}}=3,\ \mbox{\hyperlink{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_afa231099d07583c3ed0981e0bb665f55aca5fd48d9795f5ccfbc6c2dfa32b7450}{JTYPE\_BUTTON}}=4\ \};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00108}00108\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00109}00109\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classCtrlThread}{CtrlThread}}:\ \textcolor{keyword}{public}\ PeriodicThread}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00110}00110\ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00111}00111\ \ \ \ \ \textcolor{keyword}{struct\ }struct\_jointProperties}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00112}00112\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00113}00113\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ type;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00114}00114\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ param[3];}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00115}00115\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{string}\ param\_s;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00116}00116\ \ \ \ \ \};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00117}00117\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00118}00118\ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00119}00119\ \ \ \ \ ResourceFinder\ \ \ \ \ \ \ \&\mbox{\hyperlink{classCtrlThread_a7a454b03ce044a1b7f5c1a4dd69f2275}{rf}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00120}\mbox{\hyperlink{classCtrlThread_a3b1e9c81262a6bcf962d8daca7ced676}{00120}}\ \ \ \ \ BufferedPort<Bottle>\ \mbox{\hyperlink{classCtrlThread_a3b1e9c81262a6bcf962d8daca7ced676}{port\_command}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00121}\mbox{\hyperlink{classCtrlThread_a93bc1768843b07d1eb8c88060404eb24}{00121}}\ \ \ \ \ BufferedPort<Bottle>\ \mbox{\hyperlink{classCtrlThread_a93bc1768843b07d1eb8c88060404eb24}{port\_axis\_only}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00122}\mbox{\hyperlink{classCtrlThread_a04e5e419a376e56d60654b95ffbd6921}{00122}}\ \ \ \ \ BufferedPort<Bottle>\ \mbox{\hyperlink{classCtrlThread_a04e5e419a376e56d60654b95ffbd6921}{port\_buttons\_only}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00123}\mbox{\hyperlink{classCtrlThread_abe1cfce545e3425ea89e4d14c9598f56}{00123}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_abe1cfce545e3425ea89e4d14c9598f56}{silent}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00124}\mbox{\hyperlink{classCtrlThread_aab7eb82a671a524b88a8b5567fef4a45}{00124}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_aab7eb82a671a524b88a8b5567fef4a45}{force\_cfg}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00125}00125\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00126}00126\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{classCtrlThread_a4d0620186eb996bb57635dd51759cd66}{defaultExecTime}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00127}00127\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{classCtrlThread_a08e157223f628fb6ec290584a40ee679}{t0}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00128}\mbox{\hyperlink{classCtrlThread_a5172dac00c04ae9cb128a6a2f22d2999}{00128}}\ \ \ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{classCtrlThread_a5172dac00c04ae9cb128a6a2f22d2999}{numAxes}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00129}\mbox{\hyperlink{classCtrlThread_af31e9a0c0b456164f957b671425a47f1}{00129}}\ \ \ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{classCtrlThread_af31e9a0c0b456164f957b671425a47f1}{numBalls}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00130}\mbox{\hyperlink{classCtrlThread_a2e4571bacd43040c9d482a148f6d301b}{00130}}\ \ \ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{classCtrlThread_a2e4571bacd43040c9d482a148f6d301b}{numHats}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00131}\mbox{\hyperlink{classCtrlThread_a2a1d177193f574c0ddb5d0942120be38}{00131}}\ \ \ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{classCtrlThread_a2a1d177193f574c0ddb5d0942120be38}{numButtons}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00132}\mbox{\hyperlink{classCtrlThread_a218ac54620646619a31bd66a757f8783}{00132}}\ \ \ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{classCtrlThread_a218ac54620646619a31bd66a757f8783}{joy\_id}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00133}\mbox{\hyperlink{classCtrlThread_a258a7892979eaaa2cbe6971653c83fc8}{00133}}\ \ \ \ \ SDL\_Joystick*\ \mbox{\hyperlink{classCtrlThread_a258a7892979eaaa2cbe6971653c83fc8}{joy1}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00134}00134\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00135}00135\ \ \ \ \ \textcolor{comment}{//button\ actions;}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00136}\mbox{\hyperlink{classCtrlThread_a18e56685d4ffced417d830b83693d98f}{00136}}\ \ \ \ \ \textcolor{keywordtype}{string}\ \mbox{\hyperlink{classCtrlThread_a18e56685d4ffced417d830b83693d98f}{button\_actions}}\ [20];}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00137}00137\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00138}00138\ \ \ \ \ \textcolor{comment}{//hats\ actions;}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00139}\mbox{\hyperlink{classCtrlThread_a897edda10ed409d4ce43be4541aff4c5}{00139}}\ \ \ \ \ \textcolor{keywordtype}{string}\ \mbox{\hyperlink{classCtrlThread_a897edda10ed409d4ce43be4541aff4c5}{hat\_actions}}\ [20];}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00140}00140\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00141}00141\ \ \ \ \ \textcolor{comment}{//variables\ read\ from\ the\ joystick}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00142}\mbox{\hyperlink{classCtrlThread_a4ae83aae3bfff1c32cb5923131f5d9b2}{00142}}\ \ \ \ \ \textcolor{keywordtype}{int}*\ \ \ \ \mbox{\hyperlink{classCtrlThread_a4ae83aae3bfff1c32cb5923131f5d9b2}{rawButtons}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00143}\mbox{\hyperlink{classCtrlThread_a1fa4dd6132a8d0baea60e9730f1d3e4b}{00143}}\ \ \ \ \ \textcolor{keywordtype}{int}*\ \ \ \ \mbox{\hyperlink{classCtrlThread_a1fa4dd6132a8d0baea60e9730f1d3e4b}{rawButtonsOld}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00144}\mbox{\hyperlink{classCtrlThread_a76a5d205b90dea2910f7f42ebd3a3361}{00144}}\ \ \ \ \ \textcolor{keywordtype}{int}*\ \ \ \ \mbox{\hyperlink{classCtrlThread_a76a5d205b90dea2910f7f42ebd3a3361}{rawHats}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00145}\mbox{\hyperlink{classCtrlThread_a149c7ac1c0b0e99d147a77c1bbcf37d4}{00145}}\ \ \ \ \ \textcolor{keywordtype}{int}*\ \ \ \ \mbox{\hyperlink{classCtrlThread_a149c7ac1c0b0e99d147a77c1bbcf37d4}{rawHatsOld}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00146}\mbox{\hyperlink{classCtrlThread_a0e0cdacac415e4a4e300ac4dbe7d3aaa}{00146}}\ \ \ \ \ \textcolor{keywordtype}{double}*\ \mbox{\hyperlink{classCtrlThread_a0e0cdacac415e4a4e300ac4dbe7d3aaa}{rawAxes}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00147}\mbox{\hyperlink{classCtrlThread_affeb2318f6d0da34c869b2a66c6e06cf}{00147}}\ \ \ \ \ \textcolor{keywordtype}{double}*\ \mbox{\hyperlink{classCtrlThread_affeb2318f6d0da34c869b2a66c6e06cf}{outAxes}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00148}00148\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00149}00149\ \ \ \ \ \textcolor{comment}{//variables\ read\ from\ the\ configuration\ file}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00150}\mbox{\hyperlink{classCtrlThread_a2986b864110ffaf8fe0d5b1e3920bfe7}{00150}}\ \ \ \ \ \textcolor{keywordtype}{int}\ \ \mbox{\hyperlink{classCtrlThread_a2986b864110ffaf8fe0d5b1e3920bfe7}{num\_inputs}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00151}\mbox{\hyperlink{classCtrlThread_aef5f4e275e701a5f70a0e3a08c086238}{00151}}\ \ \ \ \ \textcolor{keywordtype}{int}\ \ \mbox{\hyperlink{classCtrlThread_aef5f4e275e701a5f70a0e3a08c086238}{num\_outputs}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00152}\mbox{\hyperlink{classCtrlThread_adc8b1450d312e8f0b8e82db5a18eccb0}{00152}}\ \ \ \ \ \textcolor{keywordtype}{double}*\ \mbox{\hyperlink{classCtrlThread_adc8b1450d312e8f0b8e82db5a18eccb0}{inputMax}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00153}\mbox{\hyperlink{classCtrlThread_a63d8137a999d20be087dcccccb2323e3}{00153}}\ \ \ \ \ \textcolor{keywordtype}{double}*\ \mbox{\hyperlink{classCtrlThread_a63d8137a999d20be087dcccccb2323e3}{inputMin}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00154}\mbox{\hyperlink{classCtrlThread_a7618a3a140d118feb4d0a44a656196a7}{00154}}\ \ \ \ \ \textcolor{keywordtype}{double}*\ \mbox{\hyperlink{classCtrlThread_a7618a3a140d118feb4d0a44a656196a7}{outputMax}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00155}\mbox{\hyperlink{classCtrlThread_adc4b02f098a7230ab604be2621097d18}{00155}}\ \ \ \ \ \textcolor{keywordtype}{double}*\ \mbox{\hyperlink{classCtrlThread_adc4b02f098a7230ab604be2621097d18}{outputMin}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00156}\mbox{\hyperlink{classCtrlThread_ac23a0fd266efda99042bd1be880836d4}{00156}}\ \ \ \ \ \textcolor{keywordtype}{double}*\ \mbox{\hyperlink{classCtrlThread_ac23a0fd266efda99042bd1be880836d4}{jointDeadband}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00157}\mbox{\hyperlink{classCtrlThread_a4f77b78dea680b6bce30c629ce0518f8}{00157}}\ \ \ \ \ \textcolor{keywordtype}{int}*\ \ \ \ \mbox{\hyperlink{classCtrlThread_a4f77b78dea680b6bce30c629ce0518f8}{reverse}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00158}\mbox{\hyperlink{classCtrlThread_a32448186dac6801038fd53d4e9aa4342}{00158}}\ \ \ \ \ struct\_jointProperties*\ \mbox{\hyperlink{classCtrlThread_a32448186dac6801038fd53d4e9aa4342}{jointProperties}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00159}00159\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00160}00160\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00161}\mbox{\hyperlink{classCtrlThread_a85f569f89eff2f0ca0ab95b130c5e76f}{00161}}\ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a85f569f89eff2f0ca0ab95b130c5e76f}{CtrlThread}}(\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ \_period,\ ResourceFinder\ \&\_rf)\ :}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00162}00162\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ PeriodicThread((double)\_period/1000.0),\ \mbox{\hyperlink{classCtrlThread_a7a454b03ce044a1b7f5c1a4dd69f2275}{rf}}(\_rf)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00163}00163\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00164}00164\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a218ac54620646619a31bd66a757f8783}{joy\_id}}=0;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00165}00165\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a4ae83aae3bfff1c32cb5923131f5d9b2}{rawButtons}}=0;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00166}00166\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a1fa4dd6132a8d0baea60e9730f1d3e4b}{rawButtonsOld}}=0;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00167}00167\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a0e0cdacac415e4a4e300ac4dbe7d3aaa}{rawAxes}}=0;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00168}00168\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a76a5d205b90dea2910f7f42ebd3a3361}{rawHats}}=0;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00169}00169\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a149c7ac1c0b0e99d147a77c1bbcf37d4}{rawHatsOld}}=0;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00170}00170\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_affeb2318f6d0da34c869b2a66c6e06cf}{outAxes}}=0;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00171}00171\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a258a7892979eaaa2cbe6971653c83fc8}{joy1}}=0;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00172}00172\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a2986b864110ffaf8fe0d5b1e3920bfe7}{num\_inputs}}=0;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00173}00173\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_aef5f4e275e701a5f70a0e3a08c086238}{num\_outputs}}=0;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00174}00174\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_adc8b1450d312e8f0b8e82db5a18eccb0}{inputMax}}=0;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00175}00175\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a63d8137a999d20be087dcccccb2323e3}{inputMin}}=0;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00176}00176\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a7618a3a140d118feb4d0a44a656196a7}{outputMax}}=0;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00177}00177\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_adc4b02f098a7230ab604be2621097d18}{outputMin}}=0;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00178}00178\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_ac23a0fd266efda99042bd1be880836d4}{jointDeadband}}=0;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00179}00179\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a4f77b78dea680b6bce30c629ce0518f8}{reverse}}=0;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00180}00180\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a32448186dac6801038fd53d4e9aa4342}{jointProperties}}=0;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00181}00181\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_abe1cfce545e3425ea89e4d14c9598f56}{silent}}\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00182}00182\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_aab7eb82a671a524b88a8b5567fef4a45}{force\_cfg}}\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00183}00183\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00184}00184\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00185}\mbox{\hyperlink{classCtrlThread_a1777153b8f4da3d46b074980a6ae2e36}{00185}}\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classCtrlThread_a1777153b8f4da3d46b074980a6ae2e36}{threadInit}}()}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00186}00186\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00187}00187\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ get\ params\ from\ the\ RF}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00188}00188\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classCtrlThread_a7a454b03ce044a1b7f5c1a4dd69f2275}{rf}}.check(\textcolor{stringliteral}{"{}silent"{}}))}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00189}00189\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00190}00190\ \ \ \ \ \ \ \ \ \ \ \ \ yInfo\ (\textcolor{stringliteral}{"{}Running\ in\ silent\ mode\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00191}00191\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_abe1cfce545e3425ea89e4d14c9598f56}{silent}}=\textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00192}00192\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00193}00193\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00194}00194\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classCtrlThread_a7a454b03ce044a1b7f5c1a4dd69f2275}{rf}}.check(\textcolor{stringliteral}{"{}force\_configuration"{}}))}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00195}00195\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00196}00196\ \ \ \ \ \ \ \ \ \ \ \ \ yInfo\ (\ \textcolor{stringliteral}{"{}Force\ configuration\ option\ found\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00197}00197\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_aab7eb82a671a524b88a8b5567fef4a45}{force\_cfg}}=\textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00198}00198\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00199}00199\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00200}00200\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classCtrlThread_a7a454b03ce044a1b7f5c1a4dd69f2275}{rf}}.findGroup(\textcolor{stringliteral}{"{}INPUTS"{}}).check(\textcolor{stringliteral}{"{}InputsNumber"{}}))}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00201}00201\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00202}00202\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a2986b864110ffaf8fe0d5b1e3920bfe7}{num\_inputs}}\ =\ \mbox{\hyperlink{classCtrlThread_a7a454b03ce044a1b7f5c1a4dd69f2275}{rf}}.findGroup(\textcolor{stringliteral}{"{}INPUTS"{}}).find(\textcolor{stringliteral}{"{}InputsNumber"{}}).asInt32();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00203}00203\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_adc8b1450d312e8f0b8e82db5a18eccb0}{inputMax}}\ =\ \textcolor{keyword}{new}\ \textcolor{keywordtype}{double}\ [\mbox{\hyperlink{classCtrlThread_a2986b864110ffaf8fe0d5b1e3920bfe7}{num\_inputs}}];}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00204}00204\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a63d8137a999d20be087dcccccb2323e3}{inputMin}}\ =\ \textcolor{keyword}{new}\ \textcolor{keywordtype}{double}\ [\mbox{\hyperlink{classCtrlThread_a2986b864110ffaf8fe0d5b1e3920bfe7}{num\_inputs}}];}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00205}00205\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a7618a3a140d118feb4d0a44a656196a7}{outputMax}}\ =\ \textcolor{keyword}{new}\ \textcolor{keywordtype}{double}\ [\mbox{\hyperlink{classCtrlThread_a2986b864110ffaf8fe0d5b1e3920bfe7}{num\_inputs}}];}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00206}00206\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_adc4b02f098a7230ab604be2621097d18}{outputMin}}\ =\ \textcolor{keyword}{new}\ \textcolor{keywordtype}{double}\ [\mbox{\hyperlink{classCtrlThread_a2986b864110ffaf8fe0d5b1e3920bfe7}{num\_inputs}}];}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00207}00207\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_ac23a0fd266efda99042bd1be880836d4}{jointDeadband}}\ =\ \textcolor{keyword}{new}\ \textcolor{keywordtype}{double}\ [\mbox{\hyperlink{classCtrlThread_a2986b864110ffaf8fe0d5b1e3920bfe7}{num\_inputs}}];}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00208}00208\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a4f77b78dea680b6bce30c629ce0518f8}{reverse}}\ =\ \textcolor{keyword}{new}\ \textcolor{keywordtype}{int}\ [\mbox{\hyperlink{classCtrlThread_a2986b864110ffaf8fe0d5b1e3920bfe7}{num\_inputs}}];}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00209}00209\ \ \ \ \ \ \ \ \ \ \ \ \ yDebug\ (\textcolor{stringliteral}{"{}Number\ of\ input\ axes\ in\ the\ configuration\ options:\ \%d\ \(\backslash\)n"{}},\mbox{\hyperlink{classCtrlThread_a2986b864110ffaf8fe0d5b1e3920bfe7}{num\_inputs}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00210}00210\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00211}00211\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00212}00212\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00213}00213\ \ \ \ \ \ \ \ \ \ \ \ \ yError\ (\textcolor{stringliteral}{"{}Unable\ to\ find\ number\ of\ input\ axes\ in\ the\ configuration\ options\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00214}00214\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00215}00215\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00216}00216\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00217}00217\ \ \ \ \ \ \ \ \ Bottle\ b;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00218}00218\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00219}00219\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00220}00220\ \ \ \ \ \ \ \ \ b\ =\ \mbox{\hyperlink{classCtrlThread_a7a454b03ce044a1b7f5c1a4dd69f2275}{rf}}.findGroup(\textcolor{stringliteral}{"{}INPUTS"{}}).findGroup(\textcolor{stringliteral}{"{}Reverse"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00221}00221\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (b.size()-\/1\ ==\ \mbox{\hyperlink{classCtrlThread_a2986b864110ffaf8fe0d5b1e3920bfe7}{num\_inputs}})}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00222}00222\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00223}00223\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i\ =\ 1;\ i\ <\ b.size();\ i++)\ \mbox{\hyperlink{classCtrlThread_a4f77b78dea680b6bce30c629ce0518f8}{reverse}}[i-\/1]\ =\ b.get(i).asInt32();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00224}00224\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00225}00225\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \{yError\ (\ \textcolor{stringliteral}{"{}Configuration\ error:\ invalid\ number\ of\ entries\ 'Reverse'\(\backslash\)n"{}});\ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};\}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00226}00226\ \ \ \ \ \ \ \ \ b\ =\ \mbox{\hyperlink{classCtrlThread_a7a454b03ce044a1b7f5c1a4dd69f2275}{rf}}.findGroup(\textcolor{stringliteral}{"{}INPUTS"{}}).findGroup(\textcolor{stringliteral}{"{}InputMax"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00227}00227\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (b.size()-\/1\ ==\ \mbox{\hyperlink{classCtrlThread_a2986b864110ffaf8fe0d5b1e3920bfe7}{num\_inputs}})}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00228}00228\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00229}00229\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i\ =\ 1;\ i\ <\ b.size();\ i++)\ \mbox{\hyperlink{classCtrlThread_adc8b1450d312e8f0b8e82db5a18eccb0}{inputMax}}[i-\/1]\ =\ b.get(i).asFloat64();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00230}00230\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00231}00231\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \{yError\ (\ \textcolor{stringliteral}{"{}Configuration\ error:\ invalid\ number\ of\ entries\ 'InputMax'\(\backslash\)n"{}});\ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};\}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00232}00232\ \ \ \ \ \ \ \ \ b\ =\ \mbox{\hyperlink{classCtrlThread_a7a454b03ce044a1b7f5c1a4dd69f2275}{rf}}.findGroup(\textcolor{stringliteral}{"{}INPUTS"{}}).findGroup(\textcolor{stringliteral}{"{}InputMin"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00233}00233\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (b.size()-\/1\ ==\ \mbox{\hyperlink{classCtrlThread_a2986b864110ffaf8fe0d5b1e3920bfe7}{num\_inputs}})}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00234}00234\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00235}00235\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i\ =\ 1;\ i\ <\ b.size();\ i++)\ \mbox{\hyperlink{classCtrlThread_a63d8137a999d20be087dcccccb2323e3}{inputMin}}[i-\/1]\ =\ b.get(i).asFloat64();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00236}00236\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00237}00237\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \{yError\ (\ \textcolor{stringliteral}{"{}Configuration\ error:\ invalid\ number\ of\ entries\ 'InputMin'\(\backslash\)n"{}});\ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};\}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00238}00238\ \ \ \ \ \ \ \ \ b\ =\ \mbox{\hyperlink{classCtrlThread_a7a454b03ce044a1b7f5c1a4dd69f2275}{rf}}.findGroup(\textcolor{stringliteral}{"{}INPUTS"{}}).findGroup(\textcolor{stringliteral}{"{}OutputMax"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00239}00239\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (b.size()-\/1\ ==\ \mbox{\hyperlink{classCtrlThread_a2986b864110ffaf8fe0d5b1e3920bfe7}{num\_inputs}})}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00240}00240\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00241}00241\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i\ =\ 1;\ i\ <\ b.size();\ i++)\ \mbox{\hyperlink{classCtrlThread_a7618a3a140d118feb4d0a44a656196a7}{outputMax}}[i-\/1]\ =\ b.get(i).asFloat64();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00242}00242\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00243}00243\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \{yError\ (\ \textcolor{stringliteral}{"{}Configuration\ error:\ invalid\ number\ of\ entries\ 'OutputMax'\(\backslash\)n"{}});\ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};\}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00244}00244\ \ \ \ \ \ \ \ \ b\ =\ \mbox{\hyperlink{classCtrlThread_a7a454b03ce044a1b7f5c1a4dd69f2275}{rf}}.findGroup(\textcolor{stringliteral}{"{}INPUTS"{}}).findGroup(\textcolor{stringliteral}{"{}OutputMin"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00245}00245\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (b.size()-\/1\ ==\ \mbox{\hyperlink{classCtrlThread_a2986b864110ffaf8fe0d5b1e3920bfe7}{num\_inputs}})}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00246}00246\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00247}00247\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i\ =\ 1;\ i\ <\ b.size();\ i++)\ \mbox{\hyperlink{classCtrlThread_adc4b02f098a7230ab604be2621097d18}{outputMin}}[i-\/1]\ =\ b.get(i).asFloat64();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00248}00248\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00249}00249\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \{yError\ (\ \textcolor{stringliteral}{"{}Configuration\ error:\ invalid\ number\ of\ entries\ 'OutputMin'\(\backslash\)n"{}});\ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};\}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00250}00250\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00251}00251\ \ \ \ \ \ \ \ \ b\ =\ \mbox{\hyperlink{classCtrlThread_a7a454b03ce044a1b7f5c1a4dd69f2275}{rf}}.findGroup(\textcolor{stringliteral}{"{}INPUTS"{}}).findGroup(\textcolor{stringliteral}{"{}Deadband"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00252}00252\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (b.size()-\/1\ ==\ \mbox{\hyperlink{classCtrlThread_a2986b864110ffaf8fe0d5b1e3920bfe7}{num\_inputs}})}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00253}00253\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00254}00254\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i\ =\ 1;\ i\ <\ b.size();\ i++)\ \mbox{\hyperlink{classCtrlThread_ac23a0fd266efda99042bd1be880836d4}{jointDeadband}}[i-\/1]\ =\ b.get(i).asFloat64();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00255}00255\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00256}00256\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \{yError\ (\ \textcolor{stringliteral}{"{}Configuration\ error:\ invalid\ number\ of\ entries\ 'Deadband'\(\backslash\)n"{}});\ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};\}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00257}00257\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00258}00258\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classCtrlThread_a7a454b03ce044a1b7f5c1a4dd69f2275}{rf}}.findGroup(\textcolor{stringliteral}{"{}OUTPUTS"{}}).check(\textcolor{stringliteral}{"{}OutputsNumber"{}}))}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00259}00259\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00260}00260\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_aef5f4e275e701a5f70a0e3a08c086238}{num\_outputs}}\ =\ \mbox{\hyperlink{classCtrlThread_a7a454b03ce044a1b7f5c1a4dd69f2275}{rf}}.findGroup(\textcolor{stringliteral}{"{}OUTPUTS"{}}).find(\textcolor{stringliteral}{"{}OutputsNumber"{}}).asInt32();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00261}00261\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a32448186dac6801038fd53d4e9aa4342}{jointProperties}}\ =\ \textcolor{keyword}{new}\ struct\_jointProperties\ [\mbox{\hyperlink{classCtrlThread_aef5f4e275e701a5f70a0e3a08c086238}{num\_outputs}}];}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00262}00262\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00263}00263\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00264}00264\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00265}00265\ \ \ \ \ \ \ \ \ \ \ \ \ yError\ (\ \textcolor{stringliteral}{"{}Unable\ to\ find\ number\ of\ output\ axes\ in\ the\ configuration\ options\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00266}00266\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00267}00267\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00268}00268\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00269}00269\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i=0;\ i<\mbox{\hyperlink{classCtrlThread_aef5f4e275e701a5f70a0e3a08c086238}{num\_outputs}};\ i++)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00270}00270\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00271}00271\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ tmp\ [20];}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00272}00272\ \ \ \ \ \ \ \ \ \ \ \ \ sprintf\ (tmp,\textcolor{stringliteral}{"{}Ax\%d"{}},i);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00273}00273\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!\mbox{\hyperlink{classCtrlThread_a7a454b03ce044a1b7f5c1a4dd69f2275}{rf}}.findGroup(\textcolor{stringliteral}{"{}OUTPUTS"{}}).check(tmp))}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00274}00274\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00275}00275\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yError\ (\ \textcolor{stringliteral}{"{}Error\ reading\ [OUTPUT]\ block,\ unable\ to\ find\ Ax\%d\ identifier\(\backslash\)n"{}},i);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00276}00276\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00277}00277\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00278}00278\ \ \ \ \ \ \ \ \ \ \ \ \ b\ =\ \mbox{\hyperlink{classCtrlThread_a7a454b03ce044a1b7f5c1a4dd69f2275}{rf}}.findGroup(\textcolor{stringliteral}{"{}OUTPUTS"{}}).findGroup(tmp);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00279}00279\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (b.get(1).asString()==\textcolor{stringliteral}{"{}polar\_r\_theta"{}})}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00280}00280\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00281}00281\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a32448186dac6801038fd53d4e9aa4342}{jointProperties}}[i].type=\mbox{\hyperlink{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_afa231099d07583c3ed0981e0bb665f55ad13a0aba6441ec58a19a91daf13e6948}{JTYPE\_POLAR}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00282}00282\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a32448186dac6801038fd53d4e9aa4342}{jointProperties}}[i].param[0]=b.get(2).asInt32();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00283}00283\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a32448186dac6801038fd53d4e9aa4342}{jointProperties}}[i].param[1]=b.get(3).asInt32();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00284}00284\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a32448186dac6801038fd53d4e9aa4342}{jointProperties}}[i].param[2]=b.get(4).asInt32();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00285}00285\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00286}00286\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00287}00287\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (b.get(1).asString()==\textcolor{stringliteral}{"{}cartesian\_xyz"{}})}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00288}00288\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00289}00289\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a32448186dac6801038fd53d4e9aa4342}{jointProperties}}[i].type=\mbox{\hyperlink{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_afa231099d07583c3ed0981e0bb665f55a5c78c2ee83717d6d017e58a81333f1af}{JTYPE\_CARTESIAN}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00290}00290\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a32448186dac6801038fd53d4e9aa4342}{jointProperties}}[i].param[0]=b.get(2).asInt32();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00291}00291\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a32448186dac6801038fd53d4e9aa4342}{jointProperties}}[i].param[1]=0;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00292}00292\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a32448186dac6801038fd53d4e9aa4342}{jointProperties}}[i].param[2]=0;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00293}00293\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00294}00294\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00295}00295\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (b.get(1).asString()==\textcolor{stringliteral}{"{}button\_as\_axis"{}})}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00296}00296\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00297}00297\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (b.size()\ <\ 5)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00298}00298\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00299}00299\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}Configuration\ error:\ 'button\_as\_axis'\ for\ Ax\%d\ requires\ 3\ parameters\ (button\_num,\ low\_val,\ high\_val)"{}},\ i);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00300}00300\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00301}00301\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00302}00302\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a32448186dac6801038fd53d4e9aa4342}{jointProperties}}[i].type=\mbox{\hyperlink{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_afa231099d07583c3ed0981e0bb665f55aca5fd48d9795f5ccfbc6c2dfa32b7450}{JTYPE\_BUTTON}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00303}00303\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a32448186dac6801038fd53d4e9aa4342}{jointProperties}}[i].param[0]=b.get(2).asInt32();\ \textcolor{comment}{//button\ num}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00304}00304\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a32448186dac6801038fd53d4e9aa4342}{jointProperties}}[i].param[1]=b.get(3).asInt32();\ \textcolor{comment}{//low\ value}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00305}00305\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a32448186dac6801038fd53d4e9aa4342}{jointProperties}}[i].param[2]=b.get(4).asInt32();\ \textcolor{comment}{//high\ value}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00306}00306\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00307}00307\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00308}00308\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (b.get(1).asString()==\textcolor{stringliteral}{"{}constant"{}})}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00309}00309\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00310}00310\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a32448186dac6801038fd53d4e9aa4342}{jointProperties}}[i].type=\mbox{\hyperlink{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_afa231099d07583c3ed0981e0bb665f55a0079fb0990ece1897b8f68bd5a259740}{JTYPE\_CONSTANT}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00311}00311\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a32448186dac6801038fd53d4e9aa4342}{jointProperties}}[i].param[0]=b.get(2).asInt32();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00312}00312\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a32448186dac6801038fd53d4e9aa4342}{jointProperties}}[i].param[1]=0;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00313}00313\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a32448186dac6801038fd53d4e9aa4342}{jointProperties}}[i].param[2]=0;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00314}00314\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00315}00315\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00316}00316\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (b.get(1).asString()==\textcolor{stringliteral}{"{}string"{}})}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00317}00317\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00318}00318\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a32448186dac6801038fd53d4e9aa4342}{jointProperties}}[i].type=\mbox{\hyperlink{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_afa231099d07583c3ed0981e0bb665f55a4b51a77460be7314d1305719e7b50eb3}{JTYPE\_STRING}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00319}00319\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a32448186dac6801038fd53d4e9aa4342}{jointProperties}}[i].param[0]=0;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00320}00320\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a32448186dac6801038fd53d4e9aa4342}{jointProperties}}[i].param[1]=0;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00321}00321\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a32448186dac6801038fd53d4e9aa4342}{jointProperties}}[i].param[2]=0;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00322}00322\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a32448186dac6801038fd53d4e9aa4342}{jointProperties}}[i].param\_s=b.get(2).asString();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00323}00323\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00324}00324\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00325}00325\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00326}00326\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}Unknown\ [OUTPUT]\ property"{}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00327}00327\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00328}00328\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00329}00329\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00330}00330\ \ \ \ \ \ \ \ \ \textcolor{comment}{//string\ s\ =\ b.toString();\ //this\ causes\ compilation\ issues\ under\ linux}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00331}00331\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00332}00332\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ open\ the\ output\ port}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00333}00333\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{string}\ output\_port\_name;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00334}00334\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classCtrlThread_a7a454b03ce044a1b7f5c1a4dd69f2275}{rf}}.findGroup(\textcolor{stringliteral}{"{}GENERAL"{}}).check(\textcolor{stringliteral}{"{}outputPortName"{}}))}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00335}00335\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00336}00336\ \ \ \ \ \ \ \ \ \ \ \ \ output\_port\_name\ =\ \mbox{\hyperlink{classCtrlThread_a7a454b03ce044a1b7f5c1a4dd69f2275}{rf}}.findGroup(\textcolor{stringliteral}{"{}GENERAL"{}}).find(\textcolor{stringliteral}{"{}outputPortName"{}}).asString();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00337}00337\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00338}00338\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00339}00339\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00340}00340\ \ \ \ \ \ \ \ \ \ \ \ \ output\_port\_name\ =\ \textcolor{stringliteral}{"{}/joystickCtrl:o"{}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00341}00341\ \ \ \ \ \ \ \ \ \ \ \ \ yWarning\ (\ \textcolor{stringliteral}{"{}outputPortName\ not\ found,\ using\ \%s\ \(\backslash\)n"{}},\ output\_port\_name.c\_str());}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00342}00342\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00343}00343\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ ret=\textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00344}00344\ \ \ \ \ \ \ \ \ ret\ \&=\ \mbox{\hyperlink{classCtrlThread_a3b1e9c81262a6bcf962d8daca7ced676}{port\_command}}.open(output\_port\_name.c\_str());}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00345}00345\ \ \ \ \ \ \ \ \ \textcolor{comment}{//@@@\ TO\ BE\ COMPLETED:\ port\ name\ prefix\ to\ be\ set\ in\ the\ ini\ file}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00346}00346\ \ \ \ \ \ \ \ \ ret\ \&=\ \mbox{\hyperlink{classCtrlThread_a93bc1768843b07d1eb8c88060404eb24}{port\_axis\_only}}.open(\textcolor{stringliteral}{"{}/joystickCtrl/raw\_axis:o"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00347}00347\ \ \ \ \ \ \ \ \ ret\ \&=\ \mbox{\hyperlink{classCtrlThread_a04e5e419a376e56d60654b95ffbd6921}{port\_buttons\_only}}.open(\textcolor{stringliteral}{"{}/joystickCtrl/raw\_buttons:o"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00348}00348\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (ret==\textcolor{keyword}{false})}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00349}00349\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00350}00350\ \ \ \ \ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}Unable\ to\ open\ module\ ports"{}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00351}00351\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00352}00352\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00353}00353\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00354}00354\ \ \ \ \ \ \ \ \ \textcolor{comment}{//get\ the\ list\ of\ the\ commands\ to\ be\ executed\ with\ the\ buttons}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00355}00355\ \ \ \ \ \ \ \ \ Bottle\&\ exec\_comm\_bottle\ =\ \mbox{\hyperlink{classCtrlThread_a7a454b03ce044a1b7f5c1a4dd69f2275}{rf}}.findGroup(\textcolor{stringliteral}{"{}BUTTONS\_EXECUTE"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00356}00356\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!exec\_comm\_bottle.isNull())}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00357}00357\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00358}00358\ \ \ \ \ \ \ \ \ \ \ \ \ yInfo\ (\ \textcolor{stringliteral}{"{}associating\ the\ following\ actions\ to\ the\ buttons:\ \(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00359}00359\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ iii\ =\ 0;\ iii\ <\ 20;\ iii++)\{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00360}00360\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ tmp[80];}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00361}00361\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sprintf(tmp,\ \textcolor{stringliteral}{"{}button\%d"{}},\ iii);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00362}00362\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (exec\_comm\_bottle.check(tmp))}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00363}00363\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00364}00364\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a18e56685d4ffced417d830b83693d98f}{button\_actions}}[iii]\ =\ exec\_comm\_bottle.find(tmp).toString();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00365}00365\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ printf\ (\textcolor{stringliteral}{"{}\%s\ \%s\(\backslash\)n"{}},\ tmp,\ \mbox{\hyperlink{classCtrlThread_a18e56685d4ffced417d830b83693d98f}{button\_actions}}[iii].c\_str());}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00366}00366\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00367}00367\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00368}00368\ \ \ \ \ \ \ \ \ \ \ \ \ printf\ (\textcolor{stringliteral}{"{}\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00369}00369\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00370}00370\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00371}00371\ \ \ \ \ \ \ \ \ \textcolor{comment}{//get\ the\ list\ of\ the\ commands\ to\ be\ executed\ with\ the\ hats}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00372}00372\ \ \ \ \ \ \ \ \ Bottle\&\ hats\_exec\_bottle\ =\ \mbox{\hyperlink{classCtrlThread_a7a454b03ce044a1b7f5c1a4dd69f2275}{rf}}.findGroup(\textcolor{stringliteral}{"{}HATS\_EXECUTE"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00373}00373\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!hats\_exec\_bottle.isNull())}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00374}00374\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00375}00375\ \ \ \ \ \ \ \ \ \ \ \ \ yInfo\ (\ \textcolor{stringliteral}{"{}associating\ the\ following\ actions\ to\ the\ hats:\ \(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00376}00376\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ iii\ =\ 0;\ iii\ <\ 20;\ iii++)\{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00377}00377\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ tmp[80];}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00378}00378\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sprintf(tmp,\ \textcolor{stringliteral}{"{}hat\%d"{}},\ iii);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00379}00379\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (hats\_exec\_bottle.check(tmp))}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00380}00380\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00381}00381\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a897edda10ed409d4ce43be4541aff4c5}{hat\_actions}}[iii]\ =\ hats\_exec\_bottle.find(tmp).toString();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00382}00382\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ printf\ (\textcolor{stringliteral}{"{}\%s\ \%s\(\backslash\)n"{}},\ tmp,\ \mbox{\hyperlink{classCtrlThread_a897edda10ed409d4ce43be4541aff4c5}{hat\_actions}}[iii].c\_str());}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00383}00383\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00384}00384\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00385}00385\ \ \ \ \ \ \ \ \ \ \ \ \ printf\ (\textcolor{stringliteral}{"{}\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00386}00386\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00387}00387\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00388}00388\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ start\ SDL\ subsystem}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00389}00389\ \ \ \ \ \ \ \ \ \textcolor{comment}{//SDL\_Init(SDL\_INIT\_VIDEO);}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00390}00390\ \ \ \ \ \ \ \ \ \textcolor{comment}{//SDL\_SetVideoMode(640,\ 480,\ 16,\ SDL\_DOUBLEBUF);}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00391}00391\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\ SDL\_InitSubSystem\ (\ SDL\_INIT\_JOYSTICK\ )\ <\ 0\ )}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00392}00392\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00393}00393\ \ \ \ \ \ \ \ \ \ \ \ \ yError\ (\ \textcolor{stringliteral}{"{}Unable\ to\ initialize\ Joystick:\ \%s\(\backslash\)n"{}},\ SDL\_GetError()\ );}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00394}00394\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00395}00395\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00396}00396\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00397}00397\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ get\ the\ list\ of\ available\ joysticks}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00398}00398\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{saveNetwork_8m_a0eba6f64b9c26507a877bcb0c4f270e2}{fprintf}}\ (\ stderr,\ \textcolor{stringliteral}{"{}\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00399}00399\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{classCtrlThread_a218ac54620646619a31bd66a757f8783}{joy\_id}}=0;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00400}00400\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ joystick\_num\ =\ SDL\_NumJoysticks\ ();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00401}00401\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (joystick\_num\ ==\ 0)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00402}00402\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00403}00403\ \ \ \ \ \ \ \ \ \ \ \ \ yError\ (\ \textcolor{stringliteral}{"{}Error:\ No\ joysticks\ found\(\backslash\)n"{}});\ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00404}00404\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00405}00405\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (joystick\_num\ ==\ 1)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00406}00406\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00407}00407\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a218ac54620646619a31bd66a757f8783}{joy\_id}}=0;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00408}00408\ \ \ \ \ \ \ \ \ \ \ \ \ yInfo\ (\ \textcolor{stringliteral}{"{}One\ joystick\ found\ \(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00409}00409\ \textcolor{preprocessor}{\#if\ (SDL\_MAJOR\_VERSION\ ==\ 2)}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00410}00410\ \ \ \ \ \ \ \ \ \ \ \ \ yInfo\ (\ \textcolor{stringliteral}{"{}Using\ joystick:\ \%s\ \(\backslash\)n"{}},\ SDL\_JoystickNameForIndex(\mbox{\hyperlink{classCtrlThread_a218ac54620646619a31bd66a757f8783}{joy\_id}}));}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00411}00411\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00412}00412\ \ \ \ \ \ \ \ \ \ \ \ \ yInfo\ (\ \textcolor{stringliteral}{"{}Using\ joystick:\ \%s\ \(\backslash\)n"{}},\ SDL\_JoystickName(\mbox{\hyperlink{classCtrlThread_a218ac54620646619a31bd66a757f8783}{joy\_id}}));}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00413}00413\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00414}00414\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00415}00415\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00416}00416\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00417}00417\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00418}00418\ \ \ \ \ \ \ \ \ \ \ \ \ yInfo\ (\ \textcolor{stringliteral}{"{}More\ than\ one\ joystick\ found:\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00419}00419\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i=0;\ i<joystick\_num;\ i++)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00420}00420\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00421}00421\ \textcolor{preprocessor}{\#if\ (SDL\_MAJOR\_VERSION\ ==\ 2)}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00422}00422\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yInfo\ (\ \textcolor{stringliteral}{"{}\%d:\ \%s\(\backslash\)n"{}},i,SDL\_JoystickNameForIndex(i));}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00423}00423\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00424}00424\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yInfo\ (\ \textcolor{stringliteral}{"{}\%d:\ \%s\(\backslash\)n"{}},i,SDL\_JoystickName(i));}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00425}00425\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00426}00426\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00427}00427\ \ \ \ \ \ \ \ \ \ \ \ \ yInfo\ (\ \textcolor{stringliteral}{"{}\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00428}00428\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00429}00429\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ choose\ between\ multiple\ joysticks}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00430}00430\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classCtrlThread_a7a454b03ce044a1b7f5c1a4dd69f2275}{rf}}.findGroup(\textcolor{stringliteral}{"{}GENERAL"{}}).check(\textcolor{stringliteral}{"{}DefaultJoystickNumber"{}}))}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00431}00431\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00432}00432\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a218ac54620646619a31bd66a757f8783}{joy\_id}}\ =\ \mbox{\hyperlink{classCtrlThread_a7a454b03ce044a1b7f5c1a4dd69f2275}{rf}}.findGroup(\textcolor{stringliteral}{"{}GENERAL"{}}).find(\textcolor{stringliteral}{"{}DefaultJoystickNumber"{}}).asInt32();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00433}00433\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yInfo\ (\ \textcolor{stringliteral}{"{}Multiple\ joysticks\ found,\ using\ \#\%d,\ as\ specified\ in\ the\ configuration\ options\(\backslash\)n"{}},\ \mbox{\hyperlink{classCtrlThread_a218ac54620646619a31bd66a757f8783}{joy\_id}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00434}00434\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00435}00435\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00436}00436\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00437}00437\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yWarning\ (\ \textcolor{stringliteral}{"{}No\ default\ joystick\ specified\ in\ the\ configuration\ options\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00438}00438\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yWarning\ (\ \textcolor{stringliteral}{"{}Which\ joystick\ you\ want\ to\ use?\ (choose\ number)\ \(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00439}00439\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ cin\ >>\ \mbox{\hyperlink{classCtrlThread_a218ac54620646619a31bd66a757f8783}{joy\_id}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00440}00440\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00441}00441\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00442}00442\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00443}00443\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Open\ the\ Joystick\ driver}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00444}00444\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a258a7892979eaaa2cbe6971653c83fc8}{joy1}}\ =\ SDL\_JoystickOpen\ (\ \mbox{\hyperlink{classCtrlThread_a218ac54620646619a31bd66a757f8783}{joy\_id}}\ );}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00445}00445\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\ \mbox{\hyperlink{classCtrlThread_a258a7892979eaaa2cbe6971653c83fc8}{joy1}}\ ==\ NULL\ )}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00446}00446\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00447}00447\ \ \ \ \ \ \ \ \ \ \ \ \ yError\ (\ \textcolor{stringliteral}{"{}Could\ not\ open\ joystick\(\backslash\)n"{}}\ );}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00448}00448\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00449}00449\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00450}00450\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00451}00451\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Obtaining\ Joystick\ capabilities}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00452}00452\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a5172dac00c04ae9cb128a6a2f22d2999}{numAxes}}\ =\ SDL\_JoystickNumAxes\ (\ \mbox{\hyperlink{classCtrlThread_a258a7892979eaaa2cbe6971653c83fc8}{joy1}}\ );}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00453}00453\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_af31e9a0c0b456164f957b671425a47f1}{numBalls}}\ =\ SDL\_JoystickNumBalls\ (\ \mbox{\hyperlink{classCtrlThread_a258a7892979eaaa2cbe6971653c83fc8}{joy1}}\ );}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00454}00454\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a2e4571bacd43040c9d482a148f6d301b}{numHats}}\ =\ SDL\_JoystickNumHats\ (\ \mbox{\hyperlink{classCtrlThread_a258a7892979eaaa2cbe6971653c83fc8}{joy1}}\ );}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00455}00455\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a2a1d177193f574c0ddb5d0942120be38}{numButtons}}\ =\ SDL\_JoystickNumButtons\ (\ \mbox{\hyperlink{classCtrlThread_a258a7892979eaaa2cbe6971653c83fc8}{joy1}}\ );}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00456}00456\ \ \ \ \ \ \ \ \ yInfo\ (\ \ \textcolor{stringliteral}{"{}Characteristics\ of\ joy\ \%d:\ \(\backslash\)n"{}},\ \mbox{\hyperlink{classCtrlThread_a218ac54620646619a31bd66a757f8783}{joy\_id}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00457}00457\ \ \ \ \ \ \ \ \ yInfo\ (\ \ \textcolor{stringliteral}{"{}\%i\ Axes\(\backslash\)n"{}},\ \mbox{\hyperlink{classCtrlThread_a5172dac00c04ae9cb128a6a2f22d2999}{numAxes}}\ );}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00458}00458\ \ \ \ \ \ \ \ \ yInfo\ (\ \ \textcolor{stringliteral}{"{}\%i\ Balls\(\backslash\)n"{}},\ \mbox{\hyperlink{classCtrlThread_af31e9a0c0b456164f957b671425a47f1}{numBalls}}\ );}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00459}00459\ \ \ \ \ \ \ \ \ yInfo\ (\ \ \textcolor{stringliteral}{"{}\%i\ Hats\(\backslash\)n"{}},\ \ \mbox{\hyperlink{classCtrlThread_a2e4571bacd43040c9d482a148f6d301b}{numHats}}\ );}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00460}00460\ \ \ \ \ \ \ \ \ yInfo\ (\ \ \textcolor{stringliteral}{"{}\%i\ Buttons\(\backslash\)n"{}},\ \mbox{\hyperlink{classCtrlThread_a2a1d177193f574c0ddb5d0942120be38}{numButtons}}\ );}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00461}00461\ \ \ \ \ \ \ \ \ yInfo\ (\ \ \textcolor{stringliteral}{"{}\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00462}00462\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00463}00463\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ check:\ selected\ joint\ MUST\ have\ at\ least\ one\ axis}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00464}00464\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classCtrlThread_a5172dac00c04ae9cb128a6a2f22d2999}{numAxes}}<=0)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00465}00465\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00466}00466\ \ \ \ \ \ \ \ \ \ \ \ \ yError\ (\ \textcolor{stringliteral}{"{}Error:\ selected\ joystick\ has\ \%d\ Axes?!\(\backslash\)n"{}},\mbox{\hyperlink{classCtrlThread_a5172dac00c04ae9cb128a6a2f22d2999}{numAxes}}\ );}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00467}00467\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00468}00468\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00469}00469\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00470}00470\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classCtrlThread_a5172dac00c04ae9cb128a6a2f22d2999}{numAxes}}!=\mbox{\hyperlink{classCtrlThread_a2986b864110ffaf8fe0d5b1e3920bfe7}{num\_inputs}})}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00471}00471\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00472}00472\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classCtrlThread_aab7eb82a671a524b88a8b5567fef4a45}{force\_cfg}}\ ==\ \textcolor{keyword}{false})}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00473}00473\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00474}00474\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yWarning\ (\ \ \textcolor{stringliteral}{"{}Warning:\ \#\ of\ joystick\ axes\ (\%d)\ differs\ from\ \#\ of\ configured\ input\ axes\ (\%d)!\(\backslash\)n"{}},\mbox{\hyperlink{classCtrlThread_a5172dac00c04ae9cb128a6a2f22d2999}{numAxes}},\mbox{\hyperlink{classCtrlThread_a2986b864110ffaf8fe0d5b1e3920bfe7}{num\_inputs}}\ );}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00475}00475\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yWarning\ (\ \ \textcolor{stringliteral}{"{}This\ probably\ means\ that\ your\ .ini\ file\ does\ not\ containt\ a\ correct\ configuration.\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00476}00476\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yWarning\ (\ \ \textcolor{stringliteral}{"{}Do\ you\ want\ to\ continue\ anyway\ (y/n)?\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00477}00477\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ input[255];}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00478}00478\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ cin\ >>\ input;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00479}00479\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (input[0]!=\textcolor{charliteral}{'y'}\ \&\&\ input[0]!=\textcolor{charliteral}{'Y'})}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00480}00480\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00481}00481\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yInfo\ (\ \textcolor{stringliteral}{"{}Quitting...\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00482}00482\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00483}00483\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00484}00484\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00485}00485\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00486}00486\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yWarning\ (\ \textcolor{stringliteral}{"{}Overriding\ the\ number\ of\ axes\ specified\ in\ the\ configuration\ file.\ Using\ \%d\ axes.\(\backslash\)n"{}},\mbox{\hyperlink{classCtrlThread_a5172dac00c04ae9cb128a6a2f22d2999}{numAxes}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00487}00487\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00488}00488\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00489}00489\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00490}00490\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00491}00491\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yWarning\ (\ \textcolor{stringliteral}{"{}Warning:\ \#\ of\ joystick\ axes\ (\%d)\ differs\ from\ \#\ of\ configured\ input\ axes\ (\%d)!\(\backslash\)n"{}},\mbox{\hyperlink{classCtrlThread_a5172dac00c04ae9cb128a6a2f22d2999}{numAxes}},\mbox{\hyperlink{classCtrlThread_a2986b864110ffaf8fe0d5b1e3920bfe7}{num\_inputs}}\ );}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00492}00492\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yWarning\ (\ \textcolor{stringliteral}{"{}This\ probably\ means\ that\ your\ .ini\ file\ does\ not\ containt\ a\ correct\ configuration.\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00493}00493\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yWarning\ (\ \textcolor{stringliteral}{"{}However,\ -\/-\/force\_configuration\ option\ is\ enabled.\ This\ will\ override\ the\ number\ of\ axes\ specified\ in\ the\ configuration\ file.\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00494}00494\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yWarning\ (\ \textcolor{stringliteral}{"{}Using\ \%d\ axes.\(\backslash\)n"{}},\mbox{\hyperlink{classCtrlThread_a5172dac00c04ae9cb128a6a2f22d2999}{numAxes}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00495}00495\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00496}00496\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00497}00497\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00498}00498\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a0e0cdacac415e4a4e300ac4dbe7d3aaa}{rawAxes}}\ \ \ \ \ \ \ =\ \textcolor{keyword}{new}\ \textcolor{keywordtype}{double}\ [\mbox{\hyperlink{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_a264ad386c43d13682e5f5eb92138e569}{MAX\_AXES}}];}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00499}00499\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a76a5d205b90dea2910f7f42ebd3a3361}{rawHats}}\ \ \ \ \ \ \ =\ \textcolor{keyword}{new}\ \textcolor{keywordtype}{int}\ \ \ \ [\mbox{\hyperlink{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_a264ad386c43d13682e5f5eb92138e569}{MAX\_AXES}}];}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00500}00500\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a149c7ac1c0b0e99d147a77c1bbcf37d4}{rawHatsOld}}\ \ \ \ =\ \textcolor{keyword}{new}\ \textcolor{keywordtype}{int}\ \ \ \ [\mbox{\hyperlink{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_a264ad386c43d13682e5f5eb92138e569}{MAX\_AXES}}];}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00501}00501\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a4ae83aae3bfff1c32cb5923131f5d9b2}{rawButtons}}\ \ \ \ =\ \textcolor{keyword}{new}\ \textcolor{keywordtype}{int}\ \ \ \ [\mbox{\hyperlink{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_a264ad386c43d13682e5f5eb92138e569}{MAX\_AXES}}];}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00502}00502\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a1fa4dd6132a8d0baea60e9730f1d3e4b}{rawButtonsOld}}\ =\ \textcolor{keyword}{new}\ \textcolor{keywordtype}{int}\ \ \ \ [\mbox{\hyperlink{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_a264ad386c43d13682e5f5eb92138e569}{MAX\_AXES}}];}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00503}00503\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_affeb2318f6d0da34c869b2a66c6e06cf}{outAxes}}\ \ \ \ \ \ \ =\ \textcolor{keyword}{new}\ \textcolor{keywordtype}{double}\ [\mbox{\hyperlink{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_a264ad386c43d13682e5f5eb92138e569}{MAX\_AXES}}];}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00504}00504\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00505}00505\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00506}00506\ \textcolor{comment}{\ \ \ \ \ \ \ \ //\ check:\ selected\ joint\ MUST\ have\ at\ least\ one\ button}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00507}00507\ \textcolor{comment}{\ \ \ \ \ \ \ \ if\ (numButtons>0)}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00508}00508\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ rawButtons=new\ int\ [numButtons];}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00509}00509\ \textcolor{comment}{\ \ \ \ \ \ \ \ else}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00510}00510\ \textcolor{comment}{\ \ \ \ \ \ \ \ \{}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00511}00511\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ printf\ (\ "{}Error\ reading\ numButtons\(\backslash\)n"{}\ );}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00512}00512\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ return\ false;}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00513}00513\ \textcolor{comment}{\ \ \ \ \ \ \ \ \}*/}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00514}00514\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00515}00515\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00516}00516\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00517}\mbox{\hyperlink{classCtrlThread_a25b0160305a67aa801593056f8e1d33c}{00517}}\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classCtrlThread_a25b0160305a67aa801593056f8e1d33c}{afterStart}}(\textcolor{keywordtype}{bool}\ s)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00518}00518\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00519}00519\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (s)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00520}00520\ \ \ \ \ \ \ \ \ \ \ \ \ yInfo\ (\ \textcolor{stringliteral}{"{}Thread\ started\ successfully\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00521}00521\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00522}00522\ \ \ \ \ \ \ \ \ \ \ \ \ yError\ (\ \textcolor{stringliteral}{"{}Thread\ did\ not\ start\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00523}00523\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00524}00524\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a08e157223f628fb6ec290584a40ee679}{t0}}=Time::now();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00525}00525\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00526}00526\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00527}\mbox{\hyperlink{classCtrlThread_aea650f8807d3d8365dac45e8cf347feb}{00527}}\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classCtrlThread_aea650f8807d3d8365dac45e8cf347feb}{run}}()}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00528}00528\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00529}00529\ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//check\ if\ driver\ is\ connected}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00530}00530\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00531}00531\ \textcolor{comment}{\ \ \ \ \ \ \ \ if\ (joy\_id>SDL\_NumJoysticks())}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00532}00532\ \textcolor{comment}{\ \ \ \ \ \ \ \ \{}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00533}00533\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ fprintf\ (\ stderr,\ "{}Lost\ connection\ to\ driver!\(\backslash\)n"{});}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00534}00534\ \textcolor{comment}{\ \ \ \ \ \ \ \ \}}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00535}00535\ \textcolor{comment}{\ \ \ \ \ \ \ \ fprintf\ (\ stderr,\ "{}\%d\(\backslash\)n"{},SDL\_NumJoysticks());}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00536}00536\ \textcolor{comment}{\ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00537}00537\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00538}00538\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Updates\ the\ joystick\ status}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00539}00539\ \ \ \ \ \ \ \ \ SDL\_JoystickUpdate\ ();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00540}00540\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00541}00541\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Reading\ joystick\ data\ (axes/buttons...)}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00542}00542\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\ \textcolor{keywordtype}{int}\ i=0;\ i\ <\ \mbox{\hyperlink{classCtrlThread_a2a1d177193f574c0ddb5d0942120be38}{numButtons}};\ ++i\ )}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00543}00543\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00544}00544\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a1fa4dd6132a8d0baea60e9730f1d3e4b}{rawButtonsOld}}[i]\ =\ \mbox{\hyperlink{classCtrlThread_a4ae83aae3bfff1c32cb5923131f5d9b2}{rawButtons}}[i];}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00545}00545\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a4ae83aae3bfff1c32cb5923131f5d9b2}{rawButtons}}[i]\ =\ SDL\_JoystickGetButton\ (\ \mbox{\hyperlink{classCtrlThread_a258a7892979eaaa2cbe6971653c83fc8}{joy1}},\ i\ );}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00546}00546\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00547}00547\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00548}00548\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\ \textcolor{keywordtype}{int}\ i=0;\ i\ <\ \mbox{\hyperlink{classCtrlThread_a2e4571bacd43040c9d482a148f6d301b}{numHats}};\ ++i\ )}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00549}00549\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00550}00550\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a149c7ac1c0b0e99d147a77c1bbcf37d4}{rawHatsOld}}[i]\ =\ \mbox{\hyperlink{classCtrlThread_a76a5d205b90dea2910f7f42ebd3a3361}{rawHats}}[i];}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00551}00551\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a76a5d205b90dea2910f7f42ebd3a3361}{rawHats}}[i]\ =\ SDL\_JoystickGetHat\ (\ \mbox{\hyperlink{classCtrlThread_a258a7892979eaaa2cbe6971653c83fc8}{joy1}},\ i\ );}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00552}00552\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00553}00553\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00554}00554\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\ \textcolor{keywordtype}{int}\ i=0;\ i\ <\ \mbox{\hyperlink{classCtrlThread_a5172dac00c04ae9cb128a6a2f22d2999}{numAxes}};\ ++i\ )}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00555}00555\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00556}00556\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a0e0cdacac415e4a4e300ac4dbe7d3aaa}{rawAxes}}[i]\ =\ (double)SDL\_JoystickGetAxis\ (\ \mbox{\hyperlink{classCtrlThread_a258a7892979eaaa2cbe6971653c83fc8}{joy1}},\ i\ );}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00557}00557\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00558}00558\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00559}00559\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Formatting\ input\ data}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00560}00560\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i=0;i<\mbox{\hyperlink{classCtrlThread_a2986b864110ffaf8fe0d5b1e3920bfe7}{num\_inputs}};i++)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00561}00561\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00562}00562\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ v\ =\ \mbox{\hyperlink{classCtrlThread_a0e0cdacac415e4a4e300ac4dbe7d3aaa}{rawAxes}}[i];}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00563}00563\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classCtrlThread_ac23a0fd266efda99042bd1be880836d4}{jointDeadband}}[i]>0)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00564}00564\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00565}00565\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (fabs(v)<\mbox{\hyperlink{classCtrlThread_ac23a0fd266efda99042bd1be880836d4}{jointDeadband}}[i])\ v=0;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00566}00566\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00567}00567\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classCtrlThread_a4f77b78dea680b6bce30c629ce0518f8}{reverse}}[i]==1)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00568}00568\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ v=-\/v;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00569}00569\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00570}00570\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classCtrlThread_adc8b1450d312e8f0b8e82db5a18eccb0}{inputMax}}[i]==\mbox{\hyperlink{classCtrlThread_a63d8137a999d20be087dcccccb2323e3}{inputMin}}[i])}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00571}00571\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00572}00572\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ v\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00573}00573\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00574}00574\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00575}00575\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00576}00576\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ v\ =\ (v<\mbox{\hyperlink{classCtrlThread_adc8b1450d312e8f0b8e82db5a18eccb0}{inputMax}}[i])\ ?\ v\ :\ \mbox{\hyperlink{classCtrlThread_adc8b1450d312e8f0b8e82db5a18eccb0}{inputMax}}[i];}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00577}00577\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ v\ =\ (v>\mbox{\hyperlink{classCtrlThread_a63d8137a999d20be087dcccccb2323e3}{inputMin}}[i])\ ?\ v\ :\ \mbox{\hyperlink{classCtrlThread_a63d8137a999d20be087dcccccb2323e3}{inputMin}}[i];}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00578}00578\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ v\ =\ v\ -\/\ ((\mbox{\hyperlink{classCtrlThread_adc8b1450d312e8f0b8e82db5a18eccb0}{inputMax}}[i]-\/\mbox{\hyperlink{classCtrlThread_a63d8137a999d20be087dcccccb2323e3}{inputMin}}[i])/2+\mbox{\hyperlink{classCtrlThread_a63d8137a999d20be087dcccccb2323e3}{inputMin}}[i]);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00579}00579\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ v\ =\ v\ /\ (\mbox{\hyperlink{classCtrlThread_adc8b1450d312e8f0b8e82db5a18eccb0}{inputMax}}[i]-\/\mbox{\hyperlink{classCtrlThread_a63d8137a999d20be087dcccccb2323e3}{inputMin}}[i]);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00580}00580\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ v\ =\ v\ *\ (\mbox{\hyperlink{classCtrlThread_a7618a3a140d118feb4d0a44a656196a7}{outputMax}}[i]-\/\mbox{\hyperlink{classCtrlThread_adc4b02f098a7230ab604be2621097d18}{outputMin}}[i]);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00581}00581\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ v\ =\ v\ +\ ((\mbox{\hyperlink{classCtrlThread_a7618a3a140d118feb4d0a44a656196a7}{outputMax}}[i]-\/\mbox{\hyperlink{classCtrlThread_adc4b02f098a7230ab604be2621097d18}{outputMin}}[i])/2+\mbox{\hyperlink{classCtrlThread_adc4b02f098a7230ab604be2621097d18}{outputMin}}[i]);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00582}00582\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00583}00583\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00584}00584\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00585}00585\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ v\ =\ v+jointOffset[i];}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00586}00586\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ v\ =\ v*jointGain[i];}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00587}00587\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ v\ =\ (v<jointMax[i])\ ?\ v\ :\ jointMax[i];}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00588}00588\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ v\ =\ (v>jointMin[i])\ ?\ v\ :\ jointMin[i];}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00589}00589\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00590}00590\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00591}00591\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a0e0cdacac415e4a4e300ac4dbe7d3aaa}{rawAxes}}[i]=v;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00592}00592\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00593}00593\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00594}00594\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Sending\ data\ out\ on\ a\ Yarp\ port}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00595}00595\ \ \ \ \ \ \ \ \ Bottle\ \mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00596}00596\ \ \ \ \ \ \ \ \ Bottle\ axis\_data;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00597}00597\ \ \ \ \ \ \ \ \ Bottle\ buttons\_data;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00598}00598\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i=0;i<\mbox{\hyperlink{classCtrlThread_aef5f4e275e701a5f70a0e3a08c086238}{num\_outputs}};i++)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00599}00599\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00600}00600\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classCtrlThread_a32448186dac6801038fd53d4e9aa4342}{jointProperties}}[i].type\ ==\ \mbox{\hyperlink{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_afa231099d07583c3ed0981e0bb665f55ad13a0aba6441ec58a19a91daf13e6948}{JTYPE\_POLAR}})}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00601}00601\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00602}00602\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classCtrlThread_a32448186dac6801038fd53d4e9aa4342}{jointProperties}}[i].param[2]\ ==\ 0)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00603}00603\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00604}00604\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_affeb2318f6d0da34c869b2a66c6e06cf}{outAxes}}[i]=\ atan2(\ \ (\mbox{\hyperlink{classCtrlThread_a0e0cdacac415e4a4e300ac4dbe7d3aaa}{rawAxes}}[\mbox{\hyperlink{classCtrlThread_a32448186dac6801038fd53d4e9aa4342}{jointProperties}}[i].param[0]]),}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00605}00605\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (\mbox{\hyperlink{classCtrlThread_a0e0cdacac415e4a4e300ac4dbe7d3aaa}{rawAxes}}[\mbox{\hyperlink{classCtrlThread_a32448186dac6801038fd53d4e9aa4342}{jointProperties}}[i].param[1]])\ )\ *\ 180.0\ /\ 3.14159265;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00606}00606\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00607}00607\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classCtrlThread_a32448186dac6801038fd53d4e9aa4342}{jointProperties}}[i].param[2]\ ==\ 1)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00608}00608\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00609}00609\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_affeb2318f6d0da34c869b2a66c6e06cf}{outAxes}}[i]=\ sqrt\ (\ \ pow((\mbox{\hyperlink{classCtrlThread_a0e0cdacac415e4a4e300ac4dbe7d3aaa}{rawAxes}}[\mbox{\hyperlink{classCtrlThread_a32448186dac6801038fd53d4e9aa4342}{jointProperties}}[i].param[0]]),2)+}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00610}00610\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pow((\mbox{\hyperlink{classCtrlThread_a0e0cdacac415e4a4e300ac4dbe7d3aaa}{rawAxes}}[\mbox{\hyperlink{classCtrlThread_a32448186dac6801038fd53d4e9aa4342}{jointProperties}}[i].param[1]]),2)\ );}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00611}00611\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00612}00612\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00613}00613\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00614}00614\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_affeb2318f6d0da34c869b2a66c6e06cf}{outAxes}}[i]=0.0;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00615}00615\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yWarning\ (\ \textcolor{stringliteral}{"{}Unknown\ parameter\ for\ JTYPE\_POLAR,\ joint\ \%d\(\backslash\)n"{}},i);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00616}00616\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00617}00617\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00618}00618\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classCtrlThread_a32448186dac6801038fd53d4e9aa4342}{jointProperties}}[i].type\ ==\ \mbox{\hyperlink{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_afa231099d07583c3ed0981e0bb665f55a5c78c2ee83717d6d017e58a81333f1af}{JTYPE\_CARTESIAN}})}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00619}00619\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00620}00620\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_affeb2318f6d0da34c869b2a66c6e06cf}{outAxes}}[i]=\mbox{\hyperlink{classCtrlThread_a0e0cdacac415e4a4e300ac4dbe7d3aaa}{rawAxes}}[\mbox{\hyperlink{classCtrlThread_a32448186dac6801038fd53d4e9aa4342}{jointProperties}}[i].param[0]];}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00621}00621\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00622}00622\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classCtrlThread_a32448186dac6801038fd53d4e9aa4342}{jointProperties}}[i].type\ ==\ \mbox{\hyperlink{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_afa231099d07583c3ed0981e0bb665f55a0079fb0990ece1897b8f68bd5a259740}{JTYPE\_CONSTANT}})}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00623}00623\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00624}00624\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_affeb2318f6d0da34c869b2a66c6e06cf}{outAxes}}[i]=(\mbox{\hyperlink{classCtrlThread_a32448186dac6801038fd53d4e9aa4342}{jointProperties}}[i].param[0]);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00625}00625\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00626}00626\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classCtrlThread_a32448186dac6801038fd53d4e9aa4342}{jointProperties}}[i].type\ ==\ \mbox{\hyperlink{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_afa231099d07583c3ed0981e0bb665f55aca5fd48d9795f5ccfbc6c2dfa32b7450}{JTYPE\_BUTTON}})}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00627}00627\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00628}00628\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ button\_idx\ =\ \mbox{\hyperlink{classCtrlThread_a32448186dac6801038fd53d4e9aa4342}{jointProperties}}[i].param[0];}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00629}00629\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (button\_idx>=0\ \&\&\ button\_idx<\mbox{\hyperlink{classCtrlThread_a2a1d177193f574c0ddb5d0942120be38}{numButtons}})}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00630}00630\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00631}00631\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classCtrlThread_a4ae83aae3bfff1c32cb5923131f5d9b2}{rawButtons}}[button\_idx]\ ==\ 0)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00632}00632\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00633}00633\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_affeb2318f6d0da34c869b2a66c6e06cf}{outAxes}}[i]\ =\ \mbox{\hyperlink{classCtrlThread_a32448186dac6801038fd53d4e9aa4342}{jointProperties}}[i].param[1];}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00634}00634\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00635}00635\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00636}00636\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00637}00637\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_affeb2318f6d0da34c869b2a66c6e06cf}{outAxes}}[i]\ =\ \mbox{\hyperlink{classCtrlThread_a32448186dac6801038fd53d4e9aa4342}{jointProperties}}[i].param[2];}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00638}00638\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00639}00639\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00640}00640\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00641}00641\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00642}00642\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yWarning\ (\ \textcolor{stringliteral}{"{}Button\ id\ out\ of\ bounds\ (\%d<\%d)"{}},button\_idx,\mbox{\hyperlink{classCtrlThread_a2a1d177193f574c0ddb5d0942120be38}{numButtons}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00643}00643\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_affeb2318f6d0da34c869b2a66c6e06cf}{outAxes}}[i]\ =\ 0.0;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00644}00644\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00645}00645\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00646}00646\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00647}00647\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00648}00648\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_affeb2318f6d0da34c869b2a66c6e06cf}{outAxes}}[i]=0.0;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00649}00649\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yWarning\ (\ \textcolor{stringliteral}{"{}Unknown\ property,\ joint\ \%d\(\backslash\)n"{}},i);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00650}00650\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00651}00651\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00652}00652\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00653}00653\ \ \ \ \ \ \ \ \ \textcolor{comment}{//execute\ button\ actions}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00654}00654\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i=0;i<\mbox{\hyperlink{classCtrlThread_a2a1d177193f574c0ddb5d0942120be38}{numButtons}};i++)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00655}00655\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00656}00656\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classCtrlThread_a1fa4dd6132a8d0baea60e9730f1d3e4b}{rawButtonsOld}}[i]\ ==\ 0\ \&\&\ \mbox{\hyperlink{classCtrlThread_a4ae83aae3bfff1c32cb5923131f5d9b2}{rawButtons}}[i]\ ==\ 1)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00657}00657\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00658}00658\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//execute\ script}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00659}00659\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!\mbox{\hyperlink{classCtrlThread_a18e56685d4ffced417d830b83693d98f}{button\_actions}}[i].empty())}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00660}00660\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00661}00661\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yInfo\ (\textcolor{stringliteral}{"{}executing\ script\ \%d:\ \%s\(\backslash\)n"{}},\ i,\ \mbox{\hyperlink{classCtrlThread_a18e56685d4ffced417d830b83693d98f}{button\_actions}}[i].c\_str());}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00662}00662\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ ret\ =\ system(\mbox{\hyperlink{classCtrlThread_a18e56685d4ffced417d830b83693d98f}{button\_actions}}[i].c\_str());}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00663}00663\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00664}00664\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00665}00665\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00666}00666\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yWarning\ (\textcolor{stringliteral}{"{}no\ scripts\ associated\ to\ button\ \%d\(\backslash\)n"{}},\ i);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00667}00667\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00668}00668\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00669}00669\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00670}00670\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00671}00671\ \ \ \ \ \ \ \ \ \textcolor{comment}{//execute\ button\ actions}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00672}00672\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i=0;i<\mbox{\hyperlink{classCtrlThread_a2e4571bacd43040c9d482a148f6d301b}{numHats}};i++)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00673}00673\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00674}00674\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classCtrlThread_a76a5d205b90dea2910f7f42ebd3a3361}{rawHats}}[i]\ !=\ SDL\_HAT\_CENTERED)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00675}00675\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00676}00676\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//execute\ script}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00677}00677\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!\mbox{\hyperlink{classCtrlThread_a897edda10ed409d4ce43be4541aff4c5}{hat\_actions}}[i].empty())}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00678}00678\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00679}00679\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{string}\ action(\mbox{\hyperlink{classCtrlThread_a897edda10ed409d4ce43be4541aff4c5}{hat\_actions}}[i]);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00680}00680\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ action\ +=\ \textcolor{stringliteral}{"{}\ "{}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00681}00681\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//if\ true,\ the\ behavior\ is\ like\ a\ button,\ one\ esecution\ per\ press}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00682}00682\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//if\ false,\ execution\ is\ continuous}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00683}00683\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ trigger\_mode=\textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00684}00684\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{switch}(\mbox{\hyperlink{classCtrlThread_a76a5d205b90dea2910f7f42ebd3a3361}{rawHats}}[i])}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00685}00685\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00686}00686\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ SDL\_HAT\_UP:}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00687}00687\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ action\ +=\ \textcolor{stringliteral}{"{}up"{}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00688}00688\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00689}00689\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ SDL\_HAT\_RIGHT:}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00690}00690\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ action\ +=\ \textcolor{stringliteral}{"{}right"{}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00691}00691\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00692}00692\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ SDL\_HAT\_DOWN:}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00693}00693\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ action\ +=\ \textcolor{stringliteral}{"{}down"{}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00694}00694\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00695}00695\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ SDL\_HAT\_LEFT:}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00696}00696\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ action\ +=\ \textcolor{stringliteral}{"{}left"{}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00697}00697\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00698}00698\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ SDL\_HAT\_RIGHTUP:}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00699}00699\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ action\ +=\ \textcolor{stringliteral}{"{}rightup"{}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00700}00700\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00701}00701\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ SDL\_HAT\_RIGHTDOWN:}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00702}00702\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ action\ +=\ \textcolor{stringliteral}{"{}rightdown"{}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00703}00703\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00704}00704\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ SDL\_HAT\_LEFTUP:}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00705}00705\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ action\ +=\ \textcolor{stringliteral}{"{}leftup"{}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00706}00706\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00707}00707\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ SDL\_HAT\_LEFTDOWN:}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00708}00708\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ action\ +=\ \textcolor{stringliteral}{"{}leftdown"{}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00709}00709\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00710}00710\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{default}:}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00711}00711\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00712}00712\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00713}00713\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (trigger\_mode)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00714}00714\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00715}00715\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classCtrlThread_a149c7ac1c0b0e99d147a77c1bbcf37d4}{rawHatsOld}}[i]==SDL\_HAT\_CENTERED)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00716}00716\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00717}00717\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yInfo\ (\textcolor{stringliteral}{"{}executing\ script\ \%d:\ \%s\(\backslash\)n"{}},\ i,\ action.c\_str());}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00718}00718\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ ret\ =\ system(action.c\_str());}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00719}00719\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00720}00720\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00721}00721\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00722}00722\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00723}00723\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yInfo\ (\textcolor{stringliteral}{"{}executing\ script\ \%d:\ \%s\(\backslash\)n"{}},\ i,\ action.c\_str());}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00724}00724\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ ret\ =\ system(action.c\_str());}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00725}00725\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00726}00726\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00727}00727\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00728}00728\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00729}00729\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yWarning\ (\textcolor{stringliteral}{"{}no\ scripts\ associated\ to\ button\ \%d\(\backslash\)n"{}},\ i);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00730}00730\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00731}00731\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00732}00732\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00733}00733\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00734}00734\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Preparing\ data\ to\ be\ sent\ on\ the\ yarp\ ports}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00735}00735\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i=0;i<\mbox{\hyperlink{classCtrlThread_aef5f4e275e701a5f70a0e3a08c086238}{num\_outputs}};i++)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00736}00736\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00737}00737\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\ \mbox{\hyperlink{classCtrlThread_a32448186dac6801038fd53d4e9aa4342}{jointProperties}}[i].type\ ==\ \mbox{\hyperlink{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_afa231099d07583c3ed0981e0bb665f55a4b51a77460be7314d1305719e7b50eb3}{JTYPE\_STRING}})}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00738}00738\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}.addString(\mbox{\hyperlink{classCtrlThread_a32448186dac6801038fd53d4e9aa4342}{jointProperties}}[i].param\_s.c\_str());}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00739}00739\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00740}00740\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}.addFloat64(\mbox{\hyperlink{classCtrlThread_affeb2318f6d0da34c869b2a66c6e06cf}{outAxes}}[i]);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00741}00741\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00742}00742\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i=0;i<\mbox{\hyperlink{classCtrlThread_a2a1d177193f574c0ddb5d0942120be38}{numButtons}};i++)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00743}00743\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00744}00744\ \ \ \ \ \ \ \ \ \ \ \ \ buttons\_data.addFloat64(\mbox{\hyperlink{classCtrlThread_a4ae83aae3bfff1c32cb5923131f5d9b2}{rawButtons}}[i]);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00745}00745\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00746}00746\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i=0;i<\mbox{\hyperlink{classCtrlThread_a5172dac00c04ae9cb128a6a2f22d2999}{numAxes}};\ i++)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00747}00747\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00748}00748\ \ \ \ \ \ \ \ \ \ \ \ \ axis\_data.addFloat64(\mbox{\hyperlink{classCtrlThread_a0e0cdacac415e4a4e300ac4dbe7d3aaa}{rawAxes}}[i]);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00749}00749\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00750}00750\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00751}00751\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Sending\ data\ on\ the\ yarp\ ports}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00752}00752\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classCtrlThread_a3b1e9c81262a6bcf962d8daca7ced676}{port\_command}}.getOutputCount()>0)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00753}00753\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00754}00754\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a3b1e9c81262a6bcf962d8daca7ced676}{port\_command}}.prepare()\ =\ \mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00755}00755\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a3b1e9c81262a6bcf962d8daca7ced676}{port\_command}}.write();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00756}00756\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00757}00757\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classCtrlThread_a93bc1768843b07d1eb8c88060404eb24}{port\_axis\_only}}.getOutputCount()>0)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00758}00758\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00759}00759\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a93bc1768843b07d1eb8c88060404eb24}{port\_axis\_only}}.prepare()\ =\ axis\_data;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00760}00760\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a93bc1768843b07d1eb8c88060404eb24}{port\_axis\_only}}.write();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00761}00761\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00762}00762\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classCtrlThread_a04e5e419a376e56d60654b95ffbd6921}{port\_buttons\_only}}.getOutputCount()>0)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00763}00763\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00764}00764\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a04e5e419a376e56d60654b95ffbd6921}{port\_buttons\_only}}.prepare()\ =\ buttons\_data;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00765}00765\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a04e5e419a376e56d60654b95ffbd6921}{port\_buttons\_only}}.write();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00766}00766\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00767}00767\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00768}00768\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Displaying\ status}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00769}00769\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!\mbox{\hyperlink{classCtrlThread_abe1cfce545e3425ea89e4d14c9598f56}{silent}})\ \mbox{\hyperlink{classCtrlThread_af742a53eedc822279792ba2b5f94c152}{printStatus}}();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00770}00770\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00771}00771\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00772}\mbox{\hyperlink{classCtrlThread_a268630a05175b64474a471f356917120}{00772}}\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classCtrlThread_a268630a05175b64474a471f356917120}{threadRelease}}()}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00773}00773\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00774}00774\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classCtrlThread_a0e0cdacac415e4a4e300ac4dbe7d3aaa}{rawAxes}})\ \ \ \ \ \ \ \ \ \textcolor{keyword}{delete}\ []\ \mbox{\hyperlink{classCtrlThread_a0e0cdacac415e4a4e300ac4dbe7d3aaa}{rawAxes}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00775}00775\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classCtrlThread_a76a5d205b90dea2910f7f42ebd3a3361}{rawHats}})\ \ \ \ \ \ \ \ \ \textcolor{keyword}{delete}\ []\ \mbox{\hyperlink{classCtrlThread_a76a5d205b90dea2910f7f42ebd3a3361}{rawHats}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00776}00776\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classCtrlThread_a149c7ac1c0b0e99d147a77c1bbcf37d4}{rawHatsOld}})\ \ \ \ \ \ \textcolor{keyword}{delete}\ []\ \mbox{\hyperlink{classCtrlThread_a149c7ac1c0b0e99d147a77c1bbcf37d4}{rawHatsOld}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00777}00777\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classCtrlThread_affeb2318f6d0da34c869b2a66c6e06cf}{outAxes}})\ \ \ \ \ \ \ \ \ \textcolor{keyword}{delete}\ []\ \mbox{\hyperlink{classCtrlThread_affeb2318f6d0da34c869b2a66c6e06cf}{outAxes}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00778}00778\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classCtrlThread_a4ae83aae3bfff1c32cb5923131f5d9b2}{rawButtons}})\ \ \ \ \ \ \textcolor{keyword}{delete}\ []\ \mbox{\hyperlink{classCtrlThread_a4ae83aae3bfff1c32cb5923131f5d9b2}{rawButtons}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00779}00779\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classCtrlThread_adc8b1450d312e8f0b8e82db5a18eccb0}{inputMax}})\ \ \ \ \ \ \ \ \textcolor{keyword}{delete}\ []\ \mbox{\hyperlink{classCtrlThread_adc8b1450d312e8f0b8e82db5a18eccb0}{inputMax}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00780}00780\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classCtrlThread_a63d8137a999d20be087dcccccb2323e3}{inputMin}})\ \ \ \ \ \ \ \ \textcolor{keyword}{delete}\ []\ \mbox{\hyperlink{classCtrlThread_a63d8137a999d20be087dcccccb2323e3}{inputMin}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00781}00781\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classCtrlThread_a7618a3a140d118feb4d0a44a656196a7}{outputMax}})\ \ \ \ \ \ \ \textcolor{keyword}{delete}\ []\ \mbox{\hyperlink{classCtrlThread_a7618a3a140d118feb4d0a44a656196a7}{outputMax}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00782}00782\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classCtrlThread_adc4b02f098a7230ab604be2621097d18}{outputMin}})\ \ \ \ \ \ \ \textcolor{keyword}{delete}\ []\ \mbox{\hyperlink{classCtrlThread_adc4b02f098a7230ab604be2621097d18}{outputMin}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00783}00783\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classCtrlThread_ac23a0fd266efda99042bd1be880836d4}{jointDeadband}})\ \ \ \textcolor{keyword}{delete}\ []\ \mbox{\hyperlink{classCtrlThread_ac23a0fd266efda99042bd1be880836d4}{jointDeadband}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00784}00784\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classCtrlThread_a32448186dac6801038fd53d4e9aa4342}{jointProperties}})\ \textcolor{keyword}{delete}\ []\ \mbox{\hyperlink{classCtrlThread_a32448186dac6801038fd53d4e9aa4342}{jointProperties}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00785}00785\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classCtrlThread_a4f77b78dea680b6bce30c629ce0518f8}{reverse}})\ \ \ \ \ \ \ \ \ \textcolor{keyword}{delete}\ []\ \mbox{\hyperlink{classCtrlThread_a4f77b78dea680b6bce30c629ce0518f8}{reverse}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00786}00786\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a3b1e9c81262a6bcf962d8daca7ced676}{port\_command}}.interrupt();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00787}00787\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a3b1e9c81262a6bcf962d8daca7ced676}{port\_command}}.close();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00788}00788\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a93bc1768843b07d1eb8c88060404eb24}{port\_axis\_only}}.interrupt();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00789}00789\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a93bc1768843b07d1eb8c88060404eb24}{port\_axis\_only}}.close();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00790}00790\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a04e5e419a376e56d60654b95ffbd6921}{port\_buttons\_only}}.interrupt();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00791}00791\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a04e5e419a376e56d60654b95ffbd6921}{port\_buttons\_only}}.close();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00792}00792\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00793}00793\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00794}00794\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00795}\mbox{\hyperlink{classCtrlThread_af742a53eedc822279792ba2b5f94c152}{00795}}\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classCtrlThread_af742a53eedc822279792ba2b5f94c152}{printStatus}}()}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00796}00796\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00797}00797\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ t=Time::now();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00798}00798\ \ \ \ \ \ \ \ \ std::ostringstream\ buff;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00799}00799\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00800}00800\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (t-\/\mbox{\hyperlink{classCtrlThread_a08e157223f628fb6ec290584a40ee679}{t0}}>=\mbox{\hyperlink{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_a3f482d6d79877879dee562279a19a6ee}{PRINT\_STATUS\_PER}})}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00801}00801\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00802}00802\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//for\ (int\ i=0;i\ <numButtons;\ i++)}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00803}00803\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ \ \ sprintf\ (buff,\ "{}\%+6d"{},\ rawButtons[i]\ );}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00804}00804\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00805}00805\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i=0;i\ <\mbox{\hyperlink{classCtrlThread_a5172dac00c04ae9cb128a6a2f22d2999}{numAxes}};\ i++)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00806}00806\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00807}00807\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ buff\ <<\ std::setw(9)\ <<\ std::fixed\ <<\ std::setprecision(1)\ <<\ \mbox{\hyperlink{classCtrlThread_a0e0cdacac415e4a4e300ac4dbe7d3aaa}{rawAxes}}[i];}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00808}00808\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00809}00809\ \ \ \ \ \ \ \ \ \ \ \ \ buff\ <<\ \textcolor{stringliteral}{"{}\ -\/-\/-\/>\ "{}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00810}00810\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i=0;i\ <\mbox{\hyperlink{classCtrlThread_aef5f4e275e701a5f70a0e3a08c086238}{num\_outputs}};\ i++)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00811}00811\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00812}00812\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ buff\ <<\ std::setw(9)\ <<\ std::fixed\ <<\ std::setprecision(1)\ <<\ \mbox{\hyperlink{classCtrlThread_affeb2318f6d0da34c869b2a66c6e06cf}{outAxes}}[i];}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00813}00813\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00814}00814\ \ \ \ \ \ \ \ \ \ \ \ \ yDebug()\ <<\ buff.str();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00815}00815\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlThread_a08e157223f628fb6ec290584a40ee679}{t0}}=t;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00816}00816\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00817}00817\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00818}00818\ \};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00819}00819\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00820}00820\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00821}00821\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00822}00822\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classCtrlModule}{CtrlModule}}:\ \textcolor{keyword}{public}\ RFModule}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00823}00823\ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00824}00824\ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00825}00825\ \ \ \ \ \mbox{\hyperlink{classCtrlThread}{CtrlThread}}\ *\mbox{\hyperlink{classCtrlModule_a93641f1661372f3b48fccae4e06c192e}{thr}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00826}00826\ \ \ \ \ \textcolor{comment}{//Port\ \ \ \ \ \ \ \ rpcPort;}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00827}00827\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00828}00828\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00829}\mbox{\hyperlink{classCtrlModule_ab78f283efde30fef452759fd0701ab7c}{00829}}\ \ \ \ \ \mbox{\hyperlink{classCtrlModule_ab78f283efde30fef452759fd0701ab7c}{CtrlModule}}()\ \{\ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00830}00830\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00831}\mbox{\hyperlink{classCtrlModule_a173962a9cb0efffbc78add632ba62265}{00831}}\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classCtrlModule_a173962a9cb0efffbc78add632ba62265}{configure}}(ResourceFinder\ \&rf)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00832}00832\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00833}00833\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ rateThread\ =\ 10;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00834}00834\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (rf.findGroup(\textcolor{stringliteral}{"{}GENERAL"{}}).check(\textcolor{stringliteral}{"{}rateThread"{}}))}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00835}00835\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00836}00836\ \ \ \ \ \ \ \ \ \ \ \ \ rateThread\ =\ rf.findGroup(\textcolor{stringliteral}{"{}GENERAL"{}}).find(\textcolor{stringliteral}{"{}rateThread"{}}).asInt32();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00837}00837\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00838}00838\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00839}00839\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00840}00840\ \ \ \ \ \ \ \ \ \ \ \ \ yWarning\ (\textcolor{stringliteral}{"{}rateThread\ option\ not\ found,\ assuming\ \%d\ ms\(\backslash\)n"{}},\ rateThread);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00841}00841\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00842}00842\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlModule_a93641f1661372f3b48fccae4e06c192e}{thr}}=\textcolor{keyword}{new}\ \mbox{\hyperlink{classCtrlThread}{CtrlThread}}(rateThread,rf);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00843}00843\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!\mbox{\hyperlink{classCtrlModule_a93641f1661372f3b48fccae4e06c192e}{thr}}-\/>start())}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00844}00844\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00845}00845\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{delete}\ \mbox{\hyperlink{classCtrlModule_a93641f1661372f3b48fccae4e06c192e}{thr}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00846}00846\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00847}00847\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00848}00848\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00849}00849\ \ \ \ \ \ \ \ \ \textcolor{comment}{//rpcPort.open("{}/joystickCtrl/rpc"{});}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00850}00850\ \ \ \ \ \ \ \ \ \textcolor{comment}{//attach(rpcPort);}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00851}00851\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00852}00852\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00853}00853\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00854}00854\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00855}\mbox{\hyperlink{classCtrlModule_acb27c445268f455245975aa05a29f634}{00855}}\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classCtrlModule_acb27c445268f455245975aa05a29f634}{close}}()}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00856}00856\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00857}00857\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCtrlModule_a93641f1661372f3b48fccae4e06c192e}{thr}}-\/>stop();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00858}00858\ \ \ \ \ \ \ \ \ \textcolor{keyword}{delete}\ \mbox{\hyperlink{classCtrlModule_a93641f1661372f3b48fccae4e06c192e}{thr}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00859}00859\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00860}00860\ \ \ \ \ \ \ \ \ \textcolor{comment}{//rpcPort.interrupt();}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00861}00861\ \ \ \ \ \ \ \ \ \textcolor{comment}{//rpcPort.close();}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00862}00862\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00863}00863\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00864}00864\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00865}00865\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00866}\mbox{\hyperlink{classCtrlModule_a74f8b8bf7021da56eac0708ced67b6cb}{00866}}\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{classCtrlModule_a74f8b8bf7021da56eac0708ced67b6cb}{getPeriod}}()\ \ \ \ \{\ \textcolor{keywordflow}{return}\ 1.0;\ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00867}\mbox{\hyperlink{classCtrlModule_ac7e3e16c42daf7feed85e72483a141bb}{00867}}\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{bool}\ \ \ \mbox{\hyperlink{classCtrlModule_ac7e3e16c42daf7feed85e72483a141bb}{updateModule}}()\ \{\ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};\ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00868}00868\ \};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00869}00869\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00870}00870\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00871}00871\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00872}\mbox{\hyperlink{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_a0ddf1224851353fc92bfbff6f499fa97}{00872}}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{icub-tutorials_2src_2anyRobotCartesianInterface_2src_2fakeRobot_2main_8cpp_ae66f6b31b5ad750f1fe042a706a4e3d4}{main}}(\textcolor{keywordtype}{int}\ argc,\ \textcolor{keywordtype}{char}\ *argv[])}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00873}00873\ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00874}00874\ \ \ \ \ ResourceFinder\ rf;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00875}00875\ \ \ \ \ rf.setDefaultConfigFile(\textcolor{stringliteral}{"{}joystickControl.ini"{}});\ \ \ \ \ \textcolor{comment}{//overridden\ by\ -\/-\/from\ parameter}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00876}00876\ \ \ \ \ rf.setDefaultContext(\textcolor{stringliteral}{"{}joystickControl"{}});\ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//overridden\ by\ -\/-\/context\ parameter}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00877}00877\ \ \ \ \ rf.configure(argc,argv);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00878}00878\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00879}00879\ \ \ \ \ \textcolor{keywordflow}{if}\ (rf.check(\textcolor{stringliteral}{"{}help"{}}))}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00880}00880\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00881}00881\ \ \ \ \ \ \ \ \ yInfo\ (\ \textcolor{stringliteral}{"{}Options:\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00882}00882\ \ \ \ \ \ \ \ \ yInfo\ (\ \textcolor{stringliteral}{"{}-\/-\/silent:\ supress\ text\ output\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00883}00883\ \ \ \ \ \ \ \ \ yInfo\ (\ \textcolor{stringliteral}{"{}-\/-\/force\_configuration:\ force\ a\ joystick\ configuration\ for\ a\ joystick\ with\ differnt\ \#\ of\ axes,\ buttons\ etc.\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00884}00884\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ 0;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00885}00885\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00886}00886\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00887}00887\ \ \ \ \ Network\ \mbox{\hyperlink{namespaceyarp}{yarp}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00888}00888\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00889}00889\ \ \ \ \ \textcolor{keywordflow}{if}\ (!\mbox{\hyperlink{namespaceyarp}{yarp}}.checkNetwork())}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00890}00890\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00891}00891\ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}Sorry\ YARP\ network\ does\ not\ seem\ to\ be\ available,\ is\ the\ yarp\ server\ available?\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00892}00892\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ -\/1;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00893}00893\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00894}00894\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00895}00895\ \ \ \ \ \textcolor{comment}{//SDL\_JoystickEventState\ (SDL\_ENABLE);}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00896}00896\ \ \ \ \ \textcolor{comment}{//\ this\ will\ alter\ the\ behaviour\ of\ the\ event\ queue\ of\ the\ sdl\ system}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00897}00897\ \ \ \ \ SDL\_JoystickEventState\ (\ SDL\_QUERY\ );}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00898}00898\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00899}00899\ \ \ \ \ \mbox{\hyperlink{classCtrlModule}{CtrlModule}}\ mod;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00900}00900\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00901}00901\ \ \ \ \ \textcolor{keywordflow}{return}\ mod.runModule(rf);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00902}00902\ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00903}00903\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00904}00904\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2joystickCtrl_2main_8cpp_source_l00905}00905\ }
+
+\end{DoxyCode}

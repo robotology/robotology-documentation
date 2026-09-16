@@ -1,0 +1,61 @@
+\doxysection{Smith\+Predictor.\+h}
+\hypertarget{SmithPredictor_8h_source}{}\label{SmithPredictor_8h_source}\index{icub-\/main/src/libraries/icubmod/cartesianController/SmithPredictor.h@{icub-\/main/src/libraries/icubmod/cartesianController/SmithPredictor.h}}
+\mbox{\hyperlink{SmithPredictor_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00001}00001\ \textcolor{comment}{/*\ }}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00002}00002\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2012\ Department\ of\ Robotics\ Brain\ and\ Cognitive\ Sciences\ -\/\ Istituto\ Italiano\ di\ Tecnologia}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00003}00003\ \textcolor{comment}{\ *\ Author:\ Ugo\ Pattacini}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00004}00004\ \textcolor{comment}{\ *\ email:\ \ ugo.pattacini@iit.it}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00005}00005\ \textcolor{comment}{\ *\ website:\ www.robotcub.org}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00006}00006\ \textcolor{comment}{\ *\ Permission\ is\ granted\ to\ copy,\ distribute,\ and/or\ modify\ this\ program}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00007}00007\ \textcolor{comment}{\ *\ under\ the\ terms\ of\ the\ GNU\ General\ Public\ License,\ version\ 2\ or\ any}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00008}00008\ \textcolor{comment}{\ *\ later\ version\ published\ by\ the\ Free\ Software\ Foundation.}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00009}00009\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00010}00010\ \textcolor{comment}{\ *\ A\ copy\ of\ the\ license\ can\ be\ found\ at}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00011}00011\ \textcolor{comment}{\ *\ http://www.robotcub.org/icub/license/gpl.txt}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00012}00012\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00013}00013\ \textcolor{comment}{\ *\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00014}00014\ \textcolor{comment}{\ *\ WITHOUT\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00015}00015\ \textcolor{comment}{\ *\ MERCHANTABILITY\ or\ FITNESS\ FOR\ A\ PARTICULAR\ PURPOSE.\ See\ the\ GNU\ General}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00016}00016\ \textcolor{comment}{\ *\ Public\ License\ for\ more\ details}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00017}00017\ \textcolor{comment}{*/}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00018}00018\ }
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00019}00019\ \textcolor{preprocessor}{\#ifndef\ \_\_SMITHPREDICTOR\_H\_\_}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00020}00020\ \textcolor{preprocessor}{\#define\ \_\_SMITHPREDICTOR\_H\_\_}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00021}00021\ }
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00022}00022\ \textcolor{preprocessor}{\#include\ <deque>}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00023}00023\ }
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00024}00024\ \textcolor{preprocessor}{\#include\ <yarp/os/Property.h>}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00025}00025\ \textcolor{preprocessor}{\#include\ <yarp/sig/Vector.h>}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00026}00026\ }
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00027}00027\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{pids_8h}{iCub/ctrl/pids.h}}>}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00028}00028\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{filters_8h}{iCub/ctrl/filters.h}}>}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00029}00029\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{iKinFwd_8h}{iCub/iKin/iKinFwd.h}}>}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00030}00030\ }
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00031}00031\ }
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00032}00032\ \textcolor{comment}{//\ this\ class\ implements\ the\ Smith\ Predictor\ block}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00033}00033\ \textcolor{comment}{//\ which\ accounts\ for\ the\ communication\ delays\ that}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00034}00034\ \textcolor{comment}{//\ exist\ between\ the\ velocity\ commands\ and\ their}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00035}00035\ \textcolor{comment}{//\ execution\ on\ the\ robot}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00036}\mbox{\hyperlink{classSmithPredictor}{00036}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classSmithPredictor}{SmithPredictor}}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00037}00037\ \{}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00038}00038\ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00039}\mbox{\hyperlink{classSmithPredictor_a9683102e6b6deeb463f4c546537be1ab}{00039}}\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Integrator}{iCub::ctrl::Integrator}}\ *\mbox{\hyperlink{classSmithPredictor_a9683102e6b6deeb463f4c546537be1ab}{I}};}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00040}\mbox{\hyperlink{classSmithPredictor_a7354226f4e993e0ba5eae6d738630541}{00040}}\ \ \ \ \ std::deque<iCub::ctrl::Filter*>\ \mbox{\hyperlink{classSmithPredictor_a7354226f4e993e0ba5eae6d738630541}{F}};}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00041}\mbox{\hyperlink{classSmithPredictor_a0c5b9cb3b33e8c5c38e4e18283fe7251}{00041}}\ \ \ \ \ std::deque<std::deque<double>*>\ \mbox{\hyperlink{classSmithPredictor_a0c5b9cb3b33e8c5c38e4e18283fe7251}{tappedDelays}};}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00042}\mbox{\hyperlink{classSmithPredictor_a5144dd0f2ce0748043a177e2e61026d6}{00042}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classSmithPredictor_a5144dd0f2ce0748043a177e2e61026d6}{enabled}};}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00043}00043\ }
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00044}00044\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classSmithPredictor_a568f508f7014643bca74df1fe99ef252}{dealloc}}();}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00045}00045\ }
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00046}00046\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00047}00047\ \ \ \ \ \mbox{\hyperlink{classSmithPredictor_a94e451760de2b160d4c0d76325d4ad89}{SmithPredictor}}();}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00048}00048\ \ \ \ \ \mbox{\hyperlink{classSmithPredictor_a1fda642c42c53592aa0206e3325c69ae}{\string~SmithPredictor}}();}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00049}00049\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classSmithPredictor_a21a656ecdfe600a3305dc1992cff1fbd}{configure}}(\textcolor{keyword}{const}\ yarp::os::Property\ \&options,\ \mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain}{iCub::iKin::iKinChain}}\ \&chain);}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00050}00050\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classSmithPredictor_aa5e00cb2d1b5dc4e27245995f07e8db5}{restart}}(\textcolor{keyword}{const}\ yarp::sig::Vector\ \&y0);}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00051}00051\ \ \ \ \ yarp::sig::Vector\ \mbox{\hyperlink{classSmithPredictor_a66f364c883d17180d9ae17d3b6f7d45c}{computeCmd}}(\textcolor{keyword}{const}\ yarp::sig::Vector\ \&u);}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00052}00052\ \};}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00053}00053\ }
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00054}00054\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8h_source_l00055}00055\ }
+
+\end{DoxyCode}

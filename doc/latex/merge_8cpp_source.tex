@@ -1,0 +1,688 @@
+\doxysection{merge.\+cpp}
+\hypertarget{merge_8cpp_source}{}\label{merge_8cpp_source}\index{icub-\/main/src/modules/learningMachine/src/bin/merge.cpp@{icub-\/main/src/modules/learningMachine/src/bin/merge.cpp}}
+\mbox{\hyperlink{merge_8cpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00001}00001\ \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00002}00002\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2007-\/2010\ RobotCub\ Consortium,\ European\ Commission\ FP6\ Project\ IST-\/004370}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00003}00003\ \textcolor{comment}{\ *\ author:\ \ Arjan\ Gijsberts}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00004}00004\ \textcolor{comment}{\ *\ email:\ \ \ arjan.gijsberts@iit.it}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00005}00005\ \textcolor{comment}{\ *\ website:\ www.robotcub.org}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00006}00006\ \textcolor{comment}{\ *\ Permission\ is\ granted\ to\ copy,\ distribute,\ and/or\ modify\ this\ program}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00007}00007\ \textcolor{comment}{\ *\ under\ the\ terms\ of\ the\ GNU\ General\ Public\ License,\ version\ 2\ or\ any}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00008}00008\ \textcolor{comment}{\ *\ later\ version\ published\ by\ the\ Free\ Software\ Foundation.}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00009}00009\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00010}00010\ \textcolor{comment}{\ *\ A\ copy\ of\ the\ license\ can\ be\ found\ at}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00011}00011\ \textcolor{comment}{\ *\ http://www.robotcub.org/icub/license/gpl.txt}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00012}00012\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00013}00013\ \textcolor{comment}{\ *\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00014}00014\ \textcolor{comment}{\ *\ WITHOUT\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00015}00015\ \textcolor{comment}{\ *\ MERCHANTABILITY\ or\ FITNESS\ FOR\ A\ PARTICULAR\ PURPOSE.\ See\ the\ GNU\ General}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00016}00016\ \textcolor{comment}{\ *\ Public\ License\ for\ more\ details}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00017}00017\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00018}00018\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00019}00019\ \textcolor{comment}{//\ e.g.\ ./merge\ -\/-\/format\ "{}(/foo:o[3,1]\ /bar:o[2,3][1-\/4]\ (/baz:o))"{}}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00020}00020\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00051}00051\ \textcolor{preprocessor}{\#include\ <iostream>}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00052}00052\ \textcolor{preprocessor}{\#include\ <sstream>}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00053}00053\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00054}00054\ \textcolor{preprocessor}{\#include\ <map>}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00055}00055\ \textcolor{preprocessor}{\#include\ <vector>}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00056}00056\ \textcolor{preprocessor}{\#include\ <stdexcept>}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00057}00057\ \textcolor{preprocessor}{\#include\ <cassert>}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00058}00058\ \textcolor{preprocessor}{\#include\ <list>}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00059}00059\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00060}00060\ \textcolor{preprocessor}{\#include\ <yarp/sig/Vector.h>}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00061}00061\ \textcolor{preprocessor}{\#include\ <yarp/os/Port.h>}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00062}00062\ \textcolor{preprocessor}{\#include\ <yarp/os/ResourceFinder.h>}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00063}00063\ \textcolor{preprocessor}{\#include\ <yarp/os/RFModule.h>}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00064}00064\ \textcolor{comment}{//\#include\ <yarp/os/BufferedPort.h>}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00065}00065\ \textcolor{preprocessor}{\#include\ <yarp/os/Network.h>}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00066}00066\ \textcolor{preprocessor}{\#include\ <yarp/os/Time.h>}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00067}00067\ \textcolor{preprocessor}{\#include\ <yarp/os/Vocab.h>}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00068}00068\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00069}00069\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00070}00070\ \textcolor{keyword}{using\ namespace\ }yarp::os;}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00071}00071\ \textcolor{keyword}{using\ namespace\ }yarp::sig;}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00072}00072\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00073}00073\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespaceiCub}{iCub}}\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00074}00074\ \textcolor{keyword}{namespace\ }learningmachine\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00075}\mbox{\hyperlink{namespaceiCub_1_1learningmachine_1_1merge}{00075}}\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{icub-main_2src_2tools_2imageBlender_2main_8cpp_a804c1da900d66b023ced7b52f62a0f46}{merge}}\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00076}00076\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00081}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1PortSource}{00081}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1PortSource}{PortSource}}\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00082}00082\ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00086}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1PortSource_aee43bbdf7e6f6c91e63e2f5bbcebd42f}{00086}}\ \ \ \ \ Bottle\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1PortSource_aee43bbdf7e6f6c91e63e2f5bbcebd42f}{data}};}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00087}00087\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00091}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1PortSource_a36cedf78033795e6d66d7ef6d4a1dd14}{00091}}\ \ \ \ \ Port\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1PortSource_a36cedf78033795e6d66d7ef6d4a1dd14}{port}};}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00092}00092\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00099}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1PortSource_a0ded1e289724e73f3192918ab8ee909d}{00099}}\ \ \ \ \ std::string\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1PortSource_a0ded1e289724e73f3192918ab8ee909d}{getInputName}}(std::string\ prefix)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00100}00100\ \ \ \ \ \ \ \ \ std::ostringstream\ buffer;}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00101}00101\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ i\ =\ 1;}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00102}00102\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{do}\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00103}00103\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ standard\ prefix\ +\ i}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00104}00104\ \ \ \ \ \ \ \ \ \ \ \ \ buffer.str(\textcolor{stringliteral}{"{}"{}});\ \textcolor{comment}{//\ clear\ buffer}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00105}00105\ \ \ \ \ \ \ \ \ \ \ \ \ buffer\ <<\ prefix\ <<\ i++\ <<\ \textcolor{stringliteral}{"{}:i"{}};}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00106}00106\ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{while}\ (Network::queryName(buffer.str().c\_str()).isValid());}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00107}00107\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ buffer.str();}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00108}00108\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00109}00109\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00113}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1PortSource_acdd17125392612de3a4d712a020cf9d4}{00113}}\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1PortSource_acdd17125392612de3a4d712a020cf9d4}{PortSource}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1PortSource}{PortSource}}\&\ other);}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00114}00114\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00118}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1PortSource_a7a7075be2d3febb73ad6c1a19b2e6837}{00118}}\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1PortSource}{PortSource}}\&\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1PortSource_a7a7075be2d3febb73ad6c1a19b2e6837}{operator=}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1PortSource}{PortSource}}\&\ other);}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00119}00119\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00120}00120\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00124}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1PortSource_a793fdccf436a81ef991e85b58722412d}{00124}}\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1PortSource_a793fdccf436a81ef991e85b58722412d}{PortSource}}(std::string\ name,\ std::string\ pp)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00125}00125\ \ \ \ \ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1PortSource_a50d7c15a8e58c8d0f7761ab7f6b85559}{initPort}}(pp);}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00126}00126\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00127}00127\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00131}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1PortSource_a12f98a1c2c43f6950fd082ab20659ada}{00131}}\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1PortSource_a12f98a1c2c43f6950fd082ab20659ada}{\string~PortSource}}()\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00132}00132\ \ \ \ \ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1PortSource_a70ec3f0f379cf9fba83c83801a82637d}{interrupt}}();}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00133}00133\ \ \ \ \ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1PortSource_a95e8d7944df552b3aaf3a3ddaddf7929}{close}}();}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00134}00134\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00135}00135\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00140}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1PortSource_a50d7c15a8e58c8d0f7761ab7f6b85559}{00140}}\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1PortSource_a50d7c15a8e58c8d0f7761ab7f6b85559}{initPort}}(std::string\ prefix)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00141}00141\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1PortSource_a36cedf78033795e6d66d7ef6d4a1dd14}{port}}.open(this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1PortSource_a0ded1e289724e73f3192918ab8ee909d}{getInputName}}(prefix).c\_str());}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00142}00142\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00143}00143\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00148}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1PortSource_a13ef80016b86d8940b40acef6dccf3a1}{00148}}\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1PortSource_a13ef80016b86d8940b40acef6dccf3a1}{connect}}(std::string\ dst)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00149}00149\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (Network::queryName(dst.c\_str()).isValid())\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00150}00150\ \ \ \ \ \ \ \ \ \ \ \ \ Network::connect(dst.c\_str(),\ this-\/>port.where().getName().c\_str());}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00151}00151\ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00152}00152\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{throw}\ std::runtime\_error(\textcolor{stringliteral}{"{}Cannot\ find\ requested\ port:\ "{}}\ +\ dst);}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00153}00153\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00154}00154\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00155}00155\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00159}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1PortSource_a709f3eb5eac85193a28320b7485f9f85}{00159}}\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1PortSource_a709f3eb5eac85193a28320b7485f9f85}{update}}()\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00160}00160\ \ \ \ \ \ \ \ \ this-\/>port.read(\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1PortSource_aee43bbdf7e6f6c91e63e2f5bbcebd42f}{data}});}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00161}00161\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00162}00162\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00167}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1PortSource_ad92ec3b60a02bd54d860fbc99e9ffbf6}{00167}}\ \ \ \ \ \textcolor{keyword}{virtual}\ Bottle\&\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1PortSource_ad92ec3b60a02bd54d860fbc99e9ffbf6}{getData}}()\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00168}00168\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1PortSource_aee43bbdf7e6f6c91e63e2f5bbcebd42f}{data}};}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00169}00169\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00170}00170\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00174}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1PortSource_a70ec3f0f379cf9fba83c83801a82637d}{00174}}\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1PortSource_a70ec3f0f379cf9fba83c83801a82637d}{interrupt}}()\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00175}00175\ \ \ \ \ \ \ \ \ this-\/>port.interrupt();}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00176}00176\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00177}00177\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00181}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1PortSource_a95e8d7944df552b3aaf3a3ddaddf7929}{00181}}\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1PortSource_a95e8d7944df552b3aaf3a3ddaddf7929}{close}}()\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00182}00182\ \ \ \ \ \ \ \ \ this-\/>port.close();}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00183}00183\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00184}00184\ \};}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00185}00185\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00189}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList}{00189}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList}{SourceList}}\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00190}00190\ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00191}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList_a9846113db7d28511f6f65bb8fbf4b6a4}{00191}}\ \ \ \ \ \textcolor{keyword}{typedef}\ std::map<std::string,\ PortSource*>\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList_a9846113db7d28511f6f65bb8fbf4b6a4}{SourceMap}};}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00192}00192\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00196}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList_a259c397ee9883dacc9840aedbd08c3e9}{00196}}\ \ \ \ \ std::string\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList_a259c397ee9883dacc9840aedbd08c3e9}{portPrefix}};}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00197}00197\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00202}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList_aebd43fca2618391f0b2c353b3c1f2c24}{00202}}\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList_a9846113db7d28511f6f65bb8fbf4b6a4}{SourceMap}}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList_aebd43fca2618391f0b2c353b3c1f2c24}{sourceMap}};}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00203}00203\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00204}00204\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00208}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList_af75b8ccf3988121047fe2e4ada969ae1}{00208}}\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList_af75b8ccf3988121047fe2e4ada969ae1}{SourceList}}(std::string\ pp\ =\ \textcolor{stringliteral}{"{}/lm/merge/source"{}})\ :\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList_a259c397ee9883dacc9840aedbd08c3e9}{portPrefix}}(pp)\ \{\ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00209}00209\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00213}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList_a9dd4339bb47e53c1cfa417b0e28b9ef5}{00213}}\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList_a9dd4339bb47e53c1cfa417b0e28b9ef5}{\string~SourceList}}()\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00214}00214\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (SourceMap::iterator\ it\ =\ this-\/>sourceMap.begin();\ it\ !=\ this-\/>sourceMap.end();\ it++)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00215}00215\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{delete}\ it-\/>second;}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00216}00216\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00217}00217\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00218}00218\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00222}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList_abf5398e108418d51c5067e2a5f56108a}{00222}}\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList_abf5398e108418d51c5067e2a5f56108a}{SourceList}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList}{SourceList}}\&\ other);}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00223}00223\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00227}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList_af5a53846ad873f1f32ed01a9a6fd71ef}{00227}}\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList}{SourceList}}\&\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList_af5a53846ad873f1f32ed01a9a6fd71ef}{operator=}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList}{SourceList}}\&\ other);}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00228}00228\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00232}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList_a93d47e4ca2ac862c135c358a02d90b5c}{00232}}\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList_a93d47e4ca2ac862c135c358a02d90b5c}{update}}()\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00233}00233\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ for\ each\ in\ portmap,\ port.read,\ store\ in\ datamap}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00234}00234\ \ \ \ \ \ \ \ \ SourceMap::iterator\ it;}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00235}00235\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (it\ =\ this-\/>sourceMap.begin();\ it\ !=\ this-\/>sourceMap.end();\ it++\ )\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00236}00236\ \ \ \ \ \ \ \ \ \ \ \ \ it-\/>second-\/>update();}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00237}00237\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00238}00238\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00239}00239\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00243}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList_afd6611a0b63ac19d758e2689f8a1cb0c}{00243}}\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList_afd6611a0b63ac19d758e2689f8a1cb0c}{hasSource}}(std::string\ name)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00244}00244\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (this-\/>sourceMap.count(name)\ >\ 0);}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00245}00245\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00246}00246\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00253}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList_a4b70e6749175665d9ec730fea8f21f99}{00253}}\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList_a4b70e6749175665d9ec730fea8f21f99}{addSource}}(std::string\ name)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00254}00254\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList_afd6611a0b63ac19d758e2689f8a1cb0c}{hasSource}}(name))\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00255}00255\ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>sourceMap[name]\ =\ \textcolor{keyword}{new}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1PortSource}{PortSource}}(name,\ this-\/>portPrefix);}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00256}00256\ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>sourceMap[name]-\/>connect(name);}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00257}00257\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00258}00258\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00259}00259\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00266}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList_af47724668d55be2e5b0c2d9a5be837d5}{00266}}\ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1PortSource}{PortSource}}\&\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList_af47724668d55be2e5b0c2d9a5be837d5}{getSource}}(std::string\ name)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00267}00267\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList_afd6611a0b63ac19d758e2689f8a1cb0c}{hasSource}}(name))\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00268}00268\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{throw}\ std::runtime\_error(\textcolor{stringliteral}{"{}Attempt\ to\ retrieve\ inexistent\ source."{}});}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00269}00269\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00270}00270\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *(this-\/>sourceMap[name]);}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00271}00271\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00272}00272\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00276}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList_a0632a99f1a31f7560a5820e7b96e3d84}{00276}}\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList_a0632a99f1a31f7560a5820e7b96e3d84}{interrupt}}()\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00277}00277\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (SourceMap::iterator\ it\ =\ this-\/>sourceMap.begin();\ it\ !=\ this-\/>sourceMap.end();\ it++)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00278}00278\ \ \ \ \ \ \ \ \ \ \ \ \ it-\/>second-\/>interrupt();}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00279}00279\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00280}00280\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00281}00281\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00285}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList_a8df5060c344ea30dddef57a7353dfd12}{00285}}\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList_a8df5060c344ea30dddef57a7353dfd12}{close}}()\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00286}00286\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (SourceMap::iterator\ it\ =\ this-\/>sourceMap.begin();\ it\ !=\ this-\/>sourceMap.end();\ it++)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00287}00287\ \ \ \ \ \ \ \ \ \ \ \ \ it-\/>second-\/>close();}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00288}00288\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00289}00289\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00290}00290\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00295}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList_ae3f4ff16611460f636ffae7fecef6976}{00295}}\ \ \ \ \ \textcolor{keyword}{virtual}\ std::string\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList_ae3f4ff16611460f636ffae7fecef6976}{getPortPrefix}}()\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00296}00296\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList_a259c397ee9883dacc9840aedbd08c3e9}{portPrefix}};}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00297}00297\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00298}00298\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00303}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList_a8635f667683ecc8014582724ca2699a5}{00303}}\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList_a8635f667683ecc8014582724ca2699a5}{setPortPrefix}}(std::string\ pp)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00304}00304\ \ \ \ \ \ \ \ \ this-\/>portPrefix\ =\ pp;}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00305}00305\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00306}00306\ \};}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00307}00307\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00308}00308\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00314}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1DataSelector}{00314}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1DataSelector}{DataSelector}}\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00315}00315\ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00316}00316\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00317}00317\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00322}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1DataSelector_af8355f16231208727e0c19d355d0d5ec}{00322}}\ \ \ \ \ \textcolor{keyword}{virtual}\ std::string\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1DataSelector_af8355f16231208727e0c19d355d0d5ec}{toString}}(\textcolor{keywordtype}{int}\ indent\ =\ 0)\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00323}00323\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00328}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1DataSelector_a8920464a2a77ee2a1cde3cc7e61b7532}{00328}}\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1DataSelector_a8920464a2a77ee2a1cde3cc7e61b7532}{declareSources}}(\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList}{SourceList}}\&\ sl)\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00329}00329\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00335}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1DataSelector_ad4f7b65ce68a672cd727bea73a555552}{00335}}\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1DataSelector_ad4f7b65ce68a672cd727bea73a555552}{select}}(Bottle\&\ bot,\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList}{SourceList}}\&\ sl)\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00336}00336\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00337}00337\ \};}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00338}00338\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00339}00339\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00346}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1IndexSelector}{00346}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1IndexSelector}{IndexSelector}}\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1DataSelector}{DataSelector}}\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00347}00347\ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00351}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1IndexSelector_a257cbb38f7830ad522c6c39325e99edf}{00351}}\ \ \ \ \ std::string\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1IndexSelector_a257cbb38f7830ad522c6c39325e99edf}{name}};}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00352}00352\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00357}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1IndexSelector_a3da682a82b2b3ef391dc6e31a2c01edd}{00357}}\ \ \ \ \ std::list<std::list<int>\ >\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1IndexSelector_a3da682a82b2b3ef391dc6e31a2c01edd}{indices}};}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00358}00358\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00367}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1IndexSelector_a02af598c194c27cd9a0c98e44a762e42}{00367}}\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1IndexSelector_a02af598c194c27cd9a0c98e44a762e42}{selectRecursive}}(Bottle\&\ \mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}},\ Bottle\&\ in,\ std::list<\ std::list<int>\ >::iterator\ it)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00368}00368\ \ \ \ \ \ \ \ \ std::list<int>::iterator\ it2;}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00369}00369\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (it2\ =\ (*it).begin();\ it2\ !=\ (*it).end();\ ++it2)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00370}00370\ \ \ \ \ \ \ \ \ \ \ \ \ it++;}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00371}00371\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{debugFunctions_8cpp_abacd9574384513f6cb349a60c829d5e9}{idx}}\ =\ *it2\ -\/\ 1;}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00372}00372\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(it\ ==\ this-\/>indices.end())\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00373}00373\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(in.get(\mbox{\hyperlink{debugFunctions_8cpp_abacd9574384513f6cb349a60c829d5e9}{idx}}).isList())\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00374}00374\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ add\ unwrapped\ bottle}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00375}00375\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1IndexSelector_acf09b7cc70e2535f9b6423c536b8a82e}{addBottle}}(out,\ *(in.get(\mbox{\hyperlink{debugFunctions_8cpp_abacd9574384513f6cb349a60c829d5e9}{idx}}).asList()));}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00376}00376\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00377}00377\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ add\ value\ directly}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00378}00378\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}}.add(in.get(\mbox{\hyperlink{debugFunctions_8cpp_abacd9574384513f6cb349a60c829d5e9}{idx}}));}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00379}00379\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00380}00380\ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00381}00381\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(!in.get(\mbox{\hyperlink{debugFunctions_8cpp_abacd9574384513f6cb349a60c829d5e9}{idx}}).isList())\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00382}00382\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{throw}\ std::runtime\_error(\textcolor{stringliteral}{"{}Cannot\ index\ non-\/list\ type"{}});}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00383}00383\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00384}00384\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1IndexSelector_a02af598c194c27cd9a0c98e44a762e42}{selectRecursive}}(out,\ *(in.get(\mbox{\hyperlink{debugFunctions_8cpp_abacd9574384513f6cb349a60c829d5e9}{idx}}).asList()),\ it);}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00385}00385\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00386}00386\ \ \ \ \ \ \ \ \ \ \ \ \ it-\/-\/;}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00387}00387\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00388}00388\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00389}00389\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00390}00390\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00391}00391\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00398}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1IndexSelector_acf09b7cc70e2535f9b6423c536b8a82e}{00398}}\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1IndexSelector_acf09b7cc70e2535f9b6423c536b8a82e}{addBottle}}(Bottle\&\ \mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}},\ \textcolor{keyword}{const}\ Bottle\&\ in)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00399}00399\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i\ =\ 0;\ i\ <\ in.size();\ i++)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00400}00400\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}}.add(in.get(i));}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00401}00401\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00402}00402\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00403}00403\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00404}00404\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00410}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1IndexSelector_a4764d227a96e47684d2b52f810c1a0d7}{00410}}\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1IndexSelector_a4764d227a96e47684d2b52f810c1a0d7}{IndexSelector}}(std::string\ format)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00411}00411\ \ \ \ \ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1IndexSelector_a8d6de948a09a97f038648be2fbe2c8b7}{loadFormat}}(format);}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00412}00412\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00413}00413\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00414}00414\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00415}00415\ \textcolor{comment}{\ \ \ \ \ *\ Inherited\ from\ DataSelector.}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00416}00416\ \textcolor{comment}{\ \ \ \ \ */}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00417}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1IndexSelector_a1f11f14e4e9521de164a8b05f3bb2f1f}{00417}}\ \ \ \ \ std::string\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1IndexSelector_a1f11f14e4e9521de164a8b05f3bb2f1f}{toString}}(\textcolor{keywordtype}{int}\ indent\ =\ 0)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00418}00418\ \ \ \ \ \ \ \ \ std::ostringstream\ buffer;}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00419}00419\ \ \ \ \ \ \ \ \ buffer\ <<\ std::string(indent,\ \textcolor{charliteral}{'\ '})\ <<\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1IndexSelector_a257cbb38f7830ad522c6c39325e99edf}{name}};}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00420}00420\ \ \ \ \ \ \ \ \ std::list<\ std::list<int>\ >::iterator\ it1;}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00421}00421\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (it1\ =\ this-\/>indices.begin();\ it1\ !=\ this-\/>indices.end();\ ++it1)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00422}00422\ \ \ \ \ \ \ \ \ \ \ \ \ buffer\ <<\ \textcolor{stringliteral}{"{}["{}};}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00423}00423\ \ \ \ \ \ \ \ \ \ \ \ \ std::list<int>::iterator\ it2;}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00424}00424\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (it2\ =\ (*it1).begin();\ it2\ !=\ (*it1).end();\ ++it2)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00425}00425\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (it2\ !=\ (*it1).begin())}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00426}00426\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ buffer\ <<\ \textcolor{stringliteral}{"{},"{}};}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00427}00427\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ buffer\ <<\ *it2;}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00428}00428\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00429}00429\ \ \ \ \ \ \ \ \ \ \ \ \ buffer\ <<\ \textcolor{stringliteral}{"{}]"{}};}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00430}00430\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00431}00431\ \ \ \ \ \ \ \ \ buffer\ <<\ std::endl;}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00432}00432\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ buffer.str();}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00433}00433\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00434}00434\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00435}00435\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00436}00436\ \textcolor{comment}{\ \ \ \ \ *\ Inherited\ from\ DataSelector.}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00437}00437\ \textcolor{comment}{\ \ \ \ \ */}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00438}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1IndexSelector_a914caf37052f14330574679a1cd6f364}{00438}}\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1IndexSelector_a914caf37052f14330574679a1cd6f364}{declareSources}}(\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList}{SourceList}}\&\ sl)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00439}00439\ \ \ \ \ \ \ \ \ sl.\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList_a4b70e6749175665d9ec730fea8f21f99}{addSource}}(this-\/>name);}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00440}00440\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00441}00441\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00442}00442\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00443}00443\ \textcolor{comment}{\ \ \ \ \ *\ Inherited\ from\ DataSelector.}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00444}00444\ \textcolor{comment}{\ \ \ \ \ */}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00445}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1IndexSelector_afd9e44b23a0c9f645b063b75bd4271a8}{00445}}\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1IndexSelector_afd9e44b23a0c9f645b063b75bd4271a8}{select}}(Bottle\&\ bot,\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList}{SourceList}}\&\ sl)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00446}00446\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(this-\/>indices.size()\ ==\ 0)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00447}00447\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ no\ indices,\ select\ all}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00448}00448\ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1IndexSelector_acf09b7cc70e2535f9b6423c536b8a82e}{addBottle}}(bot,\ sl.\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList_af47724668d55be2e5b0c2d9a5be837d5}{getSource}}(this-\/>name).\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1PortSource_ad92ec3b60a02bd54d860fbc99e9ffbf6}{getData}}());}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00449}00449\ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00450}00450\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ select\ sub-\/bottles\ and\ items\ recursively}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00451}00451\ \ \ \ \ \ \ \ \ \ \ \ \ std::list<\ std::list<int>\ >::iterator\ it1;}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00452}00452\ \ \ \ \ \ \ \ \ \ \ \ \ it1\ =\ this-\/>indices.begin();}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00453}00453\ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1IndexSelector_a02af598c194c27cd9a0c98e44a762e42}{selectRecursive}}(bot,\ sl.\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList_af47724668d55be2e5b0c2d9a5be837d5}{getSource}}(this-\/>name).\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1PortSource_ad92ec3b60a02bd54d860fbc99e9ffbf6}{getData}}(),\ it1);}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00454}00454\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00455}00455\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00456}00456\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00457}00457\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00464}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1IndexSelector_a8d6de948a09a97f038648be2fbe2c8b7}{00464}}\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1IndexSelector_a8d6de948a09a97f038648be2fbe2c8b7}{loadFormat}}(std::string\ format)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00465}00465\ \ \ \ \ \ \ \ \ \textcolor{comment}{//std::cout\ <<\ "{}Parsing\ format:\ "{}\ <<\ format\ <<\ std::endl;}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00466}00466\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ find\ indexing\ specifier}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00467}00467\ \ \ \ \ \ \ \ \ std::string::size\_type\ idxStart\ =\ format.find(\textcolor{stringliteral}{"{}["{}});}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00468}00468\ \ \ \ \ \ \ \ \ this-\/>name\ =\ format.substr(0,\ idxStart);}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00469}00469\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00470}00470\ \ \ \ \ \ \ \ \ std::string::size\_type\ idxEnd;}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00471}00471\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (idxStart\ !=\ std::string::npos)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00472}00472\ \ \ \ \ \ \ \ \ \ \ \ \ idxEnd\ =\ format.find(\textcolor{stringliteral}{"{}]"{}},\ idxStart);}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00473}00473\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (idxEnd\ ==\ std::string::npos)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00474}00474\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{throw}\ std::runtime\_error(\textcolor{stringliteral}{"{}Missing\ closing\ bracket\ ']'"{}});}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00475}00475\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00476}00476\ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1IndexSelector_a5f1ac332332cb224f7be8b3e9ec01a1a}{loadIndices}}(format.substr(idxStart\ +\ 1,\ idxEnd\ -\/\ idxStart\ -\/\ 1));}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00477}00477\ \ \ \ \ \ \ \ \ \ \ \ \ idxStart\ =\ format.find(\textcolor{stringliteral}{"{}["{}},\ idxStart\ +\ 1);}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00478}00478\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (idxStart\ !=\ std::string::npos\ \&\&\ (idxStart\ <\ idxEnd))\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00479}00479\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{throw}\ std::runtime\_error(\textcolor{stringliteral}{"{}Unexpected\ opening\ bracket\ '['"{}});}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00480}00480\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00481}00481\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00482}00482\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00483}00483\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00490}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1IndexSelector_a5f1ac332332cb224f7be8b3e9ec01a1a}{00490}}\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1IndexSelector_a5f1ac332332cb224f7be8b3e9ec01a1a}{loadIndices}}(std::string\ format)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00491}00491\ \ \ \ \ \ \ \ \ std::list<int>\ idxList;}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00492}00492\ \ \ \ \ \ \ \ \ std::vector<std::string>\ indexSplit\ =\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1IndexSelector_a2cb3749ceb266d3c27c9c7e75028be5f}{split}}(format,\ \textcolor{stringliteral}{"{},"{}});}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00493}00493\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ i\ =\ 0;\ i\ <\ indexSplit.size();\ i++)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00494}00494\ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<std::string>\ rangeSplit\ =\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1IndexSelector_a2cb3749ceb266d3c27c9c7e75028be5f}{split}}(indexSplit[i],\ \textcolor{stringliteral}{"{}-\/"{}});}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00495}00495\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00496}00496\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (rangeSplit.size()\ ==\ 0)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00497}00497\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ should\ be\ impossible}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00498}00498\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{throw}\ std::runtime\_error(\textcolor{stringliteral}{"{}Unexpected\ problem\ parsing:\ "{}}\ +\ indexSplit[i]);}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00499}00499\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00500}00500\ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (rangeSplit.size()\ ==\ 1)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00501}00501\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ single\ index\ specification}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00502}00502\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ idxList.push\_back(this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1IndexSelector_aa5c8ba65132dcf7a7cc646212d642b3d}{stringToInt}}(rangeSplit[0]));}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00503}00503\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00504}00504\ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (rangeSplit.size()\ ==\ 2)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00505}00505\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ start-\/end\ index\ specification}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00506}00506\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ start\ =\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1IndexSelector_aa5c8ba65132dcf7a7cc646212d642b3d}{stringToInt}}(rangeSplit[0]);}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00507}00507\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ end\ =\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1IndexSelector_aa5c8ba65132dcf7a7cc646212d642b3d}{stringToInt}}(rangeSplit[1]);}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00508}00508\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (start\ >\ end)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00509}00509\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{throw}\ std::runtime\_error(\textcolor{stringliteral}{"{}End\ of\ range\ before\ start\ of\ range:\ "{}}\ +\ indexSplit[i]);}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00510}00510\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00511}00511\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ \mbox{\hyperlink{debugFunctions_8cpp_abacd9574384513f6cb349a60c829d5e9}{idx}}\ =\ start;\ \mbox{\hyperlink{debugFunctions_8cpp_abacd9574384513f6cb349a60c829d5e9}{idx}}\ <=\ end;\ \mbox{\hyperlink{debugFunctions_8cpp_abacd9574384513f6cb349a60c829d5e9}{idx}}++)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00512}00512\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ idxList.push\_back(\mbox{\hyperlink{debugFunctions_8cpp_abacd9574384513f6cb349a60c829d5e9}{idx}});}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00513}00513\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00514}00514\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00515}00515\ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (rangeSplit.size()\ >\ 2)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00516}00516\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ illegal}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00517}00517\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{throw}\ std::runtime\_error(\textcolor{stringliteral}{"{}Illegal\ range\ specification:\ "{}}\ +\ indexSplit[i]);}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00518}00518\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00519}00519\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00520}00520\ \ \ \ \ \ \ \ \ this-\/>indices.push\_back(idxList);}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00521}00521\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00522}00522\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00530}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1IndexSelector_a2cb3749ceb266d3c27c9c7e75028be5f}{00530}}\ \ \ \ \ \textcolor{keyword}{static}\ std::vector<std::string>\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1IndexSelector_a2cb3749ceb266d3c27c9c7e75028be5f}{split}}(std::string\ input,\ std::string\ delimiter)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00531}00531\ \ \ \ \ \ \ \ \ std::string::size\_type\ start\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00532}00532\ \ \ \ \ \ \ \ \ std::string::size\_type\ end\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00533}00533\ \ \ \ \ \ \ \ \ std::vector<std::string>\ output;}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00534}00534\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (end\ !=\ std::string::npos)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00535}00535\ \ \ \ \ \ \ \ \ \ \ \ \ end\ =\ input.find(delimiter,\ start);}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00536}00536\ \ \ \ \ \ \ \ \ \ \ \ \ output.push\_back(input.substr(start,\ (end\ ==\ std::string::npos)\ ?\ end\ :\ end\ -\/\ start));}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00537}00537\ \ \ \ \ \ \ \ \ \ \ \ \ start\ =\ end\ +\ 1;}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00538}00538\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00539}00539\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ output;}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00540}00540\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00541}00541\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00548}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1IndexSelector_aa5c8ba65132dcf7a7cc646212d642b3d}{00548}}\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1IndexSelector_aa5c8ba65132dcf7a7cc646212d642b3d}{stringToInt}}(std::string\ str)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00549}00549\ \ \ \ \ \ \ \ \ std::istringstream\ buffer(str);}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00550}00550\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ ret;}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00551}00551\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (buffer\ >>\ ret)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00552}00552\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00553}00553\ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00554}00554\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{throw}\ std::runtime\_error(\textcolor{stringliteral}{"{}Could\ not\ read\ integer\ from\ '"{}}\ +\ str\ +\ \textcolor{stringliteral}{"{}'"{}});}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00555}00555\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00556}00556\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00557}00557\ \};}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00558}00558\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00559}00559\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00564}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1CompositeSelector}{00564}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1CompositeSelector}{CompositeSelector}}\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1DataSelector}{DataSelector}}\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00565}00565\ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00566}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1CompositeSelector_a6c5be99bd997975ff0279b3e0e246f6f}{00566}}\ \ \ \ \ std::vector<DataSelector*>\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1CompositeSelector_a6c5be99bd997975ff0279b3e0e246f6f}{children}};}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00567}00567\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00571}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1CompositeSelector_aad22a03261b62b3406e7cf889b502e2a}{00571}}\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1CompositeSelector_aad22a03261b62b3406e7cf889b502e2a}{CompositeSelector}}(Bottle\&\ format)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00572}00572\ \ \ \ \ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1CompositeSelector_aa3a259d1f399c4c55171ecab388533c3}{loadFormat}}(format);}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00573}00573\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00574}00574\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00578}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1CompositeSelector_a0b457bcd4a4e7f632071077f741a6afd}{00578}}\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1CompositeSelector_a0b457bcd4a4e7f632071077f741a6afd}{\string~CompositeSelector}}()\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00579}00579\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ clear\ children\ vector}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00580}00580\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ i\ =\ 0;\ i\ <\ this-\/>children.size();\ i++)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00581}00581\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{delete}\ this-\/>children[i];}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00582}00582\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00583}00583\ \ \ \ \ \ \ \ \ this-\/>children.clear();}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00584}00584\ \ \ \ \ \ \ \ \ this-\/>children.resize(0);}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00585}00585\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00586}00586\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00590}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1CompositeSelector_aee573f0428f2eed0f59080f2a85b3cb7}{00590}}\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1CompositeSelector_aee573f0428f2eed0f59080f2a85b3cb7}{CompositeSelector}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1CompositeSelector}{CompositeSelector}}\&\ other);}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00591}00591\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00595}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1CompositeSelector_a62088ab35b9c47583e168e768c1b6953}{00595}}\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1CompositeSelector}{CompositeSelector}}\&\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1CompositeSelector_a62088ab35b9c47583e168e768c1b6953}{operator=}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1CompositeSelector}{CompositeSelector}}\&\ other);}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00596}00596\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00597}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1CompositeSelector_aa3248af08db48ea4af864f63dff962a6}{00597}}\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1CompositeSelector_aa3248af08db48ea4af864f63dff962a6}{addChild}}(\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1DataSelector}{DataSelector}}*\ ds)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00598}00598\ \ \ \ \ \ \ \ \ this-\/>children.push\_back(ds);}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00599}00599\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00600}00600\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00607}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1CompositeSelector_aa3a259d1f399c4c55171ecab388533c3}{00607}}\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1CompositeSelector_aa3a259d1f399c4c55171ecab388533c3}{loadFormat}}(Bottle\&\ format)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00608}00608\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ i\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00609}00609\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ len\ =\ format.size();}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00610}00610\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (i\ <\ len)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00611}00611\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (format.get(i).isString())\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00612}00612\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//std::cout\ <<\ "{}Adding\ Index\ for\ "{}\ <<\ format.get(i).asString().c\_str()\ <<\ std::endl;}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00613}00613\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1CompositeSelector_aa3248af08db48ea4af864f63dff962a6}{addChild}}(\textcolor{keyword}{new}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1IndexSelector}{IndexSelector}}(format.get(i).asString().c\_str()));}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00614}00614\ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (format.get(i).isList())\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00615}00615\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//std::cout\ <<\ "{}Adding\ Composite\ for\ "{}\ <<\ format.get(i).asList()-\/>toString().c\_str()\ <<\ std::endl;}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00616}00616\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1CompositeSelector_aa3248af08db48ea4af864f63dff962a6}{addChild}}(\textcolor{keyword}{new}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1CompositeSelector}{CompositeSelector}}(*(format.get(i).asList())));}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00617}00617\ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00618}00618\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{throw}\ std::runtime\_error(std::string(\textcolor{stringliteral}{"{}Unexpected\ token\ during\ parsing:\ "{}})\ +}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00619}00619\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ format.get(i).asString().c\_str());}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00620}00620\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00621}00621\ \ \ \ \ \ \ \ \ \ \ \ \ i++;}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00622}00622\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00623}00623\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00624}00624\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00625}00625\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00626}00626\ \textcolor{comment}{\ \ \ \ \ *\ Inherited\ from\ DataSelector.}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00627}00627\ \textcolor{comment}{\ \ \ \ \ */}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00628}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1CompositeSelector_aa9748abd64b29e3888dc8ed6dd415a76}{00628}}\ \ \ \ \ std::string\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1CompositeSelector_aa9748abd64b29e3888dc8ed6dd415a76}{toString}}(\textcolor{keywordtype}{int}\ indent\ =\ 0)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00629}00629\ \ \ \ \ \ \ \ \ std::ostringstream\ buffer;}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00630}00630\ \ \ \ \ \ \ \ \ buffer\ <<\ std::string(indent,\ \textcolor{charliteral}{'\ '})\ <<\ \textcolor{stringliteral}{"{}("{}}\ <<\ std::endl;}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00631}00631\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ i\ =\ 0;\ i\ <\ this-\/>children.size();\ i++)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00632}00632\ \ \ \ \ \ \ \ \ \ \ \ \ buffer\ <<\ this-\/>children[i]-\/>toString(indent\ +\ 2);}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00633}00633\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00634}00634\ \ \ \ \ \ \ \ \ buffer\ <<\ std::string(indent,\ \textcolor{charliteral}{'\ '})\ <<\ \textcolor{stringliteral}{"{})"{}}\ <<\ std::endl;}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00635}00635\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ buffer.str();}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00636}00636\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00637}00637\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00638}00638\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00639}00639\ \textcolor{comment}{\ \ \ \ \ *\ Inherited\ from\ DataSelector.}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00640}00640\ \textcolor{comment}{\ \ \ \ \ */}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00641}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1CompositeSelector_a9472b0d0c9327d0e119de628bf2a2a94}{00641}}\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1CompositeSelector_a9472b0d0c9327d0e119de628bf2a2a94}{declareSources}}(\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList}{SourceList}}\&\ sl)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00642}00642\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ i\ =\ 0;\ i\ <\ this-\/>children.size();\ i++)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00643}00643\ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>children[i]-\/>declareSources(sl);}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00644}00644\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00645}00645\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00646}00646\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00647}00647\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00648}00648\ \textcolor{comment}{\ \ \ \ \ *\ Inherited\ from\ DataSelector.}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00649}00649\ \textcolor{comment}{\ \ \ \ \ */}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00650}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1CompositeSelector_aeff8660ee5d2d1186ce9efbeae262da0}{00650}}\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1CompositeSelector_aeff8660ee5d2d1186ce9efbeae262da0}{select}}(Bottle\&\ bot,\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList}{SourceList}}\&\ sl)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00651}00651\ \ \ \ \ \ \ \ \ Bottle\&\ bot2\ =\ bot.addList();}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00652}00652\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ i\ =\ 0;\ i\ <\ this-\/>children.size();\ i++)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00653}00653\ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>children[i]-\/>select(bot2,\ sl);}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00654}00654\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00655}00655\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00656}00656\ \};}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00657}00657\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00663}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1RootSelector}{00663}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1RootSelector}{RootSelector}}\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1CompositeSelector}{CompositeSelector}}\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00664}00664\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00668}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1RootSelector_af226fd5c08b94622e70d3065a6be217b}{00668}}\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1RootSelector_af226fd5c08b94622e70d3065a6be217b}{RootSelector}}(Bottle\&\ format)\ :\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1CompositeSelector}{CompositeSelector}}(format)\ \{\ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00669}00669\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00670}00670\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00671}00671\ \textcolor{comment}{\ \ \ \ \ *\ Inherited\ from\ DataSelector.}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00672}00672\ \textcolor{comment}{\ \ \ \ \ */}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00673}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1RootSelector_a6ac22d1bac9a17064112fb8efab63d4e}{00673}}\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1RootSelector_a6ac22d1bac9a17064112fb8efab63d4e}{select}}(Bottle\&\ bot,\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList}{SourceList}}\&\ sl)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00674}00674\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ i\ =\ 0;\ i\ <\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1CompositeSelector_a6c5be99bd997975ff0279b3e0e246f6f}{children}}.size();\ i++)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00675}00675\ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1CompositeSelector_a6c5be99bd997975ff0279b3e0e246f6f}{children}}[i]-\/>select(bot,\ sl);}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00676}00676\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00677}00677\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00678}00678\ \};}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00679}00679\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00688}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule}{00688}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule}{MergeModule}}\ :\ \textcolor{keyword}{public}\ RFModule\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00689}00689\ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00693}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_aad959b9406f5b5c03c999b9eb18bc664}{00693}}\ \ \ \ \ std::string\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_aad959b9406f5b5c03c999b9eb18bc664}{portPrefix}};}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00694}00694\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00698}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_a65743e611f5ea6703f996a470a29b6bb}{00698}}\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_a65743e611f5ea6703f996a470a29b6bb}{desiredPeriod}};}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00699}00699\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00703}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_aa9539cd5fe8ba99de9f63c48da66d25a}{00703}}\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList}{SourceList}}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_aa9539cd5fe8ba99de9f63c48da66d25a}{sourceList}};}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00704}00704\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00708}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_ab54a62f10f2800258596291862209d97}{00708}}\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1DataSelector}{DataSelector}}*\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_ab54a62f10f2800258596291862209d97}{dataSelector}};}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00709}00709\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00713}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_af12465e67086167523a2ff3572cc1e4e}{00713}}\ \ \ \ \ Port\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_af12465e67086167523a2ff3572cc1e4e}{output}};}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00714}00714\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00715}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_a637caa160b65bea0e435e0e382ffa1e9}{00715}}\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_a637caa160b65bea0e435e0e382ffa1e9}{printOptions}}(std::string\ \mbox{\hyperlink{debugFunctions_8cpp_a7a3172cc98e93d8eadfb9ab30373799e}{error}}\ =\ \textcolor{stringliteral}{"{}"{}})\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00716}00716\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{debugFunctions_8cpp_a7a3172cc98e93d8eadfb9ab30373799e}{error}}\ !=\ \textcolor{stringliteral}{"{}"{}})\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00717}00717\ \ \ \ \ \ \ \ \ \ \ \ \ std::cerr\ <<\ \textcolor{stringliteral}{"{}Error:\ "{}}\ <<\ \mbox{\hyperlink{debugFunctions_8cpp_a7a3172cc98e93d8eadfb9ab30373799e}{error}}\ <<\ std::endl;}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00718}00718\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00719}00719\ \ \ \ \ \ \ \ \ std::cout\ <<\ \textcolor{stringliteral}{"{}Available\ options"{}}\ <<\ std::endl;}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00720}00720\ \ \ \ \ \ \ \ \ std::cout\ <<\ \textcolor{stringliteral}{"{}-\/-\/format\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ The\ format\ for\ the\ output\ (required)"{}}\ <<\ std::endl;}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00721}00721\ \ \ \ \ \ \ \ \ std::cout\ <<\ \textcolor{stringliteral}{"{}-\/-\/frequency\ f\ \ \ \ \ \ \ \ \ \ Sampling\ frequency\ in\ Hz"{}}\ <<\ std::endl;}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00722}00722\ \ \ \ \ \ \ \ \ std::cout\ <<\ \textcolor{stringliteral}{"{}-\/-\/port\ pfx\ \ \ \ \ \ \ \ \ \ \ \ \ Prefix\ for\ registering\ the\ ports"{}}\ <<\ std::endl;}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00723}00723\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00724}00724\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00732}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_a0e510d210d0c9831fdf93f08ef363025}{00732}}\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_a0e510d210d0c9831fdf93f08ef363025}{registerPort}}(Contactable\&\ port,\ std::string\ name)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00733}00733\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (port.open(name.c\_str())\ !=\ \textcolor{keyword}{true})\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00734}00734\ \ \ \ \ \ \ \ \ \ \ \ \ std::string\ msg(\textcolor{stringliteral}{"{}could\ not\ register\ port\ "{}});}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00735}00735\ \ \ \ \ \ \ \ \ \ \ \ \ msg+=name;}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00736}00736\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{throw}\ std::runtime\_error(msg);}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00737}00737\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00738}00738\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00739}00739\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00743}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_a03d49f5ef42c942eaf0def202176e31c}{00743}}\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_a03d49f5ef42c942eaf0def202176e31c}{registerAllPorts}}()\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00744}00744\ \ \ \ \ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_a0e510d210d0c9831fdf93f08ef363025}{registerPort}}(this-\/>output,\ this-\/>portPrefix\ +\ \textcolor{stringliteral}{"{}/output:o"{}});}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00745}00745\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00746}00746\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00752}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_a4b335e8bcc3c576df849c6adc0f704e4}{00752}}\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_a4b335e8bcc3c576df849c6adc0f704e4}{unregisterAllPorts}}()\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00753}00753\ \ \ \ \ \ \ \ \ this-\/>sourceList.\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList_a8df5060c344ea30dddef57a7353dfd12}{close}}();}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00754}00754\ \ \ \ \ \ \ \ \ this-\/>output.close();}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00755}00755\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00756}00756\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00757}00757\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00758}00758\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00762}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_a500e29ce59a73d44bf7fa044fa4363c9}{00762}}\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_a500e29ce59a73d44bf7fa044fa4363c9}{MergeModule}}(std::string\ pp\ =\ \textcolor{stringliteral}{"{}/lm/merge"{}})}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00763}00763\ \ \ \ \ \ \ \ \ \ \ \ \ :\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_aad959b9406f5b5c03c999b9eb18bc664}{portPrefix}}(pp),\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_a65743e611f5ea6703f996a470a29b6bb}{desiredPeriod}}(0.1),\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_ab54a62f10f2800258596291862209d97}{dataSelector}}((\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1DataSelector}{DataSelector}}*)\ 0)\ \{\ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00764}00764\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00768}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_a4e2eb56fdf554b240cf0635ce25f1d43}{00768}}\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_a4e2eb56fdf554b240cf0635ce25f1d43}{\string~MergeModule}}()\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00769}00769\ \ \ \ \ \ \ \ \ \textcolor{keyword}{delete}\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_ab54a62f10f2800258596291862209d97}{dataSelector}};}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00770}00770\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00771}00771\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00772}00772\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00773}00773\ \textcolor{comment}{\ \ \ \ \ *\ Inherited\ from\ yarp::os::RFModule}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00774}00774\ \textcolor{comment}{\ \ \ \ \ */}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00775}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_ae629b79f8a7fce9b7a87ce24339db4c4}{00775}}\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_ae629b79f8a7fce9b7a87ce24339db4c4}{getPeriod}}()\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00776}00776\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_a65743e611f5ea6703f996a470a29b6bb}{desiredPeriod}};}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00777}00777\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00778}00778\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00779}00779\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00780}00780\ \textcolor{comment}{\ \ \ \ \ *\ Inherited\ from\ yarp::os::RFModule}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00781}00781\ \textcolor{comment}{\ \ \ \ \ */}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00782}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_aea5df3777558ca736eac0a95fa6e0e6e}{00782}}\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_aea5df3777558ca736eac0a95fa6e0e6e}{interruptModule}}()\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00783}00783\ \ \ \ \ \ \ \ \ this-\/>sourceList.\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList_a0632a99f1a31f7560a5820e7b96e3d84}{interrupt}}();}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00784}00784\ \ \ \ \ \ \ \ \ this-\/>output.interrupt();}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00785}00785\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00786}00786\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00787}00787\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00788}00788\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00789}00789\ \textcolor{comment}{\ \ \ \ \ *\ Inherited\ from\ yarp::os::RFModule}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00790}00790\ \textcolor{comment}{\ \ \ \ \ */}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00791}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_a378cacf0892241facdf13baf2b6216f3}{00791}}\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_a378cacf0892241facdf13baf2b6216f3}{close}}()\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00792}00792\ \ \ \ \ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_a4b335e8bcc3c576df849c6adc0f704e4}{unregisterAllPorts}}();}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00793}00793\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00794}00794\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00795}00795\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00796}00796\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00797}00797\ \textcolor{comment}{\ \ \ \ \ *\ Inherited\ from\ yarp::os::RFModule}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00798}00798\ \textcolor{comment}{\ \ \ \ \ */}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00799}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_a40c463a9bf4a5cc904ae148764c0d95f}{00799}}\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_a40c463a9bf4a5cc904ae148764c0d95f}{configure}}(ResourceFinder\&\ opt)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00800}00800\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ read\ for\ the\ general\ specifiers:}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00801}00801\ \ \ \ \ \ \ \ \ Value*\ val;}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00802}00802\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ success\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00803}00803\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00804}00804\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (opt.check(\textcolor{stringliteral}{"{}help"{}}))\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00805}00805\ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_a637caa160b65bea0e435e0e382ffa1e9}{printOptions}}();}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00806}00806\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00807}00807\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00808}00808\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00809}00809\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ check\ for\ port\ specifier:\ portSuffix}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00810}00810\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (opt.check(\textcolor{stringliteral}{"{}port"{}},\ val))\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00811}00811\ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>portPrefix\ =\ val-\/>asString().c\_str();}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00812}00812\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00813}00813\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00814}00814\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ set\ port\ prefix}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00815}00815\ \ \ \ \ \ \ \ \ this-\/>sourceList.\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList_a8635f667683ecc8014582724ca2699a5}{setPortPrefix}}(this-\/>portPrefix\ +\ \textcolor{stringliteral}{"{}/source"{}});}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00816}00816\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00817}00817\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ read\ and\ parse\ format}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00818}00818\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (opt.check(\textcolor{stringliteral}{"{}format"{}},\ val))\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00819}00819\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (val-\/>isList())\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00820}00820\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>dataSelector\ =\ \textcolor{keyword}{new}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1RootSelector}{RootSelector}}(*(val-\/>asList()));}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00821}00821\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>dataSelector-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1DataSelector_a8920464a2a77ee2a1cde3cc7e61b7532}{declareSources}}(this-\/>sourceList);}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00822}00822\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ success\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00823}00823\ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00824}00824\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{throw}\ std::runtime\_error(\textcolor{stringliteral}{"{}The\ format\ must\ be\ a\ list!"{}});}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00825}00825\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00826}00826\ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00827}00827\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ error,\ no\ format!}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00828}00828\ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_a637caa160b65bea0e435e0e382ffa1e9}{printOptions}}(\textcolor{stringliteral}{"{}Please\ supply\ a\ format!"{}});}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00829}00829\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00830}00830\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00831}00831\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00832}00832\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00833}00833\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (opt.check(\textcolor{stringliteral}{"{}frequency"{}},\ val))\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00834}00834\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (val-\/>isFloat64()\ ||\ val-\/>isInt32())\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00835}00835\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_af5a049bd239bc36e39295161248ab52e}{setFrequency}}(val-\/>asFloat64());}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00836}00836\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00837}00837\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00838}00838\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00839}00839\ \ \ \ \ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_a03d49f5ef42c942eaf0def202176e31c}{registerAllPorts}}();}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00840}00840\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00841}00841\ \ \ \ \ \ \ \ \ this-\/>attachTerminal();}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00842}00842\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00843}00843\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ success;}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00844}00844\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00845}00845\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00846}00846\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00847}00847\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00848}00848\ \textcolor{comment}{\ \ \ \ \ *\ Inherited\ from\ yarp::os::RFModule}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00849}00849\ \textcolor{comment}{\ \ \ \ \ */}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00850}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_a84580853eec37529841f745f0bee959a}{00850}}\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_a84580853eec37529841f745f0bee959a}{updateModule}}()\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00851}00851\ \ \ \ \ \ \ \ \ assert(this-\/>dataSelector\ !=\ (\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1DataSelector}{DataSelector}}*)\ 0);}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00852}00852\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00853}00853\ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>sourceList.\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1SourceList_a93d47e4ca2ac862c135c358a02d90b5c}{update}}();}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00854}00854\ \ \ \ \ \ \ \ \ \ \ \ \ Bottle\ \mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}};}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00855}00855\ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>dataSelector-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1DataSelector_ad4f7b65ce68a672cd727bea73a555552}{select}}(\mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}},\ this-\/>sourceList);}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00856}00856\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//std::cout\ <<\ "{}Bottle:\ "{}\ <<\ out.toString().c\_str()\ <<\ std::endl;}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00857}00857\ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>output.write(\mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}});}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00858}00858\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//this-\/>listeners.process(this-\/>portSource);}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00859}00859\ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{catch}\ (\textcolor{keyword}{const}\ std::exception\&\ \mbox{\hyperlink{compute__ekf__fast_8m_a08a4415e9d594ff960030b921d42b91e}{e}})\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00860}00860\ \ \ \ \ \ \ \ \ \ \ \ \ std::cerr\ <<\ \textcolor{stringliteral}{"{}Error:\ "{}}\ <<\ \mbox{\hyperlink{compute__ekf__fast_8m_a08a4415e9d594ff960030b921d42b91e}{e}}.what()\ <<\ std::endl;}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00861}00861\ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{catch}\ (...)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00862}00862\ \ \ \ \ \ \ \ \ \ \ \ \ std::cerr\ <<\ \textcolor{stringliteral}{"{}Error...\ something\ bad\ happened,\ but\ I\ wouldn't\ know\ what!"{}}\ <<\ std::endl;}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00863}00863\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00864}00864\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00865}00865\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00866}00866\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00867}00867\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00868}00868\ \textcolor{comment}{\ \ \ \ \ *\ Inherited\ from\ yarp::os::RFModule}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00869}00869\ \textcolor{comment}{\ \ \ \ \ */}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00870}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_a525fc5189291cc6f3ffdb760f532bdd9}{00870}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_a525fc5189291cc6f3ffdb760f532bdd9}{respond}}(\textcolor{keyword}{const}\ Bottle\&\ \mbox{\hyperlink{dataTypes_8h_a4d43e8212bdc9dbee866506f04effcea}{cmd}},\ Bottle\&\ reply)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00871}00871\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ success\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00872}00872\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00873}00873\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00874}00874\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{switch}\ (\mbox{\hyperlink{dataTypes_8h_a4d43e8212bdc9dbee866506f04effcea}{cmd}}.get(0).asVocab32())\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00875}00875\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ yarp::os::createVocab32(\textcolor{charliteral}{'h'},\textcolor{charliteral}{'e'},\textcolor{charliteral}{'l'},\textcolor{charliteral}{'p'}):\ \textcolor{comment}{//\ print\ help\ information}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00876}00876\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ success\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00877}00877\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ reply.add(Value::makeVocab32(\textcolor{stringliteral}{"{}help"{}}));}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00878}00878\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00879}00879\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ reply.addString(\textcolor{stringliteral}{"{}Merge\ module\ configuration\ options"{}});}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00880}00880\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ reply.addString(\textcolor{stringliteral}{"{}\ \ help\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Displays\ this\ message"{}});}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00881}00881\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ reply.addString(\textcolor{stringliteral}{"{}\ \ info\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Prints\ information"{}});}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00882}00882\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ reply.addString(\textcolor{stringliteral}{"{}\ \ freq\ f\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Sampling\ frequency\ in\ Hertz\ (0\ for\ disabled)"{}});}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00883}00883\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00884}00884\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00885}00885\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ yarp::os::createVocab32(\textcolor{charliteral}{'i'},\textcolor{charliteral}{'n'},\textcolor{charliteral}{'f'},\textcolor{charliteral}{'o'}):\ \textcolor{comment}{//\ print\ information}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00886}00886\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00887}00887\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ reply.add(Value::makeVocab32(\textcolor{stringliteral}{"{}help"{}}));}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00888}00888\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ success\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00889}00889\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ reply.addString(this-\/>dataSelector-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1DataSelector_af8355f16231208727e0c19d355d0d5ec}{toString}}().c\_str());}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00890}00890\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00891}00891\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00892}00892\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00893}00893\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ yarp::os::createVocab32(\textcolor{charliteral}{'f'},\textcolor{charliteral}{'r'},\textcolor{charliteral}{'e'},\textcolor{charliteral}{'q'}):\ \textcolor{comment}{//\ set\ sampling\ frequency}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00894}00894\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00895}00895\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{dataTypes_8h_a4d43e8212bdc9dbee866506f04effcea}{cmd}}.size()\ >\ 1\ \&\&\ (\mbox{\hyperlink{dataTypes_8h_a4d43e8212bdc9dbee866506f04effcea}{cmd}}.get(1).isInt32()\ ||\ \mbox{\hyperlink{dataTypes_8h_a4d43e8212bdc9dbee866506f04effcea}{cmd}}.get(1).isFloat64()))\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00896}00896\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ success\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00897}00897\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_af3f4f4c0336dd2b35e0fa47d8a754836}{setDesiredPeriod}}(1.\ /\ cmd.get(1).asFloat64());}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00898}00898\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//reply.addString((std::string("{}Current\ frequency:\ "{})\ +\ cmd.get(1).toString().c\_str()).c\_str());}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00899}00899\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00900}00900\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00901}00901\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00902}00902\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00903}00903\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{default}:}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00904}00904\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00905}00905\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00906}00906\ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{catch}\ (\textcolor{keyword}{const}\ std::exception\&\ \mbox{\hyperlink{compute__ekf__fast_8m_a08a4415e9d594ff960030b921d42b91e}{e}})\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00907}00907\ \ \ \ \ \ \ \ \ \ \ \ \ success\ =\ \textcolor{keyword}{true};\ \textcolor{comment}{//\ to\ make\ sure\ YARP\ prints\ the\ error\ message}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00908}00908\ \ \ \ \ \ \ \ \ \ \ \ \ std::string\ msg\ =\ std::string(\textcolor{stringliteral}{"{}Error:\ "{}})\ +\ \mbox{\hyperlink{compute__ekf__fast_8m_a08a4415e9d594ff960030b921d42b91e}{e}}.what();}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00909}00909\ \ \ \ \ \ \ \ \ \ \ \ \ reply.addString(msg.c\_str());}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00910}00910\ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_a378cacf0892241facdf13baf2b6216f3}{close}}();}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00911}00911\ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{catch}\ (...)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00912}00912\ \ \ \ \ \ \ \ \ \ \ \ \ success\ =\ \textcolor{keyword}{true};\ \textcolor{comment}{//\ to\ make\ sure\ YARP\ prints\ the\ error\ message}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00913}00913\ \ \ \ \ \ \ \ \ \ \ \ \ std::string\ msg\ =\ std::string(\textcolor{stringliteral}{"{}Error.\ (something\ bad\ happened,\ but\ I\ wouldn't\ know\ what!)"{}});}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00914}00914\ \ \ \ \ \ \ \ \ \ \ \ \ reply.addString(msg.c\_str());}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00915}00915\ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_a378cacf0892241facdf13baf2b6216f3}{close}}();}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00916}00916\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00917}00917\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00918}00918\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ success;}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00919}00919\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00920}00920\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00926}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_af3f4f4c0336dd2b35e0fa47d8a754836}{00926}}\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_af3f4f4c0336dd2b35e0fa47d8a754836}{setDesiredPeriod}}(\textcolor{keywordtype}{double}\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}})\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00927}00927\ \ \ \ \ \ \ \ \ this-\/>desiredPeriod\ =\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}};}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00928}00928\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00929}00929\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00935}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_af5a049bd239bc36e39295161248ab52e}{00935}}\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_af5a049bd239bc36e39295161248ab52e}{setFrequency}}(\textcolor{keywordtype}{double}\ \mbox{\hyperlink{compute__ekf__sym_8m_a633de4b0c14ca52ea2432a3c8a5c4c31}{f}})\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00936}00936\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{compute__ekf__sym_8m_a633de4b0c14ca52ea2432a3c8a5c4c31}{f}}\ <=\ 0)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00937}00937\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{throw}\ std::runtime\_error(\textcolor{stringliteral}{"{}Frequency\ must\ be\ larger\ than\ 0"{}});}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00938}00938\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00939}00939\ \ \ \ \ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_af3f4f4c0336dd2b35e0fa47d8a754836}{setDesiredPeriod}}(1.\ /\ f);}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00940}00940\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00941}00941\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00946}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_aed3b1c097b092faece24a399d03db1bf}{00946}}\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_aed3b1c097b092faece24a399d03db1bf}{getDesiredPeriod}}()\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00947}00947\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule_a65743e611f5ea6703f996a470a29b6bb}{desiredPeriod}};}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00948}00948\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00949}00949\ \};}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00950}00950\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00951}00951\ \}\ \textcolor{comment}{//\ merge}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00952}00952\ \}\ \textcolor{comment}{//\ learningmachine}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00953}00953\ \}\ \textcolor{comment}{//\ iCub}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00954}00954\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00955}00955\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceiCub_1_1learningmachine_1_1merge}{iCub::learningmachine::merge}};}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00956}00956\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00957}\mbox{\hyperlink{merge_8cpp_a0ddf1224851353fc92bfbff6f499fa97}{00957}}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{icub-tutorials_2src_2anyRobotCartesianInterface_2src_2fakeRobot_2main_8cpp_ae66f6b31b5ad750f1fe042a706a4e3d4}{main}}(\textcolor{keywordtype}{int}\ argc,\ \textcolor{keywordtype}{char}\ *argv[])\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00958}00958\ \ \ \ \ Network\ \mbox{\hyperlink{namespaceyarp}{yarp}};}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00959}00959\ \ \ \ \ \textcolor{keywordtype}{int}\ ret;}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00960}00960\ }
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00961}00961\ \ \ \ \ ResourceFinder\ rf;}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00962}00962\ \ \ \ \ rf.setDefaultContext(\textcolor{stringliteral}{"{}learningMachine"{}});}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00963}00963\ \ \ \ \ rf.configure(argc,\ argv);}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00964}00964\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1merge_1_1MergeModule}{MergeModule}}\ \textcolor{keyword}{module};}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00965}00965\ \ \ \ \ \textcolor{keywordflow}{try}\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00966}00966\ \ \ \ \ \ \ \ \ ret\ =\ \textcolor{keyword}{module}.runModule(rf);}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00967}00967\ \ \ \ \ \}\ \textcolor{keywordflow}{catch}(\textcolor{keyword}{const}\ std::exception\&\ \mbox{\hyperlink{compute__ekf__fast_8m_a08a4415e9d594ff960030b921d42b91e}{e}})\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00968}00968\ \ \ \ \ \ \ \ \ std::cerr\ <<\ \textcolor{stringliteral}{"{}Error:\ "{}}\ <<\ \mbox{\hyperlink{compute__ekf__fast_8m_a08a4415e9d594ff960030b921d42b91e}{e}}.what()\ <<\ std::endl;}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00969}00969\ \ \ \ \ \ \ \ \ \textcolor{keyword}{module}.close();}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00970}00970\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ 1;}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00971}00971\ \ \ \ \ \}\ \textcolor{keywordflow}{catch}(\textcolor{keywordtype}{char}*\ msg)\ \{}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00972}00972\ \ \ \ \ \ \ \ \ std::cerr\ <<\ \textcolor{stringliteral}{"{}Error:\ "{}}\ <<\ msg\ <<\ std::endl;}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00973}00973\ \ \ \ \ \ \ \ \ \textcolor{keyword}{module}.close();}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00974}00974\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ 1;}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00975}00975\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00976}00976\ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00977}00977\ \}}
+\DoxyCodeLine{\Hypertarget{merge_8cpp_source_l00978}00978\ }
+
+\end{DoxyCode}

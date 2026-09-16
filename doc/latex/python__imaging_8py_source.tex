@@ -1,0 +1,127 @@
+\doxysection{python\+\_\+imaging.\+py}
+\hypertarget{python__imaging_8py_source}{}\label{python__imaging_8py_source}\index{icub-\/tutorials/python/python\_imaging.py@{icub-\/tutorials/python/python\_imaging.py}}
+\mbox{\hyperlink{python__imaging_8py}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00001}\mbox{\hyperlink{namespacepython__imaging}{00001}}\ \textcolor{keyword}{import}\ numpy}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00002}00002\ \textcolor{keyword}{import}\ yarp}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00003}00003\ \textcolor{keyword}{import}\ scipy.ndimage}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00004}00004\ \textcolor{keyword}{import}\ matplotlib.pylab}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00005}00005\ }
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00006}00006\ \textcolor{comment}{\#\ Initialise\ YARP}}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00007}00007\ yarp.Network.init()}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00008}00008\ }
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00009}00009\ }
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00010}\mbox{\hyperlink{namespacepython__imaging_a5e1b658540f8973afeea450bcdf0803b}{00010}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepython__imaging_a5e1b658540f8973afeea450bcdf0803b}{python\_to\_yarp}}():}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00011}00011\ \ \ \ \ \textcolor{comment}{\#\ Create\ the\ array\ with\ random\ data}}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00012}00012\ \ \ \ \ img\_array\ =\ numpy.random.uniform(0.,\ 255.,\ (240,\ 320)).astype(numpy.float32)}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00013}00013\ }
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00014}00014\ \ \ \ \ \textcolor{comment}{\#\ Create\ the\ yarp\ image\ and\ wrap\ it\ around\ the\ array\ \ }}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00015}00015\ \ \ \ \ yarp\_image\ =\ yarp.ImageFloat()}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00016}00016\ \ \ \ \ yarp\_image.setExternal(img\_array,\ img\_array.shape[1],\ img\_array.shape[0])}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00017}00017\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00018}00018\ \ \ \ \ \textcolor{comment}{\#\ Alternatively,\ if\ using\ Python\ 2.x,\ try:}}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00019}00019\ \ \ \ \ \textcolor{comment}{\#\ yarp\_image.setExternal(img\_array.\_\_array\_interface\_\_['data'][0],\ img\_array.shape[1],\ img\_array.shape[0])}}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00020}00020\ }
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00021}00021\ \ \ \ \ \textcolor{comment}{\#\ Create\ the\ yarp\ port,\ connect\ it\ to\ the\ running\ instance\ of\ yarpview\ and\ send\ the\ image}}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00022}00022\ \ \ \ \ output\_port\ =\ yarp.Port()}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00023}00023\ \ \ \ \ output\_port.open(\textcolor{stringliteral}{"{}/python-\/image-\/port"{}})}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00024}00024\ \ \ \ \ yarp.Network.connect(\textcolor{stringliteral}{"{}/python-\/image-\/port"{}},\ \textcolor{stringliteral}{"{}/view01"{}})}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00025}00025\ \ \ \ \ output\_port.write(yarp\_image)}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00026}00026\ }
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00027}00027\ \ \ \ \ \textcolor{comment}{\#\ Cleanup}}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00028}00028\ \ \ \ \ output\_port.close()}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00029}00029\ }
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00030}00030\ }
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00031}\mbox{\hyperlink{namespacepython__imaging_aa4e9be7c603e0dc0e9fcd2955d74e699}{00031}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepython__imaging_aa4e9be7c603e0dc0e9fcd2955d74e699}{yarp\_to\_python}}():}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00032}00032\ \ \ \ \ \textcolor{comment}{\#\ Create\ a\ port\ and\ connect\ it\ to\ the\ iCub\ simulator\ virtual\ camera}}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00033}00033\ \ \ \ \ input\_port\ =\ yarp.Port()}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00034}00034\ \ \ \ \ input\_port.open(\textcolor{stringliteral}{"{}/python-\/image-\/port"{}})}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00035}00035\ \ \ \ \ yarp.Network.connect(\textcolor{stringliteral}{"{}/icubSim/cam"{}},\ \textcolor{stringliteral}{"{}/python-\/image-\/port"{}})}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00036}00036\ }
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00037}00037\ \ \ \ \ \textcolor{comment}{\#\ Create\ numpy\ array\ to\ receive\ the\ image\ and\ the\ YARP\ image\ wrapped\ around\ it}}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00038}00038\ \ \ \ \ img\_array\ =\ numpy.zeros((240,\ 320,\ 3),\ dtype=numpy.uint8)}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00039}00039\ \ \ \ \ yarp\_image\ =\ yarp.ImageRgb()}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00040}00040\ \ \ \ \ yarp\_image.resize(320,\ 240)}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00041}00041\ \ \ \ \ yarp\_image.setExternal(img\_array,\ img\_array.shape[1],\ img\_array.shape[0])}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00042}00042\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00043}00043\ \ \ \ \ \textcolor{comment}{\#\ Alternatively,\ if\ using\ Python\ 2.x,\ try:}}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00044}00044\ \ \ \ \ \textcolor{comment}{\#\ yarp\_image.setExternal(img\_array.\_\_array\_interface\_\_['data'][0],\ img\_array.shape[1],\ img\_array.shape[0])}}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00045}00045\ }
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00046}00046\ \ \ \ \ \textcolor{comment}{\#\ Read\ the\ data\ from\ the\ port\ into\ the\ image}}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00047}00047\ \ \ \ \ input\_port.read(yarp\_image)}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00048}00048\ }
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00049}00049\ \ \ \ \ \textcolor{comment}{\#\ display\ the\ image\ that\ has\ been\ read}}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00050}00050\ \ \ \ \ matplotlib.pylab.imshow(img\_array)}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00051}00051\ }
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00052}00052\ \ \ \ \ \textcolor{comment}{\#\ Cleanup}}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00053}00053\ \ \ \ \ input\_port.close()}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00054}00054\ }
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00055}00055\ }
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00056}\mbox{\hyperlink{classpython__imaging_1_1SobelFilter}{00056}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classpython__imaging_1_1SobelFilter}{SobelFilter}}:}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00057}00057\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Object\ that\ reads\ an\ image\ from\ a\ port,\ transforms\ it\ and\ sends\ the\ result\ to\ another\ port.}}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00058}00058\ \textcolor{stringliteral}{\ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00059}00059\ \textcolor{stringliteral}{\ \ \ \ The\ object\ reads\ RGB\ images\ and\ sends\ monochrome\ ones\ with\ calculated\ sobel\ filter.}}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00060}00060\ \textcolor{stringliteral}{\ \ \ \ Note:\ this\ class\ uses\ the\ alternative\ implementation\ of\ setExternal\ together\ with\ numpy\ array\ interface.}}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00061}00061\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00062}00062\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00063}\mbox{\hyperlink{classpython__imaging_1_1SobelFilter_a2a9b70e2fd9c9476ba7c56798e89bf82}{00063}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpython__imaging_1_1SobelFilter_a2a9b70e2fd9c9476ba7c56798e89bf82}{\_\_init\_\_}}(self,\ input\_port\_name,\ output\_port\_name):\ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00064}00064\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Prepare\ ports}}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00065}\mbox{\hyperlink{classpython__imaging_1_1SobelFilter_a9a91f35ee91fcdca0e3f0274bbfb3a4a}{00065}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpython__imaging_1_1SobelFilter_a9a91f35ee91fcdca0e3f0274bbfb3a4a}{\_input\_port}}\ =\ yarp.Port()}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00066}\mbox{\hyperlink{classpython__imaging_1_1SobelFilter_afca453995ce69775ca7e2db798d0747e}{00066}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpython__imaging_1_1SobelFilter_afca453995ce69775ca7e2db798d0747e}{\_input\_port\_name}}\ =\ input\_port\_name}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00067}00067\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpython__imaging_1_1SobelFilter_a9a91f35ee91fcdca0e3f0274bbfb3a4a}{\_input\_port}}.open(self.\mbox{\hyperlink{classpython__imaging_1_1SobelFilter_afca453995ce69775ca7e2db798d0747e}{\_input\_port\_name}})}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00068}00068\ }
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00069}\mbox{\hyperlink{classpython__imaging_1_1SobelFilter_a36149fb22306523ea978406f7b64df27}{00069}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpython__imaging_1_1SobelFilter_a36149fb22306523ea978406f7b64df27}{\_output\_port}}\ =\ yarp.Port()}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00070}\mbox{\hyperlink{classpython__imaging_1_1SobelFilter_ac4edd39a5ccc32e75e63542cb4fd2cbd}{00070}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpython__imaging_1_1SobelFilter_ac4edd39a5ccc32e75e63542cb4fd2cbd}{\_output\_port\_name}}\ =\ output\_port\_name}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00071}00071\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpython__imaging_1_1SobelFilter_a36149fb22306523ea978406f7b64df27}{\_output\_port}}.open(self.\mbox{\hyperlink{classpython__imaging_1_1SobelFilter_ac4edd39a5ccc32e75e63542cb4fd2cbd}{\_output\_port\_name}})}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00072}00072\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00073}00073\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Prepare\ image\ buffers}}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00074}00074\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Input}}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00075}\mbox{\hyperlink{classpython__imaging_1_1SobelFilter_a5c4a003fc0d177510cc5be56377fdf73}{00075}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpython__imaging_1_1SobelFilter_a5c4a003fc0d177510cc5be56377fdf73}{\_input\_buf\_image}}\ =\ yarp.ImageRgb()}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00076}00076\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpython__imaging_1_1SobelFilter_a5c4a003fc0d177510cc5be56377fdf73}{\_input\_buf\_image}}.resize(320,\ 240)}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00077}\mbox{\hyperlink{classpython__imaging_1_1SobelFilter_ae767489e89b3d95295e01192fbca2d3c}{00077}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpython__imaging_1_1SobelFilter_ae767489e89b3d95295e01192fbca2d3c}{\_input\_buf\_array}}\ =\ numpy.zeros((240,\ 320,\ 3),\ dtype\ =\ numpy.uint8)}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00078}00078\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpython__imaging_1_1SobelFilter_a5c4a003fc0d177510cc5be56377fdf73}{\_input\_buf\_image}}.setExternal(self.\mbox{\hyperlink{classpython__imaging_1_1SobelFilter_ae767489e89b3d95295e01192fbca2d3c}{\_input\_buf\_array}}.\_\_array\_interface\_\_[\textcolor{stringliteral}{'data'}][0],\ self.\mbox{\hyperlink{classpython__imaging_1_1SobelFilter_ae767489e89b3d95295e01192fbca2d3c}{\_input\_buf\_array}}.shape[1],\ self.\mbox{\hyperlink{classpython__imaging_1_1SobelFilter_ae767489e89b3d95295e01192fbca2d3c}{\_input\_buf\_array}}.shape[0])}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00079}00079\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Output}}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00080}\mbox{\hyperlink{classpython__imaging_1_1SobelFilter_aab8c97bbc319bc38ec1f5021fa22d5c0}{00080}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpython__imaging_1_1SobelFilter_aab8c97bbc319bc38ec1f5021fa22d5c0}{\_output\_buf\_image}}\ =\ yarp.ImageFloat()}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00081}00081\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpython__imaging_1_1SobelFilter_aab8c97bbc319bc38ec1f5021fa22d5c0}{\_output\_buf\_image}}.resize(320,\ 240)}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00082}\mbox{\hyperlink{classpython__imaging_1_1SobelFilter_af21d52d4ca74b93aa93fc741dceac5ea}{00082}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpython__imaging_1_1SobelFilter_af21d52d4ca74b93aa93fc741dceac5ea}{\_output\_buf\_array}}\ =\ numpy.zeros((240,\ 320),\ dtype\ =\ numpy.float32)}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00083}00083\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpython__imaging_1_1SobelFilter_aab8c97bbc319bc38ec1f5021fa22d5c0}{\_output\_buf\_image}}.setExternal(self.\mbox{\hyperlink{classpython__imaging_1_1SobelFilter_af21d52d4ca74b93aa93fc741dceac5ea}{\_output\_buf\_array}}.\_\_array\_interface\_\_[\textcolor{stringliteral}{'data'}][0],\ self.\mbox{\hyperlink{classpython__imaging_1_1SobelFilter_af21d52d4ca74b93aa93fc741dceac5ea}{\_output\_buf\_array}}.shape[1],\ self.\mbox{\hyperlink{classpython__imaging_1_1SobelFilter_af21d52d4ca74b93aa93fc741dceac5ea}{\_output\_buf\_array}}.shape[0])}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00084}00084\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00085}\mbox{\hyperlink{classpython__imaging_1_1SobelFilter_afdacd10797f3ca17300b9f3831390bb1}{00085}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpython__imaging_1_1SobelFilter_afdacd10797f3ca17300b9f3831390bb1}{run}}(self):\ \ \ }
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00086}00086\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ \textcolor{keyword}{True}:\ \textcolor{comment}{\#\ Break\ this\ by\ hitting\ CTRL-\/C}}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00087}00087\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Read\ an\ image\ from\ the\ port}}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00088}00088\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpython__imaging_1_1SobelFilter_a9a91f35ee91fcdca0e3f0274bbfb3a4a}{\_input\_port}}.read(self.\mbox{\hyperlink{classpython__imaging_1_1SobelFilter_a5c4a003fc0d177510cc5be56377fdf73}{\_input\_buf\_image}})}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00089}00089\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00090}00090\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Make\ sure\ the\ image\ has\ not\ been\ re-\/allocated}}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00091}00091\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{assert}\ self.\mbox{\hyperlink{classpython__imaging_1_1SobelFilter_ae767489e89b3d95295e01192fbca2d3c}{\_input\_buf\_array}}.\_\_array\_interface\_\_[\textcolor{stringliteral}{'data'}][0]\ ==\ self.\mbox{\hyperlink{classpython__imaging_1_1SobelFilter_a5c4a003fc0d177510cc5be56377fdf73}{\_input\_buf\_image}}.getRawImage().\_\_long\_\_()}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00092}00092\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00093}00093\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Let's\ calculate\ the\ sobel\ filter}}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00094}00094\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpython__imaging_1_1SobelFilter_af21d52d4ca74b93aa93fc741dceac5ea}{\_output\_buf\_array}}[:,:]\ =\ scipy.ndimage.filters.sobel(self.\mbox{\hyperlink{classpython__imaging_1_1SobelFilter_ae767489e89b3d95295e01192fbca2d3c}{\_input\_buf\_array}}.mean(2)\ /\ 255.)}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00095}00095\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Normalise\ the\ result}}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00096}00096\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpython__imaging_1_1SobelFilter_af21d52d4ca74b93aa93fc741dceac5ea}{\_output\_buf\_array}}\ -\/=\ self.\mbox{\hyperlink{classpython__imaging_1_1SobelFilter_af21d52d4ca74b93aa93fc741dceac5ea}{\_output\_buf\_array}}.min()}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00097}00097\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpython__imaging_1_1SobelFilter_af21d52d4ca74b93aa93fc741dceac5ea}{\_output\_buf\_array}}\ /=\ self.\mbox{\hyperlink{classpython__imaging_1_1SobelFilter_af21d52d4ca74b93aa93fc741dceac5ea}{\_output\_buf\_array}}.max()}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00098}00098\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpython__imaging_1_1SobelFilter_af21d52d4ca74b93aa93fc741dceac5ea}{\_output\_buf\_array}}\ *=\ 255.}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00099}00099\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00100}00100\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Send\ the\ result\ to\ the\ output\ port}}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00101}00101\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpython__imaging_1_1SobelFilter_a36149fb22306523ea978406f7b64df27}{\_output\_port}}.write(self.\mbox{\hyperlink{classpython__imaging_1_1SobelFilter_aab8c97bbc319bc38ec1f5021fa22d5c0}{\_output\_buf\_image}})}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00102}00102\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00103}\mbox{\hyperlink{classpython__imaging_1_1SobelFilter_ae564457ef3fbe7361bf4f3135040dbf5}{00103}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpython__imaging_1_1SobelFilter_ae564457ef3fbe7361bf4f3135040dbf5}{cleanup}}(self):}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00104}00104\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpython__imaging_1_1SobelFilter_a9a91f35ee91fcdca0e3f0274bbfb3a4a}{\_input\_port}}.close()}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00105}00105\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpython__imaging_1_1SobelFilter_a36149fb22306523ea978406f7b64df27}{\_output\_port}}.close()}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00106}00106\ }
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00107}00107\ }
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00108}00108\ \textcolor{keywordflow}{if}\ \_\_name\_\_==\textcolor{stringliteral}{"{}\_\_main\_\_"{}}:}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00109}00109\ \ \ \ \ \textcolor{comment}{\#\ Example\ demonstrating\ how\ to\ use\ the\ SobelFilter\ class\ implemented\ above}}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00110}00110\ \ \ \ \ \textcolor{comment}{\#\ This\ assumes\ iCub\ simulator\ is\ running\ with\ world\ camera\ at\ /icubSim/cam}}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00111}00111\ \ \ \ \ \textcolor{comment}{\#\ and\ an\ instance\ of\ yarpview\ with\ port\ name\ /view01}}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00112}00112\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00113}\mbox{\hyperlink{namespacepython__imaging_ae1f81126d5dae4386231bb2531e496c4}{00113}}\ \ \ \ \ image\_filter\ =\ \mbox{\hyperlink{classpython__imaging_1_1SobelFilter}{SobelFilter}}(\textcolor{stringliteral}{"{}/sobel:in"{}},\ \textcolor{stringliteral}{"{}/sobel:out"{}})}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00114}00114\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00115}00115\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00116}00116\ \ \ \ \ \ \ \ \ \textcolor{keyword}{assert}\ yarp.Network.connect(\textcolor{stringliteral}{"{}/sobel:out"{}},\ \textcolor{stringliteral}{"{}/view01"{}})}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00117}00117\ \ \ \ \ \ \ \ \ \textcolor{keyword}{assert}\ yarp.Network.connect(\textcolor{stringliteral}{"{}/icubSim/cam"{}},\ \textcolor{stringliteral}{"{}/sobel:in"{}})}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00118}00118\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00119}00119\ \ \ \ \ \ \ \ \ image\_filter.run()}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00120}00120\ \ \ \ \ \textcolor{keywordflow}{finally}:}
+\DoxyCodeLine{\Hypertarget{python__imaging_8py_source_l00121}00121\ \ \ \ \ \ \ \ \ image\_filter.cleanup()}
+
+\end{DoxyCode}

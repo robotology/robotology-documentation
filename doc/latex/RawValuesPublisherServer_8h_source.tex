@@ -1,0 +1,88 @@
+\doxysection{Raw\+Values\+Publisher\+Server.\+h}
+\hypertarget{RawValuesPublisherServer_8h_source}{}\label{RawValuesPublisherServer_8h_source}\index{icub-\/main/src/libraries/icubmod/rawValuesPublisherServer/RawValuesPublisherServer.h@{icub-\/main/src/libraries/icubmod/rawValuesPublisherServer/RawValuesPublisherServer.h}}
+\mbox{\hyperlink{RawValuesPublisherServer_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00001}00001\ \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00002}00002\ \textcolor{comment}{\ *\ SPDX-\/FileCopyrightText:\ 2006-\/2024\ Istituto\ Italiano\ di\ Tecnologia\ (IIT)}}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00003}00003\ \textcolor{comment}{\ *\ SPDX-\/License-\/Identifier:\ BSD-\/3-\/Clause}}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00004}00004\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00005}00005\ }
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00006}00006\ \textcolor{preprocessor}{\#ifndef\ RAWVALUESPUBLISHER\_NETWORKSERVER\_H}}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00007}00007\ \textcolor{preprocessor}{\#define\ RAWVALUESPUBLISHER\_NETWORKSERVER\_H}}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00008}00008\ }
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00009}00009\ \textcolor{comment}{//\ std\ includes}}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00010}00010\ \textcolor{preprocessor}{\#include\ <map>}}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00011}00011\ }
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00012}00012\ \textcolor{comment}{//\ yarp\ includes}}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00013}00013\ \textcolor{preprocessor}{\#include\ <yarp/os/Network.h>}}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00014}00014\ \textcolor{preprocessor}{\#include\ <yarp/dev/DeviceDriver.h>}}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00015}00015\ \textcolor{preprocessor}{\#include\ <yarp/os/PeriodicThread.h>}}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00016}00016\ \textcolor{preprocessor}{\#include\ <yarp/os/Stamp.h>}}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00017}00017\ \textcolor{preprocessor}{\#include\ <yarp/dev/PolyDriver.h>}}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00018}00018\ \textcolor{preprocessor}{\#include\ <yarp/dev/IMultipleWrapper.h>}}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00019}00019\ \textcolor{preprocessor}{\#include\ <yarp/sig/Vector.h>}}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00020}00020\ }
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00021}00021\ \textcolor{comment}{//\ Interface\ for\ the\ getter\ of\ the\ raw\ data\ }}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00022}00022\ \textcolor{comment}{//\ It\ calls\ the\ rawValuesDataStruct\ generated\ w/\ thrift}}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00023}00023\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{IRawValuesPublisher_8h}{iCub/IRawValuesPublisher.h}}>}}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00024}00024\ }
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00025}00025\ \textcolor{comment}{//\ ParamParser\ generated\ classes}}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00026}00026\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{RawValuesPublisherServer__ParamsParser_8h}{RawValuesPublisherServer\_ParamsParser.h}}"{}}}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00027}00027\ }
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00028}00028\ \textcolor{comment}{/*TIPS:}}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00029}00029\ \textcolor{comment}{\ *\ \ 1.\ follow\ Multipleanalog\ server\ as\ example\ https://github.com/robotology/yarp/blob/bde9cd2b1069d207a77a845935b2c3063c74c58d/src/devices/networkWrappers/multipleanalogsensorsserver/MultipleAnalogSensorsServer.h\#L33}}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00030}00030\ \textcolor{comment}{\ *\ \ 2.\ as\ fist\ MVP\ implement\ only\ Buffered\ Port\ and\ NOT\ RPC}}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00031}00031\ \textcolor{comment}{\ *\ \ 3.\ avoid\ the\ config\ parameters\ parser}}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00032}00032\ \textcolor{comment}{\ *\ \ 4.\ use\ the\ thrift\ file\ to\ create\ the\ RawValue\ data\ struct.\ As\ first\ step\ it'll\ contain\ only\ one\ uint32\_t\ value.}}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00033}00033\ \textcolor{comment}{\ *\ \ See\ https://github.com/robotology/icub-\/main/tree/ab93283ba6d654396b92e081d960ace777a9e656/src/tools/depth2kin\ es\ example}}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00034}00034\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00035}00035\ \textcolor{comment}{\ *\ */}}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00036}00036\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceiCub}{iCub}};}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00037}00037\ }
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00038}\mbox{\hyperlink{classRawValuesPublisherServer}{00038}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classRawValuesPublisherServer}{RawValuesPublisherServer}}\ :}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00039}00039\ \ \ \ \ \textcolor{keyword}{public}\ yarp::os::PeriodicThread,}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00040}00040\ \ \ \ \ \textcolor{keyword}{public}\ yarp::dev::DeviceDriver,}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00041}00041\ \ \ \ \ \textcolor{keyword}{public}\ yarp::dev::IMultipleWrapper,}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00042}00042\ \ \ \ \ \textcolor{keyword}{public}\ \mbox{\hyperlink{classiCub_1_1RawValuesPublisherMetadata}{RawValuesPublisherMetadata}},}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00043}00043\ \ \ \ \ \textcolor{keyword}{public}\ \mbox{\hyperlink{classRawValuesPublisherServer__ParamsParser}{RawValuesPublisherServer\_ParamsParser}}}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00044}00044\ \{}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00045}00045\ }
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00046}00046\ \textcolor{keyword}{private}:}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00047}00047\ \ \ \ \ yarp::os::Stamp\ m\_stamp;}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00048}00048\ \ \ \ \ \textcolor{keywordtype}{double}\ m\_threadPeriodInS\ =\ 0.1;}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00049}00049\ \ \ \ \ yarp::os::BufferedPort<rawValuesDataVectorsMap>\ m\_streamingRawDataPort;\ \textcolor{comment}{//\ streams\ data\ continuously\ at\ each\ server\ run}}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00050}00050\ \ \ \ \ yarp::os::Port\ m\_rpcRawDataPort;\ \textcolor{comment}{//\ public\ data\ on\ client\ request}}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00051}00051\ \ \ \ \ std::string\ m\_streamingPortName\ =\ \textcolor{stringliteral}{"{}"{}};}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00052}00052\ \ \ \ \ std::string\ m\_rpcPortName\ =\ \textcolor{stringliteral}{"{}"{}};}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00053}00053\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00054}00054\ \ \ \ \ std::vector<std::string>\ m\_vectorOfKeys;}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00055}00055\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1rawValuesKeyMetadataMap}{rawValuesKeyMetadataMap}}\ m\_mapOfMetadata;}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00056}00056\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00057}00057\ \ \ \ \ \textcolor{comment}{//\ Interface\ of\ the\ wrapped\ device}}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00058}00058\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1debugLibrary_1_1IRawValuesPublisher}{iCub::debugLibrary::IRawValuesPublisher}}*\ m\_iRawValuesPublisher\{\textcolor{keyword}{nullptr}\};}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00059}00059\ }
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00060}00060\ \ \ \ \ \textcolor{keywordtype}{bool}\ populateMetadata(\mbox{\hyperlink{classiCub_1_1rawValuesKeyMetadataMap}{rawValuesKeyMetadataMap}}\ \&metamap);}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00061}00061\ }
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00062}00062\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00063}00063\ \ \ \ \ \mbox{\hyperlink{classRawValuesPublisherServer_a2f99a5a45e460fa1391b2d6213fd98f7}{RawValuesPublisherServer}}();}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00064}\mbox{\hyperlink{classRawValuesPublisherServer_a851285a6cdc4c777d8d0e8da51da6a7a}{00064}}\ \ \ \ \ \mbox{\hyperlink{classRawValuesPublisherServer_a851285a6cdc4c777d8d0e8da51da6a7a}{\string~RawValuesPublisherServer}}();}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00065}00065\ }
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00066}00066\ \ \ \ \ \textcolor{comment}{/*\ DevideDriver\ methods\ */}}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00067}00067\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classRawValuesPublisherServer_a59fb0a104089282667026d0c64903d8d}{open}}(yarp::os::Searchable\ \&params)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00068}00068\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classRawValuesPublisherServer_ae495b1d3544cc2a3832374c2e756ed1f}{close}}()\ \textcolor{keyword}{override};}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00069}00069\ }
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00070}00070\ \ \ \ \ \textcolor{comment}{/*\ PeriodThread\ methods\ */}}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00071}00071\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classRawValuesPublisherServer_a9d8654f86e2ba19ef82c7ca3d4a9dcff}{threadRelease}}()\ \textcolor{keyword}{override};}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00072}00072\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classRawValuesPublisherServer_aa7026ff203fbaa878c9740794f937bd1}{run}}()\ \textcolor{keyword}{override};}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00073}00073\ }
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00074}00074\ \ \ \ \ \textcolor{comment}{/*\ IMultipleWrapper\ methods\ */}}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00075}00075\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classRawValuesPublisherServer_acab1533a6b678fdf24d2ad3973176ffc}{attachAll}}(\textcolor{keyword}{const}\ yarp::dev::PolyDriverList\ \&\mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}})\ \textcolor{keyword}{override};}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00076}00076\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classRawValuesPublisherServer_aec9c5e741a274d0e2c0e7f832d4ed289}{detachAll}}()\ \textcolor{keyword}{override};}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00077}00077\ }
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00078}00078\ \ \ \ \ \textcolor{comment}{/*\ RawValuesPublisherMetadata\ */}}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00079}00079\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1rawValuesKeyMetadataMap}{rawValuesKeyMetadataMap}}\ \mbox{\hyperlink{classRawValuesPublisherServer_a5c50d895e9264a54443237261dac1fc1}{getMetadata}}()\ \textcolor{keyword}{override};}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00080}00080\ \};}
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00081}00081\ }
+\DoxyCodeLine{\Hypertarget{RawValuesPublisherServer_8h_source_l00082}00082\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

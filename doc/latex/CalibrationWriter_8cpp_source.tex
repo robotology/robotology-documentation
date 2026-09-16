@@ -1,0 +1,464 @@
+\doxysection{Calibration\+Writer.\+cpp}
+\hypertarget{CalibrationWriter_8cpp_source}{}\label{CalibrationWriter_8cpp_source}\index{icub-\/main/src/tools/stereoCalib/src/CalibrationWriter.cpp@{icub-\/main/src/tools/stereoCalib/src/CalibrationWriter.cpp}}
+\mbox{\hyperlink{CalibrationWriter_8cpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00001}00001\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{CalibrationWriter_8h}{CalibrationWriter.h}}"{}}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00002}00002\ }
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00003}00003\ \textcolor{preprocessor}{\#include\ <cerrno>}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00004}00004\ \textcolor{preprocessor}{\#include\ <cmath>}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00005}00005\ \textcolor{preprocessor}{\#include\ <cstdio>}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00006}00006\ \textcolor{preprocessor}{\#include\ <cstring>}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00007}00007\ \textcolor{preprocessor}{\#include\ <fstream>}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00008}00008\ \textcolor{preprocessor}{\#include\ <iomanip>}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00009}00009\ \textcolor{preprocessor}{\#include\ <sstream>}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00010}00010\ }
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00011}00011\ \textcolor{preprocessor}{\#include\ <opencv2/imgcodecs.hpp>}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00012}00012\ \textcolor{preprocessor}{\#include\ <opencv2/imgproc.hpp>}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00013}00013\ }
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00014}00014\ \textcolor{keyword}{namespace}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00015}00015\ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00016}00016\ }
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00017}00017\ \textcolor{keywordtype}{bool}\ isFinite(\textcolor{keyword}{const}\ cv::Mat\&\ matrix)}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00018}00018\ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00019}00019\ \ \ \ \ \textcolor{keywordflow}{return}\ !matrix.empty()\ \&\&\ cv::checkRange(matrix,\ \textcolor{keyword}{true},\ \textcolor{keyword}{nullptr});}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00020}00020\ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00021}00021\ }
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00022}00022\ \textcolor{keywordtype}{bool}\ isFinite(\textcolor{keywordtype}{double}\ value)}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00023}00023\ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00024}00024\ \ \ \ \ \textcolor{keywordflow}{return}\ std::isfinite(value);}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00025}00025\ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00026}00026\ }
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00027}00027\ \textcolor{keywordtype}{bool}\ isValidCamera(\textcolor{keyword}{const}\ \mbox{\hyperlink{structstereo__calib_1_1CameraCalibrationResult}{stereo\_calib::CameraCalibrationResult}}\&\ camera)}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00028}00028\ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00029}00029\ \ \ \ \ \textcolor{keywordflow}{return}\ camera.\mbox{\hyperlink{structstereo__calib_1_1CameraCalibrationResult_a4af9c79d45caea9fa0d386e576af2788}{isValid}}()\ \&\&\ camera.\mbox{\hyperlink{structstereo__calib_1_1CameraCalibrationResult_a56af5efa7781244020cc5063fe44a7ae}{K}}.type()\ ==\ CV\_64F\ \&\&\ camera.\mbox{\hyperlink{structstereo__calib_1_1CameraCalibrationResult_a61e36d6fff721611f13bc004093c30c4}{D}}.type()\ ==\ CV\_64F\ \&\&}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00030}00030\ \ \ \ \ \ \ \ \ \ \ \ camera.\mbox{\hyperlink{structstereo__calib_1_1CameraCalibrationResult_a56af5efa7781244020cc5063fe44a7ae}{K}}.at<\textcolor{keywordtype}{double}>(0,\ 0)\ >\ 0.0\ \&\&\ camera.\mbox{\hyperlink{structstereo__calib_1_1CameraCalibrationResult_a56af5efa7781244020cc5063fe44a7ae}{K}}.at<\textcolor{keywordtype}{double}>(1,\ 1)\ >\ 0.0\ \&\&}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00031}00031\ \ \ \ \ \ \ \ \ \ \ \ isFinite(camera.\mbox{\hyperlink{structstereo__calib_1_1CameraCalibrationResult_a56af5efa7781244020cc5063fe44a7ae}{K}})\ \&\&\ isFinite(camera.\mbox{\hyperlink{structstereo__calib_1_1CameraCalibrationResult_a61e36d6fff721611f13bc004093c30c4}{D}})\ \&\&\ isFinite(camera.\mbox{\hyperlink{structstereo__calib_1_1CameraCalibrationResult_a6366799e3288c139db1fd32378f67fa8}{rms}});}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00032}00032\ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00033}00033\ }
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00034}00034\ \textcolor{keywordtype}{bool}\ isValidStereo(\textcolor{keyword}{const}\ \mbox{\hyperlink{structstereo__calib_1_1StereoCalibrationResult}{stereo\_calib::StereoCalibrationResult}}\&\ stereo)}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00035}00035\ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00036}00036\ \ \ \ \ \textcolor{keywordflow}{return}\ stereo.\mbox{\hyperlink{structstereo__calib_1_1StereoCalibrationResult_aab777c263ff01161ed7373ba827cb418}{isValid}}()\ \&\&\ stereo.\mbox{\hyperlink{structstereo__calib_1_1StereoCalibrationResult_a8d44c8bfab9367d2e16b42d6fae8d09f}{R}}.type()\ ==\ CV\_64F\ \&\&\ stereo.\mbox{\hyperlink{structstereo__calib_1_1StereoCalibrationResult_a4bbc954e0c4b51cca7df8127de16f3ea}{T}}.type()\ ==\ CV\_64F\ \&\&}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00037}00037\ \ \ \ \ \ \ \ \ \ \ \ isFinite(stereo.\mbox{\hyperlink{structstereo__calib_1_1StereoCalibrationResult_a8d44c8bfab9367d2e16b42d6fae8d09f}{R}})\ \&\&\ isFinite(stereo.\mbox{\hyperlink{structstereo__calib_1_1StereoCalibrationResult_a4bbc954e0c4b51cca7df8127de16f3ea}{T}})\ \&\&\ isFinite(stereo.\mbox{\hyperlink{structstereo__calib_1_1StereoCalibrationResult_a57c2f1a91d3a48ea5e518d3a4b496d1a}{rms}});}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00038}00038\ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00039}00039\ }
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00040}00040\ \textcolor{keywordtype}{bool}\ isValidRectification(\textcolor{keyword}{const}\ \mbox{\hyperlink{structstereo__calib_1_1RectificationResult}{stereo\_calib::RectificationResult}}\&\ rectification)}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00041}00041\ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00042}00042\ \ \ \ \ \textcolor{keywordflow}{return}\ rectification.\mbox{\hyperlink{structstereo__calib_1_1RectificationResult_acf52563440b4fca9a7a3c3b7712ef5b4}{isValid}}()\ \&\&\ rectification.\mbox{\hyperlink{structstereo__calib_1_1RectificationResult_a12f5a55e8a36dd51e68a78547fe8a4f0}{R1}}.type()\ ==\ CV\_64F\ \&\&}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00043}00043\ \ \ \ \ \ \ \ \ \ \ \ rectification.\mbox{\hyperlink{structstereo__calib_1_1RectificationResult_ac9a87a66577847c1b0225a1bd5f8acd7}{R2}}.type()\ ==\ CV\_64F\ \&\&\ rectification.\mbox{\hyperlink{structstereo__calib_1_1RectificationResult_a4d29bb030343c3052c53328624950e83}{P1}}.type()\ ==\ CV\_64F\ \&\&}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00044}00044\ \ \ \ \ \ \ \ \ \ \ \ rectification.\mbox{\hyperlink{structstereo__calib_1_1RectificationResult_a9cc270ff29c3a835297334d101c8cbf0}{P2}}.type()\ ==\ CV\_64F\ \&\&\ rectification.\mbox{\hyperlink{structstereo__calib_1_1RectificationResult_a1978d90ed27844826cc0315cb90f8719}{Q}}.type()\ ==\ CV\_64F\ \&\&}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00045}00045\ \ \ \ \ \ \ \ \ \ \ \ isFinite(rectification.\mbox{\hyperlink{structstereo__calib_1_1RectificationResult_a12f5a55e8a36dd51e68a78547fe8a4f0}{R1}})\ \&\&\ isFinite(rectification.\mbox{\hyperlink{structstereo__calib_1_1RectificationResult_ac9a87a66577847c1b0225a1bd5f8acd7}{R2}})\ \&\&}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00046}00046\ \ \ \ \ \ \ \ \ \ \ \ isFinite(rectification.\mbox{\hyperlink{structstereo__calib_1_1RectificationResult_a4d29bb030343c3052c53328624950e83}{P1}})\ \&\&\ isFinite(rectification.\mbox{\hyperlink{structstereo__calib_1_1RectificationResult_a9cc270ff29c3a835297334d101c8cbf0}{P2}})\ \&\&}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00047}00047\ \ \ \ \ \ \ \ \ \ \ \ isFinite(rectification.\mbox{\hyperlink{structstereo__calib_1_1RectificationResult_a1978d90ed27844826cc0315cb90f8719}{Q}})\ \&\&\ isFinite(rectification.\mbox{\hyperlink{structstereo__calib_1_1RectificationResult_a1d58e2690df60958296c26be95f677f5}{balance}})\ \&\&}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00048}00048\ \ \ \ \ \ \ \ \ \ \ \ isFinite(rectification.\mbox{\hyperlink{structstereo__calib_1_1RectificationResult_a3ed46d0bf5929af60453d01b6553cb14}{fovScale}});}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00049}00049\ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00050}00050\ }
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00051}00051\ \textcolor{keywordtype}{bool}\ isValidStereoQuality(\textcolor{keyword}{const}\ \mbox{\hyperlink{structstereo__calib_1_1CalibrationQualityMetrics}{stereo\_calib::CalibrationQualityMetrics}}\&\ quality)}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00052}00052\ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00053}00053\ \ \ \ \ \textcolor{keywordflow}{return}\ quality.\mbox{\hyperlink{structstereo__calib_1_1CalibrationQualityMetrics_a77830380743b9272369566b5bc60b1fc}{acceptedObservations}}\ >\ 0\ \&\&\ isFinite(quality.\mbox{\hyperlink{structstereo__calib_1_1CalibrationQualityMetrics_a24b2ed5de3689a8d981b2da74c38281d}{baseline}})\ \&\&\ quality.\mbox{\hyperlink{structstereo__calib_1_1CalibrationQualityMetrics_a24b2ed5de3689a8d981b2da74c38281d}{baseline}}\ >\ 0.0\ \&\&}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00054}00054\ \ \ \ \ \ \ \ \ \ \ \ isFinite(quality.\mbox{\hyperlink{structstereo__calib_1_1CalibrationQualityMetrics_a8967d1db669d0fe05481c441849cb114}{meanTimestampDeltaMs}})\ \&\&\ isFinite(quality.\mbox{\hyperlink{structstereo__calib_1_1CalibrationQualityMetrics_adac938c1ac7a2f1b4e2da64a233eb218}{maxTimestampDeltaMs}})\ \&\&}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00055}00055\ \ \ \ \ \ \ \ \ \ \ \ isFinite(quality.\mbox{\hyperlink{structstereo__calib_1_1CalibrationQualityMetrics_adcbcfed35eeb1a7016657b8aac12caed}{meanVerticalRectificationErrorPx}})\ \&\&}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00056}00056\ \ \ \ \ \ \ \ \ \ \ \ isFinite(quality.\mbox{\hyperlink{structstereo__calib_1_1CalibrationQualityMetrics_a6c305341274130c3dc3c6824f6226776}{medianVerticalRectificationErrorPx}})\ \&\&}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00057}00057\ \ \ \ \ \ \ \ \ \ \ \ isFinite(quality.\mbox{\hyperlink{structstereo__calib_1_1CalibrationQualityMetrics_a4fc2a3e4b177324f5f9f50cdff35da52}{rmsVerticalRectificationErrorPx}})\ \&\&}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00058}00058\ \ \ \ \ \ \ \ \ \ \ \ isFinite(quality.\mbox{\hyperlink{structstereo__calib_1_1CalibrationQualityMetrics_aa4ea39f83e52eac0a468c6f39dae995b}{p95VerticalRectificationErrorPx}})\ \&\&}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00059}00059\ \ \ \ \ \ \ \ \ \ \ \ isFinite(quality.\mbox{\hyperlink{structstereo__calib_1_1CalibrationQualityMetrics_a9c5622fd8063c557fdc690c92cfce660}{maxVerticalRectificationErrorPx}})\ \&\&}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00060}00060\ \ \ \ \ \ \ \ \ \ \ \ quality.\mbox{\hyperlink{structstereo__calib_1_1CalibrationQualityMetrics_a8967d1db669d0fe05481c441849cb114}{meanTimestampDeltaMs}}\ >=\ 0.0\ \&\&\ quality.\mbox{\hyperlink{structstereo__calib_1_1CalibrationQualityMetrics_adac938c1ac7a2f1b4e2da64a233eb218}{maxTimestampDeltaMs}}\ >=\ 0.0\ \&\&}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00061}00061\ \ \ \ \ \ \ \ \ \ \ \ quality.\mbox{\hyperlink{structstereo__calib_1_1CalibrationQualityMetrics_adcbcfed35eeb1a7016657b8aac12caed}{meanVerticalRectificationErrorPx}}\ >=\ 0.0\ \&\&}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00062}00062\ \ \ \ \ \ \ \ \ \ \ \ quality.\mbox{\hyperlink{structstereo__calib_1_1CalibrationQualityMetrics_a6c305341274130c3dc3c6824f6226776}{medianVerticalRectificationErrorPx}}\ >=\ 0.0\ \&\&}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00063}00063\ \ \ \ \ \ \ \ \ \ \ \ quality.\mbox{\hyperlink{structstereo__calib_1_1CalibrationQualityMetrics_a4fc2a3e4b177324f5f9f50cdff35da52}{rmsVerticalRectificationErrorPx}}\ >=\ 0.0\ \&\&}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00064}00064\ \ \ \ \ \ \ \ \ \ \ \ quality.\mbox{\hyperlink{structstereo__calib_1_1CalibrationQualityMetrics_aa4ea39f83e52eac0a468c6f39dae995b}{p95VerticalRectificationErrorPx}}\ >=\ 0.0\ \&\&}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00065}00065\ \ \ \ \ \ \ \ \ \ \ \ quality.\mbox{\hyperlink{structstereo__calib_1_1CalibrationQualityMetrics_a9c5622fd8063c557fdc690c92cfce660}{maxVerticalRectificationErrorPx}}\ >=\ 0.0;}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00066}00066\ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00067}00067\ }
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00068}00068\ \textcolor{keywordtype}{double}\ matrixValue(\textcolor{keyword}{const}\ cv::Mat\&\ matrix,\ \textcolor{keywordtype}{int}\ index)}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00069}00069\ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00070}00070\ \ \ \ \ \textcolor{keywordflow}{return}\ matrix.reshape(1,\ 1).at<\textcolor{keywordtype}{double}>(0,\ index);}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00071}00071\ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00072}00072\ }
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00073}00073\ \textcolor{keywordtype}{void}\ writeMatrix(std::ostream\&\ output,\ \textcolor{keyword}{const}\ std::string\&\ name,\ \textcolor{keyword}{const}\ cv::Mat\&\ matrix)}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00074}00074\ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00075}00075\ \ \ \ \ output\ <<\ name\ <<\ \textcolor{stringliteral}{"{}\ ("{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00076}00076\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ index\ =\ 0;\ index\ <\ static\_cast<int>(matrix.total());\ ++index)}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00077}00077\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00078}00078\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (index\ !=\ 0)}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00079}00079\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00080}00080\ \ \ \ \ \ \ \ \ \ \ \ \ output\ <<\ \textcolor{charliteral}{'\ '};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00081}00081\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00082}00082\ \ \ \ \ \ \ \ \ output\ <<\ matrixValue(matrix,\ index);}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00083}00083\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00084}00084\ \ \ \ \ output\ <<\ \textcolor{stringliteral}{"{})\(\backslash\)n"{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00085}00085\ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00086}00086\ }
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00087}00087\ \textcolor{keywordtype}{void}\ writeCamera(std::ostream\&\ output,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ side,}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00088}00088\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{structstereo__calib_1_1CameraCalibrationResult}{stereo\_calib::CameraCalibrationResult}}\&\ camera)}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00089}00089\ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00090}00090\ \ \ \ \ output\ <<\ \textcolor{stringliteral}{"{}[CAMERA\_CALIBRATION\_"{}}\ <<\ side\ <<\ \textcolor{stringliteral}{"{}]\(\backslash\)n"{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00091}00091\ \ \ \ \ output\ <<\ \textcolor{stringliteral}{"{}projection\ fisheye\(\backslash\)n"{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00092}00092\ \ \ \ \ output\ <<\ \textcolor{stringliteral}{"{}drawCenterCross\ 0\(\backslash\)n\(\backslash\)n"{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00093}00093\ \ \ \ \ output\ <<\ \textcolor{stringliteral}{"{}w\ "{}}\ <<\ camera.\mbox{\hyperlink{structstereo__calib_1_1CameraCalibrationResult_ad7ff790b96cb951778a8ae369c8ffbf3}{imageSize}}.width\ <<\ \textcolor{stringliteral}{"{}\(\backslash\)n"{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00094}00094\ \ \ \ \ output\ <<\ \textcolor{stringliteral}{"{}h\ "{}}\ <<\ camera.\mbox{\hyperlink{structstereo__calib_1_1CameraCalibrationResult_ad7ff790b96cb951778a8ae369c8ffbf3}{imageSize}}.height\ <<\ \textcolor{stringliteral}{"{}\(\backslash\)n"{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00095}00095\ \ \ \ \ output\ <<\ \textcolor{stringliteral}{"{}fx\ "{}}\ <<\ matrixValue(camera.\mbox{\hyperlink{structstereo__calib_1_1CameraCalibrationResult_a56af5efa7781244020cc5063fe44a7ae}{K}},\ 0)\ <<\ \textcolor{stringliteral}{"{}\(\backslash\)n"{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00096}00096\ \ \ \ \ output\ <<\ \textcolor{stringliteral}{"{}fy\ "{}}\ <<\ matrixValue(camera.\mbox{\hyperlink{structstereo__calib_1_1CameraCalibrationResult_a56af5efa7781244020cc5063fe44a7ae}{K}},\ 4)\ <<\ \textcolor{stringliteral}{"{}\(\backslash\)n"{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00097}00097\ \ \ \ \ output\ <<\ \textcolor{stringliteral}{"{}cx\ "{}}\ <<\ matrixValue(camera.\mbox{\hyperlink{structstereo__calib_1_1CameraCalibrationResult_a56af5efa7781244020cc5063fe44a7ae}{K}},\ 2)\ <<\ \textcolor{stringliteral}{"{}\(\backslash\)n"{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00098}00098\ \ \ \ \ output\ <<\ \textcolor{stringliteral}{"{}cy\ "{}}\ <<\ matrixValue(camera.\mbox{\hyperlink{structstereo__calib_1_1CameraCalibrationResult_a56af5efa7781244020cc5063fe44a7ae}{K}},\ 5)\ <<\ \textcolor{stringliteral}{"{}\(\backslash\)n"{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00099}00099\ \ \ \ \ output\ <<\ \textcolor{stringliteral}{"{}k1\ "{}}\ <<\ matrixValue(camera.\mbox{\hyperlink{structstereo__calib_1_1CameraCalibrationResult_a61e36d6fff721611f13bc004093c30c4}{D}},\ 0)\ <<\ \textcolor{stringliteral}{"{}\(\backslash\)n"{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00100}00100\ \ \ \ \ output\ <<\ \textcolor{stringliteral}{"{}k2\ "{}}\ <<\ matrixValue(camera.\mbox{\hyperlink{structstereo__calib_1_1CameraCalibrationResult_a61e36d6fff721611f13bc004093c30c4}{D}},\ 1)\ <<\ \textcolor{stringliteral}{"{}\(\backslash\)n"{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00101}00101\ \ \ \ \ output\ <<\ \textcolor{stringliteral}{"{}k3\ "{}}\ <<\ matrixValue(camera.\mbox{\hyperlink{structstereo__calib_1_1CameraCalibrationResult_a61e36d6fff721611f13bc004093c30c4}{D}},\ 2)\ <<\ \textcolor{stringliteral}{"{}\(\backslash\)n"{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00102}00102\ \ \ \ \ output\ <<\ \textcolor{stringliteral}{"{}k4\ "{}}\ <<\ matrixValue(camera.\mbox{\hyperlink{structstereo__calib_1_1CameraCalibrationResult_a61e36d6fff721611f13bc004093c30c4}{D}},\ 3)\ <<\ \textcolor{stringliteral}{"{}\(\backslash\)n\(\backslash\)n"{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00103}00103\ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00104}00104\ }
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00105}00105\ std::string\ temporaryObservationFile(\textcolor{keyword}{const}\ std::string\&\ filename)}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00106}00106\ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00107}00107\ \ \ \ \ \textcolor{keyword}{const}\ std::size\_t\ separator\ =\ filename.find\_last\_of(\textcolor{stringliteral}{"{}/\(\backslash\)\(\backslash\)"{}});}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00108}00108\ \ \ \ \ \textcolor{keyword}{const}\ std::size\_t\ extension\ =\ filename.find\_last\_of(\textcolor{charliteral}{'.'});}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00109}00109\ \ \ \ \ \textcolor{keywordflow}{if}\ (extension\ !=\ std::string::npos\ \&\&}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00110}00110\ \ \ \ \ \ \ \ \ (separator\ ==\ std::string::npos\ ||\ extension\ >\ separator))}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00111}00111\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00112}00112\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ filename.substr(0,\ extension)\ +\ \textcolor{stringliteral}{"{}.tmp"{}}\ +\ filename.substr(extension);}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00113}00113\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00114}00114\ \ \ \ \ \textcolor{keywordflow}{return}\ filename\ +\ \textcolor{stringliteral}{"{}.tmp.yml"{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00115}00115\ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00116}00116\ }
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00117}00117\ std::string\ joinPath(\textcolor{keyword}{const}\ std::string\&\ directory,\ \textcolor{keyword}{const}\ std::string\&\ filename)}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00118}00118\ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00119}00119\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{namespacescripting_adbefde486008e3db0bed68e0a045f203}{directory}}.empty()\ ||\ \mbox{\hyperlink{namespacescripting_adbefde486008e3db0bed68e0a045f203}{directory}}.back()\ ==\ \textcolor{charliteral}{'/'}\ ||\ \mbox{\hyperlink{namespacescripting_adbefde486008e3db0bed68e0a045f203}{directory}}.back()\ ==\ \textcolor{charliteral}{'\(\backslash\)\(\backslash\)'})}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00120}00120\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00121}00121\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{namespacescripting_adbefde486008e3db0bed68e0a045f203}{directory}}\ +\ filename;}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00122}00122\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00123}00123\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{namespacescripting_adbefde486008e3db0bed68e0a045f203}{directory}}\ +\ \textcolor{charliteral}{'/'}\ +\ filename;}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00124}00124\ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00125}00125\ }
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00126}00126\ \textcolor{keywordtype}{bool}\ isValidObservation(\textcolor{keyword}{const}\ \mbox{\hyperlink{structstereo__calib_1_1StereoObservation}{stereo\_calib::StereoObservation}}\&\ observation)}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00127}00127\ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00128}00128\ \ \ \ \ \textcolor{keywordflow}{if}\ (!observation.\mbox{\hyperlink{structstereo__calib_1_1StereoObservation_af944a65ff7a16819ed0ece8a37468973}{isValid}}()\ ||\ !isFinite(observation.\mbox{\hyperlink{structstereo__calib_1_1StereoObservation_ab6a7bf30ca22efabe01452296172d6cd}{leftTimestampSeconds}})\ ||}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00129}00129\ \ \ \ \ \ \ \ \ !isFinite(observation.\mbox{\hyperlink{structstereo__calib_1_1StereoObservation_ab202bbda85262f776f3eba16e85a2c94}{rightTimestampSeconds}})\ ||}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00130}00130\ \ \ \ \ \ \ \ \ !isFinite(observation.\mbox{\hyperlink{structstereo__calib_1_1StereoObservation_a420d5fbcc1a0743b3e02dee5abf81e11}{timestampDeltaSeconds}}))}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00131}00131\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00132}00132\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00133}00133\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00134}00134\ \ \ \ \ \textcolor{keywordflow}{for}\ (std::size\_t\ index\ =\ 0;\ index\ <\ observation.\mbox{\hyperlink{structstereo__calib_1_1StereoObservation_aa4c08f05f17f983d99b82a1f5b8cce7f}{objectPoints}}.size();\ ++index)}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00135}00135\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00136}00136\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ cv::Point3f\&\ objectPoint\ =\ observation.\mbox{\hyperlink{structstereo__calib_1_1StereoObservation_aa4c08f05f17f983d99b82a1f5b8cce7f}{objectPoints}}[index];}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00137}00137\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ cv::Point2f\&\ leftPoint\ =\ observation.\mbox{\hyperlink{structstereo__calib_1_1StereoObservation_a985af16fa1f39e84615213289a2b9ce2}{leftImagePoints}}[index];}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00138}00138\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ cv::Point2f\&\ rightPoint\ =\ observation.\mbox{\hyperlink{structstereo__calib_1_1StereoObservation_ade7a727ab1da37076f86c2ee11116a0d}{rightImagePoints}}[index];}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00139}00139\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!isFinite(objectPoint.x)\ ||\ !isFinite(objectPoint.y)\ ||\ !isFinite(objectPoint.z)\ ||}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00140}00140\ \ \ \ \ \ \ \ \ \ \ \ \ !isFinite(leftPoint.x)\ ||\ !isFinite(leftPoint.y)\ ||}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00141}00141\ \ \ \ \ \ \ \ \ \ \ \ \ !isFinite(rightPoint.x)\ ||\ !isFinite(rightPoint.y))}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00142}00142\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00143}00143\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00144}00144\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00145}00145\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00146}00146\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00147}00147\ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00148}00148\ }
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00149}00149\ \}\ \textcolor{comment}{//\ namespace}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00150}00150\ }
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00151}00151\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespacestereo__calib}{stereo\_calib}}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00152}00152\ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00153}00153\ }
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00154}\mbox{\hyperlink{classstereo__calib_1_1CalibrationWriter_ae2f261bb74e28dbbd89242ef0177fb03}{00154}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classstereo__calib_1_1CalibrationWriter_ae2f261bb74e28dbbd89242ef0177fb03}{CalibrationWriter::write}}(\textcolor{keyword}{const}\ std::string\&\ outputFile,}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00155}00155\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{structstereo__calib_1_1CalibrationResult}{CalibrationResult}}\&\ result,}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00156}00156\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::string\&\ errorMessage)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00157}00157\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00158}00158\ \ \ \ \ errorMessage.clear();}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00159}00159\ \ \ \ \ \textcolor{keywordflow}{if}\ (outputFile.empty())}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00160}00160\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00161}00161\ \ \ \ \ \ \ \ \ errorMessage\ =\ \textcolor{stringliteral}{"{}Calibration\ output\ filename\ is\ empty."{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00162}00162\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00163}00163\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00164}00164\ \ \ \ \ \textcolor{keywordflow}{if}\ (!validateResult(result,\ errorMessage))}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00165}00165\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00166}00166\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00167}00167\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00168}00168\ }
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00169}00169\ \ \ \ \ \textcolor{keyword}{const}\ std::string\ temporaryFile\ =\ outputFile\ +\ \textcolor{stringliteral}{"{}.tmp"{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00170}00170\ \ \ \ \ std::ofstream\ output(temporaryFile.c\_str(),\ std::ios::out\ |\ std::ios::trunc);}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00171}00171\ \ \ \ \ \textcolor{keywordflow}{if}\ (!output.is\_open())}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00172}00172\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00173}00173\ \ \ \ \ \ \ \ \ errorMessage\ =\ \textcolor{stringliteral}{"{}Could\ not\ open\ temporary\ calibration\ file\ '"{}}\ +\ temporaryFile\ +}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00174}00174\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}':\ "{}}\ +\ std::strerror(errno);}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00175}00175\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00176}00176\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00177}00177\ }
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00178}00178\ \ \ \ \ output\ <<\ std::setprecision(17);}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00179}00179\ \ \ \ \ output\ <<\ \textcolor{stringliteral}{"{}\#\ Generated\ by\ stereoCalib.\ Do\ not\ edit\ while\ calibration\ is\ running.\(\backslash\)n"{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00180}00180\ \ \ \ \ \textcolor{keywordflow}{switch}\ (result.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_a31f11e28eb4f6d0faa9b91e4b385a351}{mode}})}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00181}00181\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00182}00182\ \ \ \ \ \textcolor{keywordflow}{case}\ \mbox{\hyperlink{namespacestereo__calib_a0645d0e70d31718fe1c9c42699345c2fa792eeb7b550156b7b655edf421c0493f}{CalibrationMode::MonocularLeft}}:\ \ output\ <<\ \textcolor{stringliteral}{"{}calibrationMode\ MonocularLeft\(\backslash\)n\(\backslash\)n"{}};\ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00183}00183\ \ \ \ \ \textcolor{keywordflow}{case}\ \mbox{\hyperlink{namespacestereo__calib_a0645d0e70d31718fe1c9c42699345c2fa5e3f0e200908947d31e69445d554141b}{CalibrationMode::MonocularRight}}:\ output\ <<\ \textcolor{stringliteral}{"{}calibrationMode\ MonocularRight\(\backslash\)n\(\backslash\)n"{}};\ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00184}00184\ \ \ \ \ \textcolor{keywordflow}{case}\ \mbox{\hyperlink{namespacestereo__calib_a0645d0e70d31718fe1c9c42699345c2fa2c39d0e718a3970bb027538cc588f288}{CalibrationMode::MonocularBoth}}:\ \ output\ <<\ \textcolor{stringliteral}{"{}calibrationMode\ MonocularBoth\(\backslash\)n\(\backslash\)n"{}};\ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00185}00185\ \ \ \ \ \textcolor{keywordflow}{case}\ \mbox{\hyperlink{namespacestereo__calib_a0645d0e70d31718fe1c9c42699345c2faede6d8d2c158731a395cefefd37ac309}{CalibrationMode::StereoFull}}:\ \ \ \ \ output\ <<\ \textcolor{stringliteral}{"{}calibrationMode\ StereoFull\(\backslash\)n\(\backslash\)n"{}};\ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00186}00186\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00187}00187\ }
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00188}00188\ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{bool}\ writesLeftCamera\ =\ result.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_a31f11e28eb4f6d0faa9b91e4b385a351}{mode}}\ !=\ \mbox{\hyperlink{namespacestereo__calib_a0645d0e70d31718fe1c9c42699345c2fa5e3f0e200908947d31e69445d554141b}{CalibrationMode::MonocularRight}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00189}00189\ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{bool}\ writesRightCamera\ =\ result.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_a31f11e28eb4f6d0faa9b91e4b385a351}{mode}}\ !=\ \mbox{\hyperlink{namespacestereo__calib_a0645d0e70d31718fe1c9c42699345c2fa792eeb7b550156b7b655edf421c0493f}{CalibrationMode::MonocularLeft}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00190}00190\ \ \ \ \ \textcolor{keywordflow}{if}\ (writesLeftCamera)}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00191}00191\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00192}00192\ \ \ \ \ \ \ \ \ writeCamera(output,\ \textcolor{stringliteral}{"{}LEFT"{}},\ result.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_a3002915b3b94994684c06d9a6e9a4b17}{leftCamera}});}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00193}00193\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00194}00194\ \ \ \ \ \textcolor{keywordflow}{if}\ (writesRightCamera)}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00195}00195\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00196}00196\ \ \ \ \ \ \ \ \ writeCamera(output,\ \textcolor{stringliteral}{"{}RIGHT"{}},\ result.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_aa0c5bc3e1e97ae981d7041b9148a4a68}{rightCamera}});}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00197}00197\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00198}00198\ }
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00199}00199\ \ \ \ \ \textcolor{keywordflow}{if}\ (result.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_a31f11e28eb4f6d0faa9b91e4b385a351}{mode}}\ ==\ \mbox{\hyperlink{namespacestereo__calib_a0645d0e70d31718fe1c9c42699345c2faede6d8d2c158731a395cefefd37ac309}{CalibrationMode::StereoFull}})}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00200}00200\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00201}00201\ \ \ \ \ \ \ \ \ cv::Mat\ homogeneousTransform\ =\ cv::Mat::eye(4,\ 4,\ CV\_64F);}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00202}00202\ \ \ \ \ \ \ \ \ result.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_a5a68f5b815115306665ec16a976e60d2}{stereo}}.\mbox{\hyperlink{structstereo__calib_1_1StereoCalibrationResult_a8d44c8bfab9367d2e16b42d6fae8d09f}{R}}.copyTo(homogeneousTransform(cv::Rect(0,\ 0,\ 3,\ 3)));}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00203}00203\ \ \ \ \ \ \ \ \ result.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_a5a68f5b815115306665ec16a976e60d2}{stereo}}.\mbox{\hyperlink{structstereo__calib_1_1StereoCalibrationResult_a4bbc954e0c4b51cca7df8127de16f3ea}{T}}.reshape(1,\ 3).copyTo(homogeneousTransform(cv::Rect(3,\ 0,\ 1,\ 3)));}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00204}00204\ }
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00205}00205\ \ \ \ \ \ \ \ \ output\ <<\ \textcolor{stringliteral}{"{}[STEREO\_DISPARITY]\(\backslash\)n"{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00206}00206\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ This\ is\ deliberately\ left-\/to-\/right:\ Xright\ =\ R\ *\ Xleft\ +\ T.}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00207}00207\ \ \ \ \ \ \ \ \ writeMatrix(output,\ \textcolor{stringliteral}{"{}HN"{}},\ homogeneousTransform);}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00208}00208\ \ \ \ \ \ \ \ \ writeMatrix(output,\ \textcolor{stringliteral}{"{}R"{}},\ result.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_a5a68f5b815115306665ec16a976e60d2}{stereo}}.\mbox{\hyperlink{structstereo__calib_1_1StereoCalibrationResult_a8d44c8bfab9367d2e16b42d6fae8d09f}{R}});}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00209}00209\ \ \ \ \ \ \ \ \ writeMatrix(output,\ \textcolor{stringliteral}{"{}T"{}},\ result.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_a5a68f5b815115306665ec16a976e60d2}{stereo}}.\mbox{\hyperlink{structstereo__calib_1_1StereoCalibrationResult_a4bbc954e0c4b51cca7df8127de16f3ea}{T}});}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00210}00210\ \ \ \ \ \ \ \ \ output\ <<\ \textcolor{stringliteral}{"{}\(\backslash\)n[STEREO\_RECTIFICATION]\(\backslash\)n"{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00211}00211\ \ \ \ \ \ \ \ \ writeMatrix(output,\ \textcolor{stringliteral}{"{}R1"{}},\ result.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_a2ca820298f520004737fff3a0f6b7de3}{rectification}}.\mbox{\hyperlink{structstereo__calib_1_1RectificationResult_a12f5a55e8a36dd51e68a78547fe8a4f0}{R1}});}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00212}00212\ \ \ \ \ \ \ \ \ writeMatrix(output,\ \textcolor{stringliteral}{"{}R2"{}},\ result.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_a2ca820298f520004737fff3a0f6b7de3}{rectification}}.\mbox{\hyperlink{structstereo__calib_1_1RectificationResult_ac9a87a66577847c1b0225a1bd5f8acd7}{R2}});}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00213}00213\ \ \ \ \ \ \ \ \ writeMatrix(output,\ \textcolor{stringliteral}{"{}P1"{}},\ result.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_a2ca820298f520004737fff3a0f6b7de3}{rectification}}.\mbox{\hyperlink{structstereo__calib_1_1RectificationResult_a4d29bb030343c3052c53328624950e83}{P1}});}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00214}00214\ \ \ \ \ \ \ \ \ writeMatrix(output,\ \textcolor{stringliteral}{"{}P2"{}},\ result.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_a2ca820298f520004737fff3a0f6b7de3}{rectification}}.\mbox{\hyperlink{structstereo__calib_1_1RectificationResult_a9cc270ff29c3a835297334d101c8cbf0}{P2}});}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00215}00215\ \ \ \ \ \ \ \ \ writeMatrix(output,\ \textcolor{stringliteral}{"{}Q"{}},\ result.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_a2ca820298f520004737fff3a0f6b7de3}{rectification}}.\mbox{\hyperlink{structstereo__calib_1_1RectificationResult_a1978d90ed27844826cc0315cb90f8719}{Q}});}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00216}00216\ \ \ \ \ \ \ \ \ output\ <<\ \textcolor{stringliteral}{"{}balance\ "{}}\ <<\ result.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_a2ca820298f520004737fff3a0f6b7de3}{rectification}}.\mbox{\hyperlink{structstereo__calib_1_1RectificationResult_a1d58e2690df60958296c26be95f677f5}{balance}}\ <<\ \textcolor{stringliteral}{"{}\(\backslash\)n"{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00217}00217\ \ \ \ \ \ \ \ \ output\ <<\ \textcolor{stringliteral}{"{}fovScale\ "{}}\ <<\ result.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_a2ca820298f520004737fff3a0f6b7de3}{rectification}}.\mbox{\hyperlink{structstereo__calib_1_1RectificationResult_a3ed46d0bf5929af60453d01b6553cb14}{fovScale}}\ <<\ \textcolor{stringliteral}{"{}\(\backslash\)n"{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00218}00218\ \ \ \ \ \ \ \ \ output\ <<\ \textcolor{stringliteral}{"{}zeroDisparity\ "{}}\ <<\ (result.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_a2ca820298f520004737fff3a0f6b7de3}{rectification}}.\mbox{\hyperlink{structstereo__calib_1_1RectificationResult_a7aaa4ef63550fe5bd6b40b619ed85329}{zeroDisparity}}\ ?\ 1\ :\ 0)\ <<\ \textcolor{stringliteral}{"{}\(\backslash\)n\(\backslash\)n"{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00219}00219\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00220}00220\ }
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00221}00221\ \ \ \ \ output\ <<\ \textcolor{stringliteral}{"{}[CALIBRATION\_QUALITY]\(\backslash\)n"{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00222}00222\ \ \ \ \ \textcolor{keywordflow}{if}\ (writesLeftCamera)}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00223}00223\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00224}00224\ \ \ \ \ \ \ \ \ output\ <<\ \textcolor{stringliteral}{"{}leftRms\ "{}}\ <<\ result.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_a3002915b3b94994684c06d9a6e9a4b17}{leftCamera}}.\mbox{\hyperlink{structstereo__calib_1_1CameraCalibrationResult_a6366799e3288c139db1fd32378f67fa8}{rms}}\ <<\ \textcolor{stringliteral}{"{}\(\backslash\)n"{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00225}00225\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00226}00226\ \ \ \ \ \textcolor{keywordflow}{if}\ (writesRightCamera)}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00227}00227\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00228}00228\ \ \ \ \ \ \ \ \ output\ <<\ \textcolor{stringliteral}{"{}rightRms\ "{}}\ <<\ result.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_aa0c5bc3e1e97ae981d7041b9148a4a68}{rightCamera}}.\mbox{\hyperlink{structstereo__calib_1_1CameraCalibrationResult_a6366799e3288c139db1fd32378f67fa8}{rms}}\ <<\ \textcolor{stringliteral}{"{}\(\backslash\)n"{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00229}00229\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00230}00230\ \ \ \ \ \textcolor{keywordflow}{if}\ (result.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_a31f11e28eb4f6d0faa9b91e4b385a351}{mode}}\ ==\ \mbox{\hyperlink{namespacestereo__calib_a0645d0e70d31718fe1c9c42699345c2faede6d8d2c158731a395cefefd37ac309}{CalibrationMode::StereoFull}})}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00231}00231\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00232}00232\ \ \ \ \ \ \ \ \ output\ <<\ \textcolor{stringliteral}{"{}stereoRms\ "{}}\ <<\ result.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_a5a68f5b815115306665ec16a976e60d2}{stereo}}.\mbox{\hyperlink{structstereo__calib_1_1StereoCalibrationResult_a57c2f1a91d3a48ea5e518d3a4b496d1a}{rms}}\ <<\ \textcolor{stringliteral}{"{}\(\backslash\)n"{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00233}00233\ \ \ \ \ \ \ \ \ output\ <<\ \textcolor{stringliteral}{"{}baseline\ "{}}\ <<\ result.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_afd84e1a651aa28fcadd4030d8cad9223}{quality}}.\mbox{\hyperlink{structstereo__calib_1_1CalibrationQualityMetrics_a24b2ed5de3689a8d981b2da74c38281d}{baseline}}\ <<\ \textcolor{stringliteral}{"{}\(\backslash\)n"{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00234}00234\ \ \ \ \ \ \ \ \ output\ <<\ \textcolor{stringliteral}{"{}synchronizedPairs\ "{}}\ <<\ result.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_afd84e1a651aa28fcadd4030d8cad9223}{quality}}.\mbox{\hyperlink{structstereo__calib_1_1CalibrationQualityMetrics_a693f2018e6eb3f6dd3b348a9f13c6770}{synchronizedPairs}}\ <<\ \textcolor{stringliteral}{"{}\(\backslash\)n"{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00235}00235\ \ \ \ \ \ \ \ \ output\ <<\ \textcolor{stringliteral}{"{}acceptedObservations\ "{}}\ <<\ result.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_afd84e1a651aa28fcadd4030d8cad9223}{quality}}.\mbox{\hyperlink{structstereo__calib_1_1CalibrationQualityMetrics_a77830380743b9272369566b5bc60b1fc}{acceptedObservations}}\ <<\ \textcolor{stringliteral}{"{}\(\backslash\)n"{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00236}00236\ \ \ \ \ \ \ \ \ output\ <<\ \textcolor{stringliteral}{"{}rejectedDetections\ "{}}\ <<\ result.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_afd84e1a651aa28fcadd4030d8cad9223}{quality}}.\mbox{\hyperlink{structstereo__calib_1_1CalibrationQualityMetrics_ae032a0c8ad547bb844640428d91ad7bf}{rejectedDetections}}\ <<\ \textcolor{stringliteral}{"{}\(\backslash\)n"{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00237}00237\ \ \ \ \ \ \ \ \ output\ <<\ \textcolor{stringliteral}{"{}meanTimestampDeltaMs\ "{}}\ <<\ result.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_afd84e1a651aa28fcadd4030d8cad9223}{quality}}.\mbox{\hyperlink{structstereo__calib_1_1CalibrationQualityMetrics_a8967d1db669d0fe05481c441849cb114}{meanTimestampDeltaMs}}\ <<\ \textcolor{stringliteral}{"{}\(\backslash\)n"{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00238}00238\ \ \ \ \ \ \ \ \ output\ <<\ \textcolor{stringliteral}{"{}maxTimestampDeltaMs\ "{}}\ <<\ result.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_afd84e1a651aa28fcadd4030d8cad9223}{quality}}.\mbox{\hyperlink{structstereo__calib_1_1CalibrationQualityMetrics_adac938c1ac7a2f1b4e2da64a233eb218}{maxTimestampDeltaMs}}\ <<\ \textcolor{stringliteral}{"{}\(\backslash\)n"{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00239}00239\ \ \ \ \ \ \ \ \ output\ <<\ \textcolor{stringliteral}{"{}meanVerticalErrorPx\ "{}}\ <<\ result.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_afd84e1a651aa28fcadd4030d8cad9223}{quality}}.\mbox{\hyperlink{structstereo__calib_1_1CalibrationQualityMetrics_adcbcfed35eeb1a7016657b8aac12caed}{meanVerticalRectificationErrorPx}}\ <<\ \textcolor{stringliteral}{"{}\(\backslash\)n"{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00240}00240\ \ \ \ \ \ \ \ \ output\ <<\ \textcolor{stringliteral}{"{}medianVerticalErrorPx\ "{}}\ <<\ result.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_afd84e1a651aa28fcadd4030d8cad9223}{quality}}.\mbox{\hyperlink{structstereo__calib_1_1CalibrationQualityMetrics_a6c305341274130c3dc3c6824f6226776}{medianVerticalRectificationErrorPx}}\ <<\ \textcolor{stringliteral}{"{}\(\backslash\)n"{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00241}00241\ \ \ \ \ \ \ \ \ output\ <<\ \textcolor{stringliteral}{"{}rmsVerticalErrorPx\ "{}}\ <<\ result.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_afd84e1a651aa28fcadd4030d8cad9223}{quality}}.\mbox{\hyperlink{structstereo__calib_1_1CalibrationQualityMetrics_a4fc2a3e4b177324f5f9f50cdff35da52}{rmsVerticalRectificationErrorPx}}\ <<\ \textcolor{stringliteral}{"{}\(\backslash\)n"{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00242}00242\ \ \ \ \ \ \ \ \ output\ <<\ \textcolor{stringliteral}{"{}p95VerticalErrorPx\ "{}}\ <<\ result.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_afd84e1a651aa28fcadd4030d8cad9223}{quality}}.\mbox{\hyperlink{structstereo__calib_1_1CalibrationQualityMetrics_aa4ea39f83e52eac0a468c6f39dae995b}{p95VerticalRectificationErrorPx}}\ <<\ \textcolor{stringliteral}{"{}\(\backslash\)n"{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00243}00243\ \ \ \ \ \ \ \ \ output\ <<\ \textcolor{stringliteral}{"{}maxVerticalErrorPx\ "{}}\ <<\ result.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_afd84e1a651aa28fcadd4030d8cad9223}{quality}}.\mbox{\hyperlink{structstereo__calib_1_1CalibrationQualityMetrics_a9c5622fd8063c557fdc690c92cfce660}{maxVerticalRectificationErrorPx}}\ <<\ \textcolor{stringliteral}{"{}\(\backslash\)n"{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00244}00244\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00245}00245\ }
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00246}00246\ \ \ \ \ output.flush();}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00247}00247\ \ \ \ \ \textcolor{keywordflow}{if}\ (!output.good())}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00248}00248\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00249}00249\ \ \ \ \ \ \ \ \ errorMessage\ =\ \textcolor{stringliteral}{"{}Failed\ while\ writing\ temporary\ calibration\ file\ '"{}}\ +\ temporaryFile\ +\ \textcolor{stringliteral}{"{}'."{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00250}00250\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00251}00251\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00252}00252\ \ \ \ \ output.close();}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00253}00253\ \ \ \ \ \textcolor{keywordflow}{if}\ (output.fail())}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00254}00254\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00255}00255\ \ \ \ \ \ \ \ \ errorMessage\ =\ \textcolor{stringliteral}{"{}Could\ not\ close\ temporary\ calibration\ file\ '"{}}\ +\ temporaryFile\ +\ \textcolor{stringliteral}{"{}'."{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00256}00256\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00257}00257\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00258}00258\ }
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00259}00259\ \ \ \ \ std::ifstream\ validation(temporaryFile.c\_str());}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00260}00260\ \ \ \ \ \textcolor{keywordflow}{if}\ (!validation.good())}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00261}00261\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00262}00262\ \ \ \ \ \ \ \ \ errorMessage\ =\ \textcolor{stringliteral}{"{}Could\ not\ validate\ temporary\ calibration\ file\ '"{}}\ +\ temporaryFile\ +\ \textcolor{stringliteral}{"{}'."{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00263}00263\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00264}00264\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00265}00265\ \ \ \ \ validation.close();}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00266}00266\ \ \ \ \ \textcolor{keywordflow}{if}\ (std::rename(temporaryFile.c\_str(),\ outputFile.c\_str())\ !=\ 0)}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00267}00267\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00268}00268\ \ \ \ \ \ \ \ \ errorMessage\ =\ \textcolor{stringliteral}{"{}Could\ not\ replace\ calibration\ file\ '"{}}\ +\ outputFile\ +\ \textcolor{stringliteral}{"{}'\ with\ temporary\ file:\ "{}}\ +}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00269}00269\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::strerror(errno);}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00270}00270\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00271}00271\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00272}00272\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00273}00273\ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00274}00274\ }
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00275}\mbox{\hyperlink{classstereo__calib_1_1CalibrationWriter_afe918a21498c06cc4421205b33b94cf4}{00275}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classstereo__calib_1_1CalibrationWriter_afe918a21498c06cc4421205b33b94cf4}{CalibrationWriter::writeObservations}}(\textcolor{keyword}{const}\ std::string\&\ outputFile,}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00276}00276\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<StereoObservation>\&\ observations,}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00277}00277\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::string\&\ errorMessage)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00278}00278\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00279}00279\ \ \ \ \ errorMessage.clear();}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00280}00280\ \ \ \ \ \textcolor{keywordflow}{if}\ (outputFile.empty())}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00281}00281\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00282}00282\ \ \ \ \ \ \ \ \ errorMessage\ =\ \textcolor{stringliteral}{"{}Observation\ output\ filename\ is\ empty."{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00283}00283\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00284}00284\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00285}00285\ \ \ \ \ \textcolor{keywordflow}{for}\ (std::size\_t\ index\ =\ 0;\ index\ <\ observations.size();\ ++index)}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00286}00286\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00287}00287\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!isValidObservation(observations[index]))}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00288}00288\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00289}00289\ \ \ \ \ \ \ \ \ \ \ \ \ errorMessage\ =\ \textcolor{stringliteral}{"{}Observation\ \#"{}}\ +\ std::to\_string(index)\ +\ \textcolor{stringliteral}{"{}\ is\ invalid."{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00290}00290\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00291}00291\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00292}00292\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00293}00293\ }
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00294}00294\ \ \ \ \ \textcolor{keyword}{const}\ std::string\ temporaryFile\ =\ temporaryObservationFile(outputFile);}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00295}00295\ \ \ \ \ \textcolor{keywordflow}{try}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00296}00296\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00297}00297\ \ \ \ \ \ \ \ \ cv::FileStorage\ storage(temporaryFile,\ cv::FileStorage::WRITE);}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00298}00298\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!storage.isOpened())}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00299}00299\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00300}00300\ \ \ \ \ \ \ \ \ \ \ \ \ errorMessage\ =\ \textcolor{stringliteral}{"{}Could\ not\ open\ temporary\ observation\ file\ '"{}}\ +\ temporaryFile\ +\ \textcolor{stringliteral}{"{}'."{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00301}00301\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00302}00302\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00303}00303\ }
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00304}00304\ \ \ \ \ \ \ \ \ storage\ <<\ \textcolor{stringliteral}{"{}observations"{}}\ <<\ \textcolor{stringliteral}{"{}["{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00305}00305\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (std::size\_t\ index\ =\ 0;\ index\ <\ observations.size();\ ++index)}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00306}00306\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00307}00307\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{structstereo__calib_1_1StereoObservation}{StereoObservation}}\&\ observation\ =\ observations[index];}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00308}00308\ \ \ \ \ \ \ \ \ \ \ \ \ storage\ <<\ \textcolor{stringliteral}{"{}\{"{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00309}00309\ \ \ \ \ \ \ \ \ \ \ \ \ storage\ <<\ \textcolor{stringliteral}{"{}index"{}}\ <<\ \textcolor{keyword}{static\_cast<}\textcolor{keywordtype}{int}\textcolor{keyword}{>}(index);}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00310}00310\ \ \ \ \ \ \ \ \ \ \ \ \ storage\ <<\ \textcolor{stringliteral}{"{}imageWidth"{}}\ <<\ observation.\mbox{\hyperlink{structstereo__calib_1_1StereoObservation_a301e75f5b84177271529e4cfdc8d4d67}{imageSize}}.width;}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00311}00311\ \ \ \ \ \ \ \ \ \ \ \ \ storage\ <<\ \textcolor{stringliteral}{"{}imageHeight"{}}\ <<\ observation.\mbox{\hyperlink{structstereo__calib_1_1StereoObservation_a301e75f5b84177271529e4cfdc8d4d67}{imageSize}}.height;}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00312}00312\ \ \ \ \ \ \ \ \ \ \ \ \ storage\ <<\ \textcolor{stringliteral}{"{}leftTimestampSeconds"{}}\ <<\ observation.\mbox{\hyperlink{structstereo__calib_1_1StereoObservation_ab6a7bf30ca22efabe01452296172d6cd}{leftTimestampSeconds}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00313}00313\ \ \ \ \ \ \ \ \ \ \ \ \ storage\ <<\ \textcolor{stringliteral}{"{}rightTimestampSeconds"{}}\ <<\ observation.\mbox{\hyperlink{structstereo__calib_1_1StereoObservation_ab202bbda85262f776f3eba16e85a2c94}{rightTimestampSeconds}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00314}00314\ \ \ \ \ \ \ \ \ \ \ \ \ storage\ <<\ \textcolor{stringliteral}{"{}timestampDeltaSeconds"{}}\ <<\ observation.\mbox{\hyperlink{structstereo__calib_1_1StereoObservation_a420d5fbcc1a0743b3e02dee5abf81e11}{timestampDeltaSeconds}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00315}00315\ \ \ \ \ \ \ \ \ \ \ \ \ storage\ <<\ \textcolor{stringliteral}{"{}leftSequenceNumber"{}}\ <<\ std::to\_string(observation.\mbox{\hyperlink{structstereo__calib_1_1StereoObservation_a796154044ae88152c3b04aebd2f38632}{leftSequenceNumber}});}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00316}00316\ \ \ \ \ \ \ \ \ \ \ \ \ storage\ <<\ \textcolor{stringliteral}{"{}rightSequenceNumber"{}}\ <<\ std::to\_string(observation.\mbox{\hyperlink{structstereo__calib_1_1StereoObservation_a890cef8a9606f502ea7b32b0c924c6ef}{rightSequenceNumber}});}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00317}00317\ \ \ \ \ \ \ \ \ \ \ \ \ storage\ <<\ \textcolor{stringliteral}{"{}leftImageFilename"{}}\ <<\ observation.\mbox{\hyperlink{structstereo__calib_1_1StereoObservation_a7b1151307c67eafc804dc55198271d62}{leftImageFilename}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00318}00318\ \ \ \ \ \ \ \ \ \ \ \ \ storage\ <<\ \textcolor{stringliteral}{"{}rightImageFilename"{}}\ <<\ observation.\mbox{\hyperlink{structstereo__calib_1_1StereoObservation_aaafb76c75e0abdad2328254304b5f8b1}{rightImageFilename}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00319}00319\ \ \ \ \ \ \ \ \ \ \ \ \ storage\ <<\ \textcolor{stringliteral}{"{}objectPoints"{}}\ <<\ cv::Mat(observation.\mbox{\hyperlink{structstereo__calib_1_1StereoObservation_aa4c08f05f17f983d99b82a1f5b8cce7f}{objectPoints}});}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00320}00320\ \ \ \ \ \ \ \ \ \ \ \ \ storage\ <<\ \textcolor{stringliteral}{"{}leftImagePoints"{}}\ <<\ cv::Mat(observation.\mbox{\hyperlink{structstereo__calib_1_1StereoObservation_a985af16fa1f39e84615213289a2b9ce2}{leftImagePoints}});}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00321}00321\ \ \ \ \ \ \ \ \ \ \ \ \ storage\ <<\ \textcolor{stringliteral}{"{}rightImagePoints"{}}\ <<\ cv::Mat(observation.\mbox{\hyperlink{structstereo__calib_1_1StereoObservation_ade7a727ab1da37076f86c2ee11116a0d}{rightImagePoints}});}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00322}00322\ \ \ \ \ \ \ \ \ \ \ \ \ storage\ <<\ \textcolor{stringliteral}{"{}\}"{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00323}00323\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00324}00324\ \ \ \ \ \ \ \ \ storage\ <<\ \textcolor{stringliteral}{"{}]"{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00325}00325\ \ \ \ \ \ \ \ \ storage.release();}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00326}00326\ }
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00327}00327\ \ \ \ \ \ \ \ \ cv::FileStorage\ validation(temporaryFile,\ cv::FileStorage::READ);}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00328}00328\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ cv::FileNode\ serializedObservations\ =\ validation[\textcolor{stringliteral}{"{}observations"{}}];}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00329}00329\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!validation.isOpened()\ ||\ serializedObservations.type()\ !=\ cv::FileNode::SEQ\ ||}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00330}00330\ \ \ \ \ \ \ \ \ \ \ \ \ serializedObservations.size()\ !=\ observations.size())}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00331}00331\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00332}00332\ \ \ \ \ \ \ \ \ \ \ \ \ errorMessage\ =\ \textcolor{stringliteral}{"{}Could\ not\ validate\ temporary\ observation\ file\ '"{}}\ +\ temporaryFile\ +\ \textcolor{stringliteral}{"{}'."{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00333}00333\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00334}00334\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00335}00335\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00336}00336\ \ \ \ \ \textcolor{keywordflow}{catch}\ (\textcolor{keyword}{const}\ cv::Exception\&\ exception)}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00337}00337\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00338}00338\ \ \ \ \ \ \ \ \ errorMessage\ =\ std::string(\textcolor{stringliteral}{"{}Could\ not\ write\ observation\ file:\ "{}})\ +\ exception.what();}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00339}00339\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00340}00340\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00341}00341\ \ \ \ \ \textcolor{keywordflow}{if}\ (std::rename(temporaryFile.c\_str(),\ outputFile.c\_str())\ !=\ 0)}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00342}00342\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00343}00343\ \ \ \ \ \ \ \ \ errorMessage\ =\ \textcolor{stringliteral}{"{}Could\ not\ replace\ observation\ file\ '"{}}\ +\ outputFile\ +\ \textcolor{stringliteral}{"{}'\ with\ temporary\ file:\ "{}}\ +}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00344}00344\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::strerror(errno);}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00345}00345\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00346}00346\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00347}00347\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00348}00348\ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00349}00349\ }
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00350}\mbox{\hyperlink{classstereo__calib_1_1CalibrationWriter_a70650af4f034a612a4a327f5fae4d584}{00350}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classstereo__calib_1_1CalibrationWriter_a70650af4f034a612a4a327f5fae4d584}{CalibrationWriter::writeImagePair}}(\textcolor{keyword}{const}\ std::string\&\ outputDirectory,}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00351}00351\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::size\_t\ observationIndex,}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00352}00352\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ cv::Mat\&\ leftImg,}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00353}00353\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ cv::Mat\&\ rightImg,}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00354}00354\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::string\&\ leftFile,}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00355}00355\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::string\&\ rightFile,}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00356}00356\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::string\&\ errorMessage)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00357}00357\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00358}00358\ \ \ \ \ errorMessage.clear();}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00359}00359\ \ \ \ \ leftFile.clear();}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00360}00360\ \ \ \ \ rightFile.clear();}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00361}00361\ \ \ \ \ \textcolor{keywordflow}{if}\ (outputDirectory.empty()\ ||\ leftImg.empty()\ ||\ rightImg.empty())}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00362}00362\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00363}00363\ \ \ \ \ \ \ \ \ errorMessage\ =\ \textcolor{stringliteral}{"{}Cannot\ save\ an\ image\ pair\ without\ an\ output\ directory\ and\ two\ images."{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00364}00364\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00365}00365\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00366}00366\ \ \ \ \ \textcolor{keywordflow}{if}\ (leftImg.size()\ !=\ rightImg.size())}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00367}00367\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00368}00368\ \ \ \ \ \ \ \ \ errorMessage\ =\ \textcolor{stringliteral}{"{}Cannot\ save\ an\ image\ pair\ with\ different\ image\ sizes."{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00369}00369\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00370}00370\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00371}00371\ }
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00372}00372\ \ \ \ \ std::ostringstream\ name;}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00373}00373\ \ \ \ \ name\ <<\ std::setfill(\textcolor{charliteral}{'0'})\ <<\ std::setw(4)\ <<\ observationIndex;}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00374}00374\ \ \ \ \ leftFile\ =\ \textcolor{stringliteral}{"{}left\_"{}}\ +\ name.str()\ +\ \textcolor{stringliteral}{"{}.png"{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00375}00375\ \ \ \ \ rightFile\ =\ \textcolor{stringliteral}{"{}right\_"{}}\ +\ name.str()\ +\ \textcolor{stringliteral}{"{}.png"{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00376}00376\ }
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00377}00377\ \ \ \ \ cv::Mat\ leftToWrite;}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00378}00378\ \ \ \ \ cv::Mat\ rightToWrite;}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00379}00379\ \ \ \ \ \textcolor{keywordflow}{try}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00380}00380\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00381}00381\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (leftImg.channels()\ ==\ 3)}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00382}00382\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00383}00383\ \ \ \ \ \ \ \ \ \ \ \ \ cv::cvtColor(leftImg,\ leftToWrite,\ cv::COLOR\_RGB2BGR);}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00384}00384\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00385}00385\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00386}00386\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00387}00387\ \ \ \ \ \ \ \ \ \ \ \ \ leftToWrite\ =\ leftImg.clone();}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00388}00388\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00389}00389\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (rightImg.channels()\ ==\ 3)}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00390}00390\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00391}00391\ \ \ \ \ \ \ \ \ \ \ \ \ cv::cvtColor(rightImg,\ rightToWrite,\ cv::COLOR\_RGB2BGR);}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00392}00392\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00393}00393\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00394}00394\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00395}00395\ \ \ \ \ \ \ \ \ \ \ \ \ rightToWrite\ =\ rightImg.clone();}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00396}00396\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00397}00397\ }
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00398}00398\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!cv::imwrite(joinPath(outputDirectory,\ leftFile),\ leftToWrite))}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00399}00399\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00400}00400\ \ \ \ \ \ \ \ \ \ \ \ \ errorMessage\ =\ \textcolor{stringliteral}{"{}Could\ not\ write\ left\ calibration\ image\ '"{}}\ +\ joinPath(outputDirectory,\ leftFile)\ +\ \textcolor{stringliteral}{"{}'."{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00401}00401\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00402}00402\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00403}00403\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!cv::imwrite(joinPath(outputDirectory,\ rightFile),\ rightToWrite))}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00404}00404\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00405}00405\ \ \ \ \ \ \ \ \ \ \ \ \ errorMessage\ =\ \textcolor{stringliteral}{"{}Could\ not\ write\ right\ calibration\ image\ '"{}}\ +\ joinPath(outputDirectory,\ rightFile)\ +\ \textcolor{stringliteral}{"{}'."{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00406}00406\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00407}00407\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00408}00408\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00409}00409\ \ \ \ \ \textcolor{keywordflow}{catch}\ (\textcolor{keyword}{const}\ cv::Exception\&\ exception)}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00410}00410\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00411}00411\ \ \ \ \ \ \ \ \ errorMessage\ =\ std::string(\textcolor{stringliteral}{"{}Could\ not\ write\ calibration\ images:\ "{}})\ +\ exception.what();}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00412}00412\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00413}00413\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00414}00414\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00415}00415\ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00416}00416\ }
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00417}00417\ \textcolor{keywordtype}{bool}\ CalibrationWriter::validateResult(\textcolor{keyword}{const}\ \mbox{\hyperlink{structstereo__calib_1_1CalibrationResult}{CalibrationResult}}\&\ result,}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00418}00418\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::string\&\ errorMessage)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00419}00419\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00420}00420\ \ \ \ \ errorMessage.clear();}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00421}00421\ \ \ \ \ \textcolor{keywordflow}{switch}\ (result.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_a31f11e28eb4f6d0faa9b91e4b385a351}{mode}})}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00422}00422\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00423}00423\ \ \ \ \ \textcolor{keywordflow}{case}\ \mbox{\hyperlink{namespacestereo__calib_a0645d0e70d31718fe1c9c42699345c2fa792eeb7b550156b7b655edf421c0493f}{CalibrationMode::MonocularLeft}}:}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00424}00424\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!isValidCamera(result.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_a3002915b3b94994684c06d9a6e9a4b17}{leftCamera}}))}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00425}00425\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00426}00426\ \ \ \ \ \ \ \ \ \ \ \ \ errorMessage\ =\ \textcolor{stringliteral}{"{}Monocular-\/left\ result\ does\ not\ contain\ valid\ left\ fisheye\ intrinsics."{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00427}00427\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00428}00428\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00429}00429\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00430}00430\ \ \ \ \ \textcolor{keywordflow}{case}\ \mbox{\hyperlink{namespacestereo__calib_a0645d0e70d31718fe1c9c42699345c2fa5e3f0e200908947d31e69445d554141b}{CalibrationMode::MonocularRight}}:}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00431}00431\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!isValidCamera(result.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_aa0c5bc3e1e97ae981d7041b9148a4a68}{rightCamera}}))}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00432}00432\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00433}00433\ \ \ \ \ \ \ \ \ \ \ \ \ errorMessage\ =\ \textcolor{stringliteral}{"{}Monocular-\/right\ result\ does\ not\ contain\ valid\ right\ fisheye\ intrinsics."{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00434}00434\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00435}00435\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00436}00436\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00437}00437\ \ \ \ \ \textcolor{keywordflow}{case}\ \mbox{\hyperlink{namespacestereo__calib_a0645d0e70d31718fe1c9c42699345c2fa2c39d0e718a3970bb027538cc588f288}{CalibrationMode::MonocularBoth}}:}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00438}00438\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!isValidCamera(result.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_a3002915b3b94994684c06d9a6e9a4b17}{leftCamera}})\ ||\ !isValidCamera(result.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_aa0c5bc3e1e97ae981d7041b9148a4a68}{rightCamera}}))}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00439}00439\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00440}00440\ \ \ \ \ \ \ \ \ \ \ \ \ errorMessage\ =\ \textcolor{stringliteral}{"{}Monocular-\/both\ result\ does\ not\ contain\ valid\ fisheye\ intrinsics\ for\ both\ cameras."{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00441}00441\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00442}00442\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00443}00443\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00444}00444\ \ \ \ \ \textcolor{keywordflow}{case}\ \mbox{\hyperlink{namespacestereo__calib_a0645d0e70d31718fe1c9c42699345c2faede6d8d2c158731a395cefefd37ac309}{CalibrationMode::StereoFull}}:}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00445}00445\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!isValidCamera(result.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_a3002915b3b94994684c06d9a6e9a4b17}{leftCamera}})\ ||\ !isValidCamera(result.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_aa0c5bc3e1e97ae981d7041b9148a4a68}{rightCamera}})\ ||}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00446}00446\ \ \ \ \ \ \ \ \ \ \ \ \ !isValidStereo(result.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_a5a68f5b815115306665ec16a976e60d2}{stereo}})\ ||\ !isValidRectification(result.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_a2ca820298f520004737fff3a0f6b7de3}{rectification}})\ ||}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00447}00447\ \ \ \ \ \ \ \ \ \ \ \ \ !isValidStereoQuality(result.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_afd84e1a651aa28fcadd4030d8cad9223}{quality}}))}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00448}00448\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00449}00449\ \ \ \ \ \ \ \ \ \ \ \ \ errorMessage\ =\ \textcolor{stringliteral}{"{}Stereo\ result\ is\ missing\ valid\ intrinsics,\ transform,\ rectification,\ or\ quality\ metrics."{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00450}00450\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00451}00451\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00452}00452\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00453}00453\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00454}00454\ \ \ \ \ errorMessage\ =\ \textcolor{stringliteral}{"{}Unknown\ calibration\ mode."{}};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00455}00455\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00456}00456\ \}}
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00457}00457\ }
+\DoxyCodeLine{\Hypertarget{CalibrationWriter_8cpp_source_l00458}00458\ \}\ \textcolor{comment}{//\ namespace\ stereo\_calib}}
+
+\end{DoxyCode}

@@ -1,0 +1,80 @@
+\doxysection{position\+Direct\+Thread.\+h}
+\hypertarget{positionDirectThread_8h_source}{}\label{positionDirectThread_8h_source}\index{icub-\/main/src/modules/positionDirectControl/positionDirectThread.h@{icub-\/main/src/modules/positionDirectControl/positionDirectThread.h}}
+\mbox{\hyperlink{positionDirectThread_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00001}00001\ \textcolor{comment}{//\ -\/*-\/\ mode:C++;\ tab-\/width:4;\ c-\/basic-\/offset:4;\ indent-\/tabs-\/mode:nil\ -\/*-\/}}
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00002}00002\ \textcolor{comment}{//\ Copyright\ (C)\ 2015\ Istituto\ Italiano\ di\ Tecnologia\ -\/\ iCub\ Facility}}
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00003}00003\ \textcolor{comment}{//\ Author:\ Marco\ Randazzo\ \ <marco.randazzo@iit.it>}}
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00004}00004\ \textcolor{comment}{//\ CopyPolicy:\ Released\ under\ the\ terms\ of\ the\ GNU\ GPL\ v2.0.}}
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00005}00005\ }
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00006}00006\ \textcolor{preprocessor}{\#ifndef\ \_\_POSDIRCONTROLTHREAD\_\_}}
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00007}00007\ \textcolor{preprocessor}{\#define\ \_\_POSDIRCONTROLTHREAD\_\_}}
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00008}00008\ }
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00009}00009\ \textcolor{preprocessor}{\#include\ <mutex>}}
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00010}00010\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00011}00011\ }
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00012}00012\ \textcolor{preprocessor}{\#include\ <yarp/os/PeriodicThread.h>}}
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00013}00013\ \textcolor{preprocessor}{\#include\ <yarp/os/Bottle.h>}}
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00014}00014\ \textcolor{preprocessor}{\#include\ <yarp/dev/ControlBoardInterfaces.h>}}
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00015}00015\ \textcolor{preprocessor}{\#include\ <yarp/dev/PolyDriver.h>}}
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00016}00016\ \textcolor{preprocessor}{\#include\ <yarp/sig/Vector.h>}}
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00017}00017\ \textcolor{preprocessor}{\#include\ <yarp/os/Time.h>}}
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00018}00018\ }
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00019}\mbox{\hyperlink{classpositionDirectControlThread}{00019}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classpositionDirectControlThread}{positionDirectControlThread}}:\ \textcolor{keyword}{public}\ yarp::os::PeriodicThread}
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00020}00020\ \{}
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00021}00021\ \textcolor{keyword}{private}:}
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00022}00022\ \ \ \ \ \textcolor{keywordtype}{char}\ robotName[255];}
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00023}00023\ \ \ \ \ yarp::dev::IPositionDirect\ \ *idir;}
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00024}00024\ \ \ \ \ yarp::dev::IControlLimits\ \ \ *ilim;}
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00025}00025\ \ \ \ \ yarp::dev::IPositionControl\ *ipos;}
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00026}00026\ \ \ \ \ yarp::dev::IEncoders\ \ \ \ \ \ \ \ *ienc;}
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00027}00027\ \ \ \ \ yarp::dev::IControlMode\ \ \ \ \ *imod;}
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00028}00028\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00029}00029\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ part\_joints;}
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00030}00030\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ control\_joints;}
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00031}00031\ \ \ \ \ \textcolor{keywordtype}{int}*\ control\_joints\_list;}
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00032}00032\ }
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00033}00033\ \ \ \ \ yarp::dev::PolyDriver\ *driver;}
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00034}00034\ }
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00035}00035\ \ \ \ \ yarp::sig::Vector\ min\_limits;}
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00036}00036\ \ \ \ \ yarp::sig::Vector\ max\_limits;}
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00037}00037\ \ \ \ \ yarp::sig::Vector\ encoders;}
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00038}00038\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00039}00039\ \ \ \ \ yarp::sig::Vector\ targets;}
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00040}00040\ \ \ \ \ yarp::sig::Vector\ prev\_targets;}
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00041}00041\ }
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00042}00042\ \ \ \ \ yarp::sig::Vector\ error;}
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00043}00043\ \ \ \ \ std::mutex\ \_mutex;}
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00044}00044\ }
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00045}00045\ \ \ \ \ \textcolor{keywordtype}{bool}\ suspended;}
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00046}00046\ }
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00047}00047\ \ \ \ \ \textcolor{keywordtype}{int}\ control\_period;}
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00048}00048\ \ \ \ \ \textcolor{keywordtype}{double}\ t\_start;}
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00049}00049\ }
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00050}00050\ \ \ \ \ yarp::os::BufferedPort<yarp::os::Bottle>\ command\_port;}
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00051}00051\ }
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00052}00052\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00053}\mbox{\hyperlink{classpositionDirectControlThread_a2c029a6a38a4e40d7aad7dd95f3b78cf}{00053}}\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{classpositionDirectControlThread_a2c029a6a38a4e40d7aad7dd95f3b78cf}{joints\_limiter}};}
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00054}\mbox{\hyperlink{classpositionDirectControlThread_ab3a8370c56b5beaec9cb4151beeb3162}{00054}}\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{classpositionDirectControlThread_ab3a8370c56b5beaec9cb4151beeb3162}{target\_limiter}};}
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00055}00055\ \ \ \ \ \mbox{\hyperlink{classpositionDirectControlThread}{positionDirectControlThread}}(\textcolor{keywordtype}{int}\ rate);}
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00056}00056\ \ \ \ \ \mbox{\hyperlink{classpositionDirectControlThread_a94dd35222b7e094495d9a65ae19f62d4}{\string~positionDirectControlThread}}();}
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00057}00057\ }
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00058}00058\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classpositionDirectControlThread_ad2327c2f475d885425a0ccc3cb598a61}{init}}(yarp::dev::PolyDriver\ *d,\ std::string\ moduleName,\ std::string\ partName,\ std::string\ robotName,\ yarp::os::Bottle*\ jointsList);}
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00059}00059\ }
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00060}00060\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classpositionDirectControlThread_a3e742820ed55423c53e182e0969c89ad}{halt}}();}
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00061}00061\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classpositionDirectControlThread_a810ec6e67d36fd0441a4a2f82d2e69fe}{go}}();}
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00062}00062\ }
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00063}00063\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classpositionDirectControlThread_a30b4e1bea2be7e96c36746f2b16911f4}{setVel}}(\textcolor{keywordtype}{int}\ i,\ \textcolor{keywordtype}{double}\ vel);}
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00064}00064\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classpositionDirectControlThread_ae9f887cad5b0fd608222a9fa67342e29}{setGain}}(\textcolor{keywordtype}{int}\ i,\ \textcolor{keywordtype}{double}\ gain);\ }
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00065}00065\ }
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00066}00066\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classpositionDirectControlThread_a4fe63d7a8c014439fa2f7854078e1656}{run}}();}
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00067}00067\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classpositionDirectControlThread_a581c524085b2b5665f4ded01236be9be}{threadInit}}();}
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00068}00068\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classpositionDirectControlThread_af0ae4d0f4527be3d2a85a45dfbbb7504}{threadRelease}}();}
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00069}00069\ }
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00070}00070\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classpositionDirectControlThread_a2eb44602589483a2f985e7a67dc6fdb4}{limitSpeed}}(yarp::sig::Vector\ \&command);}
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00071}00071\ \};}
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00072}00072\ }
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00073}00073\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{positionDirectThread_8h_source_l00074}00074\ }
+
+\end{DoxyCode}

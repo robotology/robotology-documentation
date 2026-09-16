@@ -1,0 +1,388 @@
+\doxysection{pointing\+\_\+far.\+cpp}
+\hypertarget{pointing__far_8cpp_source}{}\label{pointing__far_8cpp_source}\index{icub-\/main/src/modules/actionsRenderingEngine/src/pointing\_far.cpp@{icub-\/main/src/modules/actionsRenderingEngine/src/pointing\_far.cpp}}
+\mbox{\hyperlink{pointing__far_8cpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00001}00001\ \textcolor{comment}{/*\ }}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00002}00002\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2017\ iCub\ Facility\ -\/\ Istituto\ Italiano\ di\ Tecnologia}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00003}00003\ \textcolor{comment}{\ *\ Author:\ Ugo\ Pattacini}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00004}00004\ \textcolor{comment}{\ *\ email:\ \ ugo.pattacini@iit.it}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00005}00005\ \textcolor{comment}{\ *\ Permission\ is\ granted\ to\ copy,\ distribute,\ and/or\ modify\ this\ program}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00006}00006\ \textcolor{comment}{\ *\ under\ the\ terms\ of\ the\ GNU\ General\ Public\ License,\ version\ 2\ or\ any}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00007}00007\ \textcolor{comment}{\ *\ later\ version\ published\ by\ the\ Free\ Software\ Foundation.}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00008}00008\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00009}00009\ \textcolor{comment}{\ *\ A\ copy\ of\ the\ license\ can\ be\ found\ at}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00010}00010\ \textcolor{comment}{\ *\ http://www.robotcub.org/icub/license/gpl.txt}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00011}00011\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00012}00012\ \textcolor{comment}{\ *\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00013}00013\ \textcolor{comment}{\ *\ WITHOUT\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00014}00014\ \textcolor{comment}{\ *\ MERCHANTABILITY\ or\ FITNESS\ FOR\ A\ PARTICULAR\ PURPOSE.\ See\ the\ GNU\ General}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00015}00015\ \textcolor{comment}{\ *\ Public\ License\ for\ more\ details}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00016}00016\ \textcolor{comment}{*/}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00017}00017\ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00018}00018\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00019}00019\ \textcolor{preprocessor}{\#include\ <cmath>}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00020}00020\ \textcolor{preprocessor}{\#include\ <limits>}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00021}00021\ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00022}00022\ \textcolor{preprocessor}{\#include\ <IpTNLP.hpp>}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00023}00023\ \textcolor{preprocessor}{\#include\ <IpIpoptApplication.hpp>}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00024}00024\ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00025}00025\ \textcolor{preprocessor}{\#include\ <yarp/os/Property.h>}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00026}00026\ \textcolor{preprocessor}{\#include\ <yarp/os/LogStream.h>}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00027}00027\ \textcolor{preprocessor}{\#include\ <yarp/dev/CartesianControl.h>}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00028}00028\ \textcolor{preprocessor}{\#include\ <yarp/sig/Vector.h>}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00029}00029\ \textcolor{preprocessor}{\#include\ <yarp/sig/Matrix.h>}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00030}00030\ \textcolor{preprocessor}{\#include\ <yarp/math/Math.h>}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00031}00031\ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00032}00032\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{iKinFwd_8h}{iCub/iKin/iKinFwd.h}}>}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00033}00033\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{pointing__far_8h}{iCub/pointing\_far.h}}>}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00034}00034\ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00035}\mbox{\hyperlink{pointing__far_8cpp_ac5a945020d3528355cda82d383676736}{00035}}\ \textcolor{preprocessor}{\#define\ RAD2DEG\ \ \ \ \ \ \ \ \ (180.0/M\_PI)}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00036}\mbox{\hyperlink{pointing__far_8cpp_af7e8592d0a634bd3642e9fd508ea8022}{00036}}\ \textcolor{preprocessor}{\#define\ DEG2RAD\ \ \ \ \ \ \ \ \ (M\_PI/180.0)}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00037}00037\ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00038}00038\ \textcolor{keyword}{using\ namespace\ }std;}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00039}00039\ \textcolor{keyword}{using\ namespace\ }yarp::os;}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00040}00040\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceyarp_1_1dev}{yarp::dev}};}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00041}00041\ \textcolor{keyword}{using\ namespace\ }yarp::sig;}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00042}00042\ \textcolor{keyword}{using\ namespace\ }yarp::math;}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00043}00043\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceiCub_1_1iKin}{iCub::iKin}};}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00044}00044\ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00045}00045\ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00046}00046\ \textcolor{comment}{/*************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00047}\mbox{\hyperlink{classPointingFarNLP}{00047}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classPointingFarNLP}{PointingFarNLP}}\ :\ \textcolor{keyword}{public}\ Ipopt::TNLP}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00048}00048\ \{}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00049}00049\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1iKin_1_1iCubArm}{iCubArm}}\ *finger\_tip;}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00050}00050\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1iKin_1_1iCubArm}{iCubArm}}\ *elbow;}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00051}00051\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1iKin_1_1iCubFinger}{iCubFinger}}\ *finger;}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00052}00052\ \ \ \ \ Vector\ point;}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00053}00053\ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00054}00054\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00055}00055\ \textcolor{comment}{\ \ \ \ /*********************************************************************/}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00056}\mbox{\hyperlink{classPointingFarNLP_a2f600d9b0a6202ecfe3aac133bbd35f9}{00056}}\ \ \ \ \ \mbox{\hyperlink{classPointingFarNLP_a2f600d9b0a6202ecfe3aac133bbd35f9}{PointingFarNLP}}(ICartesianControl\ *iarm)\ :}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00057}00057\ \ \ \ \ \ \ \ \ point(3,0.0)}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00058}00058\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00059}00059\ \ \ \ \ \ \ \ \ Bottle\ info;}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00060}00060\ \ \ \ \ \ \ \ \ iarm-\/>getInfo(info);}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00061}00061\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{string}\ hand=info.find(\textcolor{stringliteral}{"{}arm\_type"{}}).asString();}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00062}00062\ \ \ \ \ \ \ \ \ finger\_tip=\textcolor{keyword}{new}\ \mbox{\hyperlink{classiCub_1_1iKin_1_1iCubArm}{iCubArm}}(hand);}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00063}00063\ \ \ \ \ \ \ \ \ elbow=\textcolor{keyword}{new}\ \mbox{\hyperlink{classiCub_1_1iKin_1_1iCubArm}{iCubArm}}(hand);}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00064}00064\ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00065}00065\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{size\_t}\ underscore=hand.find(\textcolor{charliteral}{'\_'});}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00066}00066\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (underscore!=string::npos)}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00067}00067\ \ \ \ \ \ \ \ \ \ \ \ \ hand=hand.substr(0,underscore);}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00068}00068\ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00069}00069\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ update\ joints\ limits}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00070}00070\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ i=0;\ i<finger\_tip-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_acfd767b8edb2f4b26c0af2317dd08cc0}{getN}}();\ i++)}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00071}00071\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00072}00072\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ min,max;}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00073}00073\ \ \ \ \ \ \ \ \ \ \ \ \ iarm-\/>getLimits(i,\&min,\&max);}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00074}00074\ \ \ \ \ \ \ \ \ \ \ \ \ (*finger\_tip-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinLimb_ae0c121656774905c58b668b450417f0e}{asChain}}())[i].setMin(\mbox{\hyperlink{pointing__far_8cpp_af7e8592d0a634bd3642e9fd508ea8022}{DEG2RAD}}*min);}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00075}00075\ \ \ \ \ \ \ \ \ \ \ \ \ (*finger\_tip-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinLimb_ae0c121656774905c58b668b450417f0e}{asChain}}())[i].setMax(\mbox{\hyperlink{pointing__far_8cpp_af7e8592d0a634bd3642e9fd508ea8022}{DEG2RAD}}*max);}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00076}00076\ \ \ \ \ \ \ \ \ \ \ \ \ (*elbow-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinLimb_ae0c121656774905c58b668b450417f0e}{asChain}}())[i].setMin(\mbox{\hyperlink{pointing__far_8cpp_af7e8592d0a634bd3642e9fd508ea8022}{DEG2RAD}}*min);}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00077}00077\ \ \ \ \ \ \ \ \ \ \ \ \ (*elbow-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinLimb_ae0c121656774905c58b668b450417f0e}{asChain}}())[i].setMax(\mbox{\hyperlink{pointing__far_8cpp_af7e8592d0a634bd3642e9fd508ea8022}{DEG2RAD}}*max);}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00078}00078\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00079}00079\ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00080}00080\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ finger\_tip:\ block\ torso}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00081}00081\ \ \ \ \ \ \ \ \ finger\_tip-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_ad600a7548dcd3dc5cf51839d8da5a899}{blockLink}}(0,0.0);}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00082}00082\ \ \ \ \ \ \ \ \ finger\_tip-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_ad600a7548dcd3dc5cf51839d8da5a899}{blockLink}}(1,0.0);}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00083}00083\ \ \ \ \ \ \ \ \ finger\_tip-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_ad600a7548dcd3dc5cf51839d8da5a899}{blockLink}}(2,0.0);}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00084}00084\ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00085}00085\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ finger\_tip:\ block\ wrist}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00086}00086\ \ \ \ \ \ \ \ \ finger\_tip-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_ad600a7548dcd3dc5cf51839d8da5a899}{blockLink}}(8,0.0);}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00087}00087\ \ \ \ \ \ \ \ \ finger\_tip-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_ad600a7548dcd3dc5cf51839d8da5a899}{blockLink}}(9,0.0);}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00088}00088\ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00089}00089\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ elbow:\ block\ torso}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00090}00090\ \ \ \ \ \ \ \ \ elbow-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_ad600a7548dcd3dc5cf51839d8da5a899}{blockLink}}(0,0.0);}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00091}00091\ \ \ \ \ \ \ \ \ elbow-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_ad600a7548dcd3dc5cf51839d8da5a899}{blockLink}}(1,0.0);}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00092}00092\ \ \ \ \ \ \ \ \ elbow-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_ad600a7548dcd3dc5cf51839d8da5a899}{blockLink}}(2,0.0);}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00093}00093\ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00094}00094\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ elbow:\ remove\ forearm}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00095}00095\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keyword}{auto}\ i=0;\ i<4;\ i++)}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00096}00096\ \ \ \ \ \ \ \ \ \ \ \ \ elbow-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinLimb_ae0c121656774905c58b668b450417f0e}{asChain}}()-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a65521a2fa5d38f6c3823478fffad98f7}{rmLink}}(7);}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00097}00097\ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00098}00098\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ remove\ all\ constraints}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00099}00099\ \ \ \ \ \ \ \ \ finger\_tip-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinLimb_ae0c121656774905c58b668b450417f0e}{asChain}}()-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_ae52c86ba3b5e0b5dd938f591d69e29ad}{setAllConstraints}}(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00100}00100\ \ \ \ \ \ \ \ \ elbow-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinLimb_ae0c121656774905c58b668b450417f0e}{asChain}}()-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_ae52c86ba3b5e0b5dd938f591d69e29ad}{setAllConstraints}}(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00101}00101\ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00102}00102\ \ \ \ \ \ \ \ \ finger=\textcolor{keyword}{new}\ \mbox{\hyperlink{classiCub_1_1iKin_1_1iCubFinger}{iCubFinger}}(hand+\textcolor{stringliteral}{"{}\_index"{}});}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00103}00103\ \ \ \ \ \ \ \ \ finger-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinLimb_ae0c121656774905c58b668b450417f0e}{asChain}}()-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_ae52c86ba3b5e0b5dd938f591d69e29ad}{setAllConstraints}}(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00104}00104\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classPointingFarNLP_a675ec9a771a95497bcc68d857d007fd6}{setFingerJoints}}(\mbox{\hyperlink{compute__ekf__sym_8m_a35baefda5ec044ac7c1f5a41815b5b45}{zeros}}(16));}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00105}00105\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00106}00106\ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00107}00107\ \textcolor{comment}{\ \ \ \ /*********************************************************************/}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00108}\mbox{\hyperlink{classPointingFarNLP_a3c473128c23d8af46d289bd2db8bfdf5}{00108}}\ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{classPointingFarNLP_a3c473128c23d8af46d289bd2db8bfdf5}{\string~PointingFarNLP}}()}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00109}00109\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00110}00110\ \ \ \ \ \ \ \ \ \textcolor{keyword}{delete}\ finger\_tip;}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00111}00111\ \ \ \ \ \ \ \ \ \textcolor{keyword}{delete}\ elbow;}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00112}00112\ \ \ \ \ \ \ \ \ \textcolor{keyword}{delete}\ finger;}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00113}00113\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00114}00114\ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00115}00115\ \textcolor{comment}{\ \ \ \ /*********************************************************************/}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00116}\mbox{\hyperlink{classPointingFarNLP_a998b6e1884a740ee6b2c1a2ff9e23fcb}{00116}}\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classPointingFarNLP_a998b6e1884a740ee6b2c1a2ff9e23fcb}{setPoint}}(\textcolor{keyword}{const}\ Vector\&\ point)}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00117}00117\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00118}00118\ \ \ \ \ \ \ \ \ this-\/>point=point;}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00119}00119\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00120}00120\ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00121}00121\ \textcolor{comment}{\ \ \ \ /*********************************************************************/}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00122}\mbox{\hyperlink{classPointingFarNLP_a675ec9a771a95497bcc68d857d007fd6}{00122}}\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classPointingFarNLP_a675ec9a771a95497bcc68d857d007fd6}{setFingerJoints}}(\textcolor{keyword}{const}\ Vector\&\ finger\_joints)}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00123}00123\ \ \ \ \ \{\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00124}00124\ \ \ \ \ \ \ \ \ Vector\ chain\_joints;}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00125}00125\ \ \ \ \ \ \ \ \ finger-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iCubFinger_a8a1f717021bd429cb4493158d0bf0e00}{getChainJoints}}(finger\_joints,chain\_joints);}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00126}00126\ \ \ \ \ \ \ \ \ finger-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a9232068a0e37c01c09ce31c93ab9be42}{setAng}}(\mbox{\hyperlink{pointing__far_8cpp_af7e8592d0a634bd3642e9fd508ea8022}{DEG2RAD}}*chain\_joints);}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00127}00127\ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00128}00128\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ add\ final\ transformations}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00129}00129\ \ \ \ \ \ \ \ \ finger\_tip-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinLimb_ae0c121656774905c58b668b450417f0e}{asChain}}()-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a107e361a000db942f9a452acf3c9b020}{setHN}}(finger-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a0b503aeeb58dc5cb228c174bf8500599}{getH}}());}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00130}00130\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00131}00131\ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00132}00132\ \textcolor{comment}{\ \ \ \ /*********************************************************************/}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00133}\mbox{\hyperlink{classPointingFarNLP_ab9cf08d884b6e2095b6747612c64da56}{00133}}\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classPointingFarNLP_ab9cf08d884b6e2095b6747612c64da56}{getResult}}(Vector\ \&q,\ Vector\ \&\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}})\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00134}00134\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00135}00135\ \ \ \ \ \ \ \ \ q.resize(finger\_tip-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_acfd767b8edb2f4b26c0af2317dd08cc0}{getN}}());}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00136}00136\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ i=0;\ i<q.length();\ i++)}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00137}00137\ \ \ \ \ \ \ \ \ \ \ \ \ q[i]=\mbox{\hyperlink{pointing__far_8cpp_ac5a945020d3528355cda82d383676736}{RAD2DEG}}*finger\_tip-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a90b23b505be866c1549d61c6fd3b1618}{getAng}}(i);}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00138}00138\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}=finger\_tip-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a78408241048e9c9d0e976f22ae522eea}{EndEffPose}}();}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00139}00139\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00140}00140\ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00141}00141\ \textcolor{comment}{\ \ \ \ /*********************************************************************/}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00142}\mbox{\hyperlink{classPointingFarNLP_ab7204d0bc2356939c7ebfa763f2fa615}{00142}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classPointingFarNLP_ab7204d0bc2356939c7ebfa763f2fa615}{get\_nlp\_info}}(Ipopt::Index\&\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},\ Ipopt::Index\&\ m,\ Ipopt::Index\&\ nnz\_jac\_g,}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00143}00143\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Index\&\ nnz\_h\_lag,\ IndexStyleEnum\&\ index\_style)}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00144}00144\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00145}00145\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}=finger\_tip-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_ad41a688c358119a3095e08a067d94f82}{getDOF}}();}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00146}00146\ \ \ \ \ \ \ \ \ m=2;}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00147}00147\ \ \ \ \ \ \ \ \ nnz\_jac\_g=m*\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}};}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00148}00148\ \ \ \ \ \ \ \ \ nnz\_h\_lag=0;}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00149}00149\ \ \ \ \ \ \ \ \ index\_style=TNLP::C\_STYLE;}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00150}00150\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00151}00151\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00152}00152\ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00153}00153\ \textcolor{comment}{\ \ \ \ /*********************************************************************/}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00154}\mbox{\hyperlink{classPointingFarNLP_ab46c025379e1932291ad73177a00f92e}{00154}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classPointingFarNLP_ab46c025379e1932291ad73177a00f92e}{get\_bounds\_info}}(Ipopt::Index\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},\ Ipopt::Number*\ x\_l,\ Ipopt::Number*\ x\_u,}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00155}00155\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Index\ m,\ Ipopt::Number*\ g\_l,\ Ipopt::Number*\ g\_u)}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00156}00156\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00157}00157\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (Ipopt::Index\ i=0;\ i<\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}};\ i++)}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00158}00158\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00159}00159\ \ \ \ \ \ \ \ \ \ \ \ \ x\_l[i]=(*finger\_tip-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinLimb_ae0c121656774905c58b668b450417f0e}{asChain}}())(i).getMin();}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00160}00160\ \ \ \ \ \ \ \ \ \ \ \ \ x\_u[i]=(*finger\_tip-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinLimb_ae0c121656774905c58b668b450417f0e}{asChain}}())(i).getMax();}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00161}00161\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00162}00162\ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00163}00163\ \ \ \ \ \ \ \ \ g\_l[0]=0.9999;}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00164}00164\ \ \ \ \ \ \ \ \ g\_u[0]=std::numeric\_limits<double>::max();}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00165}00165\ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00166}00166\ \ \ \ \ \ \ \ \ g\_l[1]=-\/std::numeric\_limits<double>::max();}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00167}00167\ \ \ \ \ \ \ \ \ g\_u[1]=0.0;}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00168}00168\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00169}00169\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00170}00170\ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00171}00171\ \textcolor{comment}{\ \ \ \ /*********************************************************************/}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00172}\mbox{\hyperlink{classPointingFarNLP_a20beccca3aab133a25badf93b9a110a3}{00172}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classPointingFarNLP_a20beccca3aab133a25badf93b9a110a3}{get\_starting\_point}}(Ipopt::Index\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},\ \textcolor{keywordtype}{bool}\ init\_x,\ Ipopt::Number*\ \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}},}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00173}00173\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ init\_z,\ Ipopt::Number*\ z\_L,\ Ipopt::Number*\ z\_U,}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00174}00174\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Index\ m,\ \textcolor{keywordtype}{bool}\ init\_lambda,\ Ipopt::Number*\ lambda)}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00175}00175\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00176}00176\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (Ipopt::Index\ i=0;\ i<\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}};\ i++)}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00177}00177\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}[i]=0.5*((*finger\_tip-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinLimb_ae0c121656774905c58b668b450417f0e}{asChain}}())(i).getMin()+}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00178}00178\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (*finger\_tip-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinLimb_ae0c121656774905c58b668b450417f0e}{asChain}}())(i).getMax());}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00179}00179\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00180}00180\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00181}00181\ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00182}00182\ \textcolor{comment}{\ \ \ \ /*********************************************************************/}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00183}\mbox{\hyperlink{classPointingFarNLP_a7191b4786740d721cdb90bd5322b5dfd}{00183}}\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classPointingFarNLP_a7191b4786740d721cdb90bd5322b5dfd}{setAng}}(\textcolor{keyword}{const}\ Ipopt::Number*\ \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}})}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00184}00184\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00185}00185\ \ \ \ \ \ \ \ \ Vector\ q(finger\_tip-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_ad41a688c358119a3095e08a067d94f82}{getDOF}}());}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00186}00186\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<q.length();\ i++)}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00187}00187\ \ \ \ \ \ \ \ \ \ \ \ q[i]=\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}[i];}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00188}00188\ \ \ \ \ \ \ \ \ finger\_tip-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a9232068a0e37c01c09ce31c93ab9be42}{setAng}}(q);}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00189}00189\ \ \ \ \ \ \ \ \ elbow-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinLimb_ae0c121656774905c58b668b450417f0e}{asChain}}()-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a9232068a0e37c01c09ce31c93ab9be42}{setAng}}(q);}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00190}00190\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00191}00191\ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00192}00192\ \textcolor{comment}{\ \ \ \ /*********************************************************************/}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00193}\mbox{\hyperlink{classPointingFarNLP_a377fa841922af0e5dc290ed3afdf10d3}{00193}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classPointingFarNLP_a377fa841922af0e5dc290ed3afdf10d3}{eval\_f}}(Ipopt::Index\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},\ \textcolor{keyword}{const}\ Ipopt::Number*\ \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}},\ \textcolor{keywordtype}{bool}\ new\_x,}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00194}00194\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Number\&\ obj\_value)}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00195}00195\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00196}00196\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classPointingFarNLP_a7191b4786740d721cdb90bd5322b5dfd}{setAng}}(\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}});}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00197}00197\ \ \ \ \ \ \ \ \ Matrix\ tip=finger\_tip-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a0b503aeeb58dc5cb228c174bf8500599}{getH}}();}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00198}00198\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{compute__ekf__fast_8m_a08a4415e9d594ff960030b921d42b91e}{e}}=-\/1.0-\/tip(2,2);}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00199}00199\ \ \ \ \ \ \ \ \ obj\_value=\mbox{\hyperlink{compute__ekf__fast_8m_a08a4415e9d594ff960030b921d42b91e}{e}}*\mbox{\hyperlink{compute__ekf__fast_8m_a08a4415e9d594ff960030b921d42b91e}{e}};}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00200}00200\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00201}00201\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00202}00202\ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00203}00203\ \textcolor{comment}{\ \ \ \ /*********************************************************************/}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00204}\mbox{\hyperlink{classPointingFarNLP_a3eab5d78eda76ddd8df82351cbc3fd99}{00204}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classPointingFarNLP_a3eab5d78eda76ddd8df82351cbc3fd99}{eval\_grad\_f}}(Ipopt::Index\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},\ \textcolor{keyword}{const}\ Ipopt::Number*\ \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}},\ \textcolor{keywordtype}{bool}\ new\_x,}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00205}00205\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Number*\ grad\_f)}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00206}00206\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00207}00207\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classPointingFarNLP_a7191b4786740d721cdb90bd5322b5dfd}{setAng}}(\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}});}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00208}00208\ \ \ \ \ \ \ \ \ Matrix\ tip=finger\_tip-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a0b503aeeb58dc5cb228c174bf8500599}{getH}}();}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00209}00209\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{compute__ekf__fast_8m_a08a4415e9d594ff960030b921d42b91e}{e}}=-\/1.0-\/tip(2,2);}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00210}00210\ \ \ \ \ \ \ \ \ Matrix\ dtipZ=finger\_tip-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a32c019b0caecbbc5597bb954135c617f}{AnaJacobian}}(2);}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00211}00211\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (Ipopt::Index\ i=0;\ i<\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}};\ i++)}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00212}00212\ \ \ \ \ \ \ \ \ \ \ \ \ grad\_f[i]=-\/2.0*\mbox{\hyperlink{compute__ekf__fast_8m_a08a4415e9d594ff960030b921d42b91e}{e}}*dtipZ(2,i);}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00213}00213\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00214}00214\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00215}00215\ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00216}00216\ \textcolor{comment}{\ \ \ \ /*********************************************************************/}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00217}\mbox{\hyperlink{classPointingFarNLP_a61ca29da4105e37004b93f5311d24fbd}{00217}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classPointingFarNLP_a61ca29da4105e37004b93f5311d24fbd}{eval\_g}}(Ipopt::Index\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},\ \textcolor{keyword}{const}\ Ipopt::Number*\ \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}},\ \textcolor{keywordtype}{bool}\ new\_x,}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00218}00218\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Index\ m,\ Ipopt::Number*\ g)}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00219}00219\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00220}00220\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classPointingFarNLP_a7191b4786740d721cdb90bd5322b5dfd}{setAng}}(\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}});}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00221}00221\ \ \ \ \ \ \ \ \ Vector\ elbowPos=elbow-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinLimb_ae0c121656774905c58b668b450417f0e}{asChain}}()-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a13786c25ecb8b5be82e174fdd71c642b}{EndEffPosition}}();}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00222}00222\ \ \ \ \ \ \ \ \ Vector\ pe\_dir=point-\/elbowPos;}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00223}00223\ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00224}00224\ \ \ \ \ \ \ \ \ Matrix\ tip=finger\_tip-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a0b503aeeb58dc5cb228c174bf8500599}{getH}}();}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00225}00225\ \ \ \ \ \ \ \ \ Vector\ te\_dir=tip.getCol(3).subVector(0,2)-\/elbowPos;}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00226}00226\ \ \ \ \ \ \ \ \ g[0]=dot(pe\_dir,te\_dir)/(norm(pe\_dir)*norm(te\_dir));}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00227}00227\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00228}00228\ \ \ \ \ \ \ \ \ Vector\ pt\_dir=point-\/tip.getCol(3).subVector(0,2);}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00229}00229\ \ \ \ \ \ \ \ \ g[1]=pt\_dir[0];}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00230}00230\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00231}00231\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00232}00232\ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00233}00233\ \textcolor{comment}{\ \ \ \ /*********************************************************************/}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00234}\mbox{\hyperlink{classPointingFarNLP_ae339cf24586464e0ce8c4292de64062b}{00234}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classPointingFarNLP_ae339cf24586464e0ce8c4292de64062b}{eval\_jac\_g}}(Ipopt::Index\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},\ \textcolor{keyword}{const}\ Ipopt::Number*\ \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}},\ \textcolor{keywordtype}{bool}\ new\_x,}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00235}00235\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Index\ m,\ Ipopt::Index\ nele\_jac,\ Ipopt::Index*\ iRow,}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00236}00236\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Index\ *jCol,\ Ipopt::Number*\ values)}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00237}00237\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00238}00238\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!values)}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00239}00239\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00240}00240\ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Index\ \mbox{\hyperlink{debugFunctions_8cpp_abacd9574384513f6cb349a60c829d5e9}{idx}}=0;}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00241}00241\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (Ipopt::Index\ i=0;\ i<\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}};\ i++,\mbox{\hyperlink{debugFunctions_8cpp_abacd9574384513f6cb349a60c829d5e9}{idx}}++)}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00242}00242\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00243}00243\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ iRow[\mbox{\hyperlink{debugFunctions_8cpp_abacd9574384513f6cb349a60c829d5e9}{idx}}]=0;}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00244}00244\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ jCol[\mbox{\hyperlink{debugFunctions_8cpp_abacd9574384513f6cb349a60c829d5e9}{idx}}]=i;}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00245}00245\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00246}00246\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (Ipopt::Index\ i=0;\ i<\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}};\ i++,\mbox{\hyperlink{debugFunctions_8cpp_abacd9574384513f6cb349a60c829d5e9}{idx}}++)}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00247}00247\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00248}00248\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ iRow[\mbox{\hyperlink{debugFunctions_8cpp_abacd9574384513f6cb349a60c829d5e9}{idx}}]=1;}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00249}00249\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ jCol[\mbox{\hyperlink{debugFunctions_8cpp_abacd9574384513f6cb349a60c829d5e9}{idx}}]=i;}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00250}00250\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00251}00251\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00252}00252\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00253}00253\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00254}00254\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classPointingFarNLP_a7191b4786740d721cdb90bd5322b5dfd}{setAng}}(\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}});}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00255}00255\ \ \ \ \ \ \ \ \ \ \ \ \ Vector\ elbowPos=elbow-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinLimb_ae0c121656774905c58b668b450417f0e}{asChain}}()-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a13786c25ecb8b5be82e174fdd71c642b}{EndEffPosition}}();}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00256}00256\ \ \ \ \ \ \ \ \ \ \ \ \ Vector\ pe\_dir=point-\/elbowPos;}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00257}00257\ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00258}00258\ \ \ \ \ \ \ \ \ \ \ \ \ Matrix\ tip=finger\_tip-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a0b503aeeb58dc5cb228c174bf8500599}{getH}}();}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00259}00259\ \ \ \ \ \ \ \ \ \ \ \ \ Vector\ te\_dir=tip.getCol(3).subVector(0,2)-\/elbowPos;}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00260}00260\ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00261}00261\ \ \ \ \ \ \ \ \ \ \ \ \ Matrix\ dpe\_dir=-\/1.0*elbow-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinLimb_ae0c121656774905c58b668b450417f0e}{asChain}}()-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a32c019b0caecbbc5597bb954135c617f}{AnaJacobian}}().removeRows(3,3);}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00262}00262\ \ \ \ \ \ \ \ \ \ \ \ \ dpe\_dir=cat(dpe\_dir,\mbox{\hyperlink{compute__ekf__sym_8m_a35baefda5ec044ac7c1f5a41815b5b45}{zeros}}(3,finger\_tip-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_ad41a688c358119a3095e08a067d94f82}{getDOF}}()-\/elbow-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinLimb_ae0c121656774905c58b668b450417f0e}{asChain}}()-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_ad41a688c358119a3095e08a067d94f82}{getDOF}}()));}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00263}00263\ \ \ \ \ \ \ \ \ \ \ \ \ Matrix\ dte\_dir=finger\_tip-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a32c019b0caecbbc5597bb954135c617f}{AnaJacobian}}().removeRows(3,3)+dpe\_dir;}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00264}00264\ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00265}00265\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ npe=norm(pe\_dir);}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00266}00266\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ nte=norm(te\_dir);}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00267}00267\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ nn=npe*nte;}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00268}00268\ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00269}00269\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (Ipopt::Index\ i=0;\ i<\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}};\ i++)}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00270}00270\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ values[i]=(dot(dpe\_dir.getCol(i),te\_dir)+dot(pe\_dir,dte\_dir.getCol(i)))/nn-\/}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00271}00271\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ dot(pe\_dir,te\_dir)*(dot(pe\_dir,dpe\_dir.getCol(i))*nte/npe)/(nn*nn);}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00272}00272\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00273}00273\ \ \ \ \ \ \ \ \ \ \ \ \ Matrix\ dtip=-\/1.0*finger\_tip-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a32c019b0caecbbc5597bb954135c617f}{AnaJacobian}}();}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00274}00274\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (Ipopt::Index\ i=0;\ i<\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}};\ i++)}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00275}00275\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ values[\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}+i]=dtip(0,i);}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00276}00276\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00277}00277\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00278}00278\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00279}00279\ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00280}00280\ \textcolor{comment}{\ \ \ \ /*********************************************************************/}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00281}\mbox{\hyperlink{classPointingFarNLP_a5f504db778f359582a2a95a6e02384d5}{00281}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classPointingFarNLP_a5f504db778f359582a2a95a6e02384d5}{eval\_h}}(Ipopt::Index\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},\ \textcolor{keyword}{const}\ Ipopt::Number\ *\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}},\ \textcolor{keywordtype}{bool}\ new\_x,}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00282}00282\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Number\ obj\_factor,\ Ipopt::Index\ m,}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00283}00283\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Ipopt::Number\ *lambda,\ \textcolor{keywordtype}{bool}\ new\_lambda,}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00284}00284\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Index\ nele\_hess,\ Ipopt::Index\ *iRow,}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00285}00285\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Index\ *jCol,\ Ipopt::Number\ *values)}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00286}00286\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00287}00287\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00288}00288\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00289}00289\ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00290}00290\ \textcolor{comment}{\ \ \ \ /*********************************************************************/}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00291}\mbox{\hyperlink{classPointingFarNLP_a77e32354220bd51d899fbfcb346efc46}{00291}}\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classPointingFarNLP_a77e32354220bd51d899fbfcb346efc46}{finalize\_solution}}(Ipopt::SolverReturn\ status,\ Ipopt::Index\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00292}00292\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Ipopt::Number*\ \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}},\ \textcolor{keyword}{const}\ Ipopt::Number*\ z\_L,}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00293}00293\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Ipopt::Number*\ z\_U,\ Ipopt::Index\ m,}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00294}00294\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Ipopt::Number*\ g,\ \textcolor{keyword}{const}\ Ipopt::Number*\ lambda,}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00295}00295\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Number\ obj\_value,\ \textcolor{keyword}{const}\ Ipopt::IpoptData*\ ip\_data,}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00296}00296\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::IpoptCalculatedQuantities*\ ip\_cq)}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00297}00297\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00298}00298\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00299}00299\ \};}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00300}00300\ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00301}00301\ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00302}00302\ \textcolor{comment}{/*************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00303}\mbox{\hyperlink{structPointingFar_a4d4367da44262685608f454d15047caf}{00303}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{structPointingFar_a4d4367da44262685608f454d15047caf}{PointingFar::compute}}(ICartesianControl\ *iarm,\ \textcolor{keyword}{const}\ Property\&\ requirements,}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00304}00304\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Vector\&\ q,\ Vector\&\ \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}})}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00305}00305\ \{}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00306}00306\ \ \ \ \ \textcolor{keywordflow}{if}\ (iarm==NULL)}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00307}00307\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00308}00308\ \ \ \ \ \ \ \ \ yError()<<\textcolor{stringliteral}{"{}Cartesian\ controller\ not\ configured"{}};}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00309}00309\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00310}00310\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00311}00311\ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00312}00312\ \ \ \ \ Bottle\ *bPoint=requirements.find(\textcolor{stringliteral}{"{}point"{}}).asList();}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00313}00313\ \ \ \ \ \textcolor{keywordflow}{if}\ (bPoint==NULL)}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00314}00314\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00315}00315\ \ \ \ \ \ \ \ \ yError()<<\textcolor{stringliteral}{"{}Target\ point\ not\ provided"{}};}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00316}00316\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00317}00317\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00318}00318\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00319}00319\ \ \ \ \ Vector\ \mbox{\hyperlink{structPointingFar_ada8a82f6df4e88622db28a7399318681}{point}}(3,0.0);}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00320}00320\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i=0;\ i<bPoint-\/>size();\ i++)}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00321}00321\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structPointingFar_ada8a82f6df4e88622db28a7399318681}{point}}[i]=bPoint-\/>get(i).asFloat64();}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00322}00322\ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00323}00323\ \ \ \ \ Ipopt::SmartPtr<Ipopt::IpoptApplication>\ app=\textcolor{keyword}{new}\ Ipopt::IpoptApplication;}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00324}00324\ \ \ \ \ app-\/>Options()-\/>SetNumericValue(\textcolor{stringliteral}{"{}tol"{}},0.01);}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00325}00325\ \ \ \ \ app-\/>Options()-\/>SetNumericValue(\textcolor{stringliteral}{"{}constr\_viol\_tol"{}},0.01);}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00326}00326\ \ \ \ \ app-\/>Options()-\/>SetIntegerValue(\textcolor{stringliteral}{"{}acceptable\_iter"{}},0);}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00327}00327\ \ \ \ \ app-\/>Options()-\/>SetStringValue(\textcolor{stringliteral}{"{}mu\_strategy"{}},\textcolor{stringliteral}{"{}adaptive"{}});}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00328}00328\ \ \ \ \ app-\/>Options()-\/>SetIntegerValue(\textcolor{stringliteral}{"{}max\_iter"{}},200);}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00329}00329\ \ \ \ \ app-\/>Options()-\/>SetStringValue(\textcolor{stringliteral}{"{}nlp\_scaling\_method"{}},\textcolor{stringliteral}{"{}gradient-\/based"{}});}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00330}00330\ \ \ \ \ app-\/>Options()-\/>SetStringValue(\textcolor{stringliteral}{"{}hessian\_approximation"{}},\textcolor{stringliteral}{"{}limited-\/memory"{}});}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00331}00331\ \ \ \ \ app-\/>Options()-\/>SetStringValue(\textcolor{stringliteral}{"{}derivative\_test"{}},\textcolor{stringliteral}{"{}none"{}});}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00332}00332\ \ \ \ \ app-\/>Options()-\/>SetIntegerValue(\textcolor{stringliteral}{"{}print\_level"{}},0);}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00333}00333\ \ \ \ \ app-\/>Initialize();}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00334}00334\ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00335}00335\ \ \ \ \ Ipopt::SmartPtr<PointingFarNLP>\ nlp=\textcolor{keyword}{new}\ \mbox{\hyperlink{classPointingFarNLP}{PointingFarNLP}}(iarm);}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00336}00336\ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00337}00337\ \ \ \ \ \textcolor{comment}{//\ specify\ requirements}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00338}00338\ \ \ \ \ nlp-\/>setPoint(\mbox{\hyperlink{structPointingFar_ada8a82f6df4e88622db28a7399318681}{point}});}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00339}00339\ \ \ \ \ \textcolor{keywordflow}{if}\ (Bottle\ *bFingerJoints=requirements.find(\textcolor{stringliteral}{"{}finger-\/joints"{}}).asList())}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00340}00340\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00341}00341\ \ \ \ \ \ \ \ \ Vector\ finger\_joints(bFingerJoints-\/>size());}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00342}00342\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<finger\_joints.length();\ i++)}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00343}00343\ \ \ \ \ \ \ \ \ \ \ \ \ finger\_joints[i]=bFingerJoints-\/>get(i).asFloat64();}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00344}00344\ \ \ \ \ \ \ \ \ nlp-\/>setFingerJoints(finger\_joints);}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00345}00345\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00346}00346\ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00347}00347\ \ \ \ \ Ipopt::ApplicationReturnStatus\ status=app-\/>OptimizeTNLP(GetRawPtr(nlp));\ \ \ \ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00348}00348\ \ \ \ \ nlp-\/>getResult(q,\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}});}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00349}00349\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00350}00350\ \}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00351}00351\ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00352}00352\ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00353}00353\ \textcolor{comment}{/*************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00354}\mbox{\hyperlink{structPointingFar_ada8a82f6df4e88622db28a7399318681}{00354}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{structPointingFar_ada8a82f6df4e88622db28a7399318681}{PointingFar::point}}(ICartesianControl\ *iarm,\ \textcolor{keyword}{const}\ Vector\&\ q,\ \textcolor{keyword}{const}\ Vector\&\ \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}})}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00355}00355\ \{}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00356}00356\ \ \ \ \ \textcolor{keywordflow}{if}\ ((q.length()>=10)\ \&\&\ (\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}.length()>=7))}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00357}00357\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00358}00358\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ context;}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00359}00359\ \ \ \ \ \ \ \ \ iarm-\/>storeContext(\&context);\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00360}00360\ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00361}00361\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ specify\ all\ joints}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00362}00362\ \ \ \ \ \ \ \ \ Vector\ dof(10,1.0);}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00363}00363\ \ \ \ \ \ \ \ \ iarm-\/>setDOF(dof,dof);}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00364}00364\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ i=0;\ i<q.length();\ i++)}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00365}00365\ \ \ \ \ \ \ \ \ \ \ \ \ iarm-\/>setLimits(i,q[i],q[i]);}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00366}00366\ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00367}00367\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ traj;}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00368}00368\ \ \ \ \ \ \ \ \ iarm-\/>getTrajTime(\&traj);}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00369}00369\ \ \ \ \ \ \ \ \ iarm-\/>setInTargetTol(0.02);}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00370}00370\ \ \ \ \ \ \ \ \ iarm-\/>goToPoseSync(\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}.subVector(0,2),\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}.subVector(3,6));}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00371}00371\ \ \ \ \ \ \ \ \ iarm-\/>waitMotionDone(0.2,5.0*traj);}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00372}00372\ \ \ \ \ \ \ \ \ iarm-\/>stopControl();}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00373}00373\ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00374}00374\ \ \ \ \ \ \ \ \ iarm-\/>restoreContext(context);}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00375}00375\ \ \ \ \ \ \ \ \ iarm-\/>deleteContext(context);}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00376}00376\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00377}00377\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00378}00378\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00379}00379\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00380}00380\ \}}
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00381}00381\ }
+\DoxyCodeLine{\Hypertarget{pointing__far_8cpp_source_l00382}00382\ }
+
+\end{DoxyCode}

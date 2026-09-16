@@ -1,0 +1,248 @@
+\doxysection{stereo\+Calib\+Thread.\+h}
+\hypertarget{stereoCalibThread_8h_source}{}\label{stereoCalibThread_8h_source}\index{icub-\/main/src/tools/stereoCalib/include/stereoCalibThread.h@{icub-\/main/src/tools/stereoCalib/include/stereoCalibThread.h}}
+\mbox{\hyperlink{stereoCalibThread_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00001}00001\ \textcolor{preprocessor}{\#include\ <iostream>}}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00002}00002\ \textcolor{preprocessor}{\#include\ <fstream>}}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00003}00003\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00004}00004\ \textcolor{preprocessor}{\#include\ <mutex>}}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00005}00005\ \textcolor{preprocessor}{\#include\ <atomic>}}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00006}00006\ \textcolor{preprocessor}{\#include\ <cstddef>}}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00007}00007\ \textcolor{preprocessor}{\#include\ <deque>}}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00008}00008\ }
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00009}00009\ \textcolor{preprocessor}{\#include\ <opencv2/calib3d/calib3d\_c.h>}}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00010}00010\ \textcolor{preprocessor}{\#include\ <opencv2/calib3d.hpp>}}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00011}00011\ \textcolor{preprocessor}{\#include\ <opencv2/core/core\_c.h>}}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00012}00012\ \textcolor{preprocessor}{\#include\ <opencv2/core/types\_c.h>}}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00013}00013\ \textcolor{preprocessor}{\#include\ <opencv2/imgcodecs.hpp>}}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00014}00014\ }
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00015}00015\ }
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00016}00016\ }
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00017}00017\ \textcolor{preprocessor}{\#include\ <yarp/os/all.h>}}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00018}00018\ \textcolor{preprocessor}{\#include\ <yarp/dev/all.h>}}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00019}00019\ \textcolor{preprocessor}{\#include\ <yarp/sig/all.h>}}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00020}00020\ \textcolor{preprocessor}{\#include\ <yarp/math/Math.h>}}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00021}00021\ }
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00022}00022\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{iKinFwd_8h}{iCub/iKin/iKinFwd.h}}>}}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00023}00023\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{CalibrationTypes_8h}{CalibrationTypes.h}}"{}}}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00024}00024\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{CalibrationWriter_8h}{CalibrationWriter.h}}"{}}}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00025}00025\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{FisheyeCalibrationEngine_8h}{FisheyeCalibrationEngine.h}}"{}}}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00026}00026\ }
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00027}00027\ \textcolor{keyword}{using\ namespace\ }std;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00028}00028\ \textcolor{keyword}{using\ namespace\ }cv;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00029}00029\ \textcolor{keyword}{using\ namespace\ }yarp::os;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00030}00030\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceyarp_1_1dev}{yarp::dev}};}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00031}00031\ \textcolor{keyword}{using\ namespace\ }yarp::sig;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00032}00032\ \textcolor{keyword}{using\ namespace\ }yarp::math;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00033}00033\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceiCub_1_1iKin}{iCub::iKin}};}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00034}00034\ }
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00035}00035\ }
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00036}\mbox{\hyperlink{stereoCalibThread_8h_a437ef08681e7210d6678427030446a54}{00036}}\ \textcolor{preprocessor}{\#define\ LEFT\ \ \ \ 0}}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00037}\mbox{\hyperlink{stereoCalibThread_8h_a80fb826a684cf3f0d306b22aa100ddac}{00037}}\ \textcolor{preprocessor}{\#define\ RIGHT\ \ \ 1}}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00038}00038\ }
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00039}\mbox{\hyperlink{structStampedFrame}{00039}}\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structStampedFrame}{StampedFrame}}}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00040}00040\ \{}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00041}\mbox{\hyperlink{structStampedFrame_a27cab6cfa48b1e6115d6dde577c6b7b0}{00041}}\ \ \ \ \ ImageOf<PixelRgb>\ \mbox{\hyperlink{structStampedFrame_a27cab6cfa48b1e6115d6dde577c6b7b0}{image}};}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00042}\mbox{\hyperlink{structStampedFrame_a0d3df56f36078743237a0a99157bc800}{00042}}\ \ \ \ \ Stamp\ \mbox{\hyperlink{structStampedFrame_a0d3df56f36078743237a0a99157bc800}{stamp}};}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00043}00043\ \};}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00044}00044\ }
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00045}\mbox{\hyperlink{structSynchronizedPair}{00045}}\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structSynchronizedPair}{SynchronizedPair}}}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00046}00046\ \{}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00047}\mbox{\hyperlink{structSynchronizedPair_a75874f932fd1e942e5fa402f3f3b497f}{00047}}\ \ \ \ \ ImageOf<PixelRgb>\ \mbox{\hyperlink{structSynchronizedPair_a75874f932fd1e942e5fa402f3f3b497f}{left}};}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00048}\mbox{\hyperlink{structSynchronizedPair_a7e22db6f63ca567d2bce3c54bed6a297}{00048}}\ \ \ \ \ ImageOf<PixelRgb>\ \mbox{\hyperlink{structSynchronizedPair_a7e22db6f63ca567d2bce3c54bed6a297}{right}};}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00049}00049\ }
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00050}\mbox{\hyperlink{structSynchronizedPair_ab9627f32dc0806ad49de39c65b6663fc}{00050}}\ \ \ \ \ Stamp\ \mbox{\hyperlink{structSynchronizedPair_ab9627f32dc0806ad49de39c65b6663fc}{leftStamp}};}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00051}\mbox{\hyperlink{structSynchronizedPair_acc944544abb792a3c9e0b9395b6340b0}{00051}}\ \ \ \ \ Stamp\ \mbox{\hyperlink{structSynchronizedPair_acc944544abb792a3c9e0b9395b6340b0}{rightStamp}};}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00052}00052\ }
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00053}\mbox{\hyperlink{structSynchronizedPair_a40ff733dc309747d0ff525553f3b0135}{00053}}\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{structSynchronizedPair_a40ff733dc309747d0ff525553f3b0135}{timeStampDelta}}\{0.0\};}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00054}00054\ \};}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00055}00055\ }
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00056}\mbox{\hyperlink{structSynchronizerStatistics}{00056}}\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structSynchronizerStatistics}{SynchronizerStatistics}}}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00057}00057\ \{}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00058}\mbox{\hyperlink{structSynchronizerStatistics_a33d8b2a2437e8f2fe5dbbb860ecbf993}{00058}}\ \ \ \ \ std::size\_t\ \mbox{\hyperlink{structSynchronizerStatistics_a33d8b2a2437e8f2fe5dbbb860ecbf993}{pairedFrames}}\{0\};}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00059}\mbox{\hyperlink{structSynchronizerStatistics_abc89a3ab5632bbc7351da79ed99ceb32}{00059}}\ \ \ \ \ std::size\_t\ \mbox{\hyperlink{structSynchronizerStatistics_abc89a3ab5632bbc7351da79ed99ceb32}{droppedLeftFrames}}\{0\};}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00060}\mbox{\hyperlink{structSynchronizerStatistics_ae9b48726b0e91dcc52046e198fab7fe9}{00060}}\ \ \ \ \ std::size\_t\ \mbox{\hyperlink{structSynchronizerStatistics_ae9b48726b0e91dcc52046e198fab7fe9}{droppedRightFrames}}\{0\};}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00061}00061\ }
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00062}\mbox{\hyperlink{structSynchronizerStatistics_ab0f53fd4998f65ce1787f1dd4bef01e1}{00062}}\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{structSynchronizerStatistics_ab0f53fd4998f65ce1787f1dd4bef01e1}{accumulatedTimeStampDelta}}\{0.0\};}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00063}\mbox{\hyperlink{structSynchronizerStatistics_ab3dddcacf9df63cd70070b0bdc77c165}{00063}}\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{structSynchronizerStatistics_ab3dddcacf9df63cd70070b0bdc77c165}{maxTimeStampDelta}}\{0.0\};}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00064}00064\ \};}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00065}00065\ }
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00066}\mbox{\hyperlink{structStereoCalibStatus}{00066}}\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structStereoCalibStatus}{StereoCalibStatus}}}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00067}00067\ \{}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00068}\mbox{\hyperlink{structStereoCalibStatus_a0d338c0646606816b2087cc837a7f371}{00068}}\ \ \ \ \ std::string\ \mbox{\hyperlink{structStereoCalibStatus_a0d338c0646606816b2087cc837a7f371}{state}};}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00069}00069\ }
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00070}\mbox{\hyperlink{structStereoCalibStatus_a31c343b32a78ca333771104ed7f9ec65}{00070}}\ \ \ \ \ std::size\_t\ \mbox{\hyperlink{structStereoCalibStatus_a31c343b32a78ca333771104ed7f9ec65}{pairedFrames}}\{0\};}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00071}\mbox{\hyperlink{structStereoCalibStatus_a4519f00370be8cda03187169f66de318}{00071}}\ \ \ \ \ std::size\_t\ \mbox{\hyperlink{structStereoCalibStatus_a4519f00370be8cda03187169f66de318}{droppedLeftFrames}}\{0\};}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00072}\mbox{\hyperlink{structStereoCalibStatus_aee34c665b5a8ea9fecf9ce46049eaffa}{00072}}\ \ \ \ \ std::size\_t\ \mbox{\hyperlink{structStereoCalibStatus_aee34c665b5a8ea9fecf9ce46049eaffa}{droppedRightFrames}}\{0\};}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00073}00073\ }
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00074}\mbox{\hyperlink{structStereoCalibStatus_a928c3ca8b1cdcca76c46dcee50d651b8}{00074}}\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{structStereoCalibStatus_a928c3ca8b1cdcca76c46dcee50d651b8}{meanTimestampDeltaMs}}\{0.0\};}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00075}\mbox{\hyperlink{structStereoCalibStatus_ae81213069ecf793ff569094dc03903fc}{00075}}\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{structStereoCalibStatus_ae81213069ecf793ff569094dc03903fc}{maxTimestampDeltaMs}}\{0.0\};}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00076}00076\ }
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00077}00077\ \ \ \ \ \textcolor{comment}{//\ These\ fields\ are\ available\ only\ after\ a\ successful\ engine\ calibration.}}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00078}\mbox{\hyperlink{structStereoCalibStatus_a04728df143fa34b7916bd66822e41742}{00078}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{structStereoCalibStatus_a04728df143fa34b7916bd66822e41742}{calibrationAvailable}}\{\textcolor{keyword}{false}\};}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00079}\mbox{\hyperlink{structStereoCalibStatus_a6b3ede396622c2a64b41e69d89d4651f}{00079}}\ \ \ \ \ std::string\ \mbox{\hyperlink{structStereoCalibStatus_a6b3ede396622c2a64b41e69d89d4651f}{calibrationMode}};}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00080}\mbox{\hyperlink{structStereoCalibStatus_abec25e8655fac365c7d7329820bf357d}{00080}}\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{structStereoCalibStatus_abec25e8655fac365c7d7329820bf357d}{leftMonocularRms}}\{-\/1.0\};}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00081}\mbox{\hyperlink{structStereoCalibStatus_a8e1699aa9766c11548bedb5f7a0e72b2}{00081}}\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{structStereoCalibStatus_a8e1699aa9766c11548bedb5f7a0e72b2}{rightMonocularRms}}\{-\/1.0\};}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00082}\mbox{\hyperlink{structStereoCalibStatus_aebbddf64a107ba1f469c97c4f1aaf44d}{00082}}\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{structStereoCalibStatus_aebbddf64a107ba1f469c97c4f1aaf44d}{stereoRms}}\{-\/1.0\};}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00083}\mbox{\hyperlink{structStereoCalibStatus_ae62d6ec7ddf3c23c377707182ab85fef}{00083}}\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{structStereoCalibStatus_ae62d6ec7ddf3c23c377707182ab85fef}{baselineNorm}}\{-\/1.0\};}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00084}\mbox{\hyperlink{structStereoCalibStatus_ada5be57d032c8165eb89bfb4d0fc1c35}{00084}}\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{structStereoCalibStatus_ada5be57d032c8165eb89bfb4d0fc1c35}{medianVerticalRectificationErrorPx}}\{-\/1.0\};}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00085}\mbox{\hyperlink{structStereoCalibStatus_a59799a90df08a23ef66a9e5b8d1f6566}{00085}}\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{structStereoCalibStatus_a59799a90df08a23ef66a9e5b8d1f6566}{p95VerticalRectificationErrorPx}}\{-\/1.0\};}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00086}\mbox{\hyperlink{structStereoCalibStatus_a4353efd324ec10d6e68aa446f77497eb}{00086}}\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{structStereoCalibStatus_a4353efd324ec10d6e68aa446f77497eb}{maxVerticalRectificationErrorPx}}\{-\/1.0\};}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00087}\mbox{\hyperlink{structStereoCalibStatus_a3ba7847033bf71ebbd4fd652c159ed48}{00087}}\ \ \ \ \ std::string\ \mbox{\hyperlink{structStereoCalibStatus_a3ba7847033bf71ebbd4fd652c159ed48}{lastCalibrationError}};}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00088}00088\ \};}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00089}00089\ }
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00090}\mbox{\hyperlink{classStereoPairSynchronizer}{00090}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classStereoPairSynchronizer}{StereoPairSynchronizer}}}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00091}00091\ \{}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00092}00092\ \textcolor{keyword}{private}:}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00093}00093\ \ \ \ \ std::deque<StampedFrame>\ leftQueue;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00094}00094\ \ \ \ \ std::deque<StampedFrame>\ rightQueue;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00095}00095\ }
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00096}00096\ \ \ \ \ \textcolor{keywordtype}{double}\ toleranceSeconds\{0.020\};\ \textcolor{comment}{//\ 20\ milliseconds}}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00097}00097\ \ \ \ \ std::size\_t\ maxQueueSize\{5\};}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00098}00098\ }
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00099}00099\ \ \ \ \ \textcolor{keyword}{mutable}\ std::mutex\ \_mutex;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00100}00100\ \ \ \ \ \mbox{\hyperlink{structSynchronizerStatistics}{SynchronizerStatistics}}\ stats;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00101}00101\ \ \ \ \ \textcolor{keywordtype}{void}\ trimLeftQueue();}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00102}00102\ \ \ \ \ \textcolor{keywordtype}{void}\ trimRightQueue();}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00103}00103\ }
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00104}00104\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00105}00105\ }
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00106}00106\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classStereoPairSynchronizer_a85f56bec3d14b74b7da096c63e877797}{configure}}(\textcolor{keywordtype}{double}\ \mbox{\hyperlink{WholeBodyPlayerModule_8h_ae0610f1b0bb42f46b73f3d02a2b86feb}{tolerance}},\ std::size\_t\ maxQueueSize);}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00107}00107\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classStereoPairSynchronizer_a1dfc5e7a0ebe25de700e5747849f3be4}{reset}}();}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00108}00108\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classStereoPairSynchronizer_add61bdd7ab6bd89ba32396924e4e4ec8}{pushLeft}}(\textcolor{keyword}{const}\ ImageOf<PixelRgb>\&\ leftFrame,\ \textcolor{keyword}{const}\ Stamp\&\ timestamp);}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00109}00109\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classStereoPairSynchronizer_ab780ce480e732051bef028ab696bec16}{pushRight}}(\textcolor{keyword}{const}\ ImageOf<PixelRgb>\&\ rightFrame,\ \textcolor{keyword}{const}\ Stamp\&\ timestamp);}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00110}00110\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classStereoPairSynchronizer_acbca2a47b246dc867b7a22741382cf8e}{tryPopPair}}(\mbox{\hyperlink{structSynchronizedPair}{SynchronizedPair}}\&\ pair);}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00111}\mbox{\hyperlink{classStereoPairSynchronizer_a529802c3375ce8bfd87dae313730997f}{00111}}\ \ \ \ \ \mbox{\hyperlink{structSynchronizerStatistics}{SynchronizerStatistics}}\ \mbox{\hyperlink{classStereoPairSynchronizer_a529802c3375ce8bfd87dae313730997f}{getStatistics}}()\textcolor{keyword}{\ const\ }\{\ std::lock\_guard<std::mutex>\ lock(\_mutex);\ \textcolor{keywordflow}{return}\ stats;\ \}}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00112}00112\ \};}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00113}00113\ }
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00114}\mbox{\hyperlink{classstereoCalibThread}{00114}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classstereoCalibThread}{stereoCalibThread}}\ :\ \textcolor{keyword}{public}\ Thread}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00115}00115\ \{}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00116}00116\ \textcolor{keyword}{private}:}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00117}00117\ }
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00118}00118\ \ \ \ \ \textcolor{comment}{//\ States\ for\ stereoCalibrationThead}}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00119}00119\ \ \ \ \ \textcolor{comment}{//\ defined\ inside\ the\ class\ since\ they\ are\ totally\ referred\ to\ this\ class}}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00120}00120\ \ \ \ \ \textcolor{keyword}{enum\ class}\ CalibrationState}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00121}00121\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00122}00122\ \ \ \ \ \ \ \ \ Idle\ =\ 0,}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00123}00123\ \ \ \ \ \ \ \ \ Collecting,}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00124}00124\ \ \ \ \ \ \ \ \ Calibrating,}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00125}00125\ \ \ \ \ \ \ \ \ Completed,}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00126}00126\ \ \ \ \ \ \ \ \ Error\ =\ 255}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00127}00127\ \ \ \ \ \};}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00128}00128\ }
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00129}00129\ \ \ \ \ std::atomic<CalibrationState>\ calibrationState\{CalibrationState::Idle\};}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00130}00130\ \ \ \ \ std::atomic<bool>\ collectionResetRequested\{\textcolor{keyword}{false}\};}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00131}00131\ }
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00132}00132\ \ \ \ \ \mbox{\hyperlink{classStereoPairSynchronizer}{StereoPairSynchronizer}}\ synchronizer;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00133}00133\ }
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00134}00134\ \ \ \ \ \textcolor{keywordtype}{double}\ \_syncToleranceSeconds\{0.020\};}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00135}00135\ \ \ \ \ std::size\_t\ \_syncQueueSize\{5\};}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00136}00136\ }
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00137}00137\ \ \ \ \ \textcolor{keywordtype}{double}\ minCaptureIntervalSeconds\{2.0\};}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00138}00138\ \ \ \ \ \textcolor{keywordtype}{double}\ lastProcessedCandidateTime\{-\/1.0\};}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00139}00139\ \ \ \ \ \textcolor{keywordtype}{double}\ minimumBoardSpanRatio\{0.15\};}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00140}00140\ }
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00141}00141\ \ \ \ \ Size\ \_expectedImageSize\{\};}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00142}00142\ }
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00143}00143\ \ \ \ \ ImageOf<PixelRgb>\ *imageL;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00144}00144\ \ \ \ \ ImageOf<PixelRgb>\ *imageR;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00145}00145\ \ \ \ \ Mat\ LeftRgb;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00146}00146\ \ \ \ \ Mat\ RightRgb;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00147}00147\ }
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00148}00148\ \ \ \ \ \textcolor{keywordtype}{string}\ moduleName;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00149}00149\ \ \ \ \ \textcolor{keywordtype}{string}\ robotName;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00150}00150\ \ \ \ \ yarp::sig::Vector\ qL;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00151}00151\ \ \ \ \ yarp::sig::Vector\ qR;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00152}00152\ }
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00153}00153\ \ \ \ \ \textcolor{keyword}{mutable}\ std::mutex\ mtx;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00154}00154\ }
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00155}00155\ \ \ \ \ \textcolor{keywordtype}{int}\ numOfPairs;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00156}00156\ \ \ \ \ \textcolor{keywordtype}{bool}\ stereo;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00157}00157\ \ \ \ \ Mat\ Kleft;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00158}00158\ \ \ \ \ Mat\ Kright;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00159}00159\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00160}00160\ \ \ \ \ Mat\ DistL;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00161}00161\ \ \ \ \ Mat\ DistR;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00162}00162\ \ \ \ \ \textcolor{keywordtype}{double}\ vergence;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00163}00163\ \ \ \ \ \textcolor{keywordtype}{double}\ version;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00164}00164\ }
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00165}00165\ \ \ \ \ \textcolor{keywordtype}{bool}\ standalone;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00166}00166\ \ \ \ \ yarp::dev::PolyDriver\ polyHead;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00167}00167\ \ \ \ \ yarp::dev::IEncoders\ *posHead;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00168}00168\ }
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00169}00169\ \ \ \ \ yarp::dev::PolyDriver\ polyTorso;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00170}00170\ \ \ \ \ yarp::dev::IEncoders\ *posTorso;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00171}00171\ }
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00172}00172\ \ \ \ \ Mat\ R;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00173}00173\ \ \ \ \ Mat\ T;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00174}00174\ \ \ \ \ Mat\ Q;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00175}00175\ \ \ \ \ Size\ lastImageSize;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00176}00176\ \ \ \ \ \textcolor{keywordtype}{string}\ inputLeftPortName;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00177}00177\ \ \ \ \ \textcolor{keywordtype}{string}\ inputRightPortName;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00178}00178\ \ \ \ \ \textcolor{keywordtype}{string}\ outNameRight;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00179}00179\ \ \ \ \ \textcolor{keywordtype}{string}\ outNameLeft;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00180}00180\ \ \ \ \ \textcolor{keywordtype}{string}\ camCalibFile;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00181}00181\ \ \ \ \ \textcolor{keywordtype}{string}\ currentPathDir;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00182}00182\ \ \ \ \ std::vector<string>\ imageListR;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00183}00183\ \ \ \ \ std::vector<string>\ imageListL;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00184}00184\ \ \ \ \ std::vector<string>\ imageListLR;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00185}00185\ }
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00186}00186\ \ \ \ \ \mbox{\hyperlink{structstereo__calib_1_1ChessboardConfiguration}{stereo\_calib::ChessboardConfiguration}}\ \_chessboardConfiguration;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00187}00187\ \ \ \ \ std::vector<stereo\_calib::StereoObservation>\ \_observations;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00188}00188\ \ \ \ \ std::size\_t\ \_rejectedDetections\{0\};}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00189}00189\ }
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00190}00190\ \ \ \ \ \mbox{\hyperlink{classstereo__calib_1_1FisheyeCalibrationEngine}{stereo\_calib::FisheyeCalibrationEngine}}\ \_calibrationEngine;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00191}00191\ \ \ \ \ \mbox{\hyperlink{classstereo__calib_1_1CalibrationWriter}{stereo\_calib::CalibrationWriter}}\ \_calibrationWriter;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00192}00192\ \ \ \ \ \mbox{\hyperlink{structstereo__calib_1_1FisheyeCalibrationOptions}{stereo\_calib::FisheyeCalibrationOptions}}\ \_calibrationOptions;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00193}00193\ \ \ \ \ \mbox{\hyperlink{structstereo__calib_1_1CalibrationResult}{stereo\_calib::CalibrationResult}}\ \_calibrationResults;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00194}00194\ }
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00195}00195\ \ \ \ \ std::string\ \_calibrationError;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00196}00196\ }
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00197}00197\ \ \ \ \ \textcolor{keywordtype}{bool}\ \_saveImages\{\textcolor{keyword}{false}\};}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00198}00198\ \ \ \ \ \textcolor{keywordtype}{bool}\ \_drawDiagnosticCorners\{\textcolor{keyword}{true}\};}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00199}00199\ \ \ \ \ std::string\ \_observationsFile;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00200}00200\ }
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00201}00201\ }
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00202}00202\ \ \ \ \ BufferedPort<ImageOf<PixelRgb>\ >\ imagePortInLeft;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00203}00203\ \ \ \ \ BufferedPort<ImageOf<PixelRgb>\ >\ imagePortInRight;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00204}00204\ \ \ \ \ BufferedPort<ImageOf<PixelRgb>\ >\ outPortRight;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00205}00205\ \ \ \ \ BufferedPort<ImageOf<PixelRgb>\ >\ outPortLeft;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00206}00206\ }
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00207}00207\ \ \ \ \ Port\ *commandPort;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00208}00208\ \ \ \ \ \textcolor{keywordtype}{string}\ imageDir;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00209}00209\ \ \ \ \ \textcolor{keywordtype}{int}\ boardWidth;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00210}00210\ \ \ \ \ \textcolor{keywordtype}{int}\ boardHeight;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00211}00211\ \ \ \ \ \textcolor{keywordtype}{float}\ squareSize;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00212}00212\ \ \ \ \ \textcolor{keywordtype}{string}\ boardType;}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00213}00213\ \ \ \ \ \textcolor{keywordtype}{char}\ pathL[256];}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00214}00214\ \ \ \ \ \textcolor{keywordtype}{char}\ pathR[256];}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00215}00215\ \ \ \ \ \textcolor{keywordtype}{void}\ printMatrix(Mat\ \&matrix);}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00216}00216\ \ \ \ \ \textcolor{keywordtype}{bool}\ checkTS(\textcolor{keywordtype}{double}\ TSLeft,\ \textcolor{keywordtype}{double}\ TSRight,\ \textcolor{keywordtype}{double}\ th=0.08);}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00217}00217\ \ \ \ \ \textcolor{keywordtype}{void}\ preparePath(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *\ imageDir,\ \textcolor{keywordtype}{char}*\ pathL,\ \textcolor{keywordtype}{char}*\ pathR,\ \textcolor{keywordtype}{int}\ num);}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00218}00218\ \ \ \ \ \textcolor{keywordtype}{void}\ saveStereoImage(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *\ imageDir,\ \textcolor{keyword}{const}\ Mat\&\ left,\ \textcolor{keyword}{const}\ Mat\&\ right,\ \textcolor{keywordtype}{int}\ num);}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00219}00219\ \ \ \ \ \textcolor{keywordtype}{double}\ monoCalibration(\textcolor{keyword}{const}\ vector<string>\&\ imageList,\ \textcolor{keywordtype}{int}\ boardWidth,\ \textcolor{keywordtype}{int}\ boardHeight,\ Mat\ \&K,\ Mat\ \&Dist,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ cameraName);}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00220}00220\ \ \ \ \ \textcolor{keywordtype}{void}\ stereoCalibration(\textcolor{keyword}{const}\ vector<string>\&\ imagelist,\ \textcolor{keywordtype}{int}\ boardWidth,\ \textcolor{keywordtype}{int}\ boardHeight,\textcolor{keywordtype}{float}\ sqsizee);}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00221}00221\ \ \ \ \ \textcolor{keywordtype}{void}\ saveCalibration(\textcolor{keyword}{const}\ \textcolor{keywordtype}{string}\&\ extrinsicFilePath,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{string}\&\ intrinsicFilePath);}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00222}00222\ \ \ \ \ \textcolor{keywordtype}{void}\ calcChessboardCorners(Size\ boardSize,\ \textcolor{keywordtype}{float}\ squareSize,\ vector<Point3f>\&\ corners);}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00223}00223\ \ \ \ \ \textcolor{keywordtype}{bool}\ updateIntrinsics(\ \textcolor{keywordtype}{int}\ width,\ \textcolor{keywordtype}{int}\ height,\ \textcolor{keywordtype}{double}\ fx,\ \textcolor{keywordtype}{double}\ fy,\textcolor{keywordtype}{double}\ cx,\ \textcolor{keywordtype}{double}\ cy,\ \textcolor{keywordtype}{double}\ k1,\ \textcolor{keywordtype}{double}\ k2,\ \textcolor{keywordtype}{double}\ p1,\ \textcolor{keywordtype}{double}\ p2,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{string}\&\ groupname);}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00224}00224\ \ \ \ \ \textcolor{keywordtype}{bool}\ updateExtrinsics(Mat\ Rot,\ Mat\ Tr,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{string}\&\ groupname);}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00225}00225\ \ \ \ \ \textcolor{keywordtype}{void}\ saveImage(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *\ imageDir,\ \textcolor{keyword}{const}\ Mat\&\ left,\ \textcolor{keywordtype}{int}\ num);}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00226}00226\ \ \ \ \ \textcolor{keywordtype}{void}\ stereoCalibRun();}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00227}00227\ \ \ \ \ \textcolor{keywordtype}{void}\ monoCalibRun();}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00228}00228\ \ \ \ \ \textcolor{keywordtype}{bool}\ shouldQueueFrameForCollection(\textcolor{keyword}{const}\ Stamp\&\ timestamp)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00229}00229\ \ \ \ \ \textcolor{keywordtype}{void}\ processSynchronizedPair(\mbox{\hyperlink{structSynchronizedPair}{SynchronizedPair}}\&\ pair,\ Size\ boardSize);}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00230}00230\ }
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00231}00231\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00232}00232\ }
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00233}00233\ \ \ \ \ \mbox{\hyperlink{classstereoCalibThread}{stereoCalibThread}}(ResourceFinder\ \&rf,\ Port*\ commPort,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *imageDir);}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00234}00234\ \ \ \ \ \mbox{\hyperlink{structStereoCalibStatus}{StereoCalibStatus}}\ \mbox{\hyperlink{classstereoCalibThread_a7664300a06806a767bb59ef5463c232f}{getStatus}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00235}00235\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classstereoCalibThread_a007f7bf0f3305d4e0abeee6543e875d3}{startCalib}}();}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00236}00236\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classstereoCalibThread_aadb8c4b83b1909387abf3d70ea909a27}{stopCalib}}();}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00237}00237\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classstereoCalibThread_a3ab6f1754623b1e9e1ed4b391f1fc2fb}{threadInit}}();}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00238}00238\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classstereoCalibThread_abd57005317694555687c849aa03da904}{threadRelease}}();}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00239}00239\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classstereoCalibThread_a7c2851c39a91b3cd339dadfe38b9e482}{run}}();\ }
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00240}00240\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classstereoCalibThread_abe371257ce25054c7855f4a2aa74adc3}{onStop}}();}
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00241}00241\ }
+\DoxyCodeLine{\Hypertarget{stereoCalibThread_8h_source_l00242}00242\ \};}
+
+\end{DoxyCode}

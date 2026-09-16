@@ -1,0 +1,193 @@
+\doxysection{gravity\+Thread.\+h}
+\hypertarget{gravityThread_8h_source}{}\label{gravityThread_8h_source}\index{icub-\/main/src/modules/gravityCompensator/gravityThread.h@{icub-\/main/src/modules/gravityCompensator/gravityThread.h}}
+\mbox{\hyperlink{gravityThread_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00001}00001\ \textcolor{comment}{/*\ }}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00002}00002\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2011\ RobotCub\ Consortium,\ European\ Commission\ FP6\ Project\ IST-\/004370}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00003}00003\ \textcolor{comment}{\ *\ Author:\ Marco\ Randazzo,\ Matteo\ Fumagalli}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00004}00004\ \textcolor{comment}{\ *\ email:\ \ marco.randazzo@iit.it}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00005}00005\ \textcolor{comment}{\ *\ website:\ www.robotcub.org}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00006}00006\ \textcolor{comment}{\ *\ Permission\ is\ granted\ to\ copy,\ distribute,\ and/or\ modify\ this\ program}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00007}00007\ \textcolor{comment}{\ *\ under\ the\ terms\ of\ the\ GNU\ General\ Public\ License,\ version\ 2\ or\ any}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00008}00008\ \textcolor{comment}{\ *\ later\ version\ published\ by\ the\ Free\ Software\ Foundation.}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00009}00009\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00010}00010\ \textcolor{comment}{\ *\ A\ copy\ of\ the\ license\ can\ be\ found\ at}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00011}00011\ \textcolor{comment}{\ *\ http://www.robotcub.org/icub/license/gpl.txt}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00012}00012\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00013}00013\ \textcolor{comment}{\ *\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00014}00014\ \textcolor{comment}{\ *\ WITHOUT\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00015}00015\ \textcolor{comment}{\ *\ MERCHANTABILITY\ or\ FITNESS\ FOR\ A\ PARTICULAR\ PURPOSE.\ See\ the\ GNU\ General}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00016}00016\ \textcolor{comment}{\ *\ Public\ License\ for\ more\ details}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00017}00017\ \textcolor{comment}{*/}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00018}00018\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00019}00019\ \textcolor{preprocessor}{\#ifndef\ GRAVITY\_THREAD}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00020}00020\ \textcolor{preprocessor}{\#define\ GRAVITY\_THREAD}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00021}00021\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00022}00022\ \textcolor{preprocessor}{\#include\ <yarp/os/BufferedPort.h>}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00023}00023\ \textcolor{preprocessor}{\#include\ <yarp/os/RFModule.h>}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00024}00024\ \textcolor{preprocessor}{\#include\ <yarp/os/Time.h>}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00025}00025\ \textcolor{preprocessor}{\#include\ <yarp/os/Network.h>}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00026}00026\ \textcolor{preprocessor}{\#include\ <yarp/os/PeriodicThread.h>}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00027}00027\ \textcolor{preprocessor}{\#include\ <yarp/os/Stamp.h>}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00028}00028\ \textcolor{preprocessor}{\#include\ <yarp/sig/Vector.h>}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00029}00029\ \textcolor{preprocessor}{\#include\ <yarp/dev/PolyDriver.h>}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00030}00030\ \textcolor{preprocessor}{\#include\ <yarp/dev/ControlBoardInterfaces.h>}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00031}00031\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{adaptWinPolyEstimator_8h}{iCub/ctrl/adaptWinPolyEstimator.h}}>}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00032}00032\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{iDyn_8h}{iCub/iDyn/iDyn.h}}>}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00033}00033\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{iDynBody_8h}{iCub/iDyn/iDynBody.h}}>}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00034}00034\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00035}00035\ \textcolor{keyword}{using\ namespace\ }yarp::os;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00036}00036\ \textcolor{keyword}{using\ namespace\ }yarp::sig;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00037}00037\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceyarp_1_1dev}{yarp::dev}};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00038}00038\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceiCub_1_1ctrl}{iCub::ctrl}};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00039}00039\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceiCub_1_1iDyn}{iCub::iDyn}};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00040}00040\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00041}\mbox{\hyperlink{gravityThread_8h_a314e728fcd25c89c20cb03b841fd1559a97207f3457ed3b04ca92ff55d1aec3d6}{00041}}\ \textcolor{keyword}{enum}\ \mbox{\hyperlink{gravityThread_8h_a314e728fcd25c89c20cb03b841fd1559}{thread\_status\_enum}}\ \{\mbox{\hyperlink{gravityThread_8h_a314e728fcd25c89c20cb03b841fd1559a7e4a42e3b6dd63708c64cf3db6f69566}{STATUS\_OK}}=0,\ \mbox{\hyperlink{gravityThread_8h_a314e728fcd25c89c20cb03b841fd1559a97207f3457ed3b04ca92ff55d1aec3d6}{STATUS\_DISCONNECTED}}\};\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00042}\mbox{\hyperlink{gravityThread_8h_a96a58e29e8dbf2b5bdeb775cba46556eac5d70801ee7381499876f89baadd267d}{00042}}\ \textcolor{keyword}{enum}\{\mbox{\hyperlink{gravityThread_8h_a96a58e29e8dbf2b5bdeb775cba46556eac5d70801ee7381499876f89baadd267d}{GRAVITY\_COMPENSATION\_OFF}}\ =\ 0,\ \mbox{\hyperlink{gravityThread_8h_a96a58e29e8dbf2b5bdeb775cba46556ea8c355f2fd1443ba3a14bdcf1bec05cf3}{GRAVITY\_COMPENSATION\_ON}}\ =\ 1\};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00043}\mbox{\hyperlink{gravityThread_8h_ab48899087cc647f0f791ed0c459adc53a318913263c2550875bb5ff4391d7d2a9}{00043}}\ \textcolor{keyword}{enum}\{\mbox{\hyperlink{gravityThread_8h_ab48899087cc647f0f791ed0c459adc53a318913263c2550875bb5ff4391d7d2a9}{EXTERNAL\_TRQ\_OFF}}\ =\ 0,\ \mbox{\hyperlink{gravityThread_8h_ab48899087cc647f0f791ed0c459adc53ac46a84ee32e7178408bff8510c90e5b3}{EXTERNAL\_TRQ\_ON}}\ =\ 1\};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00044}00044\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00045}\mbox{\hyperlink{classgravityCompensatorThread}{00045}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classgravityCompensatorThread}{gravityCompensatorThread}}:\ \textcolor{keyword}{public}\ yarp::os::PeriodicThread}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00046}00046\ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00047}00047\ \textcolor{keyword}{private}:}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00048}00048\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00049}00049\ \ \ \ \ std::string\ \ \ \ \ \ \ \ \ \ \ wholeBodyName;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00050}00050\ \ \ \ \ BufferedPort<Vector>\ *port\_inertial;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00051}00051\ \ \ \ \ BufferedPort<Vector>\ *la\_additional\_offset;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00052}00052\ \ \ \ \ BufferedPort<Vector>\ *ra\_additional\_offset;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00053}00053\ \ \ \ \ BufferedPort<Vector>\ *ll\_additional\_offset;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00054}00054\ \ \ \ \ BufferedPort<Vector>\ *rl\_additional\_offset;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00055}00055\ \ \ \ \ BufferedPort<Vector>\ *to\_additional\_offset;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00056}00056\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00057}00057\ \ \ \ \ BufferedPort<Vector>\ *left\_arm\_exec\_torques;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00058}00058\ \ \ \ \ BufferedPort<Vector>\ *right\_arm\_exec\_torques;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00059}00059\ \ \ \ \ BufferedPort<Vector>\ *left\_leg\_exec\_torques;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00060}00060\ \ \ \ \ BufferedPort<Vector>\ *right\_leg\_exec\_torques;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00061}00061\ \ \ \ \ BufferedPort<Vector>\ *torso\_exec\_torques;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00062}00062\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00063}00063\ \ \ \ \ BufferedPort<Vector>\ *left\_arm\_gravity\_torques;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00064}00064\ \ \ \ \ BufferedPort<Vector>\ *right\_arm\_gravity\_torques;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00065}00065\ \ \ \ \ BufferedPort<Vector>\ *left\_leg\_gravity\_torques;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00066}00066\ \ \ \ \ BufferedPort<Vector>\ *right\_leg\_gravity\_torques;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00067}00067\ \ \ \ \ BufferedPort<Vector>\ *torso\_gravity\_torques;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00068}00068\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00069}00069\ \ \ \ \ PolyDriver\ \ \ *ddLA;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00070}00070\ \ \ \ \ PolyDriver\ \ \ *ddRA;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00071}00071\ \ \ \ \ PolyDriver\ \ \ *ddH;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00072}00072\ \ \ \ \ IEncoders\ \ \ \ *iencs\_arm\_left;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00073}00073\ \ \ \ \ IEncoders\ \ \ \ *iencs\_arm\_right;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00074}00074\ \ \ \ \ IEncoders\ \ \ \ *iencs\_head;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00075}00075\ \ \ \ \ IControlMode\ \ \ \ \ \ *iCtrlMode\_arm\_left;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00076}00076\ \ \ \ \ IControlMode\ \ \ \ \ \ *iCtrlMode\_arm\_right;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00077}00077\ \ \ \ \ IControlMode\ \ \ \ \ \ *iCtrlMode\_torso;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00078}00078\ \ \ \ \ IInteractionMode\ \ *iIntMode\_arm\_left;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00079}00079\ \ \ \ \ IInteractionMode\ \ *iIntMode\_arm\_right;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00080}00080\ \ \ \ \ IInteractionMode\ \ *iIntMode\_torso;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00081}00081\ \ \ \ \ IImpedanceControl\ *iImp\_arm\_left;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00082}00082\ \ \ \ \ ITorqueControl\ \ \ \ *iTqs\_arm\_left;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00083}00083\ \ \ \ \ IImpedanceControl\ *iImp\_arm\_right;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00084}00084\ \ \ \ \ ITorqueControl\ \ \ \ *iTqs\_arm\_right;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00085}00085\ \ \ \ \ IImpedanceControl\ *iImp\_torso;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00086}00086\ \ \ \ \ ITorqueControl\ \ \ \ *iTqs\_torso;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00087}00087\ \ \ \ \ \mbox{\hyperlink{gravityThread_8h_a314e728fcd25c89c20cb03b841fd1559}{thread\_status\_enum}}\ thread\_status;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00088}00088\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00089}00089\ \ \ \ \ PolyDriver\ \ \ *ddLL;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00090}00090\ \ \ \ \ PolyDriver\ \ \ *ddRL;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00091}00091\ \ \ \ \ PolyDriver\ \ \ *ddT;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00092}00092\ \ \ \ \ IEncoders\ \ \ \ *iencs\_leg\_left;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00093}00093\ \ \ \ \ IEncoders\ \ \ \ *iencs\_leg\_right;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00094}00094\ \ \ \ \ IEncoders\ \ \ \ *iencs\_torso;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00095}00095\ \ \ \ \ IControlMode\ \ \ \ \ \ *iCtrlMode\_leg\_left;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00096}00096\ \ \ \ \ IControlMode\ \ \ \ \ \ *iCtrlMode\_leg\_right;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00097}00097\ \ \ \ \ IInteractionMode\ \ *iIntMode\_leg\_left;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00098}00098\ \ \ \ \ IInteractionMode\ \ *iIntMode\_leg\_right;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00099}00099\ \ \ \ \ IImpedanceControl\ *iImp\_leg\_left;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00100}00100\ \ \ \ \ ITorqueControl\ \ \ \ *iTqs\_leg\_left;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00101}00101\ \ \ \ \ IImpedanceControl\ *iImp\_leg\_right;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00102}00102\ \ \ \ \ ITorqueControl\ \ \ \ *iTqs\_leg\_right;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00103}00103\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00104}00104\ \ \ \ \ Vector\ encoders\_arm\_left;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00105}00105\ \ \ \ \ Vector\ encoders\_arm\_right;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00106}00106\ \ \ \ \ Vector\ encoders\_head;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00107}00107\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00108}00108\ \ \ \ \ Vector\ encoders\_leg\_left;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00109}00109\ \ \ \ \ Vector\ encoders\_leg\_right;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00110}00110\ \ \ \ \ Vector\ encoders\_torso;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00111}00111\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00112}00112\ \ \ \ \ Vector\ *inertial\{\};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00113}00113\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00114}00114\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1AWLinEstimator}{AWLinEstimator}}\ \ *linEstUp\{\};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00115}00115\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1AWQuadEstimator}{AWQuadEstimator}}\ *quadEstUp\{\};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00116}00116\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1AWLinEstimator}{AWLinEstimator}}\ \ *linEstLow\{\};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00117}00117\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1AWQuadEstimator}{AWQuadEstimator}}\ *quadEstLow\{\};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00118}00118\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00119}00119\ \ \ \ \ \textcolor{keywordtype}{int}\ left\_arm\_ctrlJnt\{\};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00120}00120\ \ \ \ \ \textcolor{keywordtype}{int}\ right\_arm\_ctrlJnt\{\};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00121}00121\ \ \ \ \ \textcolor{keywordtype}{int}\ left\_leg\_ctrlJnt\{\};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00122}00122\ \ \ \ \ \textcolor{keywordtype}{int}\ right\_leg\_ctrlJnt\{\};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00123}00123\ \ \ \ \ \textcolor{keywordtype}{int}\ torso\_ctrlJnt\{\};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00124}00124\ \ \ \ \ \textcolor{keywordtype}{int}\ allJnt\{\};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00125}00125\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00126}00126\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1iDyn_1_1iCubWholeBody}{iCubWholeBody}}*\ icub;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00127}00127\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00128}00128\ \ \ \ \ Vector\ q\_head,\ dq\_head,\ d2q\_head;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00129}00129\ \ \ \ \ Vector\ q\_larm,\ dq\_larm,\ d2q\_larm;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00130}00130\ \ \ \ \ Vector\ q\_rarm,\ dq\_rarm,\ d2q\_rarm;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00131}00131\ \ \ \ \ Vector\ all\_q\_up,\ all\_dq\_up,\ all\_d2q\_up;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00132}00132\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00133}00133\ \ \ \ \ Vector\ q\_torso,\ dq\_torso,\ d2q\_torso;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00134}00134\ \ \ \ \ Vector\ q\_lleg,\ dq\_lleg,\ d2q\_lleg;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00135}00135\ \ \ \ \ Vector\ q\_rleg,\ dq\_rleg,\ d2q\_rleg;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00136}00136\ \ \ \ \ Vector\ all\_q\_low,\ all\_dq\_low,\ all\_d2q\_low;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00137}00137\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00138}00138\ \ \ \ \ Vector\ w0,dw0,d2p0,Fend,Muend;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00139}00139\ \ \ \ \ Vector\ F\_LArm,\ F\_RArm,\ F\_iDyn\_LArm,\ F\_iDyn\_RArm,\ Offset\_LArm,\ Offset\_RArm;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00140}00140\ \ \ \ \ Vector\ F\_LLeg,\ F\_RLeg,\ F\_iDyn\_LLeg,\ F\_iDyn\_RLeg,\ Offset\_LLeg,\ Offset\_RLeg;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00141}00141\ \ \ \ \ Matrix\ F\_ext\_up,\ F\_ext\_low;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00142}00142\ \ \ \ \ Vector\ inertial\_measurements;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00143}00143\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00144}00144\ \ \ \ \ std::string\ side;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00145}00145\ \ \ \ \ std::string\ part;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00146}00146\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00147}00147\ \ \ \ \ Vector\ exec\_torques\_LA,exec\_torques\_RA,exec\_torques\_LL,exec\_torques\_RL,exec\_torques\_TO;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00148}00148\ \ \ \ \ Vector\ gravity\_torques\_LA,gravity\_torques\_RA,gravity\_torques\_LL,gravity\_torques\_RL,gravity\_torques\_TO;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00149}00149\ \ \ \ \ Vector\ externalcmd\_torques\_LA,externalcmd\_torques\_RA,externalcmd\_torques\_LL,externalcmd\_torques\_RL,\ externalcmd\_torques\_TO;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00150}00150\ \ \ \ \ Vector\ ampli\_LA,\ ampli\_RA,\ ampli\_LL,\ ampli\_RL,\ ampli\_TO;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00151}00151\ \ \ \ \ \textcolor{keywordtype}{bool}\ isCalibrated;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00152}00152\ \ \ \ \ \textcolor{keywordtype}{bool}\ inertial\_enabled;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00153}00153\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00154}00154\ \ \ \ \ Vector\ evalVelUp(\textcolor{keyword}{const}\ Vector\ \&\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}});}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00155}00155\ \ \ \ \ Vector\ evalVelLow(\textcolor{keyword}{const}\ Vector\ \&\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}});}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00156}00156\ \ \ \ \ Vector\ evalAccUp(\textcolor{keyword}{const}\ Vector\ \&\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}});}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00157}00157\ \ \ \ \ Vector\ evalAccLow(\textcolor{keyword}{const}\ Vector\ \&\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}});}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00158}00158\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00159}00159\ \ \ \ \ \textcolor{keywordtype}{void}\ init\_upper();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00160}00160\ \ \ \ \ \textcolor{keywordtype}{void}\ init\_lower();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00161}00161\ \ \ \ \ \textcolor{keywordtype}{void}\ setLowerMeasure();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00162}00162\ \ \ \ \ \textcolor{keywordtype}{void}\ setUpperMeasure();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00163}00163\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00164}00164\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00165}00165\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00166}\mbox{\hyperlink{classgravityCompensatorThread_a4309319cf0322c298e9b155e1fe259f6}{00166}}\ \ \ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{classgravityCompensatorThread_a4309319cf0322c298e9b155e1fe259f6}{gravity\_mode}};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00167}\mbox{\hyperlink{classgravityCompensatorThread_a1200cad968e6a6f0497889ea3f9e2937}{00167}}\ \ \ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{classgravityCompensatorThread_a1200cad968e6a6f0497889ea3f9e2937}{external\_mode}};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00168}00168\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00169}00169\ \ \ \ \ \mbox{\hyperlink{classgravityCompensatorThread}{gravityCompensatorThread}}(std::string\ \_wholeBodyName,\ \textcolor{keywordtype}{int}\ \_rate,\ PolyDriver\ *\_ddLA,\ PolyDriver\ *\_ddRA,\ PolyDriver\ *\_ddH,\ PolyDriver\ *\_ddLL,\ PolyDriver\ *\_ddRL,\ PolyDriver\ *\_ddT,\ \mbox{\hyperlink{structiCub_1_1iDyn_1_1version__tag}{version\_tag}}\ icub\_type,\ \textcolor{keywordtype}{bool}\ \_inertial\_enabled);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00170}00170\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00171}00171\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classgravityCompensatorThread_a78d8f0c9e443abc8020dbc2d6dee081a}{setZeroJntAngVelAcc}}();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00172}00172\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classgravityCompensatorThread_a1405d58684cfa6e684cd39ffac268182}{readAndUpdate}}(\textcolor{keywordtype}{bool}\ waitMeasure=\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00173}00173\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classgravityCompensatorThread_a0fce4c71a14a9df8583e86dab789bccc}{getLowerEncodersSpeedAndAcceleration}}();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00174}00174\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classgravityCompensatorThread_a0eb21d408c0fceb472cff02fbe0f0837}{getUpperEncodersSpeedAndAcceleration}}();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00175}00175\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classgravityCompensatorThread_a7703bd59b4decf6990f9c22d06d98c54}{threadInit}}()\ \textcolor{keyword}{override};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00176}00176\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classgravityCompensatorThread_a556fab9b5d4e4139922f1c289d91c38d}{feedFwdGravityControl}}(\textcolor{keywordtype}{int}\ part\_ctrlJnt,\ \textcolor{keyword}{const}\ std::string\&\ s\_part,\ IControlMode\ *iCtrlMode,\ ITorqueControl\ *iTqs,\ IImpedanceControl\ *iImp,\ IInteractionMode\ *iIntMode,\ \textcolor{keyword}{const}\ Vector\ \&command,\ \textcolor{keywordtype}{bool}\ releasing=\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00177}00177\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classgravityCompensatorThread_aec7c7ecfd10c05c0d09dba98be439d6f}{run}}()\ \textcolor{keyword}{override};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00178}00178\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classgravityCompensatorThread_ad1d015a6f6f08639e93c84c4e5e43a8a}{threadRelease}}()\ \textcolor{keyword}{override};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00179}00179\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00180}\mbox{\hyperlink{classgravityCompensatorThread_a742d42072a807658b5bbdf09cdce6b47}{00180}}\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{gravityThread_8h_a314e728fcd25c89c20cb03b841fd1559}{thread\_status\_enum}}\ \mbox{\hyperlink{classgravityCompensatorThread_a742d42072a807658b5bbdf09cdce6b47}{getThreadStatus}}()\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00181}00181\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00182}00182\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ thread\_status;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00183}00183\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00184}00184\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00185}00185\ \};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00186}00186\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8h_source_l00187}00187\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

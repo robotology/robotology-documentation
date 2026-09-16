@@ -1,0 +1,408 @@
+\doxysection{emb\+Obj\+POS.\+cpp}
+\hypertarget{embObjPOS_8cpp_source}{}\label{embObjPOS_8cpp_source}\index{icub-\/main/src/libraries/icubmod/embObjPOS/embObjPOS.cpp@{icub-\/main/src/libraries/icubmod/embObjPOS/embObjPOS.cpp}}
+\mbox{\hyperlink{embObjPOS_8cpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00001}00001\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00002}00002\ \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00003}00003\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2020\ iCub\ Tech\ -\/\ Istituto\ Italiano\ di\ Tecnologia}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00004}00004\ \textcolor{comment}{\ *\ Author:\ \ Marco\ Accame}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00005}00005\ \textcolor{comment}{\ *\ email:\ \ \ marco.accame@iit.it}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00006}00006\ \textcolor{comment}{*/}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00007}00007\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00008}00008\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00009}00009\ \textcolor{comment}{//\ general\ purpose\ stuff.}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00010}00010\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00011}00011\ \textcolor{preprocessor}{\#include\ <iostream>}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00012}00012\ \textcolor{preprocessor}{\#include\ <string.h>}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00013}00013\ \textcolor{preprocessor}{\#include\ <stdarg.h>}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00014}00014\ \textcolor{preprocessor}{\#include\ <stdio.h>}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00015}00015\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00016}00016\ \textcolor{preprocessor}{\#include\ <ace/config.h>}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00017}00017\ \textcolor{preprocessor}{\#include\ <ace/Log\_Msg.h>}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00018}00018\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00019}00019\ \textcolor{comment}{//\ Yarp\ Includes}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00020}00020\ \textcolor{preprocessor}{\#include\ <yarp/os/Time.h>}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00021}00021\ \textcolor{preprocessor}{\#include\ <yarp/os/Log.h>}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00022}00022\ \textcolor{preprocessor}{\#include\ <yarp/os/LogStream.h>}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00023}00023\ \textcolor{preprocessor}{\#include\ <yarp/dev/PolyDriver.h>}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00024}00024\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00025}00025\ \textcolor{preprocessor}{\#include\ <yarp/os/NetType.h>}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00026}00026\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00027}00027\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00028}00028\ \textcolor{comment}{//\ specific\ to\ this\ device\ driver.}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00029}00029\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{embObjPOS_8h}{embObjPOS.h}}"{}}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00030}00030\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{ethManager_8h}{ethManager.h}}"{}}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00031}00031\ \textcolor{preprocessor}{\#include\ "{}EoAnalogSensors.h"{}}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00032}00032\ \textcolor{preprocessor}{\#include\ "{}EOnv\_hid.h"{}}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00033}00033\ \textcolor{preprocessor}{\#include\ "{}EoProtocol.h"{}}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00034}00034\ \textcolor{preprocessor}{\#include\ "{}EoProtocolMN.h"{}}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00035}00035\ \textcolor{preprocessor}{\#include\ "{}EoProtocolAS.h"{}}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00036}00036\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00037}00037\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00038}00038\ \textcolor{preprocessor}{\#ifdef\ WIN32}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00039}00039\ \textcolor{preprocessor}{\#pragma\ warning(once:4355)}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00040}00040\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00041}00041\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00042}00042\ \textcolor{keyword}{namespace\ }\{}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00043}00043\ \ \ \ \ YARP\_LOG\_COMPONENT(EMBOBJPOS,\ \textcolor{stringliteral}{"{}yarp.dev.embObjPOS"{}})}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00044}00044\ \}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00045}00045\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00046}00046\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceyarp}{yarp}};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00047}00047\ \textcolor{keyword}{using\ namespace\ }yarp::os;}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00048}00048\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceyarp_1_1dev}{yarp::dev}};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00049}00049\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00050}\mbox{\hyperlink{embObjPOS_8cpp_ad4d19181dc9b2723625ba951cc0fa1e2}{00050}}\ \textcolor{keyword}{constexpr}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{embObjPOS_8cpp_ad4d19181dc9b2723625ba951cc0fa1e2}{POS\_OPEN\_CLOSE\_SENSORS\_COUNT}}\ =\ 4;}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00051}\mbox{\hyperlink{embObjPOS_8cpp_ad7c05fe7eb35fa78a06aaf0ad73d3d85}{00051}}\ \textcolor{keyword}{constexpr}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{embObjPOS_8cpp_ad7c05fe7eb35fa78a06aaf0ad73d3d85}{POS\_ABDUCTION\_SENSORS\_COUNT}}\ =\ 2;}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00052}00052\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00053}00053\ \textcolor{keywordtype}{bool}\ embObjPOS::fromConfig(yarp::os::Searchable\ \&config,\ \mbox{\hyperlink{structservConfigPOS__t}{servConfigPOS\_t}}\ \&serviceConfig)}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00054}00054\ \{}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00055}00055\ \ \ \ \ \mbox{\hyperlink{classServiceParser}{ServiceParser}}\ parser;}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00056}00056\ \ \ \ \ \textcolor{keywordflow}{if}(\textcolor{keyword}{false}\ ==\ parser.\mbox{\hyperlink{classServiceParser_aa85c7024d23a2ecc3fac197a42f7b981}{parseService}}(config,\ serviceConfig))}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00057}00057\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00058}00058\ \ \ \ \ \ \ \ \ yError()\ <<\ m\_PDdevice.\mbox{\hyperlink{classyarp_1_1dev_1_1embObjDevPrivData_aba23cbf850ff8625a402d1c420564882}{getBoardInfo}}()\ <<\ \textcolor{stringliteral}{"{}:\ missing\ some\ configuration\ parameter.\ Check\ logs\ and\ your\ config\ file."{}};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00059}00059\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00060}00060\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00061}00061\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00062}00062\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00063}00063\ \}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00064}00064\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00065}00065\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00066}\mbox{\hyperlink{classyarp_1_1dev_1_1embObjPOS_a9ba9e3b18d1d95febe9845cf2de336a5}{00066}}\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjPOS_a9ba9e3b18d1d95febe9845cf2de336a5}{embObjPOS::embObjPOS}}():\ m\_PDdevice(\textcolor{stringliteral}{"{}embObjPOS"{}})\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00067}00067\ \{\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00068}00068\ \}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00069}00069\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00070}00070\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00071}\mbox{\hyperlink{classyarp_1_1dev_1_1embObjPOS_a870da4de9e8cf434380bae9a81327490}{00071}}\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjPOS_a870da4de9e8cf434380bae9a81327490}{embObjPOS::\string~embObjPOS}}()}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00072}00072\ \{}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00073}00073\ \ \ \ \ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjPOS_ac8577529686b52107eb42ce2b755cfe5}{close}}();}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00074}00074\ \}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00075}00075\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00076}00076\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00077}\mbox{\hyperlink{classyarp_1_1dev_1_1embObjPOS_a963725ba6ca1500eafce4dfa1b3049c2}{00077}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjPOS_a963725ba6ca1500eafce4dfa1b3049c2}{embObjPOS::initialised}}()}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00078}00078\ \{}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00079}00079\ \ \ \ \ \textcolor{keywordflow}{return}\ m\_PDdevice.\mbox{\hyperlink{classyarp_1_1dev_1_1embObjDevPrivData_a4d208aca87bb50a59e6dc2cb03916df3}{isOpen}}();}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00080}00080\ \}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00081}00081\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00082}00082\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00083}\mbox{\hyperlink{classyarp_1_1dev_1_1embObjPOS_af210630bcdfcff5007b66cb2b0cd46fe}{00083}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjPOS_af210630bcdfcff5007b66cb2b0cd46fe}{embObjPOS::open}}(yarp::os::Searchable\ \&config)}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00084}00084\ \{}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00085}00085\ \ \ \ \ \textcolor{comment}{//\ 1)\ prepare\ eth\ service\ verifing\ if\ the\ eth\ manager\ is\ available\ and\ parsing\ info\ about\ the\ eth\ board.}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00086}00086\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00087}00087\ \ \ \ \ yCInfo(EMBOBJPOS)\ <<\ \textcolor{stringliteral}{"{}embObjPOS::open():\ preparing\ ETH\ resource"{}};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00088}00088\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00089}00089\ \ \ \ \ \textcolor{keywordflow}{if}(!\ m\_PDdevice.\mbox{\hyperlink{classyarp_1_1dev_1_1embObjDevPrivData_a82ba602c194361b5f9bfd44039e08cec}{prerareEthService}}(config,\ \textcolor{keyword}{this}))}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00090}00090\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00091}00091\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00092}00092\ \ \ \ \ yCInfo(EMBOBJPOS)\ <<\ \textcolor{stringliteral}{"{}embObjPOS::open():\ browsing\ xml\ files\ which\ describe\ the\ service"{}};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00093}00093\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00094}00094\ \ \ \ \ \textcolor{comment}{//\ 2)\ read\ stuff\ from\ config\ file}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00095}00095\ \ \ \ \ serviceConfig\ =\ \{\};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00096}00096\ \ \ \ \ \textcolor{keywordflow}{if}(!fromConfig(config,\ serviceConfig))}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00097}00097\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00098}00098\ \ \ \ \ \ \ \ \ yCError(EMBOBJPOS)\ <<\ \textcolor{stringliteral}{"{}embObjPOS\ missing\ some\ configuration\ parameter.\ Check\ logs\ and\ your\ config\ file."{}};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00099}00099\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00100}00100\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00101}00101\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00102}00102\ \ \ \ \ \textcolor{comment}{//\ 3)\ prepare\ data\ vector}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00103}00103\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00104}00104\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ for\ now\ resize\ to\ max\ number\ of\ pos\ sensors\ }}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00105}00105\ \ \ \ \ \ \ \ \ \textcolor{comment}{//-\/-\/>\ then\ we\ will\ resize\ to\ the\ number\ of\ enabled\ sensors\ }}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00106}00106\ \ \ \ \ \ \ \ \ \textcolor{comment}{//-\/-\/>\ we\ can\ eventually\ use\ here\ reserve\ to\ max\ number\ and\ resize\ to\ enabled\ number}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00107}00107\ \ \ \ \ \ \ \ \ m\_data.resize(eOas\_pos\_data\_maxnumber,\ 0.0);\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00108}00108\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00109}00109\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00110}00110\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00111}00111\ \ \ \ \ yCInfo(EMBOBJPOS)\ <<\ \textcolor{stringliteral}{"{}embObjPOS::open():\ verify\ the\ presence\ of\ the\ board\ and\ if\ its\ protocol\ version\ is\ correct"{}};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00112}00112\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00113}00113\ \ \ \ \ \textcolor{comment}{//\ 4)\ verify\ analog\ sensor\ protocol\ and\ then\ verify-\/Activate\ the\ POS\ service}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00114}00114\ \ \ \ \ \textcolor{keywordflow}{if}(!m\_PDdevice.\mbox{\hyperlink{classyarp_1_1dev_1_1embObjDevPrivData_af6ba4893248307f38c590b87b85af71b}{res}}-\/>\mbox{\hyperlink{classeth_1_1AbstractEthResource_a809200d7677b3a037eeaed266dcf32db}{verifyEPprotocol}}(eoprot\_endpoint\_analogsensors))}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00115}00115\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00116}00116\ \ \ \ \ \ \ \ \ cleanup();}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00117}00117\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00118}00118\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00119}00119\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00120}00120\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00121}00121\ \ \ \ \ yCInfo(EMBOBJPOS)\ <<\ \textcolor{stringliteral}{"{}embObjPOS::open():\ verify\ and\ activate\ the\ POS\ service"{}};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00122}00122\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00123}00123\ \ \ \ \ \textcolor{keyword}{const}\ eOmn\_serv\_parameter\_t*\ servparam\ =\ \&serviceConfig.\mbox{\hyperlink{structservConfigPOS__t_ac2d588f941e49ce164d021322dc15d77}{ethservice}};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00124}00124\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00125}00125\ \ \ \ \ \textcolor{keywordflow}{if}(!m\_PDdevice.\mbox{\hyperlink{classyarp_1_1dev_1_1embObjDevPrivData_af6ba4893248307f38c590b87b85af71b}{res}}-\/>\mbox{\hyperlink{classeth_1_1AbstractEthResource_a549b21eb1d0005da8b9e78ec7498068e}{serviceVerifyActivate}}(eomn\_serv\_category\_pos,\ servparam,\ 5.0))}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00126}00126\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00127}00127\ \ \ \ \ \ \ \ \ yCError(EMBOBJPOS)\ <<\ m\_PDdevice.\mbox{\hyperlink{classyarp_1_1dev_1_1embObjDevPrivData_aba23cbf850ff8625a402d1c420564882}{getBoardInfo}}()\ <<\ \textcolor{stringliteral}{"{}open()\ has\ an\ error\ in\ call\ of\ ethResources::serviceVerifyActivate()"{}};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00128}00128\ \ \ \ \ \ \ \ \ cleanup();}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00129}00129\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00130}00130\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00131}00131\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00132}00132\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00133}00133\ \ \ \ \ yCInfo(EMBOBJPOS)\ <<\ \textcolor{stringliteral}{"{}embObjPOS::open():\ configure\ the\ POS\ service"{}};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00134}00134\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00135}00135\ \ \ \ \ \textcolor{keywordflow}{if}(\textcolor{keyword}{false}\ ==\ sendConfig2boards(serviceConfig))}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00136}00136\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00137}00137\ \ \ \ \ \ \ \ \ cleanup();}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00138}00138\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00139}00139\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00140}00140\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00141}00141\ \ \ \ \ yCInfo(EMBOBJPOS)\ <<\ \textcolor{stringliteral}{"{}embObjPOS::open():\ impose\ the\ network\ variable\ which\ the\ ETH\ bord\ must\ stream\ up"{}};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00142}00142\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00143}00143\ \ \ \ \ \textcolor{comment}{//\ Set\ variable\ to\ be\ signaled}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00144}00144\ \ \ \ \ \textcolor{keywordflow}{if}(\textcolor{keyword}{false}\ ==\ initRegulars())}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00145}00145\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00146}00146\ \ \ \ \ \ \ \ \ cleanup();}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00147}00147\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00148}00148\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00149}00149\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00150}00150\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00151}00151\ \ \ \ \ yCInfo(EMBOBJPOS)\ <<\ \textcolor{stringliteral}{"{}embObjPOS::open():\ start\ the\ POS\ service"{}};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00152}00152\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00153}00153\ \ \ \ \ \textcolor{keywordflow}{if}(!m\_PDdevice.\mbox{\hyperlink{classyarp_1_1dev_1_1embObjDevPrivData_af6ba4893248307f38c590b87b85af71b}{res}}-\/>\mbox{\hyperlink{classeth_1_1AbstractEthResource_acd35185e0471cccf5e77d972eeed6209}{serviceStart}}(eomn\_serv\_category\_pos))}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00154}00154\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00155}00155\ \ \ \ \ \ \ \ \ yCError(EMBOBJPOS)\ <<\ m\_PDdevice.\mbox{\hyperlink{classyarp_1_1dev_1_1embObjDevPrivData_aba23cbf850ff8625a402d1c420564882}{getBoardInfo}}()\ <<\ \textcolor{stringliteral}{"{}open()\ fails\ to\ start\ as\ service....\ cannot\ continue"{}};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00156}00156\ \ \ \ \ \ \ \ \ cleanup();}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00157}00157\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00158}00158\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00159}00159\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00160}00160\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00161}00161\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(m\_PDdevice.\mbox{\hyperlink{classyarp_1_1dev_1_1embObjDevPrivData_a59ac29499fb5f2d9e44fa1089a0dc122}{isVerbose}}())}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00162}00162\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00163}00163\ \ \ \ \ \ \ \ \ \ \ \ \ yCDebug(EMBOBJPOS)\ <<\ m\_PDdevice.\mbox{\hyperlink{classyarp_1_1dev_1_1embObjDevPrivData_aba23cbf850ff8625a402d1c420564882}{getBoardInfo}}()\ <<\ \textcolor{stringliteral}{"{}open()\ correctly\ starts\ service"{}};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00164}00164\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00165}00165\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00166}00166\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00167}00167\ \ \ \ \ yCInfo(EMBOBJPOS)\ <<\ \textcolor{stringliteral}{"{}embObjPOS::open():\ start\ streaming\ of\ POS\ data"{}};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00168}00168\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00169}00169\ \ \ \ \ sendStart2boards();}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00170}00170\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00171}00171\ \ \ \ \ m\_PDdevice.\mbox{\hyperlink{classyarp_1_1dev_1_1embObjDevPrivData_a2399f12cf294723f9d074ae69412b860}{setOpen}}(\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00172}00172\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00173}00173\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00174}00174\ \}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00175}00175\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00176}00176\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00177}00177\ \textcolor{keywordtype}{bool}\ embObjPOS::sendConfig2boards(\mbox{\hyperlink{structservConfigPOS__t}{servConfigPOS\_t}}\ \&serviceConfig)}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00178}00178\ \{}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00179}00179\ \ \ \ \ eOprotID32\_t\ id32\ =\ eo\_prot\_ID32dummy;}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00180}00180\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00181}00181\ \ \ \ \ eOas\_pos\_config\_t\ cfg;}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00182}00182\ \ \ \ \ cfg.datarate\ \ =\ serviceConfig.\mbox{\hyperlink{structservConfigPOS__t_a355718aa006bf021f71fb547583b3709}{acquisitionrate}};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00183}00183\ \ \ \ \ id32\ =\ eoprot\_ID\_get(eoprot\_endpoint\_analogsensors,\ eoprot\_entity\_as\_pos,\ 0,\ eoprot\_tag\_as\_pos\_config);}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00184}00184\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00185}00185\ \ \ \ \ \textcolor{keywordflow}{if}(\textcolor{keyword}{false}\ ==\ m\_PDdevice.\mbox{\hyperlink{classyarp_1_1dev_1_1embObjDevPrivData_af6ba4893248307f38c590b87b85af71b}{res}}-\/>\mbox{\hyperlink{classeth_1_1AbstractEthResource_a10337e51887f87971b599243ad6c0ca6}{setcheckRemoteValue}}(id32,\ \&cfg,\ 10,\ 0.010,\ 0.050))}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00186}00186\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00187}00187\ \ \ \ \ \ \ \ \ yCError(EMBOBJPOS)\ <<\ m\_PDdevice.\mbox{\hyperlink{classyarp_1_1dev_1_1embObjDevPrivData_aba23cbf850ff8625a402d1c420564882}{getBoardInfo}}()\ <<\ \textcolor{stringliteral}{"{}FATAL\ error\ in\ sendConfig2boards()\ while\ try\ to\ configure\ datarate="{}}\ <<\ cfg.datarate;}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00188}00188\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00189}00189\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00190}00190\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00191}00191\ \ \ \ \ \textcolor{keywordflow}{if}(m\_PDdevice.\mbox{\hyperlink{classyarp_1_1dev_1_1embObjDevPrivData_a59ac29499fb5f2d9e44fa1089a0dc122}{isVerbose}}())}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00192}00192\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00193}00193\ \ \ \ \ \ \ \ \ yCDebug(EMBOBJPOS)\ <<\ m\_PDdevice.\mbox{\hyperlink{classyarp_1_1dev_1_1embObjDevPrivData_aba23cbf850ff8625a402d1c420564882}{getBoardInfo}}()\ <<\ \textcolor{stringliteral}{"{}:\ sendConfig2boards()\ correctly\ configured\ boards\ with\ datarate="{}}\ <<\ cfg.datarate;}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00194}00194\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00195}00195\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00196}00196\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00197}00197\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00198}00198\ \}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00199}00199\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00200}00200\ \textcolor{keywordtype}{bool}\ embObjPOS::sendStart2boards(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00201}00201\ \{}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00202}00202\ \ \ \ \ eOprotID32\_t\ id32\ =\ eo\_prot\_ID32dummy;}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00203}00203\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00204}00204\ \ \ \ \ uint8\_t\ enable=1;}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00205}00205\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00206}00206\ \ \ \ \ id32\ =\ eoprot\_ID\_get(eoprot\_endpoint\_analogsensors,\ eoprot\_entity\_as\_pos,\ 0,\ eoprot\_tag\_as\_pos\_cmmnds\_enable);}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00207}00207\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00208}00208\ \ \ \ \ \textcolor{keywordflow}{if}(\textcolor{keyword}{false}\ ==\ m\_PDdevice.\mbox{\hyperlink{classyarp_1_1dev_1_1embObjDevPrivData_af6ba4893248307f38c590b87b85af71b}{res}}-\/>\mbox{\hyperlink{classeth_1_1AbstractEthResource_a10337e51887f87971b599243ad6c0ca6}{setcheckRemoteValue}}(id32,\ \&enable,\ 10,\ 0.010,\ 0.050))}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00209}00209\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00210}00210\ \ \ \ \ \ \ \ \ yCError(EMBOBJPOS)\ <<\ m\_PDdevice.\mbox{\hyperlink{classyarp_1_1dev_1_1embObjDevPrivData_aba23cbf850ff8625a402d1c420564882}{getBoardInfo}}()\ <<\ \textcolor{stringliteral}{"{}FATAL\ error\ in\ sendStart2boards()\ while\ try\ to\ enable\ the\ boards\ transmission"{}};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00211}00211\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00212}00212\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00213}00213\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00214}00214\ \ \ \ \ \textcolor{keywordflow}{if}(m\_PDdevice.\mbox{\hyperlink{classyarp_1_1dev_1_1embObjDevPrivData_a59ac29499fb5f2d9e44fa1089a0dc122}{isVerbose}}())}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00215}00215\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00216}00216\ \ \ \ \ \ \ \ \ yCDebug(EMBOBJPOS)\ <<\ m\_PDdevice.\mbox{\hyperlink{classyarp_1_1dev_1_1embObjDevPrivData_aba23cbf850ff8625a402d1c420564882}{getBoardInfo}}()\ <<\ \textcolor{stringliteral}{"{}:\ sendStart2boards()\ correctly\ enabled\ the\ boards\ transmission"{}};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00217}00217\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00218}00218\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00219}00219\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00220}00220\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00221}00221\ \}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00222}00222\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00223}00223\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00224}00224\ \textcolor{keywordtype}{bool}\ embObjPOS::initRegulars(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00225}00225\ \{}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00226}00226\ \ \ \ \ \textcolor{comment}{//\ configure\ regular\ rops}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00227}00227\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00228}00228\ \ \ \ \ vector<eOprotID32\_t>\ id32v(0);}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00229}00229\ \ \ \ \ eOprotID32\_t\ id32\ =\ eo\_prot\_ID32dummy;}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00230}00230\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00231}00231\ \ \ \ \ \textcolor{comment}{//\ we\ need\ to\ choose\ the\ id32\ to\ put\ inside\ the\ vector}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00232}00232\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00233}00233\ \ \ \ \ id32\ =\ eoprot\_ID\_get(eoprot\_endpoint\_analogsensors,\ eoprot\_entity\_as\_pos,\ 0,\ eoprot\_tag\_as\_pos\_status);;}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00234}00234\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00235}00235\ \ \ \ \ \textcolor{comment}{//\ and\ put\ it\ inside\ vector}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00236}00236\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00237}00237\ \ \ \ \ id32v.push\_back(id32);}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00238}00238\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00239}00239\ \ \ \ \ \textcolor{comment}{//\ now\ we\ send\ the\ vector}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00240}00240\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00241}00241\ \ \ \ \ \textcolor{keywordflow}{if}(\textcolor{keyword}{false}\ ==\ m\_PDdevice.\mbox{\hyperlink{classyarp_1_1dev_1_1embObjDevPrivData_af6ba4893248307f38c590b87b85af71b}{res}}-\/>\mbox{\hyperlink{classeth_1_1AbstractEthResource_ab5d89a26c22c968e9905bbcbea52cbec}{serviceSetRegulars}}(eomn\_serv\_category\_pos,\ id32v))}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00242}00242\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00243}00243\ \ \ \ \ \ \ \ \ yCError(EMBOBJPOS)\ <<\ m\_PDdevice.\mbox{\hyperlink{classyarp_1_1dev_1_1embObjDevPrivData_aba23cbf850ff8625a402d1c420564882}{getBoardInfo}}()\ <<\ \textcolor{stringliteral}{"{}initRegulars()\ fails\ to\ add\ its\ variables\ to\ regulars:\ cannot\ proceed\ any\ further"{}};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00244}00244\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00245}00245\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00246}00246\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00247}00247\ \ \ \ \ \textcolor{keywordflow}{if}(m\_PDdevice.\mbox{\hyperlink{classyarp_1_1dev_1_1embObjDevPrivData_a59ac29499fb5f2d9e44fa1089a0dc122}{isVerbose}}())}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00248}00248\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00249}00249\ \ \ \ \ \ \ \ \ yCDebug(EMBOBJPOS)\ <<\ m\_PDdevice.\mbox{\hyperlink{classyarp_1_1dev_1_1embObjDevPrivData_aba23cbf850ff8625a402d1c420564882}{getBoardInfo}}()\ <<\ \textcolor{stringliteral}{"{}initRegulars()\ added"{}}\ <<\ id32v.size()\ <<\ \textcolor{stringliteral}{"{}regular\ rops\ "{}};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00250}00250\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ nvinfo[128]\ =\ \{\};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00251}00251\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ r\ =\ 0;\ r<id32v.size();\ r++)}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00252}00252\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00253}00253\ \ \ \ \ \ \ \ \ \ \ \ \ uint32\_t\ item\ =\ id32v.at(r);}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00254}00254\ \ \ \ \ \ \ \ \ \ \ \ \ eoprot\_ID2information(item,\ nvinfo,\ \textcolor{keyword}{sizeof}(nvinfo));}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00255}00255\ \ \ \ \ \ \ \ \ \ \ \ \ yCDebug(EMBOBJPOS)\ <<\ \textcolor{stringliteral}{"{}\(\backslash\)t\ it\ added\ regular\ rop\ for"{}}\ <<\ nvinfo;}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00256}00256\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00257}00257\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00258}00258\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00259}00259\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00260}00260\ \}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00261}00261\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00262}00262\ \textcolor{keywordtype}{void}\ embObjPOS::helper\_remapperFromSensorToDataIndex(\textcolor{keyword}{const}\ uint32\_t\ sensorId,\ uint32\_t\ \&dataIndex)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00263}00263\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00300}00300\ \ \ \ \ \textcolor{comment}{//\ First\ we\ need\ to\ understand\ if\ the\ sensorId\ is\ related\ to\ open-\/close\ or\ abduction.}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00301}00301\ \ \ \ \ \textcolor{comment}{//\ We\ can\ do\ this\ by\ checking\ the\ size\ of\ idList[]\ vector,\ which\ is\ 4\ for\ open-\/close\ and\ 2\ for\ abduction.}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00302}00302\ \ \ \ \ \textcolor{comment}{//\ We\ need\ to\ use\ a\ temporary\ variable\ to\ store\ the\ dataIndex,\ because\ it\ is\ passed\ by\ reference.}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00303}00303\ \ \ \ \ \textcolor{comment}{//\ and\ the\ enum\ has\ a\ different\ type\ than\ uint32\_t.}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00304}00304\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00305}00305\ \ \ \ \ eObrd\_portpos\_t\ portPosIndex\ =\ eobrd\_portpos\_unknown;\ \textcolor{comment}{//\ default\ value\ in\ case\ of\ error}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00306}00306\ \ \ \ \ \textcolor{keywordflow}{if}\ (serviceConfig.\mbox{\hyperlink{structservConfigPOS__t_aba3119f589854ed31fc0d14da18f5b1d}{idList}}.size()\ ==\ \mbox{\hyperlink{embObjPOS_8cpp_ad4d19181dc9b2723625ba951cc0fa1e2}{POS\_OPEN\_CLOSE\_SENSORS\_COUNT}})\ \textcolor{comment}{//\ open-\/close}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00307}00307\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00308}00308\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{switch}\ (sensorId)}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00309}00309\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00310}00310\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 0:}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00311}00311\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ portPosIndex\ =\ eobrd\_portpos\_hand\_thumb\_oc;}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00312}00312\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00313}00313\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 1:}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00314}00314\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ portPosIndex\ =\ eobrd\_portpos\_hand\_index\_oc;}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00315}00315\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00316}00316\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 2:}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00317}00317\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ portPosIndex\ =\ eobrd\_portpos\_hand\_middle\_oc;}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00318}00318\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00319}00319\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 3:}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00320}00320\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ portPosIndex\ =\ eobrd\_portpos\_hand\_ring\_pinky\_oc;}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00321}00321\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00322}00322\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{default}:}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00323}00323\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ portPosIndex\ =\ eobrd\_portpos\_unknown;\ \textcolor{comment}{//\ error}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00324}00324\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00325}00325\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00326}00326\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00327}00327\ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (serviceConfig.\mbox{\hyperlink{structservConfigPOS__t_aba3119f589854ed31fc0d14da18f5b1d}{idList}}.size()\ ==\ \mbox{\hyperlink{embObjPOS_8cpp_ad7c05fe7eb35fa78a06aaf0ad73d3d85}{POS\_ABDUCTION\_SENSORS\_COUNT}})\ \textcolor{comment}{//\ abduction}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00328}00328\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00329}00329\ \ \ \ \ \ \ \ \textcolor{keywordflow}{switch}\ (sensorId)}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00330}00330\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00331}00331\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 0:}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00332}00332\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ portPosIndex\ =\ eobrd\_portpos\_hand\_thumb\_add;}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00333}00333\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00334}00334\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 1:}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00335}00335\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ portPosIndex\ =\ eobrd\_portpos\_hand\_index\_add;}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00336}00336\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00337}00337\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{default}:}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00338}00338\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ portPosIndex\ =\ eobrd\_portpos\_unknown;\ \textcolor{comment}{//\ error}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00339}00339\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00340}00340\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00341}00341\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00342}00342\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00343}00343\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00344}00344\ \ \ \ \ \ \ \ \ portPosIndex\ =\ eobrd\_portpos\_unknown;\ \textcolor{comment}{//\ error}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00345}00345\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00346}00346\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00347}00347\ \ \ \ \ dataIndex\ =\ \textcolor{keyword}{static\_cast<}uint32\_t\textcolor{keyword}{>}(portPosIndex);}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00348}00348\ \}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00349}00349\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00350}\mbox{\hyperlink{classyarp_1_1dev_1_1embObjPOS_ada0adb4a49efd189309edefb57cf4d01}{00350}}\ \textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjPOS_ada0adb4a49efd189309edefb57cf4d01}{embObjPOS::getNrOfEncoderArrays}}()\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00351}00351\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00352}00352\ \ \ \ \ \textcolor{comment}{//\ this\ should\ return\ the\ number\ of\ sensors\ we\ wanna\ have\ per\ control\ boards}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00353}00353\ \ \ \ \ \textcolor{comment}{//\ e.g.\ currently\ POS\ service\ can\ manage\ up\ to\ 4\ position\ sensors\ (2\ for\ open/close\ and\ 2\ for\ abduction)}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00354}00354\ \ \ \ \ \textcolor{comment}{//\ so\ we\ are\ returning\ the\ number\ of\ enabled\ sensors,\ i.e.\ 2\ or\ 4,\ depending\ on\ the\ device}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00355}00355\ \ \ \ \ \textcolor{comment}{//\ differently,\ we\ can\ choose\ another\ approach,\ i.e.\ return\ 1,\ as\ the\ encoder\ array\ is\ a\ single\ entity,\ }}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00356}00356\ \ \ \ \ \textcolor{comment}{//\ which\ is\ actually\ the\ control\ board\ associated\ with\ the\ opened\ serivice}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00357}00357\ \ \ \ \ \textcolor{comment}{//\ and\ then\ getEncoderArraySize()\ should\ return\ 2\ or\ 4,\ i.es\ the\ number\ of\ enabled\ sensors}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00358}00358\ \ \ \ \ yCDebug(EMBOBJPOS)\ <<\ m\_PDdevice.\mbox{\hyperlink{classyarp_1_1dev_1_1embObjDevPrivData_aba23cbf850ff8625a402d1c420564882}{getBoardInfo}}()\ <<\ \textcolor{stringliteral}{"{}embObjPOS::getNrOfEncoderArrays\ called\ at\ timestamp="{}}\ <<\ yarp::os::Time::now()\ <<\ \textcolor{stringliteral}{"{}returning"{}}\ <<\ serviceConfig.\mbox{\hyperlink{structservConfigPOS__t_aba3119f589854ed31fc0d14da18f5b1d}{idList}}.size();}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00359}00359\ \ \ \ \ \textcolor{keywordflow}{return}\ serviceConfig.\mbox{\hyperlink{structservConfigPOS__t_aba3119f589854ed31fc0d14da18f5b1d}{idList}}.size();}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00360}00360\ \}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00361}00361\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00362}\mbox{\hyperlink{classyarp_1_1dev_1_1embObjPOS_aca72f11b0f1d34b36888fafb0b4cfa72}{00362}}\ yarp::dev::MAS\_status\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjPOS_aca72f11b0f1d34b36888fafb0b4cfa72}{embObjPOS::getEncoderArrayStatus}}(\textcolor{keywordtype}{size\_t}\ sens\_index)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00363}00363\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00364}00364\ \ \ \ \ \textcolor{keywordflow}{if}\ (sens\_index\ >=\ serviceConfig.\mbox{\hyperlink{structservConfigPOS__t_aba3119f589854ed31fc0d14da18f5b1d}{idList}}.size())\ \textcolor{keywordflow}{return}\ yarp::dev::MAS\_UNKNOWN;}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00365}00365\ \ \ \ \ \textcolor{keywordflow}{return}\ yarp::dev::MAS\_OK;}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00366}00366\ \}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00367}00367\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00368}\mbox{\hyperlink{classyarp_1_1dev_1_1embObjPOS_a1cb61dc09a5b3477934dcaacf029c088}{00368}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjPOS_a1cb61dc09a5b3477934dcaacf029c088}{embObjPOS::getEncoderArrayName}}(\textcolor{keywordtype}{size\_t}\ sens\_index,\ std::string\ \&name)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00369}00369\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00370}00370\ \ \ \ \ \textcolor{keywordflow}{if}\ (sens\_index\ >=\ serviceConfig.\mbox{\hyperlink{structservConfigPOS__t_aba3119f589854ed31fc0d14da18f5b1d}{idList}}.size())\ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00371}00371\ \ \ \ \ name\ =\ serviceConfig.\mbox{\hyperlink{structservConfigPOS__t_aba3119f589854ed31fc0d14da18f5b1d}{idList}}[sens\_index];}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00372}00372\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00373}00373\ \}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00374}00374\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00375}\mbox{\hyperlink{classyarp_1_1dev_1_1embObjPOS_a99f4e409b946cecbfee38964caf76815}{00375}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjPOS_a99f4e409b946cecbfee38964caf76815}{embObjPOS::getEncoderArrayMeasure}}(\textcolor{keywordtype}{size\_t}\ sens\_index,\ yarp::sig::Vector\&\ \mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}},\ \textcolor{keywordtype}{double}\&\ timestamp)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00376}00376\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00377}00377\ \ \ \ \ \textcolor{comment}{//\ we\ cannot\ receice\ an\ index\ higher\ that\ the\ number\ of\ enabled\ sensors}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00378}00378\ \ \ \ \ \textcolor{keywordflow}{if}\ (sens\_index\ >=\ serviceConfig.\mbox{\hyperlink{structservConfigPOS__t_aba3119f589854ed31fc0d14da18f5b1d}{idList}}.size())\ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00379}00379\ \ \ \ \ std::lock\_guard<std::mutex>\ lock(m\_mutex);}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00380}00380\ \ \ \ \ timestamp\ =\ yarp::os::Time::now();}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00381}00381\ \ \ \ \ \textcolor{comment}{//\ we\ need\ to\ remap\ the\ sens\_index,\ which\ is\ the\ index\ in\ idList[],\ to\ the\ corresponding\ index\ in\ m\_data[]\ vector}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00382}00382\ \ \ \ \ uint32\_t\ dataIndex\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00383}00383\ \ \ \ \ helper\_remapperFromSensorToDataIndex(\textcolor{keyword}{static\_cast<}uint32\_t\textcolor{keyword}{>}(sens\_index),\ dataIndex);}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00384}00384\ \ \ \ \ \mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}}.resize(1);}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00385}00385\ \ \ \ \ \mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}}[0]\ =\ m\_data[dataIndex];}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00386}00386\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00387}00387\ \}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00388}00388\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00389}\mbox{\hyperlink{classyarp_1_1dev_1_1embObjPOS_a4de3f93f3558c9aa095bed4e37c72344}{00389}}\ \textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjPOS_a4de3f93f3558c9aa095bed4e37c72344}{embObjPOS::getEncoderArraySize}}(\textcolor{keywordtype}{size\_t}\ sens\_index)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00390}00390\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00391}00391\ \ \ \ \ \textcolor{keywordflow}{if}\ (sens\_index\ >=\ serviceConfig.\mbox{\hyperlink{structservConfigPOS__t_aba3119f589854ed31fc0d14da18f5b1d}{idList}}.size())\ \textcolor{keywordflow}{return}\ 0;}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00392}00392\ \ \ \ \ \textcolor{keywordflow}{return}\ 1;\ \textcolor{comment}{//this\ should\ return\ the\ size\ of\ data\ at\ index\ sens\_index,\ which\ should\ actually\ be\ 1.}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00393}00393\ \}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00394}00394\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00395}\mbox{\hyperlink{classyarp_1_1dev_1_1embObjPOS_a65020fef0b400e686d5b7606f2282c1a}{00395}}\ \mbox{\hyperlink{namespaceeth_a704c2a3588a2da466bf3665f8bd3cbea}{eth::iethresType\_t}}\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjPOS_a65020fef0b400e686d5b7606f2282c1a}{embObjPOS::type}}()}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00396}00396\ \{}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00397}00397\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{namespaceeth_a704c2a3588a2da466bf3665f8bd3cbeaaab2102e5111764f9523ade7ec17efdf3}{eth::iethres\_analogpos}};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00398}00398\ \}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00399}00399\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00400}00400\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00401}\mbox{\hyperlink{classyarp_1_1dev_1_1embObjPOS_a5cf9acd4deb1360f058212b72fe35112}{00401}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjPOS_a5cf9acd4deb1360f058212b72fe35112}{embObjPOS::update}}(eOprotID32\_t\ id32,\ \textcolor{keywordtype}{double}\ timestamp,\ \textcolor{keywordtype}{void}*\ rxdata)}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00402}00402\ \{}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00403}00403\ \ \ \ \ \textcolor{comment}{//\ called\ by\ feat\_manage\_analogsensors\_data()\ which\ is\ called\ by:}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00404}00404\ \ \ \ \ \textcolor{comment}{//\ eoprot\_fun\_UPDT\_as\_pos\_status()}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00405}00405\ \ \ \ \ \textcolor{keywordflow}{if}(!m\_PDdevice.\mbox{\hyperlink{classyarp_1_1dev_1_1embObjDevPrivData_a4d208aca87bb50a59e6dc2cb03916df3}{isOpen}}())}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00406}00406\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00407}00407\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00408}00408\ \ \ \ \ eOas\_pos\_status\_t\ *pos\_st\_ptr\ \ =\ (eOas\_pos\_status\_t*)rxdata;}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00409}00409\ \ \ \ \ uint32\_t\ sizeOfData\ =\ pos\_st\_ptr-\/>arrayofdata.head.size;}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00410}00410\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00411}00411\ \ \ \ \ \textcolor{keywordflow}{if}(sizeOfData>m\_data.size())}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00412}00412\ \ \ \ \ \ \ \ \ yCWarning(EMBOBJPOS)\ <<\ m\_PDdevice.\mbox{\hyperlink{classyarp_1_1dev_1_1embObjDevPrivData_aba23cbf850ff8625a402d1c420564882}{getBoardInfo}}()\ <<\ \textcolor{stringliteral}{"{}In\ update\ function\ I\ received\ more\ data\ than\ I\ had\ been\ configured\ to\ store.My\ size\ is\ "{}}\ <<\ m\_data.size()\ <<\ \textcolor{stringliteral}{"{}while\ I\ received\ "{}}\ <<\ sizeOfData\ <<\ \textcolor{stringliteral}{"{}values!"{}};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00413}00413\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00414}00414\ \ \ \ \ std::lock\_guard<std::mutex>\ lock(m\_mutex);}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00415}00415\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00416}00416\ \ \ \ \ \textcolor{keywordflow}{for}(uint32\_t\ i=0;\ i<sizeOfData;\ i++)}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00417}00417\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00418}00418\ \ \ \ \ \ \ \ \ eOas\_pos\_data\_t\ posdata\ =\ pos\_st\_ptr-\/>arrayofdata.data[i];}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00419}00419\ \ \ \ \ \ \ \ \ \textcolor{comment}{//pos\ value\ is\ in\ deci-\/degree}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00420}00420\ \ \ \ \ \ \ \ \ m\_data[i]=\ posdata.value*0.1;}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00421}00421\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00422}00422\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00423}00423\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00424}00424\ \}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00425}00425\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00426}\mbox{\hyperlink{classyarp_1_1dev_1_1embObjPOS_ac8577529686b52107eb42ce2b755cfe5}{00426}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjPOS_ac8577529686b52107eb42ce2b755cfe5}{embObjPOS::close}}()}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00427}00427\ \{}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00428}00428\ \ \ \ \ cleanup();}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00429}00429\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00430}00430\ \}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00431}00431\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00432}00432\ \textcolor{keywordtype}{void}\ embObjPOS::cleanup(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00433}00433\ \{}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00434}00434\ \ \ \ \ m\_PDdevice.\mbox{\hyperlink{classyarp_1_1dev_1_1embObjDevPrivData_aaaf5fdeb6801830f64a8eae4a8f40d1e}{cleanup}}(\textcolor{keyword}{static\_cast<}\mbox{\hyperlink{classeth_1_1IethResource}{eth::IethResource}}*\textcolor{keyword}{>}\ (\textcolor{keyword}{this}));}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00435}00435\ \}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00436}00436\ }
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00437}00437\ \textcolor{comment}{//\ eof}}
+\DoxyCodeLine{\Hypertarget{embObjPOS_8cpp_source_l00438}00438\ }
+
+\end{DoxyCode}

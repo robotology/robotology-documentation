@@ -1,0 +1,419 @@
+\doxysection{3dm\+\_\+gx3.\+cpp}
+\hypertarget{3dm__gx3_8cpp_source}{}\label{3dm__gx3_8cpp_source}\index{icub-\/main/src/libraries/icubmod/imu3DM\_GX3/3dm\_gx3.cpp@{icub-\/main/src/libraries/icubmod/imu3DM\_GX3/3dm\_gx3.cpp}}
+\mbox{\hyperlink{3dm__gx3_8cpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00001}00001\ \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00002}00002\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2013\ iCub\ Facility,\ Istituto\ Italiano\ di\ Tecnologia}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00003}00003\ \textcolor{comment}{\ *\ Authors:\ Alberto\ Cardellino}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00004}00004\ \textcolor{comment}{\ *\ CopyPolicy:\ Released\ under\ the\ terms\ of\ the\ LGPLv2.1\ or\ later,\ see\ LGPL.TXT}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00005}00005\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00006}00006\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00007}00007\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00008}00008\ \textcolor{preprocessor}{\#include\ <yarp/os/Bottle.h>}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00009}00009\ \textcolor{preprocessor}{\#include\ <yarp/os/Value.h>}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00010}00010\ \textcolor{preprocessor}{\#include\ <iostream>}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00011}00011\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{3dm__gx3_8h}{3dm\_gx3.h}}>}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00012}00012\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00013}00013\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00014}00014\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00015}00015\ \textcolor{preprocessor}{\#include\ <fcntl.h>}\ \ \ \textcolor{comment}{//\ File\ control\ definitions}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00016}00016\ \textcolor{preprocessor}{\#include\ <errno.h>}\ \ \ \textcolor{comment}{//\ Error\ number\ definitions}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00017}00017\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00018}00018\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00019}00019\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceyarp_1_1dev}{yarp::dev}};}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00020}00020\ \textcolor{keyword}{using\ namespace\ }yarp::os;}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00021}00021\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00022}00022\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00023}\mbox{\hyperlink{classyarp_1_1dev_1_1imu3DM__GX3_a17ed7e251fefb318e0ad53a9c7ba8894}{00023}}\ \mbox{\hyperlink{classyarp_1_1dev_1_1imu3DM__GX3_a17ed7e251fefb318e0ad53a9c7ba8894}{imu3DM\_GX3::imu3DM\_GX3}}()\ :\ PeriodicThread(0.006)}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00024}00024\ \{}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00025}00025\ \ \ \ \ \textcolor{comment}{/*\ data\ to\ be\ transfered\ are:}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00026}00026\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ 1\ \ (request\ Euler)\ +}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00027}00027\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ 19\ (answer\ Euler)\ +}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00028}00028\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ 1\ \ (acc,\ request\ gyro,\ magn)\ +}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00029}00029\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ 43\ (answer)\ =\ 64\ bytes}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00030}00030\ \textcolor{comment}{\ \ \ \ \ \ \ serial\ rate\ is\ 115.200\ Kbits/s\ -\/>\ max\ rate\ is\ 181Hz\ -\/\ 5.52ms\ (if\ device\ support\ it...\ check)}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00031}00031\ \textcolor{comment}{\ \ \ \ \ \ \ choose\ 6ms\ as\ period\ to\ let\ device\ have\ a\ breath.}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00032}00032\ \textcolor{comment}{\ \ \ */}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00033}00033\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00034}00034\ \ \ \ \ \textcolor{comment}{//\ does\ nchannels\ has\ to\ be\ a\ parameter?\ I\ don't\ think\ so\ since\ ServerInertial\ has\ this\ fixed\ interface}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00035}00035\ \ \ \ \ nchannels\ =\ 12;}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00036}00036\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00037}00037\ \ \ \ \ \textcolor{comment}{//\ only\ CB\ and\ CE\ are\ used,\ but\ keep\ here\ some\ more\ definition\ in\ case\ of\ future\ use}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00038}00038\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00039}00039\ \ \ \ \ CB\_cmd.\mbox{\hyperlink{structimu__cmd__t_ae9a5b8cf409c91b34ed59b0146f4343b}{cmd}}\ =\ \mbox{\hyperlink{dataTypes_8h_a4d43e8212bdc9dbee866506f04effceaa566b48ace50c8867b3a8be231d4baf7f}{CMD\_ACCEL\_ANGRATE\_MAG}};}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00040}00040\ \ \ \ \ CB\_cmd.\mbox{\hyperlink{structimu__cmd__t_af37943acf61d161ffcc0d092a81c1e1b}{expSize}}\ =\ 43;}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00041}00041\ \ \ \ \ CB\_cmd.\mbox{\hyperlink{structimu__cmd__t_aa8adca8823dfc8cb8cf8b4456f5aa176}{process}}\ =\ \mbox{\hyperlink{dataTypes_8h_a85e0fff1920305835be8fafb9c781af3}{process\_CB}};}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00042}00042\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00043}00043\ \ \ \ \ CE\_cmd.\mbox{\hyperlink{structimu__cmd__t_ae9a5b8cf409c91b34ed59b0146f4343b}{cmd}}\ =\ \mbox{\hyperlink{dataTypes_8h_a4d43e8212bdc9dbee866506f04effceaa382d4c150a8647cfb30bc0153099b5aa}{CMD\_EULER}};}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00044}00044\ \ \ \ \ CE\_cmd.\mbox{\hyperlink{structimu__cmd__t_af37943acf61d161ffcc0d092a81c1e1b}{expSize}}\ =\ 19;}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00045}00045\ \ \ \ \ CE\_cmd.\mbox{\hyperlink{structimu__cmd__t_aa8adca8823dfc8cb8cf8b4456f5aa176}{process}}\ =\ \mbox{\hyperlink{dataTypes_8h_a544852d367a71e8d96dbaf45ba6749e5}{process\_CE}};}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00046}00046\ \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00047}00047\ \textcolor{comment}{\ \ \ \ C2\_cmd.cmd\ =\ CMD\_ACCEL\_ANGRATE;}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00048}00048\ \textcolor{comment}{\ \ \ \ C2\_cmd.expSize\ =\ 31;}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00049}00049\ \textcolor{comment}{\ \ \ \ C2\_cmd.process\ =\ process\_C2;}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00050}00050\ \textcolor{comment}{}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00051}00051\ \textcolor{comment}{\ \ \ \ C8\_cmd.cmd\ =\ CMD\_ACCEL\_ANGRATE\_ORIENT;}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00052}00052\ \textcolor{comment}{\ \ \ \ C8\_cmd.expSize\ =\ 67;}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00053}00053\ \textcolor{comment}{\ \ \ \ C8\_cmd.process\ =\ process\_C8;}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00054}00054\ \textcolor{comment}{}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00055}00055\ \textcolor{comment}{\ \ \ \ CC\_cmd.cmd\ =\ CMD\_ACCEL\_ANGRATE\_MAG\_ORIENT;}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00056}00056\ \textcolor{comment}{\ \ \ \ CC\_cmd.expSize\ =\ 79;}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00057}00057\ \textcolor{comment}{\ \ \ \ CC\_cmd.process\ =\ process\_CC;}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00058}00058\ \textcolor{comment}{*/}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00059}00059\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00060}00060\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00061}00061\ \ \ \ \ \textcolor{comment}{//\ if\ no\ continuous\_mode\ is\ set\ ...\ imu\ worker\ thread\ cycle\ over\ these\ ....}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00062}00062\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00063}00063\ \ \ \ \ cmd\_ptr\_map[\mbox{\hyperlink{dataTypes_8h_a4d43e8212bdc9dbee866506f04effceaa566b48ace50c8867b3a8be231d4baf7f}{CMD\_ACCEL\_ANGRATE\_MAG}}]\ \ \ \ \ \ \ \ \ \ \ \ =\ \&CB\_cmd;}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00064}00064\ \ \ \ \ cmd\_ptr\_map[\mbox{\hyperlink{dataTypes_8h_a4d43e8212bdc9dbee866506f04effceaa382d4c150a8647cfb30bc0153099b5aa}{CMD\_EULER}}]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \&CE\_cmd;}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00065}00065\ \};}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00066}00066\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00067}\mbox{\hyperlink{classyarp_1_1dev_1_1imu3DM__GX3_a469a475fa68192342423106048120901}{00067}}\ \mbox{\hyperlink{classyarp_1_1dev_1_1imu3DM__GX3_a469a475fa68192342423106048120901}{imu3DM\_GX3::\string~imu3DM\_GX3}}()}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00068}00068\ \{}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00069}00069\ \ \ \ \ \mbox{\hyperlink{classyarp_1_1dev_1_1imu3DM__GX3_a98bdc887c6500d7b88b4abd76239e67a}{close}}();}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00070}00070\ \};}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00071}00071\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00072}00072\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00073}00073\ \textcolor{comment}{//\ IGenericSensor\ interface.}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00074}\mbox{\hyperlink{classyarp_1_1dev_1_1imu3DM__GX3_ac951796aed78e18d382c392735cb71da}{00074}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classyarp_1_1dev_1_1imu3DM__GX3_ac951796aed78e18d382c392735cb71da}{imu3DM\_GX3::open}}(yarp::os::Searchable\ \&config)}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00075}00075\ \{}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00076}00076\ \ \ \ \ \textcolor{keywordtype}{bool}\ ret\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00077}00077\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00078}00078\ \ \ \ \ Value\ *baudrate,\ *serial;}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00079}00079\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00080}00080\ \ \ \ \ \textcolor{keywordflow}{if}(!config.check(\textcolor{stringliteral}{"{}serial"{}},\ serial))}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00081}00081\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00082}00082\ \ \ \ \ \ \ \ \ std::cout\ <<\ \textcolor{stringliteral}{"{}Can't\ find\ 'serial'\ name\ in\ config\ file"{}};}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00083}00083\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00084}00084\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00085}00085\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00086}00086\ \ \ \ \ comPortName\ =\ serial-\/>toString();}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00087}00087\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00088}00088\ \ \ \ \ \textcolor{keywordtype}{int}\ errNum\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00089}00089\ \ \ \ \ \textcolor{comment}{/*\ open\ serial\ */}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00090}00090\ \ \ \ \ printf(\textcolor{stringliteral}{"{}\(\backslash\)n\(\backslash\)nSerial\ opening\ \%s\(\backslash\)n\(\backslash\)n\(\backslash\)n"{}},\ comPortName.c\_str());}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00091}00091\ \ \ \ \ fd\_ser\ =\ \mbox{\hyperlink{classyarp_1_1dev_1_1imu3DM__GX3_ac951796aed78e18d382c392735cb71da}{::open}}(comPortName.c\_str(),\ O\_RDWR\ |\ O\_NOCTTY\ );}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00092}00092\ \ \ \ \ \textcolor{keywordflow}{if}\ (fd\_ser\ <\ 0)\ \{}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00093}00093\ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}can't\ open\ \%s,\ \%s\(\backslash\)n"{}},\ comPortName.c\_str(),\ strerror(errno));}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00094}00094\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00095}00095\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00096}00096\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00097}00097\ \ \ \ \ \textcolor{comment}{//Get\ the\ current\ options\ for\ the\ port...}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00098}00098\ \ \ \ \ \textcolor{keyword}{struct\ }termios\ options;}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00099}00099\ \ \ \ \ tcgetattr(fd\_ser,\ \&options);}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00100}00100\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00101}00101\ \ \ \ \ \textcolor{comment}{//set\ the\ baud\ rate\ to\ 115200}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00102}00102\ \ \ \ \ \textcolor{keywordtype}{int}\ baudRate\ =\ B115200;}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00103}00103\ \ \ \ \ cfsetospeed(\&options,\ baudRate);}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00104}00104\ \ \ \ \ cfsetispeed(\&options,\ baudRate);}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00105}00105\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00106}00106\ \ \ \ \ \textcolor{comment}{//set\ the\ number\ of\ data\ bits.}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00107}00107\ \ \ \ \ options.c\_cflag\ \&=\ \string~CSIZE;\ \ \textcolor{comment}{//\ Mask\ the\ character\ size\ bits}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00108}00108\ \ \ \ \ options.c\_cflag\ |=\ CS8;}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00109}00109\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00110}00110\ \ \ \ \ \textcolor{comment}{//set\ the\ number\ of\ stop\ bits\ to\ 1}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00111}00111\ \ \ \ \ options.c\_cflag\ \&=\ \string~CSTOPB;}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00112}00112\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00113}00113\ \ \ \ \ \textcolor{comment}{//Set\ parity\ to\ None}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00114}00114\ \ \ \ \ options.c\_cflag\ \&=\string~PARENB;}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00115}00115\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00116}00116\ \ \ \ \ \textcolor{comment}{//set\ for\ non-\/canonical\ (raw\ processing,\ no\ echo,\ etc.)}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00117}00117\ \ \ \ \ options.c\_iflag\ =\ IGNPAR;\ \textcolor{comment}{//\ ignore\ parity\ check\ close\_port(int}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00118}00118\ \ \ \ \ options.c\_oflag\ =\ 0;\ \textcolor{comment}{//\ raw\ output}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00119}00119\ \ \ \ \ options.c\_lflag\ =\ 0;\ \textcolor{comment}{//\ raw\ input}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00120}00120\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00121}00121\ \ \ \ \ \textcolor{comment}{//Time-\/Outs\ -\/-\/\ won't\ work\ with\ NDELAY\ option\ in\ the\ call\ to\ open}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00122}00122\ \ \ \ \ options.c\_cc[VMIN]\ \ =\ 0;\ \ \ \textcolor{comment}{//\ block\ reading\ until\ RX\ x\ characers.\ If\ x\ =\ 0,\ it\ is\ non-\/blocking.}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00123}00123\ \ \ \ \ options.c\_cc[VTIME]\ =\ 100;\ \ \ \textcolor{comment}{//\ Inter-\/Character\ Timer\ -\/-\/\ i.e.\ timeout=\ x*.1\ s}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00124}00124\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00125}00125\ \ \ \ \ \textcolor{comment}{//Set\ local\ mode\ and\ enable\ the\ receiver}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00126}00126\ \ \ \ \ options.c\_cflag\ |=\ (CLOCAL\ |\ CREAD);}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00127}00127\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00128}00128\ \ \ \ \ tcflush(fd\_ser,TCIOFLUSH);}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00129}00129\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00130}00130\ \ \ \ \ \textcolor{comment}{//Set\ the\ new\ options\ for\ the\ port...}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00131}00131\ \ \ \ \ \textcolor{keywordflow}{if}\ (\ tcsetattr(fd\_ser,\ TCSANOW,\ \&options)\ !=\ 0)}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00132}00132\ \ \ \ \ \{\ \textcolor{comment}{//For\ error\ message}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00133}00133\ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}Configuring\ comport\ failed\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00134}00134\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00135}00135\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00136}00136\ \ \ \ \ this-\/>start();}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00137}00137\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00138}00138\ \}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00139}00139\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00140}00140\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00141}\mbox{\hyperlink{classyarp_1_1dev_1_1imu3DM__GX3_a57807dcb2afc4c0c0730e1e8aac64695}{00141}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classyarp_1_1dev_1_1imu3DM__GX3_a57807dcb2afc4c0c0730e1e8aac64695}{imu3DM\_GX3::sample\_setting}}(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00142}00142\ \{}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00143}00143\ \ \ \ \ \textcolor{keywordtype}{int}\ nbytes;}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00144}00144\ \ \ \ \ uint8\_t\ reply[20];}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00145}00145\ \ \ \ \ uint8\_t\ buff[20]\ =}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00146}00146\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00147}00147\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{dataTypes_8h_a4d43e8212bdc9dbee866506f04effceaad65dacdcf38397491e5cf4d8d3727698}{CMD\_SAMPLING\_SETTING}},}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00148}00148\ \ \ \ \ \ \ \ \ 0xA8,\ 0xB9,\ \textcolor{comment}{//\ confirm\ user\ intent}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00149}00149\ \ \ \ \ \ \ \ \ 0,\ 0,\ 0,\ 0,\ 0,\ 0,\ 0,\ 0,\ 0,\ 0,\ 0,\ 0,\ 0,\ 0,\ 0,\ 0,\ 0}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00150}00150\ \ \ \ \ \};}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00151}00151\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00152}00152\ \ \ \ \ nbytes\ =\ ::write(fd\_ser,\ (\textcolor{keywordtype}{void}*)buff,\ 20);}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00153}00153\ \ \ \ \ nbytes\ =\ \mbox{\hyperlink{classyarp_1_1dev_1_1imu3DM__GX3_adeff1deca9e9ec7123931db85ad13290}{::read}}(fd\_ser,\ (\textcolor{keywordtype}{void}*)reply,\ 19);}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00154}00154\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00155}00155\ \ \ \ \ memcpy(buff+4,\ reply+1,\ 10);}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00156}00156\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00157}00157\ \ \ \ \ \textcolor{comment}{//\ Function\ selector\ :\ change\ parameter\ but\ do\ not\ send\ a\ treply}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00158}00158\ \ \ \ \ buff[3]\ \ =\ 3;}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00159}00159\ \ \ \ \ \textcolor{comment}{//\ Data\ conditioning\ function\ selector\ byte\ 7-\/8\ :\ bit\ 12\ enable\ quaternion\ ...\ remember\ big\ endian}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00160}00160\ \ \ \ \ buff[6]\ |=\ 16;}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00161}00161\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00162}00162\ \ \ \ \ \textcolor{comment}{//printHex(buff,\ 20);}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00163}00163\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00164}00164\ \ \ \ \ nbytes\ =\ write(fd\_ser,\ (\textcolor{keywordtype}{void}*)buff,\ 20);}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00165}00165\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00166}00166\ \ \ \ \ usleep(100000);}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00167}00167\ \}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00168}00168\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00169}00169\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00170}\mbox{\hyperlink{classyarp_1_1dev_1_1imu3DM__GX3_a98bdc887c6500d7b88b4abd76239e67a}{00170}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classyarp_1_1dev_1_1imu3DM__GX3_a98bdc887c6500d7b88b4abd76239e67a}{imu3DM\_GX3::close}}()}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00171}00171\ \{}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00172}00172\ \ \ \ \ this-\/>stop();}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00173}00173\ \ \ \ \ \textcolor{keywordflow}{if}(fd\_ser\ !=\ 0)}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00174}00174\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classyarp_1_1dev_1_1imu3DM__GX3_a98bdc887c6500d7b88b4abd76239e67a}{::close}}(fd\_ser);}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00175}00175\ \ \ \ \ fd\_ser\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00176}00176\ \ \ \ \ printf(\textcolor{stringliteral}{"{}Closed\ \%s\(\backslash\)n"{}},\ comPortName.c\_str());}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00177}00177\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00178}00178\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00179}00179\ \}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00180}00180\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00181}00181\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00182}\mbox{\hyperlink{classyarp_1_1dev_1_1imu3DM__GX3_a4892472ecfb5dc3be86bcb281d52f5a4}{00182}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classyarp_1_1dev_1_1imu3DM__GX3_a4892472ecfb5dc3be86bcb281d52f5a4}{imu3DM\_GX3::getChannels}}(\textcolor{keywordtype}{int}\ *nc)}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00183}00183\ \{}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00184}00184\ \ \ \ \ *nc\ =\ nchannels;}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00185}00185\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00186}00186\ \}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00187}00187\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00188}00188\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00189}\mbox{\hyperlink{classyarp_1_1dev_1_1imu3DM__GX3_a01c564fd3b21e301bdadc4d8acdbdd77}{00189}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classyarp_1_1dev_1_1imu3DM__GX3_a01c564fd3b21e301bdadc4d8acdbdd77}{imu3DM\_GX3::calibrate}}(\textcolor{keywordtype}{int}\ ch,\ \textcolor{keywordtype}{double}\ v)}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00190}00190\ \{}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00191}00191\ \ \ \ \ \textcolor{comment}{//\ Send\ command\ to\ zero\ gyro\ bias??\ Be\ careful\ it\ must\ be\ used\ only\ if\ the\ device\ is\ absolutely\ stationary!!}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00192}00192\ \ \ \ \ printf(\textcolor{stringliteral}{"{}Not\ implemented\ yet\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00193}00193\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00194}00194\ \}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00195}00195\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00196}00196\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00197}\mbox{\hyperlink{classyarp_1_1dev_1_1imu3DM__GX3_adeff1deca9e9ec7123931db85ad13290}{00197}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classyarp_1_1dev_1_1imu3DM__GX3_adeff1deca9e9ec7123931db85ad13290}{imu3DM\_GX3::read}}(yarp::sig::Vector\ \&\mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}})}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00198}00198\ \{}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00199}00199\ \ \ \ \ \textcolor{keywordtype}{float}\ tmp\_eul[3];}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00200}00200\ \ \ \ \ \textcolor{keywordtype}{float}\ tmp\_acc[3];}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00201}00201\ \ \ \ \ \textcolor{keywordtype}{float}\ tmp\_gyro[3];}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00202}00202\ \ \ \ \ \textcolor{keywordtype}{float}\ tmp\_mag[3];}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00203}00203\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00204}00204\ \ \ \ \ uint64\_t\ imu\_timeStamp;}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00205}00205\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00206}00206\ \ \ \ \ get\_Euler(tmp\_eul,\ \&imu\_timeStamp);}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00207}00207\ \ \ \ \ get\_Acc\_Ang\_Mag(tmp\_acc,\ tmp\_gyro,\ tmp\_mag,\ \&imu\_timeStamp);}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00208}00208\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00209}00209\ \ \ \ \ \textcolor{keywordtype}{int}\ out\_idx\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00210}00210\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i=0;\ i<3;\ i++,\ out\_idx++)}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00211}00211\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}}[out\_idx]\ =\ (\textcolor{keywordtype}{double})\ tmp\_eul[i];}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00212}00212\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00213}00213\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i=0;\ i<3;\ i++,\ out\_idx++)}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00214}00214\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}}[out\_idx]\ =\ (\textcolor{keywordtype}{double})\ tmp\_acc[i];}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00215}00215\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00216}00216\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i=0;\ i<3;\ i++,\ out\_idx++)}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00217}00217\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}}[out\_idx]\ =\ (\textcolor{keywordtype}{double})\ tmp\_gyro[i];}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00218}00218\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00219}00219\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i=0;\ i<3;\ i++,\ out\_idx++)}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00220}00220\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}}[out\_idx]\ =\ (\textcolor{keywordtype}{double})\ tmp\_mag[i];}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00221}00221\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00222}00222\ \ \ \ \ lastStamp.update();}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00223}00223\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00224}00224\ \}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00225}00225\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00226}\mbox{\hyperlink{classyarp_1_1dev_1_1imu3DM__GX3_a84c7be4211bb3588c5b741d46c8429dd}{00226}}\ yarp::os::Stamp\ \mbox{\hyperlink{classyarp_1_1dev_1_1imu3DM__GX3_a84c7be4211bb3588c5b741d46c8429dd}{imu3DM\_GX3::getLastInputStamp}}()}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00227}00227\ \{}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00228}00228\ \ \ \ \ \textcolor{keywordflow}{return}\ lastStamp;}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00229}00229\ \}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00230}00230\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00232}00232\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Thread\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ //}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00234}00234\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00235}00235\ \textcolor{keywordtype}{bool}\ imu3DM\_GX3::threadInit()}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00236}00236\ \{}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00237}00237\ \ \ \ \ \textcolor{comment}{//\ if\ board\ was\ configured\ to\ automatically\ send\ data\ on\ wakeup,\ this\ will\ make\ it\ silent}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00238}00238\ \ \ \ \ stop\_continuous();}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00239}00239\ \ \ \ \ \mbox{\hyperlink{classyarp_1_1dev_1_1imu3DM__GX3_a57807dcb2afc4c0c0730e1e8aac64695}{sample\_setting}}();}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00240}00240\ \ \ \ \ printf(\textcolor{stringliteral}{"{}Started\ imu-\/3DM-\/GX3-\/25\ thread\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00241}00241\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00242}00242\ \}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00243}00243\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00244}00244\ \textcolor{keywordtype}{void}\ imu3DM\_GX3::run()}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00245}00245\ \{}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00246}00246\ \ \ \ \ \textcolor{keywordtype}{int}\ nbytes;}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00247}00247\ \ \ \ \ \textcolor{keyword}{static}\ \mbox{\hyperlink{uniondata__3DM__GX3__t}{data\_3DM\_GX3\_t}}\ \ \ th\_data;}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00248}00248\ \ \ \ \ \mbox{\hyperlink{structimu__cmd__t}{imu\_cmd\_t}}\ *\ tmp\_cmd\ =\ NULL;}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00249}00249\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00250}00250\ \ \ \ \ \textcolor{comment}{//\ ask\ data\ to\ device\ in\ polling,\ cycling\ within\ the\ map}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00251}00251\ \ \ \ \ cmd\_map\_t::iterator\ it\ =\ cmd\_ptr\_map.begin();}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00252}00252\ \ \ \ \ \textcolor{keywordflow}{while}(it\ !=\ cmd\_ptr\_map.end())}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00253}00253\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00254}00254\ \ \ \ \ \ \ \ \ tmp\_cmd\ =\ it-\/>second;}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00255}00255\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ transmit\ command}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00256}00256\ \ \ \ \ \ \ \ \ nbytes\ =\ ::write(fd\_ser,\ (\textcolor{keywordtype}{void}*)\&tmp\_cmd-\/>\mbox{\hyperlink{structimu__cmd__t_ae9a5b8cf409c91b34ed59b0146f4343b}{cmd}},\ \textcolor{keyword}{sizeof}(uint8\_t));}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00257}00257\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00258}00258\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ receive\ response}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00259}00259\ \ \ \ \ \ \ \ \ nbytes\ =\ \mbox{\hyperlink{classyarp_1_1dev_1_1imu3DM__GX3_adeff1deca9e9ec7123931db85ad13290}{::read}}(fd\_ser,\ (\textcolor{keywordtype}{void}*)\&th\_data.\mbox{\hyperlink{uniondata__3DM__GX3__t_ad937cf4a35936e98c64c37df71b7d38e}{buffer}},\ (\textcolor{keywordtype}{size\_t})tmp\_cmd-\/>\mbox{\hyperlink{structimu__cmd__t_af37943acf61d161ffcc0d092a81c1e1b}{expSize}});}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00260}00260\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00261}00261\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\ nbytes\ <\ 0\ )}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00262}00262\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00263}00263\ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}Error\ while\ reading\ imu\ response\ to\ command\ XXX\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00264}00264\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ skip\ parsing\ and\ try\ with\ the\ next\ command}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00265}00265\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00266}00266\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (\ nbytes\ !=\ tmp\_cmd-\/>\mbox{\hyperlink{structimu__cmd__t_af37943acf61d161ffcc0d092a81c1e1b}{expSize}}\ )}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00267}00267\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00268}00268\ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}read\ \%d\ instead\ of\ \%d\(\backslash\)n"{}},\ nbytes,\ tmp\_cmd-\/>\mbox{\hyperlink{structimu__cmd__t_af37943acf61d161ffcc0d092a81c1e1b}{expSize}});}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00269}00269\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ skip\ parsing\ and\ try\ with\ the\ next\ command}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00270}00270\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00271}00271\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00272}00272\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00273}00273\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ process\ data\ ...\ at\ least\ swap\ bytes\ !!!}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00274}00274\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\ tmp\_cmd-\/>\mbox{\hyperlink{structimu__cmd__t_aa8adca8823dfc8cb8cf8b4456f5aa176}{process}}\ )\ \{}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00275}00275\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ compute\ checksum\ and\ swap\ bytes}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00276}00276\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\ !\ (\textcolor{keywordtype}{bool})tmp\_cmd-\/>\mbox{\hyperlink{structimu__cmd__t_aa8adca8823dfc8cb8cf8b4456f5aa176}{process}}(th\_data)\ )}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00277}00277\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00278}00278\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}Checksum\ FAILURE\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00279}00279\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue};}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00280}00280\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00281}00281\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00282}00282\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00283}00283\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ copy\ for\ consumer\ ....}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00284}00284\ \ \ \ \ \ \ \ \ \ \ \ \ lock\_guard<mutex>\ lck(data\_mutex);}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00285}00285\ \ \ \ \ \ \ \ \ \ \ \ \ memcpy((\textcolor{keywordtype}{void}*)\&tmp\_cmd-\/>\mbox{\hyperlink{structimu__cmd__t_a87b5729c2d0d246e0cd2e6680286caf7}{data}}.\mbox{\hyperlink{uniondata__3DM__GX3__t_ad937cf4a35936e98c64c37df71b7d38e}{buffer}},\ \&th\_data.\mbox{\hyperlink{uniondata__3DM__GX3__t_ad937cf4a35936e98c64c37df71b7d38e}{buffer}},\ tmp\_cmd-\/>\mbox{\hyperlink{structimu__cmd__t_af37943acf61d161ffcc0d092a81c1e1b}{expSize}});}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00286}00286\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00287}00287\ \ \ \ \ \ \ \ \ it++;}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00288}00288\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00289}00289\ \}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00290}00290\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00291}00291\ \textcolor{keywordtype}{void}\ imu3DM\_GX3::threadRelease()}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00292}00292\ \{}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00293}00293\ \ \ \ \ stop\_continuous();}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00294}00294\ \}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00295}00295\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00297}00297\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Device\ specific\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ //}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00299}00299\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00300}00300\ \textcolor{keywordtype}{void}\ imu3DM\_GX3::stop\_continuous(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00301}00301\ \{}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00302}00302\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00303}00303\ \ \ \ \ \textcolor{keywordtype}{int}\ nbytes;}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00304}00304\ \ \ \ \ \textcolor{keyword}{const}\ uint8\_t\ buff[]\ =\ \{}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00305}00305\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{dataTypes_8h_a4d43e8212bdc9dbee866506f04effceaaf63cf7b62a7113590de70eb58531b1a4}{CMD\_STOP\_CONTINUOUS}},}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00306}00306\ \ \ \ \ \ \ \ \ 0x75,\ 0xB4\ \textcolor{comment}{//\ confirms\ user\ intent}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00307}00307\ \ \ \ \ \};}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00308}00308\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00309}00309\ \ \ \ \ nbytes\ =\ \mbox{\hyperlink{namespacestrain_1_1regulation_a66bdbf1c2aeb26b5d2fa61419b2576a2}{write}}(fd\_ser,\ (\textcolor{keywordtype}{void}*)buff,\ \textcolor{keyword}{sizeof}(buff));}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00310}00310\ \ \ \ \ \textcolor{comment}{//\ !!!\ need\ to\ clean\ serial\ buffer\ ...}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00311}00311\ \ \ \ \ sleep(1);}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00312}00312\ \ \ \ \ flush();}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00313}00313\ \}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00314}00314\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00315}00315\ \textcolor{keywordtype}{void}\ imu3DM\_GX3::get\_Acc\_Ang(\textcolor{keywordtype}{float}\ \mbox{\hyperlink{dataTypes_8h_ae0191316140fce1e08c6f21b0a2dbf0a}{acc}}[3],\ \textcolor{keywordtype}{float}\ \mbox{\hyperlink{dataTypes_8h_acaf5d6afeb0da7fbb66c7823523f5439}{angRate}}[3],\ uint64\_t\ *\mbox{\hyperlink{sine_8m_adf373d0d082773c69f688bdb3a56d6aa}{time}})\ \{}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00316}00316\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00317}00317\ \ \ \ \ \mbox{\hyperlink{struct__C2__}{acc\_angRate\_t}}\ *\ aa;}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00318}00318\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00319}00319\ \ \ \ \ lock\_guard<mutex>\ lck(data\_mutex);}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00320}00320\ \ \ \ \ aa\ =\ \&C2\_cmd.\mbox{\hyperlink{structimu__cmd__t_a87b5729c2d0d246e0cd2e6680286caf7}{data}}.\mbox{\hyperlink{uniondata__3DM__GX3__t_a78ca46bd7e4349b96c4a5ea8a1dd0a7f}{aa}};}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00321}00321\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{dataTypes_8h_ae0191316140fce1e08c6f21b0a2dbf0a}{acc}})\ \{}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00322}00322\ \ \ \ \ \ \ \ \ memcpy((\textcolor{keywordtype}{void}*)\mbox{\hyperlink{dataTypes_8h_ae0191316140fce1e08c6f21b0a2dbf0a}{acc}},\ aa-\/>\mbox{\hyperlink{struct__C2___a9eebefe4b0562a5b116834bfc7ccfc8e}{acc}}.\mbox{\hyperlink{union__3f__vect__t_a77d17b3260a2fc7513127b847b5a0822}{\_bytes}},\ \textcolor{keyword}{sizeof}(\textcolor{keywordtype}{float})*3);}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00323}00323\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00324}00324\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{dataTypes_8h_acaf5d6afeb0da7fbb66c7823523f5439}{angRate}})\ \{}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00325}00325\ \ \ \ \ \ \ \ \ memcpy((\textcolor{keywordtype}{void}*)\mbox{\hyperlink{dataTypes_8h_acaf5d6afeb0da7fbb66c7823523f5439}{angRate}},\ aa-\/>\mbox{\hyperlink{struct__C2___aa1e39b4a67c4a10af9146270714454a4}{angRate}}.\mbox{\hyperlink{union__3f__vect__t_a77d17b3260a2fc7513127b847b5a0822}{\_bytes}},\ \textcolor{keyword}{sizeof}(\textcolor{keywordtype}{float})*3);}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00326}00326\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00327}00327\ \}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00328}00328\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00329}00329\ \textcolor{keywordtype}{void}\ imu3DM\_GX3::get\_Acc\_Ang\_Orient(\textcolor{keywordtype}{float}\ \mbox{\hyperlink{dataTypes_8h_ae0191316140fce1e08c6f21b0a2dbf0a}{acc}}[3],\ \textcolor{keywordtype}{float}\ \mbox{\hyperlink{dataTypes_8h_acaf5d6afeb0da7fbb66c7823523f5439}{angRate}}[3],\ \textcolor{keywordtype}{float}\ \mbox{\hyperlink{dataTypes_8h_a9064814beba6c8c2cc8b4d9c6f3c32ae}{orientMat}}[9],\ uint64\_t\ *\mbox{\hyperlink{sine_8m_adf373d0d082773c69f688bdb3a56d6aa}{time}})\ \{}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00330}00330\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00331}00331\ \ \ \ \ \mbox{\hyperlink{struct__C8__}{acc\_ang\_orient\_t}}\ *\ aaom;}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00332}00332\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00333}00333\ \ \ \ \ lock\_guard<mutex>\ lck(data\_mutex);}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00334}00334\ \ \ \ \ aaom\ =\ \&C8\_cmd.\mbox{\hyperlink{structimu__cmd__t_a87b5729c2d0d246e0cd2e6680286caf7}{data}}.\mbox{\hyperlink{uniondata__3DM__GX3__t_aba4007bc7ae8efeb9a3d804c60ef3042}{aaom}};}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00335}00335\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{dataTypes_8h_ae0191316140fce1e08c6f21b0a2dbf0a}{acc}})\ \{}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00336}00336\ \ \ \ \ \ \ \ \ memcpy((\textcolor{keywordtype}{void}*)\mbox{\hyperlink{dataTypes_8h_ae0191316140fce1e08c6f21b0a2dbf0a}{acc}},\ aaom-\/>\mbox{\hyperlink{struct__C8___a1709c4bade7db658614d19601e10b981}{acc}}.\mbox{\hyperlink{union__3f__vect__t_a77d17b3260a2fc7513127b847b5a0822}{\_bytes}},\ \textcolor{keyword}{sizeof}(\textcolor{keywordtype}{float})*3);}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00337}00337\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00338}00338\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{dataTypes_8h_acaf5d6afeb0da7fbb66c7823523f5439}{angRate}})\ \{}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00339}00339\ \ \ \ \ \ \ \ \ memcpy((\textcolor{keywordtype}{void}*)\mbox{\hyperlink{dataTypes_8h_acaf5d6afeb0da7fbb66c7823523f5439}{angRate}},\ aaom-\/>\mbox{\hyperlink{struct__C8___aeaeb40c4bf9198bef30867f1c1873ddd}{angRate}}.\mbox{\hyperlink{union__3f__vect__t_a77d17b3260a2fc7513127b847b5a0822}{\_bytes}},\ \textcolor{keyword}{sizeof}(\textcolor{keywordtype}{float})*3);}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00340}00340\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00341}00341\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{dataTypes_8h_a9064814beba6c8c2cc8b4d9c6f3c32ae}{orientMat}})\ \{}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00342}00342\ \ \ \ \ \ \ \ \ memcpy((\textcolor{keywordtype}{void}*)\mbox{\hyperlink{dataTypes_8h_a9064814beba6c8c2cc8b4d9c6f3c32ae}{orientMat}},\ aaom-\/>\mbox{\hyperlink{struct__C8___a00780b4a71fa1c5c3edd128c7abc457b}{orientMat}}.\mbox{\hyperlink{union__3f__matx__t_ad206940c0425963221932d09adcf0f4b}{\_bytes}},\ \textcolor{keyword}{sizeof}(\textcolor{keywordtype}{float})*9);}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00343}00343\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00344}00344\ \}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00345}00345\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00346}00346\ \textcolor{keywordtype}{void}\ imu3DM\_GX3::get\_Acc\_Ang\_Mag(\textcolor{keywordtype}{float}\ \mbox{\hyperlink{dataTypes_8h_ae0191316140fce1e08c6f21b0a2dbf0a}{acc}}[3],\ \textcolor{keywordtype}{float}\ \mbox{\hyperlink{dataTypes_8h_acaf5d6afeb0da7fbb66c7823523f5439}{angRate}}[3],\ \textcolor{keywordtype}{float}\ \mbox{\hyperlink{dataTypes_8h_a1cb5e8b80a48dd41efd24945e7216a88}{mag}}[3],\ uint64\_t\ *\mbox{\hyperlink{sine_8m_adf373d0d082773c69f688bdb3a56d6aa}{time}})\ \{}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00347}00347\ \ \ \ \ \mbox{\hyperlink{struct__CB__}{acc\_ang\_mag\_t}}\ *\ aam;}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00348}00348\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00349}00349\ \ \ \ \ lock\_guard<mutex>\ lck(data\_mutex);}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00350}00350\ \ \ \ \ aam\ =\ \&CB\_cmd.\mbox{\hyperlink{structimu__cmd__t_a87b5729c2d0d246e0cd2e6680286caf7}{data}}.\mbox{\hyperlink{uniondata__3DM__GX3__t_aec962ad42052116d4cd39220e575f192}{aam}};}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00351}00351\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{dataTypes_8h_ae0191316140fce1e08c6f21b0a2dbf0a}{acc}})\ \{}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00352}00352\ \ \ \ \ \ \ \ \ memcpy((\textcolor{keywordtype}{void}*)\mbox{\hyperlink{dataTypes_8h_ae0191316140fce1e08c6f21b0a2dbf0a}{acc}},\ aam-\/>\mbox{\hyperlink{struct__CB___ab0d9364ec68d54b2b78eecba8c48adc7}{acc}}.\mbox{\hyperlink{union__3f__vect__t_a77d17b3260a2fc7513127b847b5a0822}{\_bytes}},\ \textcolor{keyword}{sizeof}(\textcolor{keywordtype}{float})*3);}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00353}00353\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00354}00354\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{dataTypes_8h_acaf5d6afeb0da7fbb66c7823523f5439}{angRate}})\ \{}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00355}00355\ \ \ \ \ \ \ \ \ memcpy((\textcolor{keywordtype}{void}*)\mbox{\hyperlink{dataTypes_8h_acaf5d6afeb0da7fbb66c7823523f5439}{angRate}},\ aam-\/>\mbox{\hyperlink{struct__CB___aa3b62b2a791e581c9f93140e5755f6e4}{angRate}}.\mbox{\hyperlink{union__3f__vect__t_a77d17b3260a2fc7513127b847b5a0822}{\_bytes}},\ \textcolor{keyword}{sizeof}(\textcolor{keywordtype}{float})*3);}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00356}00356\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00357}00357\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{dataTypes_8h_a1cb5e8b80a48dd41efd24945e7216a88}{mag}})\ \{}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00358}00358\ \ \ \ \ \ \ \ \ memcpy((\textcolor{keywordtype}{void}*)\mbox{\hyperlink{dataTypes_8h_a1cb5e8b80a48dd41efd24945e7216a88}{mag}},\ aam-\/>\mbox{\hyperlink{struct__CB___a4efaf69ea74d6c4e4b7d43298ac20627}{mag}}.\mbox{\hyperlink{union__3f__vect__t_a77d17b3260a2fc7513127b847b5a0822}{\_bytes}},\ \textcolor{keyword}{sizeof}(\textcolor{keywordtype}{float})*3);}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00359}00359\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00360}00360\ \}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00361}00361\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00362}00362\ \textcolor{keywordtype}{void}\ imu3DM\_GX3::get\_Acc\_Ang\_Mag\_Orient(\textcolor{keywordtype}{float}\ \mbox{\hyperlink{dataTypes_8h_ae0191316140fce1e08c6f21b0a2dbf0a}{acc}}[3],\ \textcolor{keywordtype}{float}\ \mbox{\hyperlink{dataTypes_8h_acaf5d6afeb0da7fbb66c7823523f5439}{angRate}}[3],\ \textcolor{keywordtype}{float}\ \mbox{\hyperlink{dataTypes_8h_a1cb5e8b80a48dd41efd24945e7216a88}{mag}}[3],\ \textcolor{keywordtype}{float}\ \mbox{\hyperlink{dataTypes_8h_a9064814beba6c8c2cc8b4d9c6f3c32ae}{orientMat}}[9],\ uint64\_t\ *\mbox{\hyperlink{sine_8m_adf373d0d082773c69f688bdb3a56d6aa}{time}})\ \{}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00363}00363\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00364}00364\ \ \ \ \ \mbox{\hyperlink{struct__CC__}{acc\_ang\_mag\_orient\_t}}\ *\ aamom;}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00365}00365\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00366}00366\ \ \ \ \ lock\_guard<mutex>\ lck(data\_mutex);}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00367}00367\ \ \ \ \ aamom\ =\ \&CC\_cmd.\mbox{\hyperlink{structimu__cmd__t_a87b5729c2d0d246e0cd2e6680286caf7}{data}}.\mbox{\hyperlink{uniondata__3DM__GX3__t_a138ec3bd16155e10f0b795f1eb7252a9}{aamom}};}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00368}00368\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{dataTypes_8h_ae0191316140fce1e08c6f21b0a2dbf0a}{acc}})\ \{}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00369}00369\ \ \ \ \ \ \ \ \ memcpy((\textcolor{keywordtype}{void}*)\mbox{\hyperlink{dataTypes_8h_ae0191316140fce1e08c6f21b0a2dbf0a}{acc}},\ aamom-\/>\mbox{\hyperlink{struct__CC___af67088c84e6c7ea07f0c11bf87b0f273}{acc}}.\mbox{\hyperlink{union__3f__vect__t_a77d17b3260a2fc7513127b847b5a0822}{\_bytes}},\ \textcolor{keyword}{sizeof}(\textcolor{keywordtype}{float})*3);}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00370}00370\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00371}00371\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{dataTypes_8h_acaf5d6afeb0da7fbb66c7823523f5439}{angRate}})\ \{}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00372}00372\ \ \ \ \ \ \ \ \ memcpy((\textcolor{keywordtype}{void}*)\mbox{\hyperlink{dataTypes_8h_acaf5d6afeb0da7fbb66c7823523f5439}{angRate}},\ aamom-\/>\mbox{\hyperlink{struct__CC___ac234d678feacf44ece17044c2adad9c5}{angRate}}.\mbox{\hyperlink{union__3f__vect__t_a77d17b3260a2fc7513127b847b5a0822}{\_bytes}},\ \textcolor{keyword}{sizeof}(\textcolor{keywordtype}{float})*3);}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00373}00373\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00374}00374\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{dataTypes_8h_a1cb5e8b80a48dd41efd24945e7216a88}{mag}})\ \{}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00375}00375\ \ \ \ \ \ \ \ \ memcpy((\textcolor{keywordtype}{void}*)\mbox{\hyperlink{dataTypes_8h_a1cb5e8b80a48dd41efd24945e7216a88}{mag}},\ aamom-\/>\mbox{\hyperlink{struct__CC___ab5ece53dffcf43b752a753770bfd855b}{mag}}.\mbox{\hyperlink{union__3f__vect__t_a77d17b3260a2fc7513127b847b5a0822}{\_bytes}},\ \textcolor{keyword}{sizeof}(\textcolor{keywordtype}{float})*3);}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00376}00376\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00377}00377\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{dataTypes_8h_a9064814beba6c8c2cc8b4d9c6f3c32ae}{orientMat}})\ \{}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00378}00378\ \ \ \ \ \ \ \ \ memcpy((\textcolor{keywordtype}{void}*)\mbox{\hyperlink{dataTypes_8h_a9064814beba6c8c2cc8b4d9c6f3c32ae}{orientMat}},\ aamom-\/>\mbox{\hyperlink{struct__CC___a9e458ef70de55be36b9ce009ee0b38ca}{orientMat}}.\mbox{\hyperlink{union__3f__matx__t_ad206940c0425963221932d09adcf0f4b}{\_bytes}},\ \textcolor{keyword}{sizeof}(\textcolor{keywordtype}{float})*9);}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00379}00379\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00380}00380\ \}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00381}00381\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00382}00382\ \textcolor{keywordtype}{void}\ imu3DM\_GX3::get\_Euler(\textcolor{keywordtype}{float}\ euler[3],\ uint64\_t\ *\mbox{\hyperlink{sine_8m_adf373d0d082773c69f688bdb3a56d6aa}{time}})\ \{}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00383}00383\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00384}00384\ \ \ \ \ \mbox{\hyperlink{struct__CE__}{eul\_t}}\ *\ eu;}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00385}00385\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00386}00386\ \ \ \ \ lock\_guard<mutex>\ lck(data\_mutex);}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00387}00387\ \ \ \ \ eu\ =\ \&CE\_cmd.\mbox{\hyperlink{structimu__cmd__t_a87b5729c2d0d246e0cd2e6680286caf7}{data}}.\mbox{\hyperlink{uniondata__3DM__GX3__t_a1ebf3bd2e0314bd2a31151ba2644b225}{eu}};}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00388}00388\ \ \ \ \ \textcolor{keywordflow}{if}\ (euler)\ \{}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00389}00389\ \ \ \ \ \ \ \ \ memcpy((\textcolor{keywordtype}{void}*)euler,\ eu-\/>\mbox{\hyperlink{struct__CE___a806982d987b85c3d965d9fdf499b5bbf}{eul}}.\mbox{\hyperlink{union__3f__vect__t_a77d17b3260a2fc7513127b847b5a0822}{\_bytes}},\ \textcolor{keyword}{sizeof}(\textcolor{keywordtype}{float})*3);}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00390}00390\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00391}00391\ \}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00392}00392\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00393}00393\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00394}00394\ \textcolor{keywordtype}{void}\ imu3DM\_GX3::get\_Euler\_AngularRate(\textcolor{keywordtype}{float}\ euler[3],\ \textcolor{keywordtype}{float}\ \mbox{\hyperlink{dataTypes_8h_acaf5d6afeb0da7fbb66c7823523f5439}{angRate}}[3],\ uint64\_t\ *\mbox{\hyperlink{sine_8m_adf373d0d082773c69f688bdb3a56d6aa}{time}})\ \{}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00395}00395\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00396}00396\ \ \ \ \ \mbox{\hyperlink{struct__CF__}{eul\_angRate\_t}}\ *\ ea;}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00397}00397\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00398}00398\ \ \ \ \ lock\_guard<mutex>\ lck(data\_mutex);}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00399}00399\ \ \ \ \ ea\ =\ \&CE\_cmd.\mbox{\hyperlink{structimu__cmd__t_a87b5729c2d0d246e0cd2e6680286caf7}{data}}.\mbox{\hyperlink{uniondata__3DM__GX3__t_a8b482d7959a41304c8c98145f43be63b}{ea}};}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00400}00400\ \ \ \ \ \textcolor{keywordflow}{if}\ (euler)\ \{}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00401}00401\ \ \ \ \ \ \ \ \ memcpy((\textcolor{keywordtype}{void}*)euler,\ ea-\/>\mbox{\hyperlink{struct__CF___a9f9edb64557a79ba2d99f8218e56e010}{eul}}.\mbox{\hyperlink{union__3f__vect__t_a77d17b3260a2fc7513127b847b5a0822}{\_bytes}},\ \textcolor{keyword}{sizeof}(\textcolor{keywordtype}{float})*3);}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00402}00402\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00403}00403\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{dataTypes_8h_acaf5d6afeb0da7fbb66c7823523f5439}{angRate}})\ \{}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00404}00404\ \ \ \ \ \ \ \ \ memcpy((\textcolor{keywordtype}{void}*)\mbox{\hyperlink{dataTypes_8h_acaf5d6afeb0da7fbb66c7823523f5439}{angRate}},\ ea-\/>\mbox{\hyperlink{struct__CF___ab998ff2059dfe16851d25a8a8d231f18}{angRate}}.\mbox{\hyperlink{union__3f__vect__t_a77d17b3260a2fc7513127b847b5a0822}{\_bytes}},\ \textcolor{keyword}{sizeof}(\textcolor{keywordtype}{float})*3);}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00405}00405\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00406}00406\ \}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00407}00407\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00408}00408\ \textcolor{keywordtype}{void}\ imu3DM\_GX3::get\_Quaternion(\textcolor{keywordtype}{float}\ \mbox{\hyperlink{dataTypes_8h_a703b2cfab58b26a167e9a15ae7c7b0ca}{quat}}[4],\ uint64\_t\ *\mbox{\hyperlink{sine_8m_adf373d0d082773c69f688bdb3a56d6aa}{time}})\ \{}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00409}00409\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00410}00410\ \ \ \ \ \mbox{\hyperlink{struct__DF__}{quat\_t}}\ *\ q;}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00411}00411\ }
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00412}00412\ \ \ \ \ lock\_guard<mutex>\ lck(data\_mutex);}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00413}00413\ \ \ \ \ q\ =\ \&DF\_cmd.\mbox{\hyperlink{structimu__cmd__t_a87b5729c2d0d246e0cd2e6680286caf7}{data}}.\mbox{\hyperlink{uniondata__3DM__GX3__t_a4b06b8c5f3f7506725309a7c8fd7c413}{quat}};}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00414}00414\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{dataTypes_8h_a703b2cfab58b26a167e9a15ae7c7b0ca}{quat}})\ \{}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00415}00415\ \ \ \ \ \ \ \ \ memcpy((\textcolor{keywordtype}{void}*)\mbox{\hyperlink{dataTypes_8h_a703b2cfab58b26a167e9a15ae7c7b0ca}{quat}},\ q-\/>\mbox{\hyperlink{struct__DF___af9cae2daa5ab8c90092fd502659d2c53}{quat}}.\mbox{\hyperlink{union__4f__vect__t_a7648fd4fe052cebc9efe7982767106ae}{\_bytes}},\ \textcolor{keyword}{sizeof}(\textcolor{keywordtype}{float})*4);}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00416}00416\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{3dm__gx3_8cpp_source_l00417}00417\ \}}
+
+\end{DoxyCode}

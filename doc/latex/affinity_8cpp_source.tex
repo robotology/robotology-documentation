@@ -1,0 +1,379 @@
+\doxysection{affinity.\+cpp}
+\hypertarget{affinity_8cpp_source}{}\label{affinity_8cpp_source}\index{icub-\/main/src/libraries/optimization/src/affinity.cpp@{icub-\/main/src/libraries/optimization/src/affinity.cpp}}
+\mbox{\hyperlink{affinity_8cpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00001}00001\ \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00002}00002\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2013\ iCub\ Facility\ -\/\ Istituto\ Italiano\ di\ Tecnologia}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00003}00003\ \textcolor{comment}{\ *\ Author:\ Ugo\ Pattacini}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00004}00004\ \textcolor{comment}{\ *\ email:\ \ ugo.pattacini@iit.it}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00005}00005\ \textcolor{comment}{\ *\ Permission\ is\ granted\ to\ copy,\ distribute,\ and/or\ modify\ this\ program}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00006}00006\ \textcolor{comment}{\ *\ under\ the\ terms\ of\ the\ GNU\ General\ Public\ License,\ version\ 2\ or\ any}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00007}00007\ \textcolor{comment}{\ *\ later\ version\ published\ by\ the\ Free\ Software\ Foundation.}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00008}00008\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00009}00009\ \textcolor{comment}{\ *\ A\ copy\ of\ the\ license\ can\ be\ found\ at}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00010}00010\ \textcolor{comment}{\ *\ http://www.robotcub.org/icub/license/gpl.txt}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00011}00011\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00012}00012\ \textcolor{comment}{\ *\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00013}00013\ \textcolor{comment}{\ *\ WITHOUT\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00014}00014\ \textcolor{comment}{\ *\ MERCHANTABILITY\ or\ FITNESS\ FOR\ A\ PARTICULAR\ PURPOSE.\ See\ the\ GNU\ General}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00015}00015\ \textcolor{comment}{\ *\ Public\ License\ for\ more\ details}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00016}00016\ \textcolor{comment}{*/}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00017}00017\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00018}00018\ \textcolor{preprocessor}{\#include\ <algorithm>}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00019}00019\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00020}00020\ \textcolor{preprocessor}{\#include\ <yarp/math/Math.h>}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00021}00021\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{math_8h}{iCub/ctrl/math.h}}>}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00022}00022\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{affinity_8h}{iCub/optimization/affinity.h}}>}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00023}00023\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00024}00024\ \textcolor{preprocessor}{\#include\ <IpTNLP.hpp>}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00025}00025\ \textcolor{preprocessor}{\#include\ <IpIpoptApplication.hpp>}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00026}00026\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00027}00027\ \textcolor{keyword}{using\ namespace\ }std;}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00028}00028\ \textcolor{keyword}{using\ namespace\ }yarp::os;}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00029}00029\ \textcolor{keyword}{using\ namespace\ }yarp::sig;}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00030}00030\ \textcolor{keyword}{using\ namespace\ }yarp::math;}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00031}00031\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceiCub_1_1ctrl}{iCub::ctrl}};}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00032}00032\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceiCub_1_1optimization}{iCub::optimization}};}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00033}00033\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00034}00034\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00035}00035\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespaceiCub}{iCub}}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00036}00036\ \{}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00037}00037\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00038}00038\ \textcolor{keyword}{namespace\ }optimization}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00039}00039\ \{}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00040}00040\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00041}00041\ \textcolor{comment}{/****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00042}\mbox{\hyperlink{namespaceiCub_1_1optimization_a0a65d3cf76a77a11bfdca52ddec83d45}{00042}}\ \textcolor{keyword}{inline}\ Matrix\ \mbox{\hyperlink{namespaceiCub_1_1optimization_a0a65d3cf76a77a11bfdca52ddec83d45}{computeA}}(\textcolor{keyword}{const}\ Ipopt::Number\ *\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}})}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00043}00043\ \{}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00044}00044\ \ \ \ \ Matrix\ \mbox{\hyperlink{sine_8m_a3b98e2dffc6cb06a89dcb0d5c60a0206}{A}}=eye(4,4);}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00045}00045\ \ \ \ \ \mbox{\hyperlink{sine_8m_a3b98e2dffc6cb06a89dcb0d5c60a0206}{A}}(0,0)=\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}[0];\ \mbox{\hyperlink{sine_8m_a3b98e2dffc6cb06a89dcb0d5c60a0206}{A}}(0,1)=\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}[3];\ \mbox{\hyperlink{sine_8m_a3b98e2dffc6cb06a89dcb0d5c60a0206}{A}}(0,2)=\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}[6];\ \mbox{\hyperlink{sine_8m_a3b98e2dffc6cb06a89dcb0d5c60a0206}{A}}(0,3)=\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}[9];}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00046}00046\ \ \ \ \ \mbox{\hyperlink{sine_8m_a3b98e2dffc6cb06a89dcb0d5c60a0206}{A}}(1,0)=\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}[1];\ \mbox{\hyperlink{sine_8m_a3b98e2dffc6cb06a89dcb0d5c60a0206}{A}}(1,1)=\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}[4];\ \mbox{\hyperlink{sine_8m_a3b98e2dffc6cb06a89dcb0d5c60a0206}{A}}(1,2)=\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}[7];\ \mbox{\hyperlink{sine_8m_a3b98e2dffc6cb06a89dcb0d5c60a0206}{A}}(1,3)=\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}[10];}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00047}00047\ \ \ \ \ \mbox{\hyperlink{sine_8m_a3b98e2dffc6cb06a89dcb0d5c60a0206}{A}}(2,0)=\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}[2];\ \mbox{\hyperlink{sine_8m_a3b98e2dffc6cb06a89dcb0d5c60a0206}{A}}(2,1)=\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}[5];\ \mbox{\hyperlink{sine_8m_a3b98e2dffc6cb06a89dcb0d5c60a0206}{A}}(2,2)=\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}[8];\ \mbox{\hyperlink{sine_8m_a3b98e2dffc6cb06a89dcb0d5c60a0206}{A}}(2,3)=\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}[11];}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00048}00048\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00049}00049\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{sine_8m_a3b98e2dffc6cb06a89dcb0d5c60a0206}{A}};}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00050}00050\ \}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00051}00051\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00052}00052\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00053}00053\ \textcolor{comment}{/****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00054}\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP}{00054}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP}{AffinityWithMatchedPointsNLP}}\ :\ \textcolor{keyword}{public}\ Ipopt::TNLP}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00055}00055\ \{}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00056}00056\ \textcolor{keyword}{protected}:\ \ \ \ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00057}\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a6cbb42cce43d72a55579694c9b6bf1ca}{00057}}\ \ \ \ \ \textcolor{keyword}{const}\ deque<Vector>\ \&\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a6cbb42cce43d72a55579694c9b6bf1ca}{p0}};}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00058}\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_aa40ddbe8b8832f645014b26891a47feb}{00058}}\ \ \ \ \ \textcolor{keyword}{const}\ deque<Vector>\ \&\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_aa40ddbe8b8832f645014b26891a47feb}{p1}};}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00059}00059\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00060}\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a2a400a9b0f6f3428161fd78dede0a74b}{00060}}\ \ \ \ \ deque<Matrix>\ \mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a2a400a9b0f6f3428161fd78dede0a74b}{dA}};}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00061}\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_aee323338e63b1697e6c0b5b00f031a69}{00061}}\ \ \ \ \ Matrix\ \mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_aee323338e63b1697e6c0b5b00f031a69}{min}};}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00062}\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a490af9f51839e179a70b61f98216a662}{00062}}\ \ \ \ \ Matrix\ \mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a490af9f51839e179a70b61f98216a662}{max}};}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00063}\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a539ed9af83b503285b617556cdf794dc}{00063}}\ \ \ \ \ Matrix\ \mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a539ed9af83b503285b617556cdf794dc}{A0}};}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00064}\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a5c121a12900bd96babb44073d9b138d9}{00064}}\ \ \ \ \ Matrix\ \mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a5c121a12900bd96babb44073d9b138d9}{A}};}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00065}00065\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00066}00066\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00067}00067\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00068}\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a6fa4eabc9315abc9015064dbfadcb9ad}{00068}}\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a6fa4eabc9315abc9015064dbfadcb9ad}{AffinityWithMatchedPointsNLP}}(\textcolor{keyword}{const}\ deque<Vector>\ \&\_p0,}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00069}00069\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ deque<Vector>\ \&\_p1,}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00070}00070\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Matrix\ \&\_min,\ \textcolor{keyword}{const}\ Matrix\ \&\_max)\ :}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00071}00071\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a6cbb42cce43d72a55579694c9b6bf1ca}{p0}}(\_p0),\ \mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_aa40ddbe8b8832f645014b26891a47feb}{p1}}(\_p1)}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00072}00072\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00073}00073\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_aee323338e63b1697e6c0b5b00f031a69}{min}}=\_min;}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00074}00074\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a490af9f51839e179a70b61f98216a662}{max}}=\_max;}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00075}00075\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a539ed9af83b503285b617556cdf794dc}{A0}}=0.5*(\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_aee323338e63b1697e6c0b5b00f031a69}{min}}+\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a490af9f51839e179a70b61f98216a662}{max}});}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00076}00076\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00077}00077\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ c=0;\ c<\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a539ed9af83b503285b617556cdf794dc}{A0}}.cols();\ c++)}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00078}00078\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00079}00079\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ r=0;\ r<\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a539ed9af83b503285b617556cdf794dc}{A0}}.rows()-\/1;\ r++)}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00080}00080\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00081}00081\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Matrix\ \mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a2a400a9b0f6f3428161fd78dede0a74b}{dA}}=\mbox{\hyperlink{compute__ekf__sym_8m_a35baefda5ec044ac7c1f5a41815b5b45}{zeros}}(4,4);\ \mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a2a400a9b0f6f3428161fd78dede0a74b}{dA}}(r,c)=1.0;}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00082}00082\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>dA.push\_back(\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a2a400a9b0f6f3428161fd78dede0a74b}{dA}});}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00083}00083\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00084}00084\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00085}00085\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00086}00086\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00087}00087\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00088}\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_af3e25edee2acab81c04469608132a3c7}{00088}}\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_af3e25edee2acab81c04469608132a3c7}{set\_A0}}(\textcolor{keyword}{const}\ Matrix\ \&\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a539ed9af83b503285b617556cdf794dc}{A0}})}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00089}00089\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00090}00090\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ row\_max=(int)std::min(this-\/>A0.rows()-\/1,\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a539ed9af83b503285b617556cdf794dc}{A0}}.rows()-\/1);}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00091}00091\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ col\_max=(int)std::min(this-\/>A0.cols(),\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a539ed9af83b503285b617556cdf794dc}{A0}}.cols());}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00092}00092\ \ \ \ \ \ \ \ \ this-\/>A0.setSubmatrix(\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a539ed9af83b503285b617556cdf794dc}{A0}}.submatrix(0,row\_max,0,col\_max),0,0);}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00093}00093\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00094}00094\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00095}00095\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00096}\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_ac172ac83724eadb8afdf65459b86c571}{00096}}\ \ \ \ \ \textcolor{keyword}{virtual}\ Matrix\ \mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_ac172ac83724eadb8afdf65459b86c571}{get\_result}}()\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00097}00097\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00098}00098\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a5c121a12900bd96babb44073d9b138d9}{A}};}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00099}00099\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00100}00100\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00101}00101\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00102}\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a67df86b83cd9aa6f831df25e14bff3ea}{00102}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a67df86b83cd9aa6f831df25e14bff3ea}{get\_nlp\_info}}(Ipopt::Index\ \&\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},\ Ipopt::Index\ \&m,\ Ipopt::Index\ \&nnz\_jac\_g,}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00103}00103\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Index\ \&nnz\_h\_lag,\ IndexStyleEnum\ \&index\_style)}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00104}00104\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00105}00105\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}=12;}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00106}00106\ \ \ \ \ \ \ \ \ m=nnz\_jac\_g=nnz\_h\_lag=0;}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00107}00107\ \ \ \ \ \ \ \ \ index\_style=TNLP::C\_STYLE;}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00108}00108\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00109}00109\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00110}00110\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00111}00111\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00112}00112\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00113}\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_ab5017cf044c8ca89dfa56b311aa50cc1}{00113}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_ab5017cf044c8ca89dfa56b311aa50cc1}{get\_bounds\_info}}(Ipopt::Index\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},\ Ipopt::Number\ *x\_l,\ Ipopt::Number\ *x\_u,}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00114}00114\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Index\ m,\ Ipopt::Number\ *g\_l,\ Ipopt::Number\ *g\_u)}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00115}00115\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00116}00116\ \ \ \ \ \ \ \ \ Ipopt::Index\ i=0;}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00117}00117\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ c=0;\ c<\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a539ed9af83b503285b617556cdf794dc}{A0}}.cols();\ c++)}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00118}00118\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00119}00119\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ r=0;\ r<\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a539ed9af83b503285b617556cdf794dc}{A0}}.rows()-\/1;\ r++)}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00120}00120\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00121}00121\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ x\_l[i]=\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_aee323338e63b1697e6c0b5b00f031a69}{min}}(r,c);}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00122}00122\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ x\_u[i]=\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a490af9f51839e179a70b61f98216a662}{max}}(r,c);}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00123}00123\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ i++;}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00124}00124\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00125}00125\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00126}00126\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00127}00127\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00128}00128\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00129}00129\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00130}00130\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00131}\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a176ed65a0295c8153c94b3036c1b2754}{00131}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a176ed65a0295c8153c94b3036c1b2754}{get\_starting\_point}}(Ipopt::Index\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},\ \textcolor{keywordtype}{bool}\ init\_x,\ Ipopt::Number\ *\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}},}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00132}00132\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ init\_z,\ Ipopt::Number\ *z\_L,\ Ipopt::Number\ *z\_U,}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00133}00133\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Index\ m,\ \textcolor{keywordtype}{bool}\ init\_lambda,\ Ipopt::Number\ *lambda)}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00134}00134\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00135}00135\ \ \ \ \ \ \ \ \ Ipopt::Index\ i=0;}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00136}00136\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ c=0;\ c<\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a539ed9af83b503285b617556cdf794dc}{A0}}.cols();\ c++)}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00137}00137\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00138}00138\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ r=0;\ r<\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a539ed9af83b503285b617556cdf794dc}{A0}}.rows()-\/1;\ r++)}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00139}00139\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}[i++]=\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a539ed9af83b503285b617556cdf794dc}{A0}}(r,c);}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00140}00140\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00141}00141\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00142}00142\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00143}00143\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00144}00144\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00145}00145\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00146}\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_ad7acf2600d84879bb202bba51199cf11}{00146}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_ad7acf2600d84879bb202bba51199cf11}{eval\_f}}(Ipopt::Index\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},\ \textcolor{keyword}{const}\ Ipopt::Number\ *\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}},\ \textcolor{keywordtype}{bool}\ new\_x,}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00147}00147\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Number\ \&obj\_value)}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00148}00148\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00149}00149\ \ \ \ \ \ \ \ \ Matrix\ \mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a5c121a12900bd96babb44073d9b138d9}{A}}=\mbox{\hyperlink{namespaceiCub_1_1optimization_a0a65d3cf76a77a11bfdca52ddec83d45}{computeA}}(\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}});}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00150}00150\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00151}00151\ \ \ \ \ \ \ \ \ obj\_value=0.0;}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00152}00152\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a6cbb42cce43d72a55579694c9b6bf1ca}{p0}}.size()>0)}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00153}00153\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00154}00154\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a6cbb42cce43d72a55579694c9b6bf1ca}{p0}}.size();\ i++)}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00155}00155\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ obj\_value+=\mbox{\hyperlink{group__Maths_ga77ee962cf3363413bca2239f9744198a}{norm2}}(\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_aa40ddbe8b8832f645014b26891a47feb}{p1}}[i]-\/\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a5c121a12900bd96babb44073d9b138d9}{A}}*\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a6cbb42cce43d72a55579694c9b6bf1ca}{p0}}[i]);}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00156}00156\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00157}00157\ \ \ \ \ \ \ \ \ \ \ \ \ obj\_value/=\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a6cbb42cce43d72a55579694c9b6bf1ca}{p0}}.size();}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00158}00158\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00159}00159\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00160}00160\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00161}00161\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00162}00162\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00163}00163\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00164}\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a80bc6d82cf137fffd755816b7b9f918c}{00164}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a80bc6d82cf137fffd755816b7b9f918c}{eval\_grad\_f}}(Ipopt::Index\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},\ \textcolor{keyword}{const}\ Ipopt::Number*\ \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}},\ \textcolor{keywordtype}{bool}\ new\_x,}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00165}00165\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Number\ *grad\_f)}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00166}00166\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00167}00167\ \ \ \ \ \ \ \ \ Matrix\ \mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a5c121a12900bd96babb44073d9b138d9}{A}}=\mbox{\hyperlink{namespaceiCub_1_1optimization_a0a65d3cf76a77a11bfdca52ddec83d45}{computeA}}(\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}});}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00168}00168\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (Ipopt::Index\ i=0;\ i<\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}};\ i++)}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00169}00169\ \ \ \ \ \ \ \ \ \ \ \ \ grad\_f[i]=0.0;}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00170}00170\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00171}00171\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a6cbb42cce43d72a55579694c9b6bf1ca}{p0}}.size()>0)}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00172}00172\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00173}00173\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a6cbb42cce43d72a55579694c9b6bf1ca}{p0}}.size();\ i++)}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00174}00174\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00175}00175\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Vector\ d=\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_aa40ddbe8b8832f645014b26891a47feb}{p1}}[i]-\/\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a5c121a12900bd96babb44073d9b138d9}{A}}*\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a6cbb42cce43d72a55579694c9b6bf1ca}{p0}}[i];}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00176}00176\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (Ipopt::Index\ j=0;\ j<\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}};\ j++)}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00177}00177\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ grad\_f[j]-\/=2.0*\mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(d,(\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a2a400a9b0f6f3428161fd78dede0a74b}{dA}}[j]*\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a6cbb42cce43d72a55579694c9b6bf1ca}{p0}}[i]));}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00178}00178\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00179}00179\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00180}00180\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (Ipopt::Index\ i=0;\ i<\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}};\ i++)}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00181}00181\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ grad\_f[i]/=\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a6cbb42cce43d72a55579694c9b6bf1ca}{p0}}.size();}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00182}00182\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00183}00183\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00184}00184\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00185}00185\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00186}00186\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00187}00187\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00188}\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a7a0045f5f5bf8dea738d2787ca79ca55}{00188}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a7a0045f5f5bf8dea738d2787ca79ca55}{eval\_g}}(Ipopt::Index\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},\ \textcolor{keyword}{const}\ Ipopt::Number\ *\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}},\ \textcolor{keywordtype}{bool}\ new\_x,}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00189}00189\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Index\ m,\ Ipopt::Number\ *g)}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00190}00190\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00191}00191\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00192}00192\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00193}00193\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00194}00194\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00195}\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_aef8fadc36b33ba05cf0138607bcc6835}{00195}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_aef8fadc36b33ba05cf0138607bcc6835}{eval\_jac\_g}}(Ipopt::Index\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},\ \textcolor{keyword}{const}\ Ipopt::Number\ *\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}},\ \textcolor{keywordtype}{bool}\ new\_x,}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00196}00196\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Index\ m,\ Ipopt::Index\ nele\_jac,\ Ipopt::Index\ *iRow,}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00197}00197\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Index\ *jCol,\ Ipopt::Number\ *values)}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00198}00198\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00199}00199\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00200}00200\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00201}00201\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00202}00202\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00203}\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a1df0a1bf505a86f4a1d9011a141f4950}{00203}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a1df0a1bf505a86f4a1d9011a141f4950}{eval\_h}}(Ipopt::Index\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},\ \textcolor{keyword}{const}\ Ipopt::Number\ *\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}},\ \textcolor{keywordtype}{bool}\ new\_x,}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00204}00204\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Number\ obj\_factor,\ Ipopt::Index\ m,\ \textcolor{keyword}{const}\ Ipopt::Number\ *lambda,}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00205}00205\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ new\_lambda,\ Ipopt::Index\ nele\_hess,\ Ipopt::Index\ *iRow,}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00206}00206\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Index\ *jCol,\ Ipopt::Number\ *values)}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00207}00207\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00208}00208\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00209}00209\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00210}00210\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00211}00211\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00212}\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a2ca1f7d3f12aeabcaeb1bbe7031879cc}{00212}}\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a2ca1f7d3f12aeabcaeb1bbe7031879cc}{finalize\_solution}}(Ipopt::SolverReturn\ status,\ Ipopt::Index\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00213}00213\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Ipopt::Number\ *\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}},\ \textcolor{keyword}{const}\ Ipopt::Number\ *z\_L,}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00214}00214\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Ipopt::Number\ *z\_U,\ Ipopt::Index\ m,}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00215}00215\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Ipopt::Number\ *g,\ \textcolor{keyword}{const}\ Ipopt::Number\ *lambda,}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00216}00216\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Number\ obj\_value,\ \textcolor{keyword}{const}\ Ipopt::IpoptData\ *ip\_data,}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00217}00217\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::IpoptCalculatedQuantities\ *ip\_cq)}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00218}00218\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00219}00219\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP_a5c121a12900bd96babb44073d9b138d9}{A}}=\mbox{\hyperlink{namespaceiCub_1_1optimization_a0a65d3cf76a77a11bfdca52ddec83d45}{computeA}}(\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}});}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00220}00220\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00221}00221\ \};}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00222}00222\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00223}00223\ \}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00224}00224\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00225}00225\ \}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00226}00226\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00227}00227\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00228}00228\ \textcolor{comment}{/****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00229}\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_af12682a3b00c70fcd0124238c6771e23}{00229}}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_af12682a3b00c70fcd0124238c6771e23}{AffinityWithMatchedPoints::AffinityWithMatchedPoints}}()}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00230}00230\ \{}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00231}00231\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_a897de6e7bbbe5c91f6dd890b8cebd801}{max\_iter}}=300;}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00232}00232\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_a7bceb813aacecb2bcb4dd7d248007163}{tol}}=1\mbox{\hyperlink{compute__ekf__fast_8m_a08a4415e9d594ff960030b921d42b91e}{e}}-\/8;}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00233}00233\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00234}00234\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_ae300a24096ef9716007532fd5fa06cfb}{min}}=\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_a1d2bc4756911620140619305610921c4}{max}}=eye(4,4);}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00235}00235\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ c=0;\ c<\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_ae300a24096ef9716007532fd5fa06cfb}{min}}.cols();\ c++)}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00236}00236\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00237}00237\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ r=0;\ r<\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_ae300a24096ef9716007532fd5fa06cfb}{min}}.rows()-\/1;\ r++)}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00238}00238\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00239}00239\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_ae300a24096ef9716007532fd5fa06cfb}{min}}(r,c)=-\/1.0;}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00240}00240\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_a1d2bc4756911620140619305610921c4}{max}}(r,c)=+1.0;}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00241}00241\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00242}00242\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00243}00243\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00244}00244\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_ac14b40c35d7278ae8143cf654b0da3e9}{A0}}=0.5*(\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_ae300a24096ef9716007532fd5fa06cfb}{min}}+\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_a1d2bc4756911620140619305610921c4}{max}});}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00245}00245\ \}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00246}00246\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00247}00247\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00248}00248\ \textcolor{comment}{/****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00249}\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_a453a4e102c293ad64bc93ba681635a5e}{00249}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_a453a4e102c293ad64bc93ba681635a5e}{AffinityWithMatchedPoints::setBounds}}(\textcolor{keyword}{const}\ Matrix\ \&min,}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00250}00250\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Matrix\ \&max)}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00251}00251\ \{}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00252}00252\ \ \ \ \ \textcolor{keywordtype}{int}\ row\_max,col\_max;}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00253}00253\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00254}00254\ \ \ \ \ row\_max=(int)std::min(this-\/>min.rows()-\/1,\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_ae300a24096ef9716007532fd5fa06cfb}{min}}.rows()-\/1);}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00255}00255\ \ \ \ \ col\_max=(int)std::min(this-\/>min.cols(),\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_ae300a24096ef9716007532fd5fa06cfb}{min}}.cols());}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00256}00256\ \ \ \ \ this-\/>min.setSubmatrix(\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_ae300a24096ef9716007532fd5fa06cfb}{min}}.submatrix(0,row\_max,0,col\_max),0,0);}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00257}00257\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00258}00258\ \ \ \ \ row\_max=(int)std::min(this-\/>max.rows()-\/1,\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_a1d2bc4756911620140619305610921c4}{max}}.rows()-\/1);}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00259}00259\ \ \ \ \ col\_max=(int)std::min(this-\/>max.cols(),\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_a1d2bc4756911620140619305610921c4}{max}}.cols());}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00260}00260\ \ \ \ \ this-\/>max.setSubmatrix(\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_a1d2bc4756911620140619305610921c4}{max}}.submatrix(0,row\_max,0,col\_max),0,0);}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00261}00261\ \}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00262}00262\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00263}00263\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00264}00264\ \textcolor{comment}{/****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00265}\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_a5925d3bccf8cdec3fdec253ee32412e9}{00265}}\ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_a5925d3bccf8cdec3fdec253ee32412e9}{AffinityWithMatchedPoints::evalError}}(\textcolor{keyword}{const}\ Matrix\ \&\mbox{\hyperlink{sine_8m_a3b98e2dffc6cb06a89dcb0d5c60a0206}{A}})}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00266}00266\ \{}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00267}00267\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{debugFunctions_8cpp_a7a3172cc98e93d8eadfb9ab30373799e}{error}}=0.0;}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00268}00268\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_a50614c0545d89a9bb22d42b066cdb8ab}{p0}}.size()>0)}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00269}00269\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00270}00270\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_a50614c0545d89a9bb22d42b066cdb8ab}{p0}}.size();\ i++)}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00271}00271\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{debugFunctions_8cpp_a7a3172cc98e93d8eadfb9ab30373799e}{error}}+=\mbox{\hyperlink{group__Maths_ga791f0548018b3597da95e70a3b226806}{norm}}(\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_a34cb5f974f743ada5309c680ea893f6e}{p1}}[i]-\/\mbox{\hyperlink{sine_8m_a3b98e2dffc6cb06a89dcb0d5c60a0206}{A}}*\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_a50614c0545d89a9bb22d42b066cdb8ab}{p0}}[i]);}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00272}00272\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00273}00273\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{debugFunctions_8cpp_a7a3172cc98e93d8eadfb9ab30373799e}{error}}/=\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_a50614c0545d89a9bb22d42b066cdb8ab}{p0}}.size();}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00274}00274\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00275}00275\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00276}00276\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{debugFunctions_8cpp_a7a3172cc98e93d8eadfb9ab30373799e}{error}};}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00277}00277\ \}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00278}00278\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00279}00279\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00280}00280\ \textcolor{comment}{/****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00281}\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_a59cad3ea210652a503e6954165e577fa}{00281}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_a59cad3ea210652a503e6954165e577fa}{AffinityWithMatchedPoints::addPoints}}(\textcolor{keyword}{const}\ Vector\ \&p0,}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00282}00282\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Vector\ \&p1)}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00283}00283\ \{}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00284}00284\ \ \ \ \ \textcolor{keywordflow}{if}\ ((\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_a50614c0545d89a9bb22d42b066cdb8ab}{p0}}.length()>=3)\ \&\&\ (\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_a34cb5f974f743ada5309c680ea893f6e}{p1}}.length()>=3))}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00285}00285\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00286}00286\ \ \ \ \ \ \ \ \ Vector\ \_p0=\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_a50614c0545d89a9bb22d42b066cdb8ab}{p0}}.subVector(0,2);\ \_p0.push\_back(1.0);}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00287}00287\ \ \ \ \ \ \ \ \ Vector\ \_p1=\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_a34cb5f974f743ada5309c680ea893f6e}{p1}}.subVector(0,2);\ \_p1.push\_back(1.0);}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00288}00288\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00289}00289\ \ \ \ \ \ \ \ \ this-\/>p0.push\_back(\_p0);}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00290}00290\ \ \ \ \ \ \ \ \ this-\/>p1.push\_back(\_p1);}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00291}00291\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00292}00292\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00293}00293\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00294}00294\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00295}00295\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00296}00296\ \}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00297}00297\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00298}00298\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00299}00299\ \textcolor{comment}{/****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00300}\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_ae4a604f4fa48f3465f0fc70590354203}{00300}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_ae4a604f4fa48f3465f0fc70590354203}{AffinityWithMatchedPoints::getPoints}}(deque<Vector>\ \&p0,}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00301}00301\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ deque<Vector>\ \&p1)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00302}00302\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00303}00303\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_a50614c0545d89a9bb22d42b066cdb8ab}{p0}}=this-\/>\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_a50614c0545d89a9bb22d42b066cdb8ab}{p0}};}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00304}00304\ \ \ \ \ p1=this-\/>\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_a34cb5f974f743ada5309c680ea893f6e}{p1}};}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00305}00305\ \}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00306}00306\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00307}00307\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00308}00308\ \textcolor{comment}{/****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00309}\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_ab8ca437e14b8e2a0c8b0337aedb3c3d1}{00309}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_ab8ca437e14b8e2a0c8b0337aedb3c3d1}{AffinityWithMatchedPoints::clearPoints}}()}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00310}00310\ \{}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00311}00311\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_a50614c0545d89a9bb22d42b066cdb8ab}{p0}}.clear();}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00312}00312\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_a34cb5f974f743ada5309c680ea893f6e}{p1}}.clear();}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00313}00313\ \}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00314}00314\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00315}00315\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00316}00316\ \textcolor{comment}{/****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00317}\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_a361097c587f0246e5c88567270fa270c}{00317}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_a361097c587f0246e5c88567270fa270c}{AffinityWithMatchedPoints::setInitialGuess}}(\textcolor{keyword}{const}\ Matrix\ \&\mbox{\hyperlink{sine_8m_a3b98e2dffc6cb06a89dcb0d5c60a0206}{A}})}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00318}00318\ \{}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00319}00319\ \ \ \ \ \textcolor{keywordtype}{int}\ row\_max=(int)std::min(\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_ac14b40c35d7278ae8143cf654b0da3e9}{A0}}.rows()-\/1,\mbox{\hyperlink{sine_8m_a3b98e2dffc6cb06a89dcb0d5c60a0206}{A}}.rows()-\/1);}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00320}00320\ \ \ \ \ \textcolor{keywordtype}{int}\ col\_max=(int)std::min(\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_ac14b40c35d7278ae8143cf654b0da3e9}{A0}}.cols(),\mbox{\hyperlink{sine_8m_a3b98e2dffc6cb06a89dcb0d5c60a0206}{A}}.cols());}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00321}00321\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_ac14b40c35d7278ae8143cf654b0da3e9}{A0}}.setSubmatrix(\mbox{\hyperlink{sine_8m_a3b98e2dffc6cb06a89dcb0d5c60a0206}{A}}.submatrix(0,row\_max,0,col\_max),0,0);}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00322}00322\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00323}00323\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00324}00324\ \}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00325}00325\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00326}00326\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00327}00327\ \textcolor{comment}{/****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00328}\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_a5a2c2a25f0ee3ca94f5eaa023c172b23}{00328}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_a5a2c2a25f0ee3ca94f5eaa023c172b23}{AffinityWithMatchedPoints::setCalibrationOptions}}(\textcolor{keyword}{const}\ Property\ \&options)}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00329}00329\ \{}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00330}00330\ \ \ \ \ \textcolor{keywordflow}{if}\ (options.check(\textcolor{stringliteral}{"{}max\_iter"{}}))}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00331}00331\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_a897de6e7bbbe5c91f6dd890b8cebd801}{max\_iter}}=options.find(\textcolor{stringliteral}{"{}max\_iter"{}}).asInt32();}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00332}00332\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00333}00333\ \ \ \ \ \textcolor{keywordflow}{if}\ (options.check(\textcolor{stringliteral}{"{}tol"{}}))}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00334}00334\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_a7bceb813aacecb2bcb4dd7d248007163}{tol}}=options.find(\textcolor{stringliteral}{"{}tol"{}}).asFloat64();}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00335}00335\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00336}00336\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00337}00337\ \}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00338}00338\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00339}00339\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00340}00340\ \textcolor{comment}{/****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00341}\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_a49346789a21840484fdab942b1d1777c}{00341}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_a49346789a21840484fdab942b1d1777c}{AffinityWithMatchedPoints::calibrate}}(Matrix\ \&\mbox{\hyperlink{sine_8m_a3b98e2dffc6cb06a89dcb0d5c60a0206}{A}},\ \textcolor{keywordtype}{double}\ \&\mbox{\hyperlink{debugFunctions_8cpp_a7a3172cc98e93d8eadfb9ab30373799e}{error}})}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00342}00342\ \{}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00343}00343\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_a50614c0545d89a9bb22d42b066cdb8ab}{p0}}.size()>0)}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00344}00344\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00345}00345\ \ \ \ \ \ \ \ \ Ipopt::SmartPtr<Ipopt::IpoptApplication>\ app=\textcolor{keyword}{new}\ Ipopt::IpoptApplication;}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00346}00346\ \ \ \ \ \ \ \ \ app-\/>Options()-\/>SetNumericValue(\textcolor{stringliteral}{"{}tol"{}},\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_a7bceb813aacecb2bcb4dd7d248007163}{tol}});}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00347}00347\ \ \ \ \ \ \ \ \ app-\/>Options()-\/>SetIntegerValue(\textcolor{stringliteral}{"{}acceptable\_iter"{}},0);}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00348}00348\ \ \ \ \ \ \ \ \ app-\/>Options()-\/>SetStringValue(\textcolor{stringliteral}{"{}mu\_strategy"{}},\textcolor{stringliteral}{"{}adaptive"{}});}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00349}00349\ \ \ \ \ \ \ \ \ app-\/>Options()-\/>SetIntegerValue(\textcolor{stringliteral}{"{}max\_iter"{}},\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_a897de6e7bbbe5c91f6dd890b8cebd801}{max\_iter}});}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00350}00350\ \ \ \ \ \ \ \ \ app-\/>Options()-\/>SetStringValue(\textcolor{stringliteral}{"{}nlp\_scaling\_method"{}},\textcolor{stringliteral}{"{}gradient-\/based"{}});}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00351}00351\ \ \ \ \ \ \ \ \ app-\/>Options()-\/>SetStringValue(\textcolor{stringliteral}{"{}jac\_c\_constant"{}},\textcolor{stringliteral}{"{}yes"{}});}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00352}00352\ \ \ \ \ \ \ \ \ app-\/>Options()-\/>SetStringValue(\textcolor{stringliteral}{"{}jac\_d\_constant"{}},\textcolor{stringliteral}{"{}yes"{}});}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00353}00353\ \ \ \ \ \ \ \ \ app-\/>Options()-\/>SetStringValue(\textcolor{stringliteral}{"{}hessian\_constant"{}},\textcolor{stringliteral}{"{}yes"{}});}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00354}00354\ \ \ \ \ \ \ \ \ app-\/>Options()-\/>SetStringValue(\textcolor{stringliteral}{"{}hessian\_approximation"{}},\textcolor{stringliteral}{"{}limited-\/memory"{}});}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00355}00355\ \ \ \ \ \ \ \ \ app-\/>Options()-\/>SetIntegerValue(\textcolor{stringliteral}{"{}print\_level"{}},0);}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00356}00356\ \ \ \ \ \ \ \ \ app-\/>Options()-\/>SetStringValue(\textcolor{stringliteral}{"{}derivative\_test"{}},\textcolor{stringliteral}{"{}none"{}});}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00357}00357\ \ \ \ \ \ \ \ \ app-\/>Initialize();}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00358}00358\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00359}00359\ \ \ \ \ \ \ \ \ Ipopt::SmartPtr<AffinityWithMatchedPointsNLP>\ nlp=\textcolor{keyword}{new}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPointsNLP}{AffinityWithMatchedPointsNLP}}(\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_a50614c0545d89a9bb22d42b066cdb8ab}{p0}},\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_a34cb5f974f743ada5309c680ea893f6e}{p1}},\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_ae300a24096ef9716007532fd5fa06cfb}{min}},\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_a1d2bc4756911620140619305610921c4}{max}});}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00360}00360\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00361}00361\ \ \ \ \ \ \ \ \ nlp-\/>set\_A0(\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_ac14b40c35d7278ae8143cf654b0da3e9}{A0}});}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00362}00362\ \ \ \ \ \ \ \ \ Ipopt::ApplicationReturnStatus\ status=app-\/>OptimizeTNLP(GetRawPtr(nlp));}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00363}00363\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00364}00364\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{sine_8m_a3b98e2dffc6cb06a89dcb0d5c60a0206}{A}}=nlp-\/>get\_result();}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00365}00365\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{debugFunctions_8cpp_a7a3172cc98e93d8eadfb9ab30373799e}{error}}=\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints_a5925d3bccf8cdec3fdec253ee32412e9}{evalError}}(\mbox{\hyperlink{sine_8m_a3b98e2dffc6cb06a89dcb0d5c60a0206}{A}});}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00366}00366\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00367}00367\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (status==Ipopt::Solve\_Succeeded);}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00368}00368\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00369}00369\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00370}00370\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00371}00371\ \}}
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00372}00372\ }
+\DoxyCodeLine{\Hypertarget{affinity_8cpp_source_l00373}00373\ }
+
+\end{DoxyCode}

@@ -1,0 +1,513 @@
+\doxysection{emb\+Obj\+IMU.\+cpp}
+\hypertarget{embObjIMU_8cpp_source}{}\label{embObjIMU_8cpp_source}\index{icub-\/main/src/libraries/icubmod/embObjIMU/embObjIMU.cpp@{icub-\/main/src/libraries/icubmod/embObjIMU/embObjIMU.cpp}}
+\mbox{\hyperlink{embObjIMU_8cpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00001}00001\ \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00002}00002\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2006-\/2018\ Istituto\ Italiano\ di\ Tecnologia\ (IIT)}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00003}00003\ \textcolor{comment}{\ *\ All\ rights\ reserved.}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00004}00004\ \textcolor{comment}{\ *\ Author:\ Valentina\ Gaggero}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00005}00005\ \textcolor{comment}{\ *\ This\ software\ may\ be\ modified\ and\ distributed\ under\ the\ terms\ of\ the}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00006}00006\ \textcolor{comment}{\ *\ BSD-\/3-\/Clause\ license.\ See\ the\ accompanying\ LICENSE\ file\ for\ details.}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00007}00007\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00008}00008\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00009}00009\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00010}00010\ \textcolor{preprocessor}{\#include\ <mutex>}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00011}00011\ \textcolor{preprocessor}{\#include\ <stdexcept>}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00012}00012\ \textcolor{preprocessor}{\#include\ <yarp/os/Time.h>}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00013}00013\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00014}00014\ \textcolor{preprocessor}{\#include\ <yarp/os/LogStream.h>}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00015}00015\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00016}00016\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{embObjIMU_8h}{embObjIMU.h}}>}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00017}00017\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00018}00018\ \textcolor{preprocessor}{\#include\ "{}EoAnalogSensors.h"{}}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00019}00019\ \textcolor{preprocessor}{\#include\ "{}EoProtocolAS.h"{}}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00020}00020\ \textcolor{preprocessor}{\#include\ "{}EOconstarray.h"{}}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00021}00021\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00022}00022\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00023}00023\ \textcolor{preprocessor}{\#include\ "{}FeatureInterface.h"{}}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00024}00024\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{eo__imu__privData_8h}{eo\_imu\_privData.h}}"{}}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00025}00025\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00026}00026\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00027}00027\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00028}00028\ \textcolor{keyword}{using\ namespace\ }yarp::os;}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00029}00029\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceyarp_1_1dev}{yarp::dev}};}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00030}00030\ \textcolor{keyword}{using\ namespace\ }yarp::sig;}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00031}00031\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00032}00032\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00033}00033\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00034}00034\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00035}00035\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00036}00036\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00037}00037\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00038}\mbox{\hyperlink{embObjIMU_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{00038}}\ \textcolor{preprocessor}{\#define\ GET\_privData(x)\ (*((static\_cast<eo\_imu\_privData*>(x))))}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00039}00039\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00040}00040\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00045}\mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_a420e20c7ccc2b9ec1f1a4be3fee2acca}{00045}}\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_a420e20c7ccc2b9ec1f1a4be3fee2acca}{embObjIMU::embObjIMU}}()}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00046}00046\ \{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00047}00047\ \ \ \ \ mPriv\ =\ \textcolor{keyword}{new}\ \mbox{\hyperlink{classyarp_1_1dev_1_1eo__imu__privData}{eo\_imu\_privData}}(\textcolor{stringliteral}{"{}embObjIMU"{}});}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00048}00048\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00049}00049\ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00050}00050\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00051}\mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_adaacb27fe4757530757c136c1259b8fd}{00051}}\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_adaacb27fe4757530757c136c1259b8fd}{embObjIMU::\string~embObjIMU}}()}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00052}00052\ \{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00053}00053\ \ \ \ \ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_a67243c5e2d8441726ed54ce68c822410}{close}}();}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00054}00054\ \ \ \ \ \textcolor{keyword}{delete}\ \&\mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv);}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00055}00055\ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00056}00056\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00057}00057\ std::string\ embObjIMU::getBoardInfo(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00058}00058\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00059}00059\ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).getBoardInfo();}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00060}00060\ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00061}00061\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00062}00062\ std::pair<size\_t,\ eOas\_sensor\_t>\ embObjIMU::getGyroSubIndex(\textcolor{keywordtype}{size\_t}\ sens\_index)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00063}00063\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00064}00064\ \ \ \ \ std::pair<size\_t,\ eOas\_sensor\_t>\ ret;}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00065}00065\ \ \ \ \ \textcolor{keywordflow}{if}\ (sens\_index\ >=\ \mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).sens.getNumOfSensors(eoas\_imu\_gyr))}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00066}00066\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00067}00067\ \ \ \ \ \ \ \ \ sens\_index\ -\/=\ \mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).sens.getNumOfSensors(eoas\_imu\_gyr);}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00068}00068\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (sens\_index\ >=\ \mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).sens.getNumOfSensors(eoas\_gyros\_st\_l3g4200d))}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00069}00069\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00070}00070\ \ \ \ \ \ \ \ \ \ \ \ \ sens\_index\ -\/=\ \mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).sens.getNumOfSensors(eoas\_gyros\_st\_l3g4200d);}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00071}00071\ \ \ \ \ \ \ \ \ \ \ \ \ ret.second\ =\ eoas\_gyros\_mtb\_ext;}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00072}00072\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00073}00073\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00074}00074\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00075}00075\ \ \ \ \ \ \ \ \ \ \ \ \ ret.second\ =\ eoas\_gyros\_st\_l3g4200d;}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00076}00076\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00077}00077\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00078}00078\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00079}00079\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00080}00080\ \ \ \ \ \ \ \ \ ret.second\ =\ eoas\_imu\_gyr;}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00081}00081\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00082}00082\ \ \ \ \ ret.first\ =\ sens\_index;}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00083}00083\ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00084}00084\ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00085}00085\ std::pair<size\_t,\ eOas\_sensor\_t>\ embObjIMU::getAccSubIndex(\textcolor{keywordtype}{size\_t}\ sens\_index)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00086}00086\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00087}00087\ \ \ \ \ std::pair<size\_t,\ eOas\_sensor\_t>\ ret;}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00088}00088\ \ \ \ \ \textcolor{keywordflow}{if}\ (sens\_index\ >=\ \mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).sens.getNumOfSensors(eoas\_imu\_acc))}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00089}00089\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00090}00090\ \ \ \ \ \ \ \ \ sens\_index\ -\/=\ \mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).sens.getNumOfSensors(eoas\_imu\_acc);}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00091}00091\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (sens\_index\ >=\ \mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).sens.getNumOfSensors(eoas\_accel\_mtb\_int))}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00092}00092\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00093}00093\ \ \ \ \ \ \ \ \ \ \ \ \ sens\_index\ -\/=\ \mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).sens.getNumOfSensors(eoas\_accel\_mtb\_int);}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00094}00094\ \ \ \ \ \ \ \ \ \ \ \ \ ret.second\ =\ eoas\_accel\_mtb\_ext;}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00095}00095\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00096}00096\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00097}00097\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00098}00098\ \ \ \ \ \ \ \ \ \ \ \ \ ret.second\ =\ eoas\_accel\_mtb\_int;}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00099}00099\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00100}00100\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00101}00101\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00102}00102\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00103}00103\ \ \ \ \ \ \ \ \ ret.second\ =\ eoas\_imu\_acc;}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00104}00104\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00105}00105\ \ \ \ \ ret.first\ =\ sens\_index;}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00106}00106\ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00107}00107\ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00108}00108\ \textcolor{keywordtype}{void}\ embObjIMU::cleanup(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00109}00109\ \{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00110}00110\ \ \ \ \ \mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).cleanup(\textcolor{keyword}{static\_cast\ <}\mbox{\hyperlink{classeth_1_1IethResource}{eth::IethResource}}*\textcolor{keyword}{>}\ (\textcolor{keyword}{this}));}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00111}00111\ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00112}00112\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00113}00113\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00114}00114\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00115}\mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_aa72c67c622dbd431393e331e9e5d11ca}{00115}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_aa72c67c622dbd431393e331e9e5d11ca}{embObjIMU::open}}(yarp::os::Searchable\ \&config)}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00116}00116\ \{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00117}00117\ \ \ \ \ \textcolor{comment}{//\ -\/\ first\ thing\ to\ do\ is\ verify\ if\ the\ eth\ manager\ is\ available\ then\ i\ parse\ info\ about\ the\ eth\ board.}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00118}00118\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00119}00119\ \ \ \ \ \textcolor{keywordflow}{if}(!\ \mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).prerareEthService(config,\ \textcolor{keyword}{this}))}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00120}00120\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00121}00121\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00122}00122\ \ \ \ \ \textcolor{comment}{//\ read\ stuff\ from\ config\ file}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00123}00123\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00124}00124\ \ \ \ \ \mbox{\hyperlink{structservConfigImu__t}{servConfigImu\_t}}\ servCfg;}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00125}00125\ \ \ \ \ \textcolor{keywordflow}{if}(!\mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).fromConfig(config,\ servCfg))}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00126}00126\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00127}00127\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00128}00128\ \ \ \ \ \textcolor{keywordflow}{if}(!\mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).res-\/>verifyEPprotocol(eoprot\_endpoint\_analogsensors))}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00129}00129\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00130}00130\ \ \ \ \ \ \ \ \ cleanup();}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00131}00131\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00132}00132\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00133}00133\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00134}00134\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00135}00135\ \ \ \ \ \textcolor{keyword}{const}\ eOmn\_serv\_parameter\_t*\ servparam\ =\ \&servCfg.\mbox{\hyperlink{structservConfigImu__t_a474765bd84cc3f5e219e3c14de5ef603}{ethservice}};}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00136}00136\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00137}00137\ \ \ \ \ \textcolor{keywordflow}{if}(\textcolor{keyword}{false}\ ==\ \mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).res-\/>serviceVerifyActivate(eomn\_serv\_category\_inertials3,\ servparam,\ 5.0))}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00138}00138\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00139}00139\ \ \ \ \ \ \ \ \ yError()\ <<\ getBoardInfo()\ <<\ \textcolor{stringliteral}{"{}open()\ has\ an\ error\ in\ call\ of\ ethResources::serviceVerifyActivate()\ "{}};}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00140}00140\ \ \ \ \ \ \ \ \ cleanup();}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00141}00141\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00142}00142\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00143}00143\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00144}00144\ \ \ \ \ \textcolor{comment}{//init\ conversion\ factor}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00145}00145\ \ \ \ \ \textcolor{comment}{//TODO:\ currently\ the\ conversion\ factors\ are\ not\ read\ from\ xml\ files,\ but\ configured\ here.}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00146}00146\ \ \ \ \ \textcolor{comment}{//please\ read\ IMUbosh\ datasheet\ for\ more\ information}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00147}00147\ \ \ \ \ \textcolor{comment}{//\ configure\ the\ sensor(s)}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00148}00148\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00149}00149\ \ \ \ \ \textcolor{keywordflow}{if}(\textcolor{keyword}{false}\ ==\ \mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).sendConfing2board(servCfg))}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00150}00150\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00151}00151\ \ \ \ \ \ \ \ \ cleanup();}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00152}00152\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00153}00153\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00154}00154\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00155}00155\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00156}00156\ \ \ \ \ \textcolor{keywordflow}{if}(\textcolor{keyword}{false}\ ==\ \mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).initRegulars())}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00157}00157\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00158}00158\ \ \ \ \ \ \ \ \ cleanup();}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00159}00159\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00160}00160\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00161}00161\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00162}00162\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00163}00163\ \ \ \ \ \textcolor{keywordflow}{if}(\textcolor{keyword}{false}\ ==\ \mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).res-\/>serviceStart(eomn\_serv\_category\_inertials3))}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00164}00164\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00165}00165\ \ \ \ \ \ \ \ \ yError()\ <<\ getBoardInfo()\ <<\ \textcolor{stringliteral}{"{}open()\ fails\ to\ start\ as\ service....\ cannot\ continue"{}};}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00166}00166\ \ \ \ \ \ \ \ \ cleanup();}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00167}00167\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00168}00168\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00169}00169\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00170}00170\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00171}00171\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(\mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).isVerbose())}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00172}00172\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00173}00173\ \ \ \ \ \ \ \ \ \ \ \ \ yDebug()\ <<\ getBoardInfo()\ <<\ \textcolor{stringliteral}{"{}open()\ correctly\ starts\ service"{}};}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00174}00174\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00175}00175\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00176}00176\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00177}00177\ \ \ \ \ \textcolor{comment}{//\ build\ data\ structure\ used\ to\ handle\ rx\ packets}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00178}00178\ \ \ \ \ \mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).maps.init(servCfg);}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00179}00179\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00180}00180\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00181}00181\ \ \ \ \ \{\ \ \ \textcolor{comment}{//\ start\ the\ configured\ sensors.\ so\ far,\ we\ must\ keep\ it\ in\ here.\ later\ on\ we\ can\ remove\ this\ command}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00182}00182\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00183}00183\ \ \ \ \ \ \ \ \ uint8\_t\ enable\ =\ 1;}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00184}00184\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00185}00185\ \ \ \ \ \ \ \ \ eOprotID32\_t\ id32\ =\ eoprot\_ID\_get(eoprot\_endpoint\_analogsensors,\ eoprot\_entity\_as\_inertial3,\ 0,\ eoprot\_tag\_as\_inertial3\_cmmnds\_enable);}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00186}00186\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(\textcolor{keyword}{false}\ ==\ \mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).res-\/>setRemoteValue(id32,\ \&enable))}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00187}00187\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00188}00188\ \ \ \ \ \ \ \ \ \ \ \ \ yError()\ <<\ getBoardInfo()\ <<\ \textcolor{stringliteral}{"{}open()\ fails\ to\ command\ the\ start\ transmission\ of\ the\ configured\ inertials"{}};}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00189}00189\ \ \ \ \ \ \ \ \ \ \ \ \ cleanup();}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00190}00190\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00191}00191\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00192}00192\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00193}00193\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00194}00194\ \ \ \ \ \mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).sens.init(servCfg,\ getBoardInfo());}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00195}00195\ \ \ \ \ \mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).setOpen(\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00196}00196\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00197}00197\ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00198}00198\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00199}\mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_a67243c5e2d8441726ed54ce68c822410}{00199}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_a67243c5e2d8441726ed54ce68c822410}{embObjIMU::close}}()}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00200}00200\ \{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00201}00201\ \ \ \ \ cleanup();}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00202}00202\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00203}00203\ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00204}00204\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00205}00205\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00206}00206\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00207}00207\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00208}00208\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00209}\mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_a86e21ea08dd9ec41868ef22d3471866b}{00209}}\ \textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_a86e21ea08dd9ec41868ef22d3471866b}{embObjIMU::getNrOfThreeAxisGyroscopes}}()\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00210}00210\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00211}00211\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).sens.getNumOfSensors(eoas\_imu\_gyr)\ +}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00212}00212\ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).sens.getNumOfSensors(eoas\_gyros\_st\_l3g4200d)\ +\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00213}00213\ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).sens.getNumOfSensors(eoas\_gyros\_mtb\_ext);}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00214}00214\ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00215}00215\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00216}\mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_a00306b9beab2a32f5b85c08f0c0c91f4}{00216}}\ yarp::dev::MAS\_status\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_a00306b9beab2a32f5b85c08f0c0c91f4}{embObjIMU::getThreeAxisGyroscopeStatus}}(\textcolor{keywordtype}{size\_t}\ sens\_index)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00217}00217\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00218}00218\ \ \ \ \ \textcolor{keyword}{auto}\ gyroSubIndex\ =\ getGyroSubIndex(sens\_index);}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00219}00219\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).sensorState\_eo2yarp(gyroSubIndex.second,\ \mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).sens.getSensorStatus(gyroSubIndex.first,\ gyroSubIndex.second));}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00220}00220\ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00221}00221\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00222}\mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_aa99c9a92ff57ce98f8f6185faa0b1419}{00222}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_aa99c9a92ff57ce98f8f6185faa0b1419}{embObjIMU::getThreeAxisGyroscopeName}}(\textcolor{keywordtype}{size\_t}\ sens\_index,\ std::string\ \&name)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00223}00223\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00224}00224\ \ \ \ \ \textcolor{keyword}{auto}\ gyroSubIndex\ =\ getGyroSubIndex(sens\_index);}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00225}00225\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).sens.getSensorName(gyroSubIndex.first,\ gyroSubIndex.second,\ name);}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00226}00226\ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00227}00227\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00228}\mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_a98841fac64d5044a119bbe21acd57b2e}{00228}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_a98841fac64d5044a119bbe21acd57b2e}{embObjIMU::getThreeAxisGyroscopeFrameName}}(\textcolor{keywordtype}{size\_t}\ sens\_index,\ std::string\ \&frameName)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00229}00229\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00230}00230\ \ \ \ \ \textcolor{keyword}{auto}\ gyroSubIndex\ =\ getGyroSubIndex(sens\_index);}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00231}00231\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).sens.getSensorFrameName(gyroSubIndex.first,\ gyroSubIndex.second,\ frameName);}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00232}00232\ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00233}00233\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00234}\mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_a9feb4dfd087c3e1a7a086570e6067f81}{00234}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_a9feb4dfd087c3e1a7a086570e6067f81}{embObjIMU::getThreeAxisGyroscopeMeasure}}(\textcolor{keywordtype}{size\_t}\ sens\_index,\ yarp::sig::Vector\&\ \mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}},\ \textcolor{keywordtype}{double}\&\ timestamp)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00235}00235\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00236}00236\ \ \ \ \ \textcolor{keyword}{auto}\ gyroSubIndex\ =\ getGyroSubIndex(sens\_index);}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00237}00237\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).sens.getSensorMeasure(gyroSubIndex.first,\ gyroSubIndex.second,\ \mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}},\ timestamp);}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00238}00238\ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00239}00239\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00240}\mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_ac3b8c0e32f7e307b17373ae368c2be52}{00240}}\ \textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_ac3b8c0e32f7e307b17373ae368c2be52}{embObjIMU::getNrOfThreeAxisLinearAccelerometers}}()\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00241}00241\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00242}00242\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).sens.getNumOfSensors(eoas\_imu\_acc)\ +\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00243}00243\ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).sens.getNumOfSensors(eoas\_accel\_mtb\_int)\ +}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00244}00244\ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).sens.getNumOfSensors(eoas\_accel\_mtb\_ext);}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00245}00245\ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00246}00246\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00247}\mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_a448402019cd8a1ade004d64a4e9eee10}{00247}}\ yarp::dev::MAS\_status\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_a448402019cd8a1ade004d64a4e9eee10}{embObjIMU::getThreeAxisLinearAccelerometerStatus}}(\textcolor{keywordtype}{size\_t}\ sens\_index)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00248}00248\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00249}00249\ \ \ \ \ \textcolor{keywordflow}{if}\ (sens\_index\ >=\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_ac3b8c0e32f7e307b17373ae368c2be52}{getNrOfThreeAxisLinearAccelerometers}}())\ \{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00250}00250\ \ \ \ \ \ \ \ \ yError()\ <<\ getBoardInfo()\ <<\ \textcolor{stringliteral}{"{}getThreeAxisLinearAccelerometerStatus:\ index\ out\ of\ range"{}};}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00251}00251\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ MAS\_status::MAS\_ERROR;}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00252}00252\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00253}00253\ \ \ \ \ \textcolor{keyword}{auto}\ accSubIndex\ =\ getAccSubIndex(sens\_index);}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00254}00254\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).sensorState\_eo2yarp(accSubIndex.second,\ \mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).sens.getSensorStatus(accSubIndex.first,\ accSubIndex.second));}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00255}00255\ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00256}00256\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00257}\mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_a2352c7df8dfcf0a8195c78f449d06010}{00257}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_a2352c7df8dfcf0a8195c78f449d06010}{embObjIMU::getThreeAxisLinearAccelerometerName}}(\textcolor{keywordtype}{size\_t}\ sens\_index,\ std::string\ \&name)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00258}00258\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00259}00259\ \ \ \ \ \textcolor{keywordflow}{if}\ (sens\_index\ >=\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_ac3b8c0e32f7e307b17373ae368c2be52}{getNrOfThreeAxisLinearAccelerometers}}())}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00260}00260\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00261}00261\ \ \ \ \ \ \ \ \ yError()\ <<\ getBoardInfo()\ <<\ \textcolor{stringliteral}{"{}getThreeAxisLinearAccelerometerName:\ index\ out\ of\ range"{}};}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00262}00262\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00263}00263\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00264}00264\ \ \ \ \ \textcolor{keyword}{auto}\ accSubIndex\ =\ getAccSubIndex(sens\_index);}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00265}00265\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).sens.getSensorName(accSubIndex.first,\ accSubIndex.second,\ name);}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00266}00266\ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00267}00267\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00268}\mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_ab3af00c87aa6aa3196acb8fa57df9629}{00268}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_ab3af00c87aa6aa3196acb8fa57df9629}{embObjIMU::getThreeAxisLinearAccelerometerFrameName}}(\textcolor{keywordtype}{size\_t}\ sens\_index,\ std::string\ \&frameName)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00269}00269\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00270}00270\ \ \ \ \ \textcolor{keywordflow}{if}\ (sens\_index\ >=\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_ac3b8c0e32f7e307b17373ae368c2be52}{getNrOfThreeAxisLinearAccelerometers}}())}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00271}00271\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00272}00272\ \ \ \ \ \ \ \ \ yError()\ <<\ getBoardInfo()\ <<\ \textcolor{stringliteral}{"{}getThreeAxisLinearAccelerometerFrameName:\ index\ out\ of\ range"{}};}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00273}00273\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00274}00274\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00275}00275\ \ \ \ \ \textcolor{keyword}{auto}\ accSubIndex\ =\ getAccSubIndex(sens\_index);}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00276}00276\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).sens.getSensorFrameName(accSubIndex.first,\ accSubIndex.second,\ frameName);}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00277}00277\ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00278}00278\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00279}\mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_adfaa435057839ce3aa90bf30f8812651}{00279}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_adfaa435057839ce3aa90bf30f8812651}{embObjIMU::getThreeAxisLinearAccelerometerMeasure}}(\textcolor{keywordtype}{size\_t}\ sens\_index,\ yarp::sig::Vector\&\ \mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}},\ \textcolor{keywordtype}{double}\&\ timestamp)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00280}00280\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00281}00281\ \ \ \ \ \textcolor{keywordflow}{if}\ (sens\_index\ >=\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_ac3b8c0e32f7e307b17373ae368c2be52}{getNrOfThreeAxisLinearAccelerometers}}())}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00282}00282\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00283}00283\ \ \ \ \ \ \ \ \ yError()\ <<\ getBoardInfo()\ <<\ \textcolor{stringliteral}{"{}getThreeAxisLinearAccelerometerMeasure:\ index\ out\ of\ range"{}};}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00284}00284\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00285}00285\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00286}00286\ \ \ \ \ \textcolor{keyword}{auto}\ accSubIndex\ =\ getAccSubIndex(sens\_index);}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00287}00287\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).sens.getSensorMeasure(accSubIndex.first,\ accSubIndex.second,\ \mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}},\ timestamp);}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00288}00288\ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00289}00289\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00290}\mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_a158760e4e6ce5092803f8a2123314656}{00290}}\ \textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_a158760e4e6ce5092803f8a2123314656}{embObjIMU::getNrOfThreeAxisMagnetometers}}()\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00291}00291\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00292}00292\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).sens.getNumOfSensors(eoas\_imu\_mag);}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00293}00293\ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00294}00294\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00295}\mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_a821fe2b36003f6ca5c38d12d6915c66c}{00295}}\ yarp::dev::MAS\_status\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_a821fe2b36003f6ca5c38d12d6915c66c}{embObjIMU::getThreeAxisMagnetometerStatus}}(\textcolor{keywordtype}{size\_t}\ sens\_index)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00296}00296\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00297}00297\ \ \ \ \ \textcolor{keywordflow}{if}\ (sens\_index\ >=\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_a158760e4e6ce5092803f8a2123314656}{getNrOfThreeAxisMagnetometers}}())}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00298}00298\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00299}00299\ \ \ \ \ \ \ \ \ yError()\ <<\ getBoardInfo()\ <<\ \textcolor{stringliteral}{"{}getThreeAxisMagnetometerStatus:\ index\ out\ of\ range"{}};}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00300}00300\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ MAS\_status::MAS\_ERROR;}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00301}00301\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00302}00302\ \ \ \ \ \textcolor{keywordflow}{return}\ \ \mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).sensorState\_eo2yarp(eoas\_imu\_mag,\ \mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).sens.getSensorStatus(sens\_index,\ eoas\_imu\_mag));}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00303}00303\ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00304}00304\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00305}\mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_aaada6518b7f3b0d49b5a85b15306a432}{00305}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_aaada6518b7f3b0d49b5a85b15306a432}{embObjIMU::getThreeAxisMagnetometerName}}(\textcolor{keywordtype}{size\_t}\ sens\_index,\ std::string\ \&name)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00306}00306\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00307}00307\ \ \ \ \ \textcolor{keywordflow}{if}\ (sens\_index\ >=\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_a158760e4e6ce5092803f8a2123314656}{getNrOfThreeAxisMagnetometers}}())}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00308}00308\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00309}00309\ \ \ \ \ \ \ \ \ yError()\ <<\ getBoardInfo()\ <<\ \textcolor{stringliteral}{"{}getThreeAxisMagnetometerName:\ index\ out\ of\ range"{}};}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00310}00310\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00311}00311\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00312}00312\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).sens.getSensorName(sens\_index,\ eoas\_imu\_mag,\ name);}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00313}00313\ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00314}00314\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00315}\mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_adbce27949c1e61cadf79307427b82b5e}{00315}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_adbce27949c1e61cadf79307427b82b5e}{embObjIMU::getThreeAxisMagnetometerFrameName}}(\textcolor{keywordtype}{size\_t}\ sens\_index,\ std::string\ \&frameName)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00316}00316\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00317}00317\ \ \ \ \ \textcolor{keywordflow}{if}\ (sens\_index\ >=\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_a158760e4e6ce5092803f8a2123314656}{getNrOfThreeAxisMagnetometers}}())}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00318}00318\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00319}00319\ \ \ \ \ \ \ \ \ yError()\ <<\ getBoardInfo()\ <<\ \textcolor{stringliteral}{"{}getThreeAxisMagnetometerFrameName:\ index\ out\ of\ range"{}};}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00320}00320\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00321}00321\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00322}00322\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).sens.getSensorFrameName(sens\_index,\ eoas\_imu\_mag,\ frameName);}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00323}00323\ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00324}00324\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00325}\mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_aeba2595278c97d0ca42fb345ea034afc}{00325}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_aeba2595278c97d0ca42fb345ea034afc}{embObjIMU::getThreeAxisMagnetometerMeasure}}(\textcolor{keywordtype}{size\_t}\ sens\_index,\ yarp::sig::Vector\&\ \mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}},\ \textcolor{keywordtype}{double}\&\ timestamp)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00326}00326\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00327}00327\ \ \ \ \ \textcolor{keywordflow}{if}\ (sens\_index\ >=\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_a158760e4e6ce5092803f8a2123314656}{getNrOfThreeAxisMagnetometers}}())}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00328}00328\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00329}00329\ \ \ \ \ \ \ \ \ yError()\ <<\ getBoardInfo()\ <<\ \textcolor{stringliteral}{"{}getThreeAxisMagnetometerMeasure:\ index\ out\ of\ range"{}};}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00330}00330\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00331}00331\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00332}00332\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).sens.getSensorMeasure(sens\_index,\ eoas\_imu\_mag,\ \mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}},\ timestamp);}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00333}00333\ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00334}00334\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00335}\mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_a9df2f1e2ffa9ffddaf2ede7848ab5fca}{00335}}\ \textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_a9df2f1e2ffa9ffddaf2ede7848ab5fca}{embObjIMU::getNrOfOrientationSensors}}()\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00336}00336\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00337}00337\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).sens.getNumOfSensors(eoas\_imu\_eul);}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00338}00338\ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00339}00339\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00340}\mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_a7cace3e71efa031b50bed74199247840}{00340}}\ yarp::dev::MAS\_status\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_a7cace3e71efa031b50bed74199247840}{embObjIMU::getOrientationSensorStatus}}(\textcolor{keywordtype}{size\_t}\ sens\_index)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00341}00341\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00342}00342\ \ \ \ \ \textcolor{keywordflow}{if}\ (sens\_index\ >=\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_a9df2f1e2ffa9ffddaf2ede7848ab5fca}{getNrOfOrientationSensors}}())}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00343}00343\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00344}00344\ \ \ \ \ \ \ \ \ yError()\ <<\ getBoardInfo()\ <<\ \ \textcolor{stringliteral}{"{}getOrientationSensorStatus:\ index\ out\ of\ range"{}};}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00345}00345\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ MAS\_status::MAS\_ERROR;}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00346}00346\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00347}00347\ \ \ \ \ \textcolor{keywordflow}{return}\ \ \mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).sensorState\_eo2yarp(eoas\_imu\_eul,\ \mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).sens.getSensorStatus(sens\_index,\ eoas\_imu\_eul));}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00348}00348\ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00349}00349\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00350}\mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_a2074b98b2f1a6d9447128846ce7a3eed}{00350}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_a2074b98b2f1a6d9447128846ce7a3eed}{embObjIMU::getOrientationSensorName}}(\textcolor{keywordtype}{size\_t}\ sens\_index,\ std::string\ \&name)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00351}00351\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00352}00352\ \ \ \ \ \textcolor{keywordflow}{if}\ (sens\_index\ >=\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_a9df2f1e2ffa9ffddaf2ede7848ab5fca}{getNrOfOrientationSensors}}())}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00353}00353\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00354}00354\ \ \ \ \ \ \ \ \ yError()\ <<\ getBoardInfo()\ <<\ \textcolor{stringliteral}{"{}getOrientationSensorName:\ index\ out\ of\ range"{}};}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00355}00355\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00356}00356\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00357}00357\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).sens.getSensorName(sens\_index,\ eoas\_imu\_eul,\ name);}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00358}00358\ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00359}00359\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00360}\mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_a01aef5150105894bf60bf8370a585a26}{00360}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_a01aef5150105894bf60bf8370a585a26}{embObjIMU::getOrientationSensorFrameName}}(\textcolor{keywordtype}{size\_t}\ sens\_index,\ std::string\ \&frameName)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00361}00361\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00362}00362\ \ \ \ \ \textcolor{keywordflow}{if}\ (sens\_index\ >=\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_a9df2f1e2ffa9ffddaf2ede7848ab5fca}{getNrOfOrientationSensors}}())}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00363}00363\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00364}00364\ \ \ \ \ \ \ \ \ yError()\ <<\ getBoardInfo()\ <<\ \textcolor{stringliteral}{"{}getOrientationSensorFrameName:\ index\ out\ of\ range"{}};}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00365}00365\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00366}00366\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00367}00367\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).sens.getSensorFrameName(sens\_index,\ eoas\_imu\_eul,\ frameName);}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00368}00368\ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00369}00369\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00370}\mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_a52e1d30a16be146e4a3e96bf0a03046c}{00370}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_a52e1d30a16be146e4a3e96bf0a03046c}{embObjIMU::getOrientationSensorMeasureAsRollPitchYaw}}(\textcolor{keywordtype}{size\_t}\ sens\_index,\ yarp::sig::Vector\&\ rpy\_out,\ \textcolor{keywordtype}{double}\&\ timestamp)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00371}00371\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00372}00372\ \ \ \ \ \textcolor{keywordflow}{if}\ (sens\_index\ >=\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_a9df2f1e2ffa9ffddaf2ede7848ab5fca}{getNrOfOrientationSensors}}())}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00373}00373\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00374}00374\ \ \ \ \ \ \ \ \ yError()\ <<\ getBoardInfo()\ <<\ \textcolor{stringliteral}{"{}getOrientationSensorMeasureAsRollPitchYaw:\ index\ out\ of\ range"{}};}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00375}00375\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00376}00376\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00377}00377\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).sens.getSensorMeasure(sens\_index,\ eoas\_imu\_eul,\ rpy\_out,\ timestamp);}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00378}00378\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00379}00379\ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00380}00380\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00381}00381\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00382}\mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_a77413266bf2bb5e80c78c7dd6454019d}{00382}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_a77413266bf2bb5e80c78c7dd6454019d}{embObjIMU::initialised}}()}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00383}00383\ \{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00384}00384\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).behFlags.opened;}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00385}00385\ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00386}00386\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00387}\mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_a4c5ff6f4df4ce38b314f0dd201b79a3d}{00387}}\ \mbox{\hyperlink{namespaceeth_a704c2a3588a2da466bf3665f8bd3cbea}{eth::iethresType\_t}}\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_a4c5ff6f4df4ce38b314f0dd201b79a3d}{embObjIMU::type}}()}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00388}00388\ \{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00389}00389\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{namespaceeth_a704c2a3588a2da466bf3665f8bd3cbeaa6319de8a36ce11a852eab624e8283d38}{eth::iethres\_analoginertial3}};}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00390}00390\ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00391}00391\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00392}00392\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00393}00393\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00394}00394\ \textcolor{preprocessor}{\#undef\ DEBUG\_PRINT\_NONVALIDDATA}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00395}\mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_a7b4dbaace8d37d74cda5b414313fc7c8}{00395}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_a7b4dbaace8d37d74cda5b414313fc7c8}{embObjIMU::update}}(eOprotID32\_t\ id32,\ \textcolor{keywordtype}{double}\ timestamp,\ \textcolor{keywordtype}{void}*\ rxdata)}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00396}00396\ \{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00397}00397\ \ \ \ \ eOas\_inertial3\_status\_t\ *i3s\ \ =\ (eOas\_inertial3\_status\_t*)rxdata;}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00398}00398\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00399}00399\ \ \ \ \ EOconstarray*\ arrayofvalues\ =\ eo\_constarray\_Load(\textcolor{keyword}{reinterpret\_cast<}\textcolor{keyword}{const\ }EOarray*\textcolor{keyword}{>}(\&i3s-\/>arrayofdata));}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00400}00400\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00401}00401\ \ \ \ \ uint8\_t\ numofIntem2update\ =\ eo\_constarray\_Size(arrayofvalues);}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00402}00402\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00403}00403\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i=0;\ i<numofIntem2update;\ i++)}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00404}00404\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00405}00405\ \ \ \ \ \ \ \ \ eOas\_inertial3\_data\_t\ *\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}\ =\ (eOas\_inertial3\_data\_t*)\ eo\_constarray\_At(arrayofvalues,\ i);}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00406}00406\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}\ ==\ NULL)}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00407}00407\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00408}00408\ \ \ \ \ \ \ \ \ \ \ \ \ yError()\ <<\ getBoardInfo()\ <<\ \textcolor{stringliteral}{"{}update():\ I\ have\ to\ update\ "{}}\ <<\ numofIntem2update\ <<\ \textcolor{stringliteral}{"{}items,\ but\ the\ "{}}\ <<\ i\ <<\ \textcolor{stringliteral}{"{}-\/th\ item\ is\ null."{}};}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00409}00409\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue};}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00410}00410\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//NOTE:\ I\ signal\ this\ strange\ situation\ with\ an\ arror\ for\ debug\ porpouse...maybe\ we\ can\ convert\ in\ in\ warning\ when\ the\ device\ is\ stable....}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00411}00411\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00412}00412\ \ \ \ \ \ \ \ \ uint8\_t\ index;}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00413}00413\ \ \ \ \ \ \ \ \ eOas\_sensor\_t\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_a4c5ff6f4df4ce38b314f0dd201b79a3d}{type}};}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00414}00414\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ validdata\ =\ \ \mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).maps.getIndex(\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}},\ index,\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_a4c5ff6f4df4ce38b314f0dd201b79a3d}{type}});}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00415}00415\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00416}00416\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(!validdata)}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00417}00417\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00418}00418\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00419}00419\ \textcolor{preprocessor}{\#if\ defined(DEBUG\_PRINT\_NONVALIDDATA)}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00420}00420\ \ \ \ \ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}NOT\ VALID\ value[\%i]\ is:\ seq\ =\ \%d,\ timestamp\ =\ \%d,\ type\ =\ \%s,\ id\ =\ \%d,\ v=\ ((\%d),\ \%d,\ \%d,\ \%d),\ status\ =\ \%x"{}},}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00421}00421\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ i,}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00422}00422\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}-\/>seq,}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00423}00423\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}-\/>timestamp,}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00424}00424\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ eoas\_sensor2string(\textcolor{keyword}{static\_cast<}eOas\_sensor\_t\textcolor{keyword}{>}(\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}-\/>typeofsensor)),}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00425}00425\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}-\/>id,}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00426}00426\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}-\/>w,\ \mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}-\/>x,\ \mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}-\/>y,\ \mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}-\/>z,}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00427}00427\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}-\/>status.general);}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00428}00428\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00429}00429\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue};}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00430}00430\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00431}00431\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00432}00432\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(\mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_a4c5ff6f4df4ce38b314f0dd201b79a3d}{type}}\ ==\ eoas\_imu\_status)}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00433}00433\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00434}00434\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//updateAllsensorOnSameBoad(data)}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00435}00435\ \ \ \ \ \ \ \ \ \ \ \ \ uint8\_t\ canbus,\ canaddress,\ i;}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00436}00436\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classyarp_1_1dev_1_1PositionMaps_aa7fa44e7f31e428281a178fa5ff2468e}{PositionMaps::getCanAddress}}(\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}},\ canbus,\ canaddress);}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00437}00437\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (uint8\_t\ t=eoas\_imu\_acc;\ t<=eoas\_imu\_status;\ t++)}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00438}00438\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00439}00439\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ uint8\_t\ i;}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00440}00440\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(\mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).maps.getIndex(\textcolor{keyword}{static\_cast<}eOas\_sensor\_t\textcolor{keyword}{>}(t),\ canbus,\ canaddress,\ i))}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00441}00441\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00442}00442\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).sens.updateStatus(\textcolor{keyword}{static\_cast<}eOas\_sensor\_t\textcolor{keyword}{>}(t),\ i,\ \mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}-\/>status);}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00443}00443\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//yError()\ <<\ "{}UPDATE\ STATUS\ OF\ SENSOR\ "{}\ <<\ i\ <<\ "{}with\ type\ "{}<<\ eoas\_sensor2string(static\_cast<eOas\_sensor\_t>(t))\ <<\ "{}can\ port="{}\ <<\ canbus\ <<\ "{}can\ addr="{}\ <<\ canaddress\ <<\ "{}status="{}\ <<\ data-\/>status.general;}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00444}00444\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00445}00445\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00446}00446\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00447}00447\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00448}00448\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00449}00449\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00450}00450\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).sens.update(\mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_a4c5ff6f4df4ce38b314f0dd201b79a3d}{type}},\ index,\ \mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}});}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00451}00451\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00452}00452\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00453}00453\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00454}00454\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00455}00455\ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00456}00456\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00457}00457\ \textcolor{comment}{//this\ function\ can\ be\ called\ inside\ update\ function\ to\ print\ the\ received\ data}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00458}00458\ \textcolor{keywordtype}{void}\ embObjIMU::updateDebugPrints(eOprotID32\_t\ id32,\ \textcolor{keywordtype}{double}\ timestamp,\ \textcolor{keywordtype}{void}*\ rxdata)}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00459}00459\ \{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00460}00460\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{int}\ prog\ =\ 1;}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00461}00461\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{double}\ prevtime\ =\ \ yarp::os::Time::now();}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00462}00462\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00463}00463\ \ \ \ \ \textcolor{keywordtype}{double}\ delta\ =\ yarp::os::Time::now()\ -\/\ prevtime;}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00464}00464\ \ \ \ \ \textcolor{keywordtype}{double}\ millidelta\ =\ 1000.0\ *delta;}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00465}00465\ \ \ \ \ \textcolor{keywordtype}{long}\ milli\ =\ \textcolor{keyword}{static\_cast<}\textcolor{keywordtype}{long}\textcolor{keyword}{>}(millidelta);}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00466}00466\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00467}00467\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00468}00468\ \ \ \ \ eOas\_inertial3\_status\_t\ *i3s\ \ =\ (eOas\_inertial3\_status\_t*)rxdata;}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00469}00469\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00470}00470\ \ \ \ \ EOconstarray*\ arrayofvalues\ =\ eo\_constarray\_Load(\textcolor{keyword}{reinterpret\_cast<}\textcolor{keyword}{const\ }EOarray*\textcolor{keyword}{>}(\&i3s-\/>arrayofdata));}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00471}00471\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00472}00472\ \ \ \ \ uint8\_t\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}\ =\ eo\_constarray\_Size(arrayofvalues);}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00473}00473\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00474}00474\ \ \ \ \ \textcolor{keywordflow}{if}(\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}\ >\ 0)}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00475}00475\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00476}00476\ \ \ \ \ \ \ \ \ prog++;}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00477}00477\ \ \ \ \ \textcolor{comment}{//\ \ \ \ \ \ \ \ if(0\ ==\ (prog\%20))}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00478}00478\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00479}00479\ \ \ \ \ \ \ \ \ \ \ \ \ yDebug()\ <<\ \textcolor{stringliteral}{"{}embObjIMU::update():\ received"{}}\ <<\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}\ <<\ \textcolor{stringliteral}{"{}values\ after"{}}\ <<\ milli\ <<\ \textcolor{stringliteral}{"{}milli"{}};}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00480}00480\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00481}00481\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i=0;\ i<\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}};\ i++)}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00482}00482\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00483}00483\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ eOas\_inertial3\_data\_t\ *\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}\ =\ (eOas\_inertial3\_data\_t*)\ eo\_constarray\_At(arrayofvalues,\ i);}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00484}00484\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(NULL\ ==\ \mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}})}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00485}00485\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00486}00486\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yDebug()\ <<\ \textcolor{stringliteral}{"{}embObjIMU::update():\ NULL"{}};}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00487}00487\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00488}00488\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00489}00489\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00490}00490\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ uint8\_t\ pos\ =\ 0xff;}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00491}00491\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ eOas\_sensor\_t\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_a4c5ff6f4df4ce38b314f0dd201b79a3d}{type}};}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00492}00492\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{embObjFTsensor_8cpp_a6f2920e75d55f8574edff55d03fe08b9}{GET\_privData}}(mPriv).maps.getIndex(\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}},\ pos,\ \mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_a4c5ff6f4df4ce38b314f0dd201b79a3d}{type}});}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00493}00493\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yDebug(\textcolor{stringliteral}{"{}value[\%i]\ is:\ seq\ =\ \%d,\ timestamp\ =\ \%d,\ type\ =\ \%s,\ id\ =\ \%d,\ v=\ ((\%d),\ \%d,\ \%d,\ \%d),\ status\ =\ \%x,\ pos\ =\ \%d"{}},}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00494}00494\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ i,}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00495}00495\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}-\/>seq,}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00496}00496\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}-\/>timestamp,}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00497}00497\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ eoas\_sensor2string(\textcolor{keyword}{static\_cast<}eOas\_sensor\_t\textcolor{keyword}{>}(\mbox{\hyperlink{classyarp_1_1dev_1_1embObjIMU_a4c5ff6f4df4ce38b314f0dd201b79a3d}{type}})),}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00498}00498\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}-\/>id,}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00499}00499\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}-\/>w,\ \mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}-\/>x,\ \mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}-\/>y,\ \mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}-\/>z,}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00500}00500\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}-\/>status.general,}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00501}00501\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pos);}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00502}00502\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00503}00503\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00504}00504\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00505}00505\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00506}00506\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00507}00507\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00508}00508\ \}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00509}00509\ }
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00510}00510\ \textcolor{comment}{//\ eof}}
+\DoxyCodeLine{\Hypertarget{embObjIMU_8cpp_source_l00511}00511\ }
+
+\end{DoxyCode}

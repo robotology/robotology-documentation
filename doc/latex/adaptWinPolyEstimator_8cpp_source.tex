@@ -1,0 +1,249 @@
+\doxysection{adapt\+Win\+Poly\+Estimator.\+cpp}
+\hypertarget{adaptWinPolyEstimator_8cpp_source}{}\label{adaptWinPolyEstimator_8cpp_source}\index{icub-\/main/src/libraries/ctrlLib/src/adaptWinPolyEstimator.cpp@{icub-\/main/src/libraries/ctrlLib/src/adaptWinPolyEstimator.cpp}}
+\mbox{\hyperlink{adaptWinPolyEstimator_8cpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00001}00001\ \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00002}00002\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2006-\/2018\ Istituto\ Italiano\ di\ Tecnologia\ (IIT)}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00003}00003\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2006-\/2010\ RobotCub\ Consortium}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00004}00004\ \textcolor{comment}{\ *\ All\ rights\ reserved.}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00005}00005\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00006}00006\ \textcolor{comment}{\ *\ This\ software\ may\ be\ modified\ and\ distributed\ under\ the\ terms}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00007}00007\ \textcolor{comment}{\ *\ of\ the\ BSD-\/3-\/Clause\ license.\ See\ the\ accompanying\ LICENSE\ file\ for}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00008}00008\ \textcolor{comment}{\ *\ details.}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00009}00009\ \textcolor{comment}{*/}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00010}00010\ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00011}00011\ \textcolor{preprocessor}{\#include\ <cmath>}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00012}00012\ \textcolor{preprocessor}{\#include\ <algorithm>}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00013}00013\ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00014}00014\ \textcolor{preprocessor}{\#include\ <yarp/os/LogStream.h>}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00015}00015\ \textcolor{preprocessor}{\#include\ <yarp/math/Math.h>}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00016}00016\ \textcolor{preprocessor}{\#include\ <yarp/math/SVD.h>}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00017}00017\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{adaptWinPolyEstimator_8h}{iCub/ctrl/adaptWinPolyEstimator.h}}>}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00018}00018\ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00019}00019\ \textcolor{keyword}{using\ namespace\ }std;}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00020}00020\ \textcolor{keyword}{using\ namespace\ }yarp::os;}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00021}00021\ \textcolor{keyword}{using\ namespace\ }yarp::sig;}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00022}00022\ \textcolor{keyword}{using\ namespace\ }yarp::math;}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00023}00023\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceiCub_1_1ctrl}{iCub::ctrl}};}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00024}00024\ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00025}00025\ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00026}00026\ \textcolor{comment}{/***************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00027}\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_ab3b25f386854ebeb1f3708c7c2b59f00}{00027}}\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_ab3b25f386854ebeb1f3708c7c2b59f00}{AWPolyEstimator::AWPolyEstimator}}(\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ \_order,\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ \_N,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ \_D)\ :\ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00028}00028\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ order(\_order),\ N(\_N),\ D(\_D)}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00029}00029\ \{}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00030}00030\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a0ecfed4d0769e0edadab020141032c3f}{order}}=std::max(\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a0ecfed4d0769e0edadab020141032c3f}{order}},1U);}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00031}00031\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a15a68e77fe63ac4c801663202461307b}{coeff}}.resize(\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a0ecfed4d0769e0edadab020141032c3f}{order}}+1);}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00032}00032\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a5deed6344a326b99b6f2e3154148b72f}{N}}=\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a5deed6344a326b99b6f2e3154148b72f}{N}}<=\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a0ecfed4d0769e0edadab020141032c3f}{order}}\ ?\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a5deed6344a326b99b6f2e3154148b72f}{N}}+1\ :\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a5deed6344a326b99b6f2e3154148b72f}{N}};}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00033}00033\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_ae9f59bbc9c1fef1df87e15f5d92064f5}{t}}.resize(\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a5deed6344a326b99b6f2e3154148b72f}{N}});}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00034}00034\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a3105885cb646b16171f4294a7fc1ef32}{x}}.resize(\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a5deed6344a326b99b6f2e3154148b72f}{N}});}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00035}00035\ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00036}00036\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a60790e6ec52df7615ab49d2313f11866}{firstRun}}=\textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00037}00037\ \}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00038}00038\ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00039}00039\ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00040}00040\ \textcolor{comment}{/***************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00041}\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a72d61a2b32b088ac7942ec25b8caaeca}{00041}}\ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a72d61a2b32b088ac7942ec25b8caaeca}{AWPolyEstimator::eval}}(\textcolor{keywordtype}{double}\ \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}})}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00042}00042\ \{}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00043}00043\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{show__eyes__axes_8m_a2fb1c5cf58867b5bbc9a1b145a86f3a0}{y}}=\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a15a68e77fe63ac4c801663202461307b}{coeff}}[0];}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00044}00044\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ i=1;\ i<=\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a0ecfed4d0769e0edadab020141032c3f}{order}};\ i++)}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00045}00045\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00046}00046\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{show__eyes__axes_8m_a2fb1c5cf58867b5bbc9a1b145a86f3a0}{y}}+=\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a15a68e77fe63ac4c801663202461307b}{coeff}}[i]*\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a3105885cb646b16171f4294a7fc1ef32}{x}};}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00047}00047\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a3105885cb646b16171f4294a7fc1ef32}{x}}*=\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a3105885cb646b16171f4294a7fc1ef32}{x}};}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00048}00048\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00049}00049\ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00050}00050\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{show__eyes__axes_8m_a2fb1c5cf58867b5bbc9a1b145a86f3a0}{y}};}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00051}00051\ \}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00052}00052\ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00053}00053\ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00054}00054\ \textcolor{comment}{/***************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00055}\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_ac00d1bb68b4caacbeec5366f5a8573e0}{00055}}\ Vector\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_ac00d1bb68b4caacbeec5366f5a8573e0}{AWPolyEstimator::fit}}(\textcolor{keyword}{const}\ Vector\ \&\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}},\ \textcolor{keyword}{const}\ Vector\ \&\mbox{\hyperlink{show__eyes__axes_8m_a2fb1c5cf58867b5bbc9a1b145a86f3a0}{y}},\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}})}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00056}00056\ \{}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00057}00057\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ i1=0;}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00058}00058\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ i2=(\textcolor{keywordtype}{unsigned}\ int)std::min(\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a3105885cb646b16171f4294a7fc1ef32}{x}}.length(),\mbox{\hyperlink{show__eyes__axes_8m_a2fb1c5cf58867b5bbc9a1b145a86f3a0}{y}}.length());}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00059}00059\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ M=i2;}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00060}00060\ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00061}00061\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}>0)}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00062}00062\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00063}00063\ \ \ \ \ \ \ \ \ i1=i2-\/\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}};}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00064}00064\ \ \ \ \ \ \ \ \ M=\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}};}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00065}00065\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00066}00066\ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00067}00067\ \ \ \ \ Matrix\ R(M,\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a0ecfed4d0769e0edadab020141032c3f}{order}}+1);}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00068}00068\ \ \ \ \ Vector\ \_y(M);}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00069}00069\ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00070}00070\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ i=i1;\ i<i2;\ i++)}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00071}00071\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00072}00072\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ \_x=\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a3105885cb646b16171f4294a7fc1ef32}{x}}[i];}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00073}00073\ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00074}00074\ \ \ \ \ \ \ \ \ R(i-\/i1,0)=1.0;}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00075}00075\ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00076}00076\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ j=1;\ j<=\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a0ecfed4d0769e0edadab020141032c3f}{order}};\ j++)}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00077}00077\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00078}00078\ \ \ \ \ \ \ \ \ \ \ \ \ R(i-\/i1,j)=\_x;}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00079}00079\ \ \ \ \ \ \ \ \ \ \ \ \ \_x*=\_x;}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00080}00080\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00081}00081\ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00082}00082\ \ \ \ \ \ \ \ \ \_y[i-\/i1]=\mbox{\hyperlink{show__eyes__axes_8m_a2fb1c5cf58867b5bbc9a1b145a86f3a0}{y}}[i];}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00083}00083\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00084}00084\ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00085}00085\ \ \ \ \ \textcolor{keywordflow}{if}\ (R.rows()>=R.cols())}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00086}00086\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ pinv(R)*\_y;}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00087}00087\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00088}00088\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ pinv(R.transposed()).transposed()*\_y;}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00089}00089\ \}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00090}00090\ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00091}00091\ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00092}00092\ \textcolor{comment}{/***************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00093}\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a21862d23b86690cd3990bfca2e91880c}{00093}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a21862d23b86690cd3990bfca2e91880c}{AWPolyEstimator::feedData}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyElement}{AWPolyElement}}\ \&el)}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00094}00094\ \{}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00095}00095\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a8f047af8ba09af4abab65efef0dc811f}{elemList}}.push\_back(el);}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00096}00096\ \}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00097}00097\ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00098}00098\ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00099}00099\ \textcolor{comment}{/***************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00100}\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a0dc22d3239efc6d0e5288a8ad6c9b221}{00100}}\ Vector\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a0dc22d3239efc6d0e5288a8ad6c9b221}{AWPolyEstimator::estimate}}()}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00101}00101\ \{}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00102}00102\ \ \ \ \ yAssert(\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a8f047af8ba09af4abab65efef0dc811f}{elemList}}.size()>0);}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00103}00103\ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00104}00104\ \ \ \ \ \textcolor{keywordtype}{size\_t}\ dim=\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a8f047af8ba09af4abab65efef0dc811f}{elemList}}[0].data.length();}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00105}00105\ \ \ \ \ Vector\ esteem(dim,0.0);}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00106}00106\ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00107}00107\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a60790e6ec52df7615ab49d2313f11866}{firstRun}})}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00108}00108\ \ \ \ \ \{\ \ \ \ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00109}00109\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_aa4c17a4b462831d45b0c566543996ccb}{winLen}}.resize(dim,\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a5deed6344a326b99b6f2e3154148b72f}{N}});}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00110}00110\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_aeb5240cc63f2f1f0476f9221fbfebdd6}{mse}}.resize(dim,0.0);}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00111}00111\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a60790e6ec52df7615ab49d2313f11866}{firstRun}}=\textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00112}00112\ \ \ \ \ \}\ \ \ \ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00113}00113\ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00114}00114\ \ \ \ \ \textcolor{keywordtype}{size\_t}\ L=\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a8f047af8ba09af4abab65efef0dc811f}{elemList}}.size();}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00115}00115\ \ \ \ \ \textcolor{keywordtype}{int}\ delta=(int)L-\/(\textcolor{keywordtype}{int})\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a5deed6344a326b99b6f2e3154148b72f}{N}};}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00116}00116\ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00117}00117\ \ \ \ \ \textcolor{keywordflow}{if}\ (delta<0)}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00118}00118\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ esteem;}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00119}00119\ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00120}00120\ \ \ \ \ \textcolor{comment}{//\ retrieve\ the\ time\ vector}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00121}00121\ \ \ \ \ \textcolor{comment}{//\ starting\ from\ t=0\ (numeric\ stability\ reason)}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00122}00122\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_ae9f59bbc9c1fef1df87e15f5d92064f5}{t}}[0]=0.0;}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00123}00123\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ j=1;\ j<\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a5deed6344a326b99b6f2e3154148b72f}{N}};\ j++)}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00124}00124\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00125}00125\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_ae9f59bbc9c1fef1df87e15f5d92064f5}{t}}[j]=\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a8f047af8ba09af4abab65efef0dc811f}{elemList}}[delta+j].time-\/\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a8f047af8ba09af4abab65efef0dc811f}{elemList}}[delta].time;}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00126}00126\ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00127}00127\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ enforce\ condition\ on\ time\ vector}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00128}00128\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_ae9f59bbc9c1fef1df87e15f5d92064f5}{t}}[j]<=0.0)}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00129}00129\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00130}00130\ \ \ \ \ \ \ \ \ \ \ \ \ yWarning()<<\textcolor{stringliteral}{"{}Provided\ non-\/increasing\ time\ vector"{}};}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00131}00131\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ esteem;}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00132}00132\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00133}00133\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00134}00134\ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00135}00135\ \ \ \ \ \textcolor{comment}{//\ cycle\ upon\ all\ elements}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00136}00136\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ i=0;\ i<dim;\ i++)}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00137}00137\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00138}00138\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ retrieve\ the\ data\ vector}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00139}00139\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ j=0;\ j<\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a5deed6344a326b99b6f2e3154148b72f}{N}};\ j++)}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00140}00140\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a3105885cb646b16171f4294a7fc1ef32}{x}}[j]=\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a8f047af8ba09af4abab65efef0dc811f}{elemList}}[delta+j].\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}[i];}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00141}00141\ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00142}00142\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ change\ the\ window\ length\ of\ two\ units,\ back\ and\ forth}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00143}00143\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ n1=(\textcolor{keywordtype}{unsigned}\ int)((\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_aa4c17a4b462831d45b0c566543996ccb}{winLen}}[i]>(\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a0ecfed4d0769e0edadab020141032c3f}{order}}+1))?(\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_aa4c17a4b462831d45b0c566543996ccb}{winLen}}[i]-\/1):(\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a0ecfed4d0769e0edadab020141032c3f}{order}}+1));}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00144}00144\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ n2=(\textcolor{keywordtype}{unsigned}\ int)((\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_aa4c17a4b462831d45b0c566543996ccb}{winLen}}[i]<\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a5deed6344a326b99b6f2e3154148b72f}{N}})?(\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_aa4c17a4b462831d45b0c566543996ccb}{winLen}}[i]+1):\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a5deed6344a326b99b6f2e3154148b72f}{N}});}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00145}00145\ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00146}00146\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ cycle\ upon\ all\ possibile\ window's\ length}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00147}00147\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}=n1;\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}<=n2;\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}++)}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00148}00148\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00149}00149\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ find\ the\ regressor's\ coefficients}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00150}00150\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a15a68e77fe63ac4c801663202461307b}{coeff}}=\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_ac00d1bb68b4caacbeec5366f5a8573e0}{fit}}(\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_ae9f59bbc9c1fef1df87e15f5d92064f5}{t}},\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a3105885cb646b16171f4294a7fc1ef32}{x}},\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}});}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00151}00151\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \_stop=\textcolor{keyword}{false};\ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00152}00152\ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00153}00153\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ test\ the\ regressor\ upon\ all\ the\ elements}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00154}00154\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ belonging\ to\ the\ actual\ window}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00155}00155\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_aeb5240cc63f2f1f0476f9221fbfebdd6}{mse}}[i]=0.0;}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00156}00156\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ k=\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a5deed6344a326b99b6f2e3154148b72f}{N}}-\/\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}};\ k<\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a5deed6344a326b99b6f2e3154148b72f}{N}};\ k++)}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00157}00157\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00158}00158\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{compute__ekf__fast_8m_a08a4415e9d594ff960030b921d42b91e}{e}}=\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a3105885cb646b16171f4294a7fc1ef32}{x}}[k]-\/\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a72d61a2b32b088ac7942ec25b8caaeca}{eval}}(\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_ae9f59bbc9c1fef1df87e15f5d92064f5}{t}}[k]);\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00159}00159\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_stop|=(fabs(\mbox{\hyperlink{compute__ekf__fast_8m_a08a4415e9d594ff960030b921d42b91e}{e}})>\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a7a17a331fe8d22ceec04146d154ac0a4}{D}});}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00160}00160\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_aeb5240cc63f2f1f0476f9221fbfebdd6}{mse}}[i]+=\mbox{\hyperlink{compute__ekf__fast_8m_a08a4415e9d594ff960030b921d42b91e}{e}}*\mbox{\hyperlink{compute__ekf__fast_8m_a08a4415e9d594ff960030b921d42b91e}{e}};}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00161}00161\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00162}00162\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_aeb5240cc63f2f1f0476f9221fbfebdd6}{mse}}[i]/=\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}};}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00163}00163\ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00164}00164\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ set\ the\ new\ window's\ length\ in\ case\ of}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00165}00165\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ crossing\ of\ max\ deviation\ threshold}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00166}00166\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\_stop)}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00167}00167\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00168}00168\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_aa4c17a4b462831d45b0c566543996ccb}{winLen}}[i]=\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}};}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00169}00169\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00170}00170\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00171}00171\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00172}00172\ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00173}00173\ \ \ \ \ \ \ \ \ esteem[i]=\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a796081decc2f9fd6587ff04dfc016c53}{getEsteeme}}();}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00174}00174\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00175}00175\ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00176}00176\ \ \ \ \ \textcolor{keywordtype}{int}\ margin=delta-\/10;}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00177}00177\ \ \ \ \ \textcolor{keywordflow}{if}\ (margin>0)}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00178}00178\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a8f047af8ba09af4abab65efef0dc811f}{elemList}}.erase(\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a8f047af8ba09af4abab65efef0dc811f}{elemList}}.begin(),\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a8f047af8ba09af4abab65efef0dc811f}{elemList}}.begin()+margin);}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00179}00179\ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00180}00180\ \ \ \ \ \textcolor{keywordflow}{return}\ esteem;}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00181}00181\ \}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00182}00182\ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00183}00183\ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00184}00184\ \textcolor{comment}{/***************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00185}\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_ad0613b9b456b9b26e5dc7df92db12cdd}{00185}}\ Vector\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a0dc22d3239efc6d0e5288a8ad6c9b221}{AWPolyEstimator::estimate}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyElement}{AWPolyElement}}\ \&el)}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00186}00186\ \{}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00187}00187\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a21862d23b86690cd3990bfca2e91880c}{feedData}}(el);}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00188}00188\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a0dc22d3239efc6d0e5288a8ad6c9b221}{estimate}}();}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00189}00189\ \}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00190}00190\ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00191}00191\ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00192}00192\ \textcolor{comment}{/***************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00193}\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a7628b39f6695860eb84b0efc4060833f}{00193}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a7628b39f6695860eb84b0efc4060833f}{AWPolyEstimator::reset}}()}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00194}00194\ \{}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00195}00195\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a8f047af8ba09af4abab65efef0dc811f}{elemList}}.size()>0)}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00196}00196\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00197}00197\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_aa4c17a4b462831d45b0c566543996ccb}{winLen}}.resize(\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a8f047af8ba09af4abab65efef0dc811f}{elemList}}[0].\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}.length(),\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a5deed6344a326b99b6f2e3154148b72f}{N}});}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00198}00198\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a8f047af8ba09af4abab65efef0dc811f}{elemList}}.clear();}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00199}00199\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00200}00200\ \}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00201}00201\ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00202}00202\ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00203}00203\ \textcolor{comment}{/***************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00204}\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWLinEstimator_a65a929f1494c8cad19577d6bc229b5b0}{00204}}\ Vector\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1AWLinEstimator_a65a929f1494c8cad19577d6bc229b5b0}{AWLinEstimator::fit}}(\textcolor{keyword}{const}\ Vector\ \&\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}},\ \textcolor{keyword}{const}\ Vector\ \&\mbox{\hyperlink{show__eyes__axes_8m_a2fb1c5cf58867b5bbc9a1b145a86f3a0}{y}},\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}})}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00205}00205\ \{}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00206}00206\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ i1=0;}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00207}00207\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ i2=(\textcolor{keywordtype}{unsigned}\ int)std::min(\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a3105885cb646b16171f4294a7fc1ef32}{x}}.length(),\mbox{\hyperlink{show__eyes__axes_8m_a2fb1c5cf58867b5bbc9a1b145a86f3a0}{y}}.length());}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00208}00208\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ M=i2;}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00209}00209\ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00210}00210\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}>0)}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00211}00211\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00212}00212\ \ \ \ \ \ \ \ \ i1=i2-\/\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}};}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00213}00213\ \ \ \ \ \ \ \ \ M=\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}};}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00214}00214\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00215}00215\ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00216}00216\ \ \ \ \ \textcolor{keywordtype}{double}\ sum\_xi\ \ =0.0;}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00217}00217\ \ \ \ \ \textcolor{keywordtype}{double}\ sum\_xixi=0.0;}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00218}00218\ \ \ \ \ \textcolor{keywordtype}{double}\ sum\_yi\ \ =0.0;}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00219}00219\ \ \ \ \ \textcolor{keywordtype}{double}\ sum\_xiyi=0.0;}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00220}00220\ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00221}00221\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ i=i1;\ i<i2;\ i++)}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00222}00222\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00223}00223\ \ \ \ \ \ \ \ \ sum\_xi\ \ +=\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a3105885cb646b16171f4294a7fc1ef32}{x}}[i];}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00224}00224\ \ \ \ \ \ \ \ \ sum\_xixi+=\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a3105885cb646b16171f4294a7fc1ef32}{x}}[i]*\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a3105885cb646b16171f4294a7fc1ef32}{x}}[i];}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00225}00225\ \ \ \ \ \ \ \ \ sum\_yi\ \ +=\mbox{\hyperlink{show__eyes__axes_8m_a2fb1c5cf58867b5bbc9a1b145a86f3a0}{y}}[i];}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00226}00226\ \ \ \ \ \ \ \ \ sum\_xiyi+=\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a3105885cb646b16171f4294a7fc1ef32}{x}}[i]*\mbox{\hyperlink{show__eyes__axes_8m_a2fb1c5cf58867b5bbc9a1b145a86f3a0}{y}}[i];}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00227}00227\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00228}00228\ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00229}00229\ \ \ \ \ \textcolor{keywordtype}{double}\ den=M*sum\_xixi-\/sum\_xi*sum\_xi;}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00230}00230\ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00231}00231\ \ \ \ \ Vector\ c(2);}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00232}00232\ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00233}00233\ \ \ \ \ \textcolor{comment}{//\ the\ bias}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00234}00234\ \ \ \ \ c[0]=(sum\_yi*sum\_xixi-\/sum\_xi*sum\_xiyi)\ /\ den;}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00235}00235\ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00236}00236\ \ \ \ \ \textcolor{comment}{//\ the\ linear\ coefficient}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00237}00237\ \ \ \ \ c[1]=(M*sum\_xiyi-\/sum\_xi*sum\_yi)\ /\ den;}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00238}00238\ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00239}00239\ \ \ \ \ \textcolor{keywordflow}{return}\ c;}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00240}00240\ \}}
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00241}00241\ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00242}00242\ }
+\DoxyCodeLine{\Hypertarget{adaptWinPolyEstimator_8cpp_source_l00243}00243\ }
+
+\end{DoxyCode}

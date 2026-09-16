@@ -1,0 +1,172 @@
+\doxysection{compensation\+Thread.\+h}
+\hypertarget{compensationThread_8h_source}{}\label{compensationThread_8h_source}\index{icub-\/main/src/modules/skinManager/include/iCub/skinManager/compensationThread.h@{icub-\/main/src/modules/skinManager/include/iCub/skinManager/compensationThread.h}}
+\mbox{\hyperlink{compensationThread_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00001}00001\ \ }
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00002}00002\ \textcolor{comment}{/*\ }}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00003}00003\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2009\ RobotCub\ Consortium,\ European\ Commission\ FP6\ Project\ IST-\/004370}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00004}00004\ \textcolor{comment}{\ *\ Authors:\ Andrea\ Del\ Prete,\ Alexander\ Schmitz}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00005}00005\ \textcolor{comment}{\ *\ email:\ \ \ andrea.delprete@iit.it,\ alexander.schmitz@iit.it}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00006}00006\ \textcolor{comment}{\ *\ website:\ www.robotcub.org\ }}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00007}00007\ \textcolor{comment}{\ *\ Permission\ is\ granted\ to\ copy,\ distribute,\ and/or\ modify\ this\ program}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00008}00008\ \textcolor{comment}{\ *\ under\ the\ terms\ of\ the\ GNU\ General\ Public\ License,\ version\ 2\ or\ any}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00009}00009\ \textcolor{comment}{\ *\ later\ version\ published\ by\ the\ Free\ Software\ Foundation.}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00010}00010\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00011}00011\ \textcolor{comment}{\ *\ A\ copy\ of\ the\ license\ can\ be\ found\ at}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00012}00012\ \textcolor{comment}{\ *\ http://www.robotcub.org/icub/license/gpl.txt}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00013}00013\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00014}00014\ \textcolor{comment}{\ *\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00015}00015\ \textcolor{comment}{\ *\ WITHOUT\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00016}00016\ \textcolor{comment}{\ *\ MERCHANTABILITY\ or\ FITNESS\ FOR\ A\ PARTICULAR\ PURPOSE.\ See\ the\ GNU\ General}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00017}00017\ \textcolor{comment}{\ *\ Public\ License\ for\ more\ details}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00018}00018\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00019}00019\ }
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00020}00020\ \textcolor{preprocessor}{\#ifndef\ \_\_COMPTHREAD\_H\_\_}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00021}00021\ \textcolor{preprocessor}{\#define\ \_\_COMPTHREAD\_H\_\_}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00022}00022\ }
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00023}00023\ \textcolor{preprocessor}{\#include\ <mutex>}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00024}00024\ \textcolor{preprocessor}{\#include\ <iostream>}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00025}00025\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00026}00026\ \textcolor{preprocessor}{\#include\ <sstream>}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00027}00027\ \textcolor{preprocessor}{\#include\ <vector>}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00028}00028\ }
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00029}00029\ \textcolor{preprocessor}{\#include\ <yarp/sig/Vector.h>}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00030}00030\ \textcolor{preprocessor}{\#include\ <yarp/os/BufferedPort.h>}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00031}00031\ \textcolor{preprocessor}{\#include\ <yarp/os/PeriodicThread.h>}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00032}00032\ \textcolor{preprocessor}{\#include\ <yarp/os/ResourceFinder.h>}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00033}00033\ \textcolor{preprocessor}{\#include\ <yarp/dev/IAnalogSensor.h>}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00034}00034\ \textcolor{preprocessor}{\#include\ <yarp/dev/PolyDriver.h>}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00035}00035\ }
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00036}00036\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{compensator_8h}{iCub/skinManager/compensator.h}}"{}}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00037}00037\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{skinContactList_8h}{iCub/skinDynLib/skinContactList.h}}"{}}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00038}00038\ }
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00039}00039\ \textcolor{keyword}{using\ namespace\ }std;}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00040}00040\ \textcolor{keyword}{using\ namespace\ }yarp::os;\ }
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00041}00041\ \textcolor{keyword}{using\ namespace\ }yarp::sig;}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00042}00042\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceyarp_1_1dev}{yarp::dev}};}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00043}00043\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceiCub_1_1skinDynLib}{iCub::skinDynLib}};}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00044}00044\ }
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00045}00045\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespaceiCub}{iCub}}\{}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00046}00046\ }
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00047}00047\ \textcolor{keyword}{namespace\ }skinManager\{}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00048}00048\ }
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00049}\mbox{\hyperlink{classiCub_1_1skinManager_1_1CompensationThread}{00049}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classiCub_1_1skinManager_1_1CompensationThread}{CompensationThread}}\ :\ \textcolor{keyword}{public}\ PeriodicThread}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00050}00050\ \{}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00051}00051\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00052}\mbox{\hyperlink{classiCub_1_1skinManager_1_1CompensationThread_a5b14d88a2dd8b29107c0433ab473f80ca9d17e81629ecead8ea240325e68e17df}{00052}}\ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{enum}\ \{\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1CompensationThread_a5b14d88a2dd8b29107c0433ab473f80ca9d17e81629ecead8ea240325e68e17df}{calibration}},\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1CompensationThread_a5b14d88a2dd8b29107c0433ab473f80ca09fd8d7c99fab5654f3f963c82958f2c}{compensation}}\}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1CompensationThread_a5b14d88a2dd8b29107c0433ab473f80c}{CompensationThreadState}};}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00053}00053\ }
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00054}00054\ \ \ \ \ \textcolor{comment}{/*\ class\ methods\ */}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00055}00055\ }
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00056}00056\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1skinManager_1_1CompensationThread}{CompensationThread}}(\textcolor{keywordtype}{string}\ name,\ ResourceFinder*\ rf,\ \textcolor{keywordtype}{string}\ robotName,\ \textcolor{keywordtype}{double}\ \_compensationGain,\ \textcolor{keywordtype}{double}\ \_contactCompensationGain,}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00057}00057\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ addThreshold,\ \textcolor{keywordtype}{float}\ minBaseline,\ \textcolor{keywordtype}{bool}\ zeroUpRawData,\ \textcolor{keywordtype}{int}\ period,\ \textcolor{keywordtype}{bool}\ binarization,\ \textcolor{keywordtype}{bool}\ smoothFilter,\ \textcolor{keywordtype}{float}\ smoothFactor);}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00058}00058\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1CompensationThread_aa20a2f89ed9f5b69bf77150e04deaf90}{threadInit}}();}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00059}00059\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1CompensationThread_a3d4179008f470e8adf8751032b3105be}{threadRelease}}();}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00060}00060\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1CompensationThread_a5324275e4a890fbb6f6308f0329b0bb0}{run}}();\ }
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00061}00061\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00062}00062\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1CompensationThread_abad8eadf392debb6911d06d93b660a3e}{calibrate}}();}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00063}00063\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1CompensationThread_aeeb8b97f4aba123c05561ff44c51fea1}{setBinarization}}(\textcolor{keywordtype}{bool}\ value);}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00064}00064\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1CompensationThread_aff2482a3f6c751840e4830711bc6ff88}{setSmoothFilter}}(\textcolor{keywordtype}{bool}\ value);}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00065}00065\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1CompensationThread_a4d5be71dd347fc02c6f9f0a446f71a07}{setSmoothFactor}}(\textcolor{keywordtype}{float}\ value);}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00066}00066\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1CompensationThread_ae2f592aa3e509bd4a03abaf8983a27c4}{setAddThreshold}}(\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ thr);}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00067}00067\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1CompensationThread_a98a109ddefd3a54464d5bf9322487429}{setCompensationGain}}(\textcolor{keywordtype}{double}\ gain);}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00068}00068\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1CompensationThread_a86efc0db89f3d689100a552681419d87}{setContactCompensationGain}}(\textcolor{keywordtype}{double}\ gain);}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00069}00069\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1CompensationThread_ae7860b6007ecb1a7add4aee4807f085b}{setMaxNeighborDistance}}(\textcolor{keywordtype}{double}\ dist);}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00070}00070\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1CompensationThread_a006b90f0660432f7885ab7e9873d7290}{setTaxelPosition}}(\mbox{\hyperlink{namespaceiCub_1_1skinDynLib_ad9eb09d94574e8020c27676ca5e9bdfc}{SkinPart}}\ sp,\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ taxelId,\ \textcolor{keyword}{const}\ Vector\ \&position);}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00071}00071\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1CompensationThread_a962f5beffb20cb3c5d5fba204c4abaa0}{setTaxelPositions}}(\mbox{\hyperlink{namespaceiCub_1_1skinDynLib_ad9eb09d94574e8020c27676ca5e9bdfc}{SkinPart}}\ sp,\ \textcolor{keyword}{const}\ Vector\ \&positions);}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00072}00072\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1CompensationThread_ac4b7badcf94759ba05414ce2e11c8292}{setTaxelOrientation}}(\mbox{\hyperlink{namespaceiCub_1_1skinDynLib_ad9eb09d94574e8020c27676ca5e9bdfc}{SkinPart}}\ sp,\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ taxelId,\ \textcolor{keyword}{const}\ Vector\ \&orientation);}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00073}00073\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1CompensationThread_af781aa81d6548ad41a7c004d6c862c50}{setTaxelOrientations}}(\mbox{\hyperlink{namespaceiCub_1_1skinDynLib_ad9eb09d94574e8020c27676ca5e9bdfc}{SkinPart}}\ sp,\ \textcolor{keyword}{const}\ vector<Vector>\ \&orientations);}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00074}00074\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1CompensationThread_a2da77e5e5057074c4cb546ad321cb76e}{setTaxelPose}}(\mbox{\hyperlink{namespaceiCub_1_1skinDynLib_ad9eb09d94574e8020c27676ca5e9bdfc}{SkinPart}}\ sp,\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ taxelId,\ \textcolor{keyword}{const}\ Vector\ \&pose);}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00075}00075\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1CompensationThread_ab129cc0c4accaaa8755fb1983487f0fb}{setTaxelPoses}}(\mbox{\hyperlink{namespaceiCub_1_1skinDynLib_ad9eb09d94574e8020c27676ca5e9bdfc}{SkinPart}}\ sp,\ \textcolor{keyword}{const}\ vector<Vector>\ \&poses);}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00076}00076\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1CompensationThread_ab129cc0c4accaaa8755fb1983487f0fb}{setTaxelPoses}}(\mbox{\hyperlink{namespaceiCub_1_1skinDynLib_ad9eb09d94574e8020c27676ca5e9bdfc}{SkinPart}}\ sp,\ \textcolor{keyword}{const}\ Vector\ \&poses);}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00077}00077\ }
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00078}00078\ \ \ \ \ Vector\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1CompensationThread_ad1681acfabf16018049ee704032dd704}{getTouchThreshold}}();}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00079}00079\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1CompensationThread_abdc277b38d1c40cbc340fbdb3ad11a42}{getBinarization}}();}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00080}00080\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1CompensationThread_a1797bc001655739f24b7cf548f90990f}{getSmoothFilter}}();}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00081}00081\ \ \ \ \ \textcolor{keywordtype}{float}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1CompensationThread_aeee46f6332e5ce5bd7e18a96575a77d2}{getSmoothFactor}}();}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00082}00082\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1CompensationThread_a0b00be361897c3242d23ce2e9e88da09}{getAddThreshold}}();}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00083}00083\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1CompensationThread_a74080feaea10a7e96caf1fdabe2d4d23}{getCompensationGain}}();}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00084}00084\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1CompensationThread_aa8181a6f4a82c8bdf98ff2a9a98da431}{getContactCompensationGain}}();}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00085}\mbox{\hyperlink{classiCub_1_1skinManager_1_1CompensationThread_a0f6a80c11143ef578e1e3b3f9bde609f}{00085}}\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1CompensationThread_a0f6a80c11143ef578e1e3b3f9bde609f}{getMaxNeighborDistance}}()\{\ \textcolor{keywordflow}{return}\ maxNeighDist;\ \}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00086}00086\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1CompensationThread_a65270ee9829fedc078f6e5c078622acd}{isCalibrating}}();}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00087}00087\ }
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00088}00088\ \ \ \ \ Vector\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1CompensationThread_ac3b15a8406a05d868a9ec8fa7295acda}{getTaxelPosition}}(\mbox{\hyperlink{namespaceiCub_1_1skinDynLib_ad9eb09d94574e8020c27676ca5e9bdfc}{SkinPart}}\ sp,\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ taxelId);}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00089}00089\ \ \ \ \ vector<Vector>\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1CompensationThread_afbf43fda59c4a17c50fccd5e6d3e4189}{getTaxelPositions}}(\mbox{\hyperlink{namespaceiCub_1_1skinDynLib_ad9eb09d94574e8020c27676ca5e9bdfc}{SkinPart}}\ sp=\mbox{\hyperlink{namespaceiCub_1_1skinDynLib_ad9eb09d94574e8020c27676ca5e9bdfca74496681d20e02a4e9900c2401bb14c3}{SKIN\_PART\_ALL}});}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00090}00090\ \ \ \ \ Vector\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1CompensationThread_a29185e0f9c3c25e95f306d88ac722e94}{getTaxelOrientation}}(\mbox{\hyperlink{namespaceiCub_1_1skinDynLib_ad9eb09d94574e8020c27676ca5e9bdfc}{SkinPart}}\ sp,\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ taxelId);}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00091}00091\ \ \ \ \ vector<Vector>\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1CompensationThread_affb21a64573ceb9dbfa697061e40f539}{getTaxelOrientations}}(\mbox{\hyperlink{namespaceiCub_1_1skinDynLib_ad9eb09d94574e8020c27676ca5e9bdfc}{SkinPart}}\ sp=\mbox{\hyperlink{namespaceiCub_1_1skinDynLib_ad9eb09d94574e8020c27676ca5e9bdfca74496681d20e02a4e9900c2401bb14c3}{SKIN\_PART\_ALL}});}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00092}00092\ \ \ \ \ Vector\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1CompensationThread_a272dd14ea48e12ebf942d35b25fe62a0}{getTaxelPose}}(\mbox{\hyperlink{namespaceiCub_1_1skinDynLib_ad9eb09d94574e8020c27676ca5e9bdfc}{SkinPart}}\ sp,\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ taxelId);}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00093}00093\ \ \ \ \ vector<Vector>\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1CompensationThread_a7362cc34ad266aa6d1fb32514e833931}{getTaxelPoses}}(\mbox{\hyperlink{namespaceiCub_1_1skinDynLib_ad9eb09d94574e8020c27676ca5e9bdfc}{SkinPart}}\ sp=\mbox{\hyperlink{namespaceiCub_1_1skinDynLib_ad9eb09d94574e8020c27676ca5e9bdfca74496681d20e02a4e9900c2401bb14c3}{SKIN\_PART\_ALL}});}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00094}00094\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1CompensationThread_a5f86b5b8009e24fd1ce11ae42174e936}{getPoseConfidence}}(\mbox{\hyperlink{namespaceiCub_1_1skinDynLib_ad9eb09d94574e8020c27676ca5e9bdfc}{SkinPart}}\ sp,\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ taxelId);}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00095}00095\ \ \ \ \ Vector\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1CompensationThread_a12d1323766ba5b758cc2455a125f4cd8}{getPoseConfidences}}(\mbox{\hyperlink{namespaceiCub_1_1skinDynLib_ad9eb09d94574e8020c27676ca5e9bdfc}{SkinPart}}\ sp);}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00096}00096\ }
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00097}00097\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1CompensationThread_a31833c6f4545a71a449bfaff652ca5a1}{enableSkinPart}}(\mbox{\hyperlink{namespaceiCub_1_1skinDynLib_ad9eb09d94574e8020c27676ca5e9bdfc}{SkinPart}}\ sp);}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00098}00098\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1CompensationThread_ab153fe58c22f1376e416dd0517515a82}{disableSkinPart}}(\mbox{\hyperlink{namespaceiCub_1_1skinDynLib_ad9eb09d94574e8020c27676ca5e9bdfc}{SkinPart}}\ sp);}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00099}00099\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1CompensationThread_ac44a977541bf62de66d987546102996b}{isSkinEnabled}}(\mbox{\hyperlink{namespaceiCub_1_1skinDynLib_ad9eb09d94574e8020c27676ca5e9bdfc}{SkinPart}}\ sp);}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00100}00100\ \ \ \ \ vector<SkinPart>\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1CompensationThread_a4b3e885aeddb8e0a215f987790c43c59}{getSkinParts}}();}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00101}00101\ \ \ \ \ Bottle\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1CompensationThread_a04f00b2baff85583977819172e616eb3}{getInfo}}();}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00102}00102\ }
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00103}00103\ }
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00104}00104\ \textcolor{keyword}{private}:}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00105}00105\ }
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00106}00106\ \ \ \ \ \textcolor{comment}{/*\ class\ constants\ */}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00107}00107\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ CAL\_TIME\ =\ 5;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ calibration\ time\ in\ sec}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00108}00108\ }
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00109}00109\ \ \ \ \ \textcolor{comment}{/*\ class\ variables\ */}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00110}00110\ \ \ \ \ \textcolor{keywordtype}{int}\ CAL\_SAMPLES;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ num\ of\ samples\ needed\ for\ calibration}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00111}00111\ \ \ \ \ \textcolor{keywordtype}{int}\ ADD\_THRESHOLD;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ value\ added\ to\ the\ touch\ threshold\ of\ every\ taxel}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00112}00112\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ SKIN\_DIM;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ total\ number\ of\ taxels}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00113}00113\ \ \ \ \ \textcolor{keywordtype}{double}\ compensationGain;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ the\ gain\ of\ the\ compensation\ algorithm}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00114}00114\ \ \ \ \ \textcolor{keywordtype}{double}\ contactCompensationGain;\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ the\ gain\ of\ the\ compensation\ algorithm\ during\ contact}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00115}00115\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00116}00116\ \ \ \ \ \textcolor{keywordtype}{bool}\ initializationFinished;}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00117}00117\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00118}00118\ \ \ \ \ \textcolor{comment}{//\ calibration\ variables}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00119}00119\ \ \ \ \ \textcolor{keywordtype}{int}\ calibrationCounter;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ count\ the\ calibration\ cycles}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00120}00120\ \ \ \ \ \textcolor{keywordtype}{int}\ readErrorCounter;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ it\ counts\ the\ number\ of\ successive\ errors}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00121}00121\ }
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00122}00122\ \ \ \ \ ResourceFinder*\ rf;}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00123}00123\ }
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00124}00124\ \ \ \ \ \textcolor{comment}{//\ input\ parameters}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00125}00125\ \ \ \ \ \textcolor{keywordtype}{string}\ moduleName;}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00126}00126\ \ \ \ \ \textcolor{keywordtype}{string}\ robotName;}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00127}00127\ \ \ \ \ \textcolor{keywordtype}{float}\ minBaseline;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ if\ the\ baseline\ value\ is\ less\ than\ this,\ then\ a\ calibration\ is\ executed\ (if\ allowed)}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00128}00128\ \ \ \ \ \textcolor{keywordtype}{bool}\ zeroUpRawData;\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ if\ true\ the\ raw\ data\ are\ considered\ from\ zero\ up,\ otherwise\ from\ 255\ down}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00129}00129\ \ \ \ \ \textcolor{keywordtype}{bool}\ binarization;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ if\ true\ binarize\ the\ compensated\ output\ value\ (0:\ no\ touch,\ 255:\ touch)}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00130}00130\ \ \ \ \ \textcolor{keywordtype}{bool}\ smoothFilter;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ if\ true\ the\ smooth\ filter\ is\ on,\ otherwise\ it\ is\ off}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00131}00131\ \ \ \ \ \textcolor{keywordtype}{float}\ smoothFactor;\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ intensity\ of\ the\ smooth\ filter\ action}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00132}00132\ \ \ \ \ \textcolor{keywordtype}{double}\ maxNeighDist;\ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ max\ neighbor\ distance\ used\ for\ computing\ taxel\ neighbors}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00133}00133\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ portNum;\ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ number\ of\ input\ ports\ (that\ is\ the\ same\ as\ the\ number\ of\ output\ ports)}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00134}00134\ }
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00135}00135\ \ \ \ \ vector<Compensator*>\ compensators;}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00136}00136\ \ \ \ \ vector<bool>\ compEnable;\ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ true\ if\ the\ related\ compensator\ is\ enabled,\ false\ otherwise}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00137}00137\ \ \ \ \ vector<bool>\ compWorking;\ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ true\ if\ the\ related\ compensator\ is\ working,\ false\ otherwise}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00138}00138\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ compensatorCounter;\ \ \ \ \textcolor{comment}{//\ count\ the\ number\ of\ compensators\ that\ are\ working\ }}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00139}00139\ }
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00140}00140\ \ \ \ \ \textcolor{comment}{//\ SKIN\ EVENTS}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00141}00141\ \ \ \ \ \textcolor{keywordtype}{bool}\ skinEventsOn;}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00142}00142\ }
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00143}00143\ \ \ \ \ \textcolor{comment}{/*\ ports\ */}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00144}00144\ \ \ \ \ BufferedPort<skinContactList>\ skinEventsPort;\ \ \ \textcolor{comment}{//\ skin\ events\ output\ port}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00145}00145\ \ \ \ \ BufferedPort<Vector>\ monitorPort;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ monitoring\ output\ port\ (streaming)}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00146}00146\ \ \ \ \ BufferedPort<Bottle>\ infoPort;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ info\ output\ port}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00147}00147\ }
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00148}00148\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1skinManager_1_1CompensationThread_a5b14d88a2dd8b29107c0433ab473f80c}{CompensationThreadState}}\ \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104ab}{state}};\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ state\ of\ the\ thread\ (calibration,\ compensation)}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00149}00149\ \ \ \ \ mutex\ stateSem;}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00150}00150\ }
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00151}00151\ \ \ \ \ \textcolor{comment}{/*\ class\ private\ methods\ */}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00152}00152\ \ \ \ \ \textcolor{keywordtype}{void}\ checkErrors();}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00153}00153\ \ \ \ \ \textcolor{keywordtype}{bool}\ doesBaselineExceed(\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ \&compInd,\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ \&taxInd,\ \textcolor{keywordtype}{double}\ \&baseline,\ \textcolor{keywordtype}{double}\ \&initialBaseline);}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00154}00154\ \ \ \ \ \textcolor{keywordtype}{void}\ sendMonitorData();}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00155}00155\ \ \ \ \ \textcolor{keywordtype}{void}\ sendDebugMsg(\textcolor{keywordtype}{string}\ msg);}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00156}00156\ \ \ \ \ \textcolor{keywordtype}{void}\ sendErrorMsg(\textcolor{keywordtype}{string}\ msg);}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00157}00157\ \ \ \ \ \textcolor{keywordtype}{void}\ sendSkinEvents();}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00158}00158\ }
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00159}00159\ \};}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00160}00160\ }
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00161}00161\ \}\ \textcolor{comment}{//namespace\ iCub}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00162}00162\ }
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00163}00163\ \}\ \textcolor{comment}{//namespace\ skinManager}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00164}00164\ }
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00165}00165\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{compensationThread_8h_source_l00166}00166\ }
+
+\end{DoxyCode}
