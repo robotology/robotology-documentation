@@ -1,0 +1,226 @@
+\doxysection{Smith\+Predictor.\+cpp}
+\hypertarget{SmithPredictor_8cpp_source}{}\label{SmithPredictor_8cpp_source}\index{icub-\/main/src/libraries/icubmod/cartesianController/SmithPredictor.cpp@{icub-\/main/src/libraries/icubmod/cartesianController/SmithPredictor.cpp}}
+\mbox{\hyperlink{SmithPredictor_8cpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00001}00001\ \textcolor{comment}{/*\ }}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00002}00002\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2012\ Department\ of\ Robotics\ Brain\ and\ Cognitive\ Sciences\ -\/\ Istituto\ Italiano\ di\ Tecnologia}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00003}00003\ \textcolor{comment}{\ *\ Author:\ Ugo\ Pattacini}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00004}00004\ \textcolor{comment}{\ *\ email:\ \ ugo.pattacini@iit.it}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00005}00005\ \textcolor{comment}{\ *\ website:\ www.robotcub.org}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00006}00006\ \textcolor{comment}{\ *\ Permission\ is\ granted\ to\ copy,\ distribute,\ and/or\ modify\ this\ program}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00007}00007\ \textcolor{comment}{\ *\ under\ the\ terms\ of\ the\ GNU\ General\ Public\ License,\ version\ 2\ or\ any}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00008}00008\ \textcolor{comment}{\ *\ later\ version\ published\ by\ the\ Free\ Software\ Foundation.}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00009}00009\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00010}00010\ \textcolor{comment}{\ *\ A\ copy\ of\ the\ license\ can\ be\ found\ at}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00011}00011\ \textcolor{comment}{\ *\ http://www.robotcub.org/icub/license/gpl.txt}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00012}00012\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00013}00013\ \textcolor{comment}{\ *\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00014}00014\ \textcolor{comment}{\ *\ WITHOUT\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00015}00015\ \textcolor{comment}{\ *\ MERCHANTABILITY\ or\ FITNESS\ FOR\ A\ PARTICULAR\ PURPOSE.\ See\ the\ GNU\ General}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00016}00016\ \textcolor{comment}{\ *\ Public\ License\ for\ more\ details}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00017}00017\ \textcolor{comment}{*/}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00018}00018\ }
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00019}00019\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00020}00020\ \textcolor{preprocessor}{\#include\ <sstream>}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00021}00021\ \textcolor{preprocessor}{\#include\ <cmath>}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00022}00022\ }
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00023}00023\ \textcolor{preprocessor}{\#include\ <yarp/os/Bottle.h>}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00024}00024\ \textcolor{preprocessor}{\#include\ <yarp/math/Math.h>}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00025}00025\ }
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00026}00026\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{SmithPredictor_8h}{SmithPredictor.h}}"{}}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00027}00027\ }
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00028}00028\ \textcolor{keyword}{using\ namespace\ }std;}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00029}00029\ \textcolor{keyword}{using\ namespace\ }yarp::os;}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00030}00030\ \textcolor{keyword}{using\ namespace\ }yarp::sig;}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00031}00031\ \textcolor{keyword}{using\ namespace\ }yarp::math;}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00032}00032\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceiCub_1_1ctrl}{iCub::ctrl}};}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00033}00033\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceiCub_1_1iKin}{iCub::iKin}};}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00034}00034\ }
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00035}00035\ }
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00036}00036\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00037}\mbox{\hyperlink{classSmithPredictor_a94e451760de2b160d4c0d76325d4ad89}{00037}}\ \mbox{\hyperlink{classSmithPredictor_a94e451760de2b160d4c0d76325d4ad89}{SmithPredictor::SmithPredictor}}()}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00038}00038\ \{}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00039}00039\ \ \ \ \ \mbox{\hyperlink{classSmithPredictor_a9683102e6b6deeb463f4c546537be1ab}{I}}=NULL;}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00040}00040\ \ \ \ \ \mbox{\hyperlink{classSmithPredictor_a5144dd0f2ce0748043a177e2e61026d6}{enabled}}=\textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00041}00041\ \}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00042}00042\ }
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00043}00043\ }
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00044}00044\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00045}\mbox{\hyperlink{classSmithPredictor_a1fda642c42c53592aa0206e3325c69ae}{00045}}\ \mbox{\hyperlink{classSmithPredictor_a1fda642c42c53592aa0206e3325c69ae}{SmithPredictor::\string~SmithPredictor}}()}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00046}00046\ \{}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00047}00047\ \ \ \ \ \mbox{\hyperlink{classSmithPredictor_a568f508f7014643bca74df1fe99ef252}{dealloc}}();}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00048}00048\ \}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00049}00049\ }
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00050}00050\ }
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00051}00051\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00052}\mbox{\hyperlink{classSmithPredictor_a568f508f7014643bca74df1fe99ef252}{00052}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classSmithPredictor_a568f508f7014643bca74df1fe99ef252}{SmithPredictor::dealloc}}()}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00053}00053\ \{\ \ \ \ }
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00054}00054\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classSmithPredictor_a9683102e6b6deeb463f4c546537be1ab}{I}}!=NULL)}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00055}00055\ \ \ \ \ \ \ \ \ \textcolor{keyword}{delete}\ \mbox{\hyperlink{classSmithPredictor_a9683102e6b6deeb463f4c546537be1ab}{I}};}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00056}00056\ }
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00057}00057\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<\mbox{\hyperlink{classSmithPredictor_a7354226f4e993e0ba5eae6d738630541}{F}}.size();\ i++)}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00058}00058\ \ \ \ \ \ \ \ \ \textcolor{keyword}{delete}\ \mbox{\hyperlink{classSmithPredictor_a7354226f4e993e0ba5eae6d738630541}{F}}[i];}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00059}00059\ }
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00060}00060\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<\mbox{\hyperlink{classSmithPredictor_a0c5b9cb3b33e8c5c38e4e18283fe7251}{tappedDelays}}.size();\ i++)}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00061}00061\ \ \ \ \ \ \ \ \ \textcolor{keyword}{delete}\ \mbox{\hyperlink{classSmithPredictor_a0c5b9cb3b33e8c5c38e4e18283fe7251}{tappedDelays}}[i];}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00062}00062\ }
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00063}00063\ \ \ \ \ \mbox{\hyperlink{classSmithPredictor_a7354226f4e993e0ba5eae6d738630541}{F}}.clear();}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00064}00064\ \ \ \ \ \mbox{\hyperlink{classSmithPredictor_a0c5b9cb3b33e8c5c38e4e18283fe7251}{tappedDelays}}.clear();}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00065}00065\ \}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00066}00066\ }
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00067}00067\ }
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00068}00068\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00069}\mbox{\hyperlink{classSmithPredictor_a21a656ecdfe600a3305dc1992cff1fbd}{00069}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classSmithPredictor_a21a656ecdfe600a3305dc1992cff1fbd}{SmithPredictor::configure}}(\textcolor{keyword}{const}\ Property\ \&options,\ \mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain}{iKinChain}}\ \&chain)}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00070}00070\ \{}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00071}00071\ \ \ \ \ \mbox{\hyperlink{classSmithPredictor_a5144dd0f2ce0748043a177e2e61026d6}{enabled}}=options.check(\textcolor{stringliteral}{"{}smith\_predictor"{}},Value(\textcolor{stringliteral}{"{}off"{}})).asString()==\textcolor{stringliteral}{"{}on"{}};}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00072}00072\ \ \ \ \ \textcolor{keywordflow}{if}\ (!\mbox{\hyperlink{classSmithPredictor_a5144dd0f2ce0748043a177e2e61026d6}{enabled}})}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00073}00073\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00074}00074\ }
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00075}00075\ \ \ \ \ \mbox{\hyperlink{classSmithPredictor_a568f508f7014643bca74df1fe99ef252}{dealloc}}();}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00076}00076\ }
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00077}00077\ \ \ \ \ \textcolor{comment}{//\ default\ values}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00078}00078\ \ \ \ \ Vector\ Kp(chain.\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_ad41a688c358119a3095e08a067d94f82}{getDOF}}(),1.0);}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00079}00079\ \ \ \ \ Vector\ Tz(chain.\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_ad41a688c358119a3095e08a067d94f82}{getDOF}}(),0.0);}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00080}00080\ \ \ \ \ Vector\ Tw(chain.\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_ad41a688c358119a3095e08a067d94f82}{getDOF}}(),0.0);}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00081}00081\ \ \ \ \ Vector\ Zeta(chain.\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_ad41a688c358119a3095e08a067d94f82}{getDOF}}(),0.0);}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00082}00082\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ i=0;\ i<chain.\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_ad41a688c358119a3095e08a067d94f82}{getDOF}}();\ i++)}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00083}00083\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSmithPredictor_a0c5b9cb3b33e8c5c38e4e18283fe7251}{tappedDelays}}.push\_back(\textcolor{keyword}{new}\ deque<double>);}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00084}00084\ }
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00085}00085\ \ \ \ \ \textcolor{keywordtype}{double}\ Ts=options.check(\textcolor{stringliteral}{"{}Ts"{}},Value(0.01)).asFloat64();}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00086}00086\ \ \ \ \ Vector\ y0(chain.\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_ad41a688c358119a3095e08a067d94f82}{getDOF}}());}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00087}00087\ \ \ \ \ Matrix\ lim(chain.\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_ad41a688c358119a3095e08a067d94f82}{getDOF}}(),2);}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00088}00088\ }
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00089}00089\ \ \ \ \ \textcolor{comment}{//\ we're\ forced\ to\ cycle\ by\ joints\ and}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00090}00090\ \ \ \ \ \textcolor{comment}{//\ not\ by\ dofs\ since\ the\ configuration}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00091}00091\ \ \ \ \ \textcolor{comment}{//\ parameters\ are\ given\ with\ joints\ ordering}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00092}00092\ \ \ \ \ \textcolor{keywordtype}{int}\ i=0;}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00093}00093\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ j=0;\ j<chain.\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_acfd767b8edb2f4b26c0af2317dd08cc0}{getN}}();\ j++)}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00094}00094\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00095}00095\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!chain[j].isBlocked())}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00096}00096\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00097}00097\ \ \ \ \ \ \ \ \ \ \ \ \ y0[i]=chain[j].\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a90b23b505be866c1549d61c6fd3b1618}{getAng}}();}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00098}00098\ \ \ \ \ \ \ \ \ \ \ \ \ lim(i,0)=chain[j].getMin();}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00099}00099\ \ \ \ \ \ \ \ \ \ \ \ \ lim(i,1)=chain[j].getMax();}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00100}00100\ }
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00101}00101\ \ \ \ \ \ \ \ \ \ \ \ \ ostringstream\ entry;}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00102}00102\ \ \ \ \ \ \ \ \ \ \ \ \ entry<<\textcolor{stringliteral}{"{}joint\_"{}}<<j;}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00103}00103\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{string}\ entry\_str(entry.str());}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00104}00104\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (options.check(entry\_str))}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00105}00105\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00106}00106\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (Bottle\ *params=options.find(entry\_str).asList())}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00107}00107\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00108}00108\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (params-\/>check(\textcolor{stringliteral}{"{}Kp"{}}))}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00109}00109\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Kp[i]=params-\/>find(\textcolor{stringliteral}{"{}Kp"{}}).asFloat64();}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00110}00110\ }
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00111}00111\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (params-\/>check(\textcolor{stringliteral}{"{}Tz"{}}))}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00112}00112\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Tz[i]=params-\/>find(\textcolor{stringliteral}{"{}Tz"{}}).asFloat64();}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00113}00113\ }
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00114}00114\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (params-\/>check(\textcolor{stringliteral}{"{}Tw"{}}))}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00115}00115\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Tw[i]=params-\/>find(\textcolor{stringliteral}{"{}Tw"{}}).asFloat64();}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00116}00116\ }
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00117}00117\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (params-\/>check(\textcolor{stringliteral}{"{}Zeta"{}}))}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00118}00118\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Zeta[i]=params-\/>find(\textcolor{stringliteral}{"{}Zeta"{}}).asFloat64();}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00119}00119\ }
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00120}00120\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (params-\/>check(\textcolor{stringliteral}{"{}Td"{}}))}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00121}00121\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00122}00122\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ depth=(int)ceil(params-\/>find(\textcolor{stringliteral}{"{}Td"{}}).asFloat64()/Ts);}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00123}00123\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSmithPredictor_a0c5b9cb3b33e8c5c38e4e18283fe7251}{tappedDelays}}[i]-\/>assign(depth,y0[i]);}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00124}00124\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00125}00125\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00126}00126\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00127}00127\ }
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00128}00128\ \ \ \ \ \ \ \ \ \ \ \ \ i++;}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00129}00129\ \ \ \ \ \ \ \ \ \}\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00130}00130\ \ \ \ \ \}\ \ \ \ }
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00131}00131\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00132}00132\ \ \ \ \ \textcolor{comment}{//\ create\ integrator}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00133}00133\ \ \ \ \ \mbox{\hyperlink{classSmithPredictor_a9683102e6b6deeb463f4c546537be1ab}{I}}=\textcolor{keyword}{new}\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Integrator}{Integrator}}(Ts,y0,lim);}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00134}00134\ }
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00135}00135\ \ \ \ \ \textcolor{comment}{//\ account\ for\ possible\ internal\ saturation}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00136}00136\ \ \ \ \ Vector\ \_y0=\mbox{\hyperlink{classSmithPredictor_a9683102e6b6deeb463f4c546537be1ab}{I}}-\/>\mbox{\hyperlink{classiCub_1_1ctrl_1_1Integrator_a0ed7a5278e29bf93b73bcdebd5e022e8}{get}}();}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00137}00137\ }
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00138}00138\ \ \ \ \ \textcolor{comment}{//\ create\ filters}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00139}00139\ \ \ \ \ Vector\ num(3);}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00140}00140\ \ \ \ \ Vector\ den(3);}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00141}00141\ \ \ \ \ Vector\ y01(1);}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00142}00142\ \ \ \ \ \textcolor{keywordtype}{double}\ Ts2=Ts*Ts;}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00143}00143\ \ \ \ \ \textcolor{keywordtype}{double}\ twoTs2=2.0*Ts2;}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00144}00144\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ i=0;\ i<chain.\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_ad41a688c358119a3095e08a067d94f82}{getDOF}}();\ i++)}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00145}00145\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00146}00146\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ implementing\ F(s)=Kp*(1+Tz*s)/(1+2*Zeta*Tw*s+(Tw*s)\string^2)}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00147}00147\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ \_num\_0=2.0*Tz[i]*Ts;}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00148}00148\ \ \ \ \ \ \ \ \ num[0]=Kp[i]\ *\ (Ts2\ +\ \_num\_0);}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00149}00149\ \ \ \ \ \ \ \ \ num[1]=Kp[i]\ *\ twoTs2;}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00150}00150\ \ \ \ \ \ \ \ \ num[2]=Kp[i]\ *\ (Ts2\ -\/\ \_num\_0);}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00151}00151\ }
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00152}00152\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ \_den\_0=4.0*Tw[i]*Tw[i];}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00153}00153\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ \_den\_1=2.0*\_den\_0;}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00154}00154\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ \_den\_2=4.0*Zeta[i]*Ts*Tw[i];}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00155}00155\ \ \ \ \ \ \ \ \ den[0]=Ts2\ \ \ \ +\ \_den\_2\ +\ \_den\_0;}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00156}00156\ \ \ \ \ \ \ \ \ den[1]=twoTs2\ -\/\ \_den\_1;}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00157}00157\ \ \ \ \ \ \ \ \ den[2]=Ts2\ \ \ \ -\/\ \_den\_2\ +\ \_den\_0;}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00158}00158\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00159}00159\ \ \ \ \ \ \ \ \ y01[0]=\_y0[i];}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00160}00160\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSmithPredictor_a7354226f4e993e0ba5eae6d738630541}{F}}.push\_back(\textcolor{keyword}{new}\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Filter}{Filter}}(num,den,y01));}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00161}00161\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00162}00162\ \}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00163}00163\ }
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00164}00164\ }
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00165}00165\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00166}\mbox{\hyperlink{classSmithPredictor_aa5e00cb2d1b5dc4e27245995f07e8db5}{00166}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classSmithPredictor_aa5e00cb2d1b5dc4e27245995f07e8db5}{SmithPredictor::restart}}(\textcolor{keyword}{const}\ Vector\ \&y0)}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00167}00167\ \{}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00168}00168\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classSmithPredictor_a5144dd0f2ce0748043a177e2e61026d6}{enabled}}\ \&\&\ (\mbox{\hyperlink{classSmithPredictor_a0c5b9cb3b33e8c5c38e4e18283fe7251}{tappedDelays}}.size()==y0.length()))}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00169}00169\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00170}00170\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ init\ the\ content\ of\ tapped\ delay\ lines}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00171}00171\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<\mbox{\hyperlink{classSmithPredictor_a0c5b9cb3b33e8c5c38e4e18283fe7251}{tappedDelays}}.size();\ i++)}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00172}00172\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ j=0;\ j<\mbox{\hyperlink{classSmithPredictor_a0c5b9cb3b33e8c5c38e4e18283fe7251}{tappedDelays}}[i]-\/>size();\ j++)}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00173}00173\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSmithPredictor_a0c5b9cb3b33e8c5c38e4e18283fe7251}{tappedDelays}}[i]-\/>at(j)=y0[i];}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00174}00174\ }
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00175}00175\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ init\ the\ integral\ part}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00176}00176\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSmithPredictor_a9683102e6b6deeb463f4c546537be1ab}{I}}-\/>\mbox{\hyperlink{classiCub_1_1ctrl_1_1Integrator_a48b2d6de0cc287577635232b21c03dc1}{reset}}(y0);}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00177}00177\ }
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00178}00178\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ account\ for\ possible\ internal\ saturation}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00179}00179\ \ \ \ \ \ \ \ \ Vector\ \_y0=\mbox{\hyperlink{classSmithPredictor_a9683102e6b6deeb463f4c546537be1ab}{I}}-\/>\mbox{\hyperlink{classiCub_1_1ctrl_1_1Integrator_a0ed7a5278e29bf93b73bcdebd5e022e8}{get}}();}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00180}00180\ }
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00181}00181\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ init\ the\ filters}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00182}00182\ \ \ \ \ \ \ \ \ Vector\ y01(1);}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00183}00183\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<\mbox{\hyperlink{classSmithPredictor_a7354226f4e993e0ba5eae6d738630541}{F}}.size();\ i++)}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00184}00184\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00185}00185\ \ \ \ \ \ \ \ \ \ \ \ \ y01[0]=\_y0[i];}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00186}00186\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSmithPredictor_a7354226f4e993e0ba5eae6d738630541}{F}}[i]-\/>init(y01);}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00187}00187\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00188}00188\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00189}00189\ \}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00190}00190\ }
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00191}00191\ }
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00192}00192\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00193}\mbox{\hyperlink{classSmithPredictor_a66f364c883d17180d9ae17d3b6f7d45c}{00193}}\ Vector\ \mbox{\hyperlink{classSmithPredictor_a66f364c883d17180d9ae17d3b6f7d45c}{SmithPredictor::computeCmd}}(\textcolor{keyword}{const}\ Vector\ \&u)}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00194}00194\ \{}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00195}00195\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classSmithPredictor_a5144dd0f2ce0748043a177e2e61026d6}{enabled}}\ \&\&\ (\mbox{\hyperlink{classSmithPredictor_a0c5b9cb3b33e8c5c38e4e18283fe7251}{tappedDelays}}.size()==u.length()))}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00196}00196\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00197}00197\ \ \ \ \ \ \ \ \ Vector\ \_u(\mbox{\hyperlink{classSmithPredictor_a7354226f4e993e0ba5eae6d738630541}{F}}.size());}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00198}00198\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<\mbox{\hyperlink{classSmithPredictor_a7354226f4e993e0ba5eae6d738630541}{F}}.size();\ i++)}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00199}00199\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00200}00200\ \ \ \ \ \ \ \ \ \ \ \ \ Vector\ u1(1);\ u1[0]=u[i];}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00201}00201\ \ \ \ \ \ \ \ \ \ \ \ \ Vector\ \_y=\mbox{\hyperlink{classSmithPredictor_a7354226f4e993e0ba5eae6d738630541}{F}}[i]-\/>filt(u1);}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00202}00202\ \ \ \ \ \ \ \ \ \ \ \ \ \_u[i]=\_y[i];}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00203}00203\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00204}00204\ }
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00205}00205\ \ \ \ \ \ \ \ \ Vector\ \mbox{\hyperlink{show__eyes__axes_8m_a2fb1c5cf58867b5bbc9a1b145a86f3a0}{y}}=\mbox{\hyperlink{classSmithPredictor_a9683102e6b6deeb463f4c546537be1ab}{I}}-\/>\mbox{\hyperlink{classiCub_1_1ctrl_1_1Integrator_a258d1f29ff3e98ce46e0835d6a7f29e0}{integrate}}(\_u);}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00206}00206\ \ \ \ \ \ \ \ \ Vector\ \mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}}(\mbox{\hyperlink{show__eyes__axes_8m_a2fb1c5cf58867b5bbc9a1b145a86f3a0}{y}}.length());}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00207}00207\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<\mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}}.length();\ i++)}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00208}00208\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00209}00209\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSmithPredictor_a0c5b9cb3b33e8c5c38e4e18283fe7251}{tappedDelays}}[i]-\/>push\_back(\mbox{\hyperlink{show__eyes__axes_8m_a2fb1c5cf58867b5bbc9a1b145a86f3a0}{y}}[i]);}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00210}00210\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}}[i]=\mbox{\hyperlink{show__eyes__axes_8m_a2fb1c5cf58867b5bbc9a1b145a86f3a0}{y}}[i]-\/\mbox{\hyperlink{classSmithPredictor_a0c5b9cb3b33e8c5c38e4e18283fe7251}{tappedDelays}}[i]-\/>front();}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00211}00211\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSmithPredictor_a0c5b9cb3b33e8c5c38e4e18283fe7251}{tappedDelays}}[i]-\/>pop\_front();}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00212}00212\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00213}00213\ }
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00214}00214\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}};}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00215}00215\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00216}00216\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00217}00217\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{compute__ekf__sym_8m_a35baefda5ec044ac7c1f5a41815b5b45}{zeros}}((\textcolor{keywordtype}{int})u.length());}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00218}00218\ \}}
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00219}00219\ }
+\DoxyCodeLine{\Hypertarget{SmithPredictor_8cpp_source_l00220}00220\ }
+
+\end{DoxyCode}

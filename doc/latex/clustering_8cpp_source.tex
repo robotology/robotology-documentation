@@ -1,0 +1,187 @@
+\doxysection{clustering.\+cpp}
+\hypertarget{clustering_8cpp_source}{}\label{clustering_8cpp_source}\index{icub-\/main/src/libraries/ctrlLib/src/clustering.cpp@{icub-\/main/src/libraries/ctrlLib/src/clustering.cpp}}
+\mbox{\hyperlink{clustering_8cpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00001}00001\ \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00002}00002\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2006-\/2018\ Istituto\ Italiano\ di\ Tecnologia\ (IIT)}}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00003}00003\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2006-\/2010\ RobotCub\ Consortium}}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00004}00004\ \textcolor{comment}{\ *\ All\ rights\ reserved.}}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00005}00005\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00006}00006\ \textcolor{comment}{\ *\ This\ software\ may\ be\ modified\ and\ distributed\ under\ the\ terms}}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00007}00007\ \textcolor{comment}{\ *\ of\ the\ BSD-\/3-\/Clause\ license.\ See\ the\ accompanying\ LICENSE\ file\ for}}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00008}00008\ \textcolor{comment}{\ *\ details.}}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00009}00009\ \textcolor{comment}{*/}}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00010}00010\ }
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00011}00011\ \textcolor{preprocessor}{\#include\ <memory>}}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00012}00012\ \textcolor{preprocessor}{\#include\ <vector>}}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00013}00013\ \textcolor{preprocessor}{\#include\ <cmath>}}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00014}00014\ \textcolor{preprocessor}{\#include\ <yarp/math/Math.h>}}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00015}00015\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{clustering_8h}{iCub/ctrl/clustering.h}}>}}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00016}00016\ }
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00017}00017\ \textcolor{keyword}{using\ namespace\ }std;}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00018}00018\ \textcolor{keyword}{using\ namespace\ }yarp::os;}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00019}00019\ \textcolor{keyword}{using\ namespace\ }yarp::sig;}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00020}00020\ \textcolor{keyword}{using\ namespace\ }yarp::math;}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00021}00021\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceiCub_1_1ctrl}{iCub::ctrl}};}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00022}00022\ }
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00023}00023\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespaceiCub}{iCub}}\ \{}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00024}00024\ \ \ \ \ \textcolor{keyword}{namespace\ }ctrl\ \{}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00025}\mbox{\hyperlink{namespaceiCub_1_1ctrl_1_1dbscan}{00025}}\ \ \ \ \ \ \ \ \ \textcolor{keyword}{namespace\ }dbscan\ \{}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00026}\mbox{\hyperlink{namespaceiCub_1_1ctrl_1_1dbscan_a163ced096fb32f21f293c2e5227292ac}{00026}}\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{enum\ class}\ \mbox{\hyperlink{namespaceiCub_1_1ctrl_1_1dbscan_a163ced096fb32f21f293c2e5227292ac}{PointType}}\ \{}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00027}00027\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespaceiCub_1_1ctrl_1_1dbscan_a163ced096fb32f21f293c2e5227292acaf8c13bb601e2113b166ef926763585b4}{unclassified}}=-\/1,}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00028}00028\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespaceiCub_1_1ctrl_1_1dbscan_a163ced096fb32f21f293c2e5227292acaaaddc3454ccbefbb2d8d8461f8f7f481}{noise}}=-\/2}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00029}00029\ \ \ \ \ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00030}00030\ }
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00031}\mbox{\hyperlink{structiCub_1_1ctrl_1_1dbscan_1_1Data__t}{00031}}\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structiCub_1_1ctrl_1_1dbscan_1_1Data__t}{Data\_t}}\ \{}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00032}\mbox{\hyperlink{structiCub_1_1ctrl_1_1dbscan_1_1Data__t_a3db1d9ab632775b71f75becaabad485e}{00032}}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ vector<Vector>\ \&\mbox{\hyperlink{structiCub_1_1ctrl_1_1dbscan_1_1Data__t_a3db1d9ab632775b71f75becaabad485e}{points}};}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00033}\mbox{\hyperlink{structiCub_1_1ctrl_1_1dbscan_1_1Data__t_a2e317ed48162b0f8b0eae9bd3ee8bf2d}{00033}}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{structiCub_1_1ctrl_1_1dbscan_1_1Data__t_a2e317ed48162b0f8b0eae9bd3ee8bf2d}{epsilon}};}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00034}\mbox{\hyperlink{structiCub_1_1ctrl_1_1dbscan_1_1Data__t_ac7d64077d8314609b7b5f7999e8d2a82}{00034}}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{structiCub_1_1ctrl_1_1dbscan_1_1Data__t_ac7d64077d8314609b7b5f7999e8d2a82}{minpts}};}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00035}\mbox{\hyperlink{structiCub_1_1ctrl_1_1dbscan_1_1Data__t_a40c819ec37499f1ae2c122438f8d28c9}{00035}}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ vector<int>\ \mbox{\hyperlink{structiCub_1_1ctrl_1_1dbscan_1_1Data__t_a40c819ec37499f1ae2c122438f8d28c9}{ids}};}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00036}\mbox{\hyperlink{structiCub_1_1ctrl_1_1dbscan_1_1Data__t_ac5b6f0e68ef5a4dd6f990f7884693368}{00036}}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structiCub_1_1ctrl_1_1dbscan_1_1Data__t_ac5b6f0e68ef5a4dd6f990f7884693368}{Data\_t}}(\textcolor{keyword}{const}\ vector<Vector>\ \&points\_,}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00037}00037\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ epsilon\_,}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00038}00038\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{size\_t}\ minpts\_)\ :}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00039}00039\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structiCub_1_1ctrl_1_1dbscan_1_1Data__t_a3db1d9ab632775b71f75becaabad485e}{points}}(points\_),\ \mbox{\hyperlink{structiCub_1_1ctrl_1_1dbscan_1_1Data__t_a2e317ed48162b0f8b0eae9bd3ee8bf2d}{epsilon}}(epsilon\_),\ \mbox{\hyperlink{structiCub_1_1ctrl_1_1dbscan_1_1Data__t_ac7d64077d8314609b7b5f7999e8d2a82}{minpts}}(minpts\_)\ \{}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00040}00040\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structiCub_1_1ctrl_1_1dbscan_1_1Data__t_a40c819ec37499f1ae2c122438f8d28c9}{ids}}.assign(\mbox{\hyperlink{structiCub_1_1ctrl_1_1dbscan_1_1Data__t_a3db1d9ab632775b71f75becaabad485e}{points}}.size(),(\textcolor{keywordtype}{int})\mbox{\hyperlink{namespaceiCub_1_1ctrl_1_1dbscan_a163ced096fb32f21f293c2e5227292acaf8c13bb601e2113b166ef926763585b4}{PointType::unclassified}});}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00041}00041\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00042}00042\ \ \ \ \ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00043}00043\ }
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00044}\mbox{\hyperlink{structiCub_1_1ctrl_1_1dbscan_1_1Node__t}{00044}}\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structiCub_1_1ctrl_1_1dbscan_1_1Node__t}{Node\_t}}\ \{}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00045}\mbox{\hyperlink{structiCub_1_1ctrl_1_1dbscan_1_1Node__t_a940cbb8d4c635312c05fb2638b4d29aa}{00045}}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{structiCub_1_1ctrl_1_1dbscan_1_1Node__t_a940cbb8d4c635312c05fb2638b4d29aa}{index}};}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00046}\mbox{\hyperlink{structiCub_1_1ctrl_1_1dbscan_1_1Node__t_a61997b68da4fc34aa340bd669f93ffa9}{00046}}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ shared\_ptr<Node\_t>\ \mbox{\hyperlink{structiCub_1_1ctrl_1_1dbscan_1_1Node__t_a61997b68da4fc34aa340bd669f93ffa9}{next}};}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00047}00047\ \ \ \ \ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00048}00048\ }
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00049}\mbox{\hyperlink{structiCub_1_1ctrl_1_1dbscan_1_1Epsilon__neighbours__t}{00049}}\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structiCub_1_1ctrl_1_1dbscan_1_1Epsilon__neighbours__t}{Epsilon\_neighbours\_t}}\ \{}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00050}\mbox{\hyperlink{structiCub_1_1ctrl_1_1dbscan_1_1Epsilon__neighbours__t_aad88c49d75f01063e5113946ec99b20b}{00050}}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{structiCub_1_1ctrl_1_1dbscan_1_1Epsilon__neighbours__t_aad88c49d75f01063e5113946ec99b20b}{num\_members}};}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00051}\mbox{\hyperlink{structiCub_1_1ctrl_1_1dbscan_1_1Epsilon__neighbours__t_a3153cec5da263c151fc9ca3b7a1beaff}{00051}}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ shared\_ptr<Node\_t>\ \mbox{\hyperlink{structiCub_1_1ctrl_1_1dbscan_1_1Epsilon__neighbours__t_a3153cec5da263c151fc9ca3b7a1beaff}{head}};}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00052}\mbox{\hyperlink{structiCub_1_1ctrl_1_1dbscan_1_1Epsilon__neighbours__t_ac7b175d087565d3f85f8d9c64973bcf6}{00052}}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ weak\_ptr<Node\_t>\ \mbox{\hyperlink{structiCub_1_1ctrl_1_1dbscan_1_1Epsilon__neighbours__t_ac7b175d087565d3f85f8d9c64973bcf6}{tail}};}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00053}00053\ \ \ \ \ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00054}00054\ }
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00055}00055\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ /**********************************************************************/}}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00056}\mbox{\hyperlink{namespaceiCub_1_1ctrl_1_1dbscan_aebb41b708032252c4e074802bb146596}{00056}}\ \ \ \ \ \ \ \ \ \ \ \ \ shared\_ptr<Node\_t>\ \mbox{\hyperlink{namespaceiCub_1_1ctrl_1_1dbscan_aebb41b708032252c4e074802bb146596}{create\_node}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{size\_t}\ index)}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00057}00057\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00058}00058\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ shared\_ptr<Node\_t>\ node(\textcolor{keyword}{new}\ \mbox{\hyperlink{structiCub_1_1ctrl_1_1dbscan_1_1Node__t}{Node\_t}}());}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00059}00059\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ node-\/>index=index;}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00060}00060\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ node-\/>next=\textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00061}00061\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ node;}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00062}00062\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00063}00063\ }
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00064}00064\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ /**********************************************************************/}}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00065}\mbox{\hyperlink{namespaceiCub_1_1ctrl_1_1dbscan_a8f46d9d0251b88939959e0eaeef08608}{00065}}\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{namespaceiCub_1_1ctrl_1_1dbscan_a8f46d9d0251b88939959e0eaeef08608}{append}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{size\_t}\ index,\ shared\_ptr<Epsilon\_neighbours\_t>\ en)}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00066}00066\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00067}00067\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ shared\_ptr<Node\_t>\ node=\mbox{\hyperlink{namespaceiCub_1_1ctrl_1_1dbscan_aebb41b708032252c4e074802bb146596}{create\_node}}(index);}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00068}00068\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (en-\/>head==\textcolor{keyword}{nullptr})}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00069}00069\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00070}00070\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ en-\/>head=node;}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00071}00071\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ en-\/>tail=node;}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00072}00072\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00073}00073\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00074}00074\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00075}00075\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ en-\/>tail.lock()-\/>next=node;}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00076}00076\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ en-\/>tail=node;}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00077}00077\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00078}00078\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ en-\/>num\_members++;}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00079}00079\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00080}00080\ }
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00081}00081\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ /**********************************************************************/}}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00082}\mbox{\hyperlink{namespaceiCub_1_1ctrl_1_1dbscan_a63cb7c6a0ad28590ba23558f6e39eed0}{00082}}\ \ \ \ \ \ \ \ \ \ \ \ \ shared\_ptr<Epsilon\_neighbours\_t>\ \mbox{\hyperlink{namespaceiCub_1_1ctrl_1_1dbscan_a63cb7c6a0ad28590ba23558f6e39eed0}{get\_epsilon\_neighbours}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{size\_t}\ index,}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00083}00083\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ shared\_ptr<Data\_t>\ augData)}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00084}00084\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00085}00085\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ shared\_ptr<Epsilon\_neighbours\_t>\ en(\textcolor{keyword}{new}\ \mbox{\hyperlink{structiCub_1_1ctrl_1_1dbscan_1_1Epsilon__neighbours__t}{Epsilon\_neighbours\_t}}());}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00086}00086\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<augData-\/>points.size();\ i++)}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00087}00087\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00088}00088\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ d=0.0;}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00089}00089\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ j=0;\ j<augData-\/>points[index].length();\ j++)}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00090}00090\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00091}00091\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ d+=pow(augData-\/>points[index][j]-\/augData-\/>points[i][j],2.0);}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00092}00092\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00093}00093\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ ((i!=index)\ \&\&\ (sqrt(d)<=augData-\/>epsilon))}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00094}00094\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00095}00095\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespaceiCub_1_1ctrl_1_1dbscan_a8f46d9d0251b88939959e0eaeef08608}{append}}(i,en);}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00096}00096\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00097}00097\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00098}00098\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ en;}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00099}00099\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00100}00100\ }
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00101}00101\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ /**********************************************************************/}}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00102}\mbox{\hyperlink{namespaceiCub_1_1ctrl_1_1dbscan_adb470a605d321eeb8614e96ef626cbee}{00102}}\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{namespaceiCub_1_1ctrl_1_1dbscan_adb470a605d321eeb8614e96ef626cbee}{spread}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{size\_t}\ index,\ shared\_ptr<Epsilon\_neighbours\_t>\ seeds,}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00103}00103\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{size\_t}\ \textcolor{keywordtype}{id},\ shared\_ptr<Data\_t>\ augData)}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00104}00104\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00105}00105\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ shared\_ptr<Epsilon\_neighbours\_t>\ \mbox{\hyperlink{namespaceiCub_1_1ctrl_1_1dbscan_adb470a605d321eeb8614e96ef626cbee}{spread}}=\mbox{\hyperlink{namespaceiCub_1_1ctrl_1_1dbscan_a63cb7c6a0ad28590ba23558f6e39eed0}{get\_epsilon\_neighbours}}(index,augData);}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00106}00106\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{namespaceiCub_1_1ctrl_1_1dbscan_adb470a605d321eeb8614e96ef626cbee}{spread}}-\/>num\_members>=augData-\/>minpts)}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00107}00107\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00108}00108\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (shared\_ptr<Node\_t>\ node=\mbox{\hyperlink{namespaceiCub_1_1ctrl_1_1dbscan_adb470a605d321eeb8614e96ef626cbee}{spread}}-\/>head;\ node!=\textcolor{keyword}{nullptr};\ node=node-\/>next)}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00109}00109\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00110}00110\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ ((augData-\/>ids[node-\/>index]==(\textcolor{keywordtype}{int})\mbox{\hyperlink{namespaceiCub_1_1ctrl_1_1dbscan_a163ced096fb32f21f293c2e5227292acaaaddc3454ccbefbb2d8d8461f8f7f481}{PointType::noise}})\ ||}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00111}00111\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (augData-\/>ids[node-\/>index]==(int)\mbox{\hyperlink{namespaceiCub_1_1ctrl_1_1dbscan_a163ced096fb32f21f293c2e5227292acaf8c13bb601e2113b166ef926763585b4}{PointType::unclassified}}))}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00112}00112\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00113}00113\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (augData-\/>ids[node-\/>index]==(\textcolor{keywordtype}{int})\mbox{\hyperlink{namespaceiCub_1_1ctrl_1_1dbscan_a163ced096fb32f21f293c2e5227292acaf8c13bb601e2113b166ef926763585b4}{PointType::unclassified}})}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00114}00114\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00115}00115\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespaceiCub_1_1ctrl_1_1dbscan_a8f46d9d0251b88939959e0eaeef08608}{append}}(node-\/>index,seeds);}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00116}00116\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00117}00117\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ augData-\/>ids[node-\/>index]=(int)\textcolor{keywordtype}{id};}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00118}00118\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00119}00119\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00120}00120\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00121}00121\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00122}00122\ }
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00123}00123\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ /**********************************************************************/}}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00124}\mbox{\hyperlink{namespaceiCub_1_1ctrl_1_1dbscan_accfdc1220364db48af5ae9dc2b746fdf}{00124}}\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{namespaceiCub_1_1ctrl_1_1dbscan_accfdc1220364db48af5ae9dc2b746fdf}{expand}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{size\_t}\ index,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{size\_t}\ \textcolor{keywordtype}{id},\ shared\_ptr<Data\_t>\ augData)}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00125}00125\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00126}00126\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ shared\_ptr<Epsilon\_neighbours\_t>\ seeds=\mbox{\hyperlink{namespaceiCub_1_1ctrl_1_1dbscan_a63cb7c6a0ad28590ba23558f6e39eed0}{get\_epsilon\_neighbours}}(index,augData);}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00127}00127\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (seeds-\/>num\_members<augData-\/>minpts)}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00128}00128\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00129}00129\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ augData-\/>ids[index]=(int)\mbox{\hyperlink{namespaceiCub_1_1ctrl_1_1dbscan_a163ced096fb32f21f293c2e5227292acaaaddc3454ccbefbb2d8d8461f8f7f481}{PointType::noise}};}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00130}00130\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00131}00131\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00132}00132\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00133}00133\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00134}00134\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ augData-\/>ids[index]=(int)\textcolor{keywordtype}{id};}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00135}00135\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (shared\_ptr<Node\_t>\ \mbox{\hyperlink{compute__ekf__sym_8m_a5e36941b3d856737e81516acd45edc50}{h}}=seeds-\/>head;\ \mbox{\hyperlink{compute__ekf__sym_8m_a5e36941b3d856737e81516acd45edc50}{h}}!=\textcolor{keyword}{nullptr};\ \mbox{\hyperlink{compute__ekf__sym_8m_a5e36941b3d856737e81516acd45edc50}{h}}=\mbox{\hyperlink{compute__ekf__sym_8m_a5e36941b3d856737e81516acd45edc50}{h}}-\/>next)}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00136}00136\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00137}00137\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ augData-\/>ids[\mbox{\hyperlink{compute__ekf__sym_8m_a5e36941b3d856737e81516acd45edc50}{h}}-\/>index]=(int)\textcolor{keywordtype}{id};}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00138}00138\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00139}00139\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (shared\_ptr<Node\_t>\ \mbox{\hyperlink{compute__ekf__sym_8m_a5e36941b3d856737e81516acd45edc50}{h}}=seeds-\/>head;\ \mbox{\hyperlink{compute__ekf__sym_8m_a5e36941b3d856737e81516acd45edc50}{h}}!=\textcolor{keyword}{nullptr};\ \mbox{\hyperlink{compute__ekf__sym_8m_a5e36941b3d856737e81516acd45edc50}{h}}=\mbox{\hyperlink{compute__ekf__sym_8m_a5e36941b3d856737e81516acd45edc50}{h}}-\/>next)}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00140}00140\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00141}00141\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespaceiCub_1_1ctrl_1_1dbscan_adb470a605d321eeb8614e96ef626cbee}{spread}}(\mbox{\hyperlink{compute__ekf__sym_8m_a5e36941b3d856737e81516acd45edc50}{h}}-\/>index,seeds,\textcolor{keywordtype}{id},augData);}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00142}00142\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00143}00143\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00144}00144\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00145}00145\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00146}00146\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00147}00147\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00148}00148\ \}}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00149}00149\ }
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00150}00150\ }
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00151}00151\ \textcolor{comment}{/**********************************************************************/}}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00152}\mbox{\hyperlink{classiCub_1_1ctrl_1_1DBSCAN_a1736fa385abc829a7d1e6dbf386969f1}{00152}}\ map<size\_t,set<size\_t>>\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1DBSCAN_a1736fa385abc829a7d1e6dbf386969f1}{DBSCAN::cluster}}(\textcolor{keyword}{const}\ vector<Vector>\ \&\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}},}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00153}00153\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Property\ \&options)}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00154}00154\ \{}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00155}00155\ \ \ \ \ \textcolor{keywordtype}{double}\ epsilon=options.check(\textcolor{stringliteral}{"{}epsilon"{}},Value(1.0)).asFloat64();}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00156}00156\ \ \ \ \ \textcolor{keywordtype}{size\_t}\ minpts=(size\_t)options.check(\textcolor{stringliteral}{"{}minpts"{}},Value(2)).asInt32();}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00157}00157\ \ \ \ \ shared\_ptr<dbscan::Data\_t>\ augData(\textcolor{keyword}{new}\ \mbox{\hyperlink{structiCub_1_1ctrl_1_1dbscan_1_1Data__t}{dbscan::Data\_t}}(\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}},epsilon,minpts));}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00158}00158\ }
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00159}00159\ \ \ \ \ \textcolor{keywordtype}{size\_t}\ \textcolor{keywordtype}{id}=0;}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00160}00160\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<augData-\/>points.size();\ i++)}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00161}00161\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00162}00162\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (augData-\/>ids[i]==(\textcolor{keywordtype}{int})\mbox{\hyperlink{namespaceiCub_1_1ctrl_1_1dbscan_a163ced096fb32f21f293c2e5227292acaf8c13bb601e2113b166ef926763585b4}{dbscan::PointType::unclassified}})}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00163}00163\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00164}00164\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{namespaceiCub_1_1ctrl_1_1dbscan_accfdc1220364db48af5ae9dc2b746fdf}{dbscan::expand}}(i,\textcolor{keywordtype}{id},augData))}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00165}00165\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00166}00166\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{id}++;}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00167}00167\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00168}00168\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00169}00169\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00170}00170\ }
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00171}00171\ \ \ \ \ map<size\_t,set<size\_t>>\ clusters;}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00172}00172\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<augData-\/>points.size();\ i++)}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00173}00173\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00174}00174\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (augData-\/>ids[i]!=(\textcolor{keywordtype}{int})\mbox{\hyperlink{namespaceiCub_1_1ctrl_1_1dbscan_a163ced096fb32f21f293c2e5227292acaaaddc3454ccbefbb2d8d8461f8f7f481}{dbscan::PointType::noise}})}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00175}00175\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00176}00176\ \ \ \ \ \ \ \ \ \ \ \ \ clusters[augData-\/>ids[i]].insert(i);}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00177}00177\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00178}00178\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00179}00179\ \ \ \ \ \textcolor{keywordflow}{return}\ clusters;}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00180}00180\ \}}
+\DoxyCodeLine{\Hypertarget{clustering_8cpp_source_l00181}00181\ }
+
+\end{DoxyCode}

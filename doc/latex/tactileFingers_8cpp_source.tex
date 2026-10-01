@@ -1,0 +1,419 @@
+\doxysection{tactile\+Fingers.\+cpp}
+\hypertarget{tactileFingers_8cpp_source}{}\label{tactileFingers_8cpp_source}\index{icub-\/main/src/libraries/perceptiveModels/src/tactileFingers.cpp@{icub-\/main/src/libraries/perceptiveModels/src/tactileFingers.cpp}}
+\mbox{\hyperlink{tactileFingers_8cpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00001}00001\ \textcolor{comment}{/*\ }}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00002}00002\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2011\ Department\ of\ Robotics\ Brain\ and\ Cognitive\ Sciences\ -\/\ Istituto\ Italiano\ di\ Tecnologia}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00003}00003\ \textcolor{comment}{\ *\ Author:\ Ugo\ Pattacini}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00004}00004\ \textcolor{comment}{\ *\ email:\ \ ugo.pattacini@iit.it}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00005}00005\ \textcolor{comment}{\ *\ Permission\ is\ granted\ to\ copy,\ distribute,\ and/or\ modify\ this\ program}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00006}00006\ \textcolor{comment}{\ *\ under\ the\ terms\ of\ the\ GNU\ General\ Public\ License,\ version\ 2\ or\ any}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00007}00007\ \textcolor{comment}{\ *\ later\ version\ published\ by\ the\ Free\ Software\ Foundation.}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00008}00008\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00009}00009\ \textcolor{comment}{\ *\ A\ copy\ of\ the\ license\ can\ be\ found\ at}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00010}00010\ \textcolor{comment}{\ *\ http://www.robotcub.org/icub/license/gpl.txt}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00011}00011\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00012}00012\ \textcolor{comment}{\ *\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00013}00013\ \textcolor{comment}{\ *\ WITHOUT\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00014}00014\ \textcolor{comment}{\ *\ MERCHANTABILITY\ or\ FITNESS\ FOR\ A\ PARTICULAR\ PURPOSE.\ See\ the\ GNU\ General}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00015}00015\ \textcolor{comment}{\ *\ Public\ License\ for\ more\ details}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00016}00016\ \textcolor{comment}{*/}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00017}00017\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00018}00018\ \textcolor{preprocessor}{\#include\ <sstream>}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00019}00019\ \textcolor{preprocessor}{\#include\ <iomanip>}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00020}00020\ \textcolor{preprocessor}{\#include\ <algorithm>}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00021}00021\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00022}00022\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{math_8h}{iCub/ctrl/math.h}}>}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00023}00023\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{ports_8h}{iCub/perception/private/ports.h}}>}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00024}00024\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{private_2models_8h}{iCub/perception/private/models.h}}>}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00025}00025\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{tactileFingers_8h}{iCub/perception/tactileFingers.h}}>}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00026}00026\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00027}00027\ \textcolor{keyword}{using\ namespace\ }std;}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00028}00028\ \textcolor{keyword}{using\ namespace\ }yarp::os;}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00029}00029\ \textcolor{keyword}{using\ namespace\ }yarp::sig;}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00030}00030\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceiCub_1_1perception}{iCub::perception}};}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00031}00031\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00032}00032\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00033}00033\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00034}\mbox{\hyperlink{classiCub_1_1perception_1_1TactileFinger_a785ce48bd9e94661b6a415ffdb8f5d6d}{00034}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1perception_1_1TactileFinger_a785ce48bd9e94661b6a415ffdb8f5d6d}{TactileFinger::fromProperty}}(\textcolor{keyword}{const}\ Property\ \&options)}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00035}00035\ \{}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00036}00036\ \ \ \ \ \textcolor{keywordflow}{if}\ (!options.check(\textcolor{stringliteral}{"{}name"{}}))}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00037}00037\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00038}00038\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00039}00039\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Node_a31aae1bd10e27d8baebeede7faae2420}{sensors}}.clear();}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00040}00040\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Node_a169cfec62924133fcf6b7d5d69ecb779}{callbacks}}.clear();}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00041}00041\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Node_a1ed44103061be1fbfb9747ed6aabc91f}{neighbors}}.clear();}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00042}00042\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00043}00043\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Node_a8d2d3ccf35d0c4dcca77acd2986d9a45}{name}}=options.find(\textcolor{stringliteral}{"{}name"{}}).asString();}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00044}00044\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1TactileFinger_afba71b7f67aa3286697efcce3d297987}{directLogic}}=(options.check(\textcolor{stringliteral}{"{}logic"{}},Value(\textcolor{stringliteral}{"{}direct"{}})).asString()==\textcolor{stringliteral}{"{}direct"{}});}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00045}00045\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1TactileFinger_a5f326061e01781e74005c545f86c6c13}{outputGain}}=options.check(\textcolor{stringliteral}{"{}output\_gain"{}},Value(1.0)).asFloat64();}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00046}00046\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00047}00047\ \ \ \ \ \textcolor{keywordflow}{if}\ ((\mbox{\hyperlink{classiCub_1_1perception_1_1Node_a8d2d3ccf35d0c4dcca77acd2986d9a45}{name}}==\textcolor{stringliteral}{"{}thumb"{}})\ ||\ (\mbox{\hyperlink{classiCub_1_1perception_1_1Node_a8d2d3ccf35d0c4dcca77acd2986d9a45}{name}}==\textcolor{stringliteral}{"{}index"{}})\ ||\ (\mbox{\hyperlink{classiCub_1_1perception_1_1Node_a8d2d3ccf35d0c4dcca77acd2986d9a45}{name}}==\textcolor{stringliteral}{"{}middle"{}})\ ||}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00048}00048\ \ \ \ \ \ \ \ \ (\mbox{\hyperlink{classiCub_1_1perception_1_1Node_a8d2d3ccf35d0c4dcca77acd2986d9a45}{name}}==\textcolor{stringliteral}{"{}ring"{}})\ \ ||\ (\mbox{\hyperlink{classiCub_1_1perception_1_1Node_a8d2d3ccf35d0c4dcca77acd2986d9a45}{name}}==\textcolor{stringliteral}{"{}little"{}}))}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00049}00049\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00050}00050\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00051}00051\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00052}00052\ \}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00053}00053\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00054}00054\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00055}00055\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00056}\mbox{\hyperlink{classiCub_1_1perception_1_1TactileFinger_a3091462125d6ccfb071c709d648fe4be}{00056}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1perception_1_1TactileFinger_a3091462125d6ccfb071c709d648fe4be}{TactileFinger::toProperty}}(Property\ \&options)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00057}00057\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00058}00058\ \ \ \ \ options.clear();}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00059}00059\ \ \ \ \ options.put(\textcolor{stringliteral}{"{}name"{}},\mbox{\hyperlink{classiCub_1_1perception_1_1Node_a8d2d3ccf35d0c4dcca77acd2986d9a45}{name}});}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00060}00060\ \ \ \ \ options.put(\textcolor{stringliteral}{"{}logic"{}},\mbox{\hyperlink{classiCub_1_1perception_1_1TactileFinger_afba71b7f67aa3286697efcce3d297987}{directLogic}}?\textcolor{stringliteral}{"{}direct"{}}:\textcolor{stringliteral}{"{}inverse"{}});}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00061}00061\ \ \ \ \ options.put(\textcolor{stringliteral}{"{}output\_gain"{}},\mbox{\hyperlink{classiCub_1_1perception_1_1TactileFinger_a5f326061e01781e74005c545f86c6c13}{outputGain}});}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00062}00062\ \}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00063}00063\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00064}00064\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00065}00065\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00066}\mbox{\hyperlink{classiCub_1_1perception_1_1TactileFinger_a6023b57e58024c6d3c3e443f31fbe388}{00066}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1perception_1_1TactileFinger_a6023b57e58024c6d3c3e443f31fbe388}{TactileFinger::toStream}}(ostream\ \&str)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00067}00067\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00068}00068\ \ \ \ \ str<<\textcolor{stringliteral}{"{}name\ \ \ \ \ \ \ \ "{}}<<\mbox{\hyperlink{classiCub_1_1perception_1_1Node_a8d2d3ccf35d0c4dcca77acd2986d9a45}{name}}<<endl;}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00069}00069\ \ \ \ \ str<<\textcolor{stringliteral}{"{}logic\ \ \ \ \ \ \ "{}}<<(\mbox{\hyperlink{classiCub_1_1perception_1_1TactileFinger_afba71b7f67aa3286697efcce3d297987}{directLogic}}?\textcolor{stringliteral}{"{}direct"{}}:\textcolor{stringliteral}{"{}inverse"{}})<<endl;}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00070}00070\ \ \ \ \ str<<\textcolor{stringliteral}{"{}output\_gain\ "{}}<<\mbox{\hyperlink{classiCub_1_1perception_1_1TactileFinger_a5f326061e01781e74005c545f86c6c13}{outputGain}}<<endl;}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00071}00071\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00072}00072\ \ \ \ \ \textcolor{keywordflow}{if}\ (str.fail())}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00073}00073\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00074}00074\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00075}00075\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00076}00076\ \}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00077}00077\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00078}00078\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00079}00079\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00080}\mbox{\hyperlink{classiCub_1_1perception_1_1TactileFinger_ad150b189e463e5e0c71c4e46025e2db0}{00080}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1perception_1_1TactileFinger_ad150b189e463e5e0c71c4e46025e2db0}{TactileFinger::calibrate}}(\textcolor{keyword}{const}\ Property\ \&options)}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00081}00081\ \{}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00082}00082\ \ \ \ \ yWarning(\textcolor{stringliteral}{"{}TactileFinger:\ calibration\ not\ available"{}});}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00083}00083\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00084}00084\ \}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00085}00085\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00086}00086\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00087}00087\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00088}\mbox{\hyperlink{classiCub_1_1perception_1_1TactileFinger_a3c9b60853aeb4a57d7f40c66210d93cc}{00088}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1perception_1_1TactileFinger_a3c9b60853aeb4a57d7f40c66210d93cc}{TactileFinger::isCalibrated}}()\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00089}00089\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00090}00090\ \ \ \ \ yWarning(\textcolor{stringliteral}{"{}TactileFinger:\ calibration\ not\ available"{}});}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00091}00091\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00092}00092\ \}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00093}00093\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00094}00094\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00095}00095\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00096}\mbox{\hyperlink{classiCub_1_1perception_1_1TactileFinger_aa460391ffe7584f577d65a8a7d61468c}{00096}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1perception_1_1TactileFinger_aa460391ffe7584f577d65a8a7d61468c}{TactileFinger::getSensorsData}}(Value\ \&\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}})\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00097}00097\ \textcolor{keyword}{}\{\ \ \ \ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00098}00098\ \ \ \ \ Vector\ in(12);}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00099}00099\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ j=0;\ j<12;\ j++)}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00100}00100\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00101}00101\ \ \ \ \ \ \ \ \ ostringstream\ tag;}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00102}00102\ \ \ \ \ \ \ \ \ tag<<\textcolor{stringliteral}{"{}In\_"{}}<<j;}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00103}00103\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00104}00104\ \ \ \ \ \ \ \ \ map<string,Sensor*>::const\_iterator\ In=\mbox{\hyperlink{classiCub_1_1perception_1_1Node_a31aae1bd10e27d8baebeede7faae2420}{sensors}}.find(tag.str());}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00105}00105\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (In==\mbox{\hyperlink{classiCub_1_1perception_1_1Node_a31aae1bd10e27d8baebeede7faae2420}{sensors}}.end())}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00106}00106\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00107}00107\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00108}00108\ \ \ \ \ \ \ \ \ Value\ val\_in;\ In-\/>second-\/>getOutput(val\_in);}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00109}00109\ \ \ \ \ \ \ \ \ in[j]=val\_in.asFloat64();}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00110}00110\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00111}00111\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00112}00112\ \ \ \ \ Property\ prop;}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00113}00113\ \ \ \ \ Bottle\ b;}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00114}00114\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00115}00115\ \ \ \ \ b.addList().read(in);}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00116}00116\ \ \ \ \ prop.put(\textcolor{stringliteral}{"{}in"{}},b.get(0));}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00117}00117\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00118}00118\ \ \ \ \ b.addList().read(prop);}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00119}00119\ \ \ \ \ \mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}=b.get(1);}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00120}00120\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00121}00121\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00122}00122\ \}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00123}00123\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00124}00124\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00125}00125\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00126}\mbox{\hyperlink{classiCub_1_1perception_1_1TactileFinger_a29407f72075e83d88e6d4a2faa32a736}{00126}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1perception_1_1TactileFinger_a29407f72075e83d88e6d4a2faa32a736}{TactileFinger::extractSensorsData}}(Vector\ \&in)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00127}00127\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00128}00128\ \ \ \ \ \textcolor{keywordtype}{bool}\ ret=\textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00129}00129\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00130}00130\ \ \ \ \ Value\ \mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}};}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00131}00131\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classiCub_1_1perception_1_1TactileFinger_aa460391ffe7584f577d65a8a7d61468c}{getSensorsData}}(\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}))}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00132}00132\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00133}00133\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (Bottle\ *b1=\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}.asList())}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00134}00134\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00135}00135\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (Bottle\ *b2=b1-\/>find(\textcolor{stringliteral}{"{}in"{}}).asList())}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00136}00136\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00137}00137\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ in.resize(b2-\/>size());\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00138}00138\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<in.length();\ i++)}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00139}00139\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ in[i]=b2-\/>get(i).asFloat64();}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00140}00140\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00141}00141\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ret=\textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00142}00142\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00143}00143\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00144}00144\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00145}00145\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00146}00146\ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00147}00147\ \}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00148}00148\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00149}00149\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00150}00150\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00151}\mbox{\hyperlink{classiCub_1_1perception_1_1TactileFinger_a8809c1eb2c9f26cb4414d6c79ad7683c}{00151}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1perception_1_1TactileFinger_a8809c1eb2c9f26cb4414d6c79ad7683c}{TactileFinger::getOutput}}(Value\ \&\mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}})\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00152}00152\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00153}00153\ \ \ \ \ Vector\ i;}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00154}00154\ \ \ \ \ \textcolor{keywordflow}{if}\ (!\mbox{\hyperlink{classiCub_1_1perception_1_1TactileFinger_a29407f72075e83d88e6d4a2faa32a736}{extractSensorsData}}(i))}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00155}00155\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00156}00156\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00157}00157\ \ \ \ \ \textcolor{keywordtype}{double}\ ret=0.0;}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00158}00158\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ j=0;\ j<i.length();\ j++)}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00159}00159\ \ \ \ \ \ \ \ \ ret=std::max(ret,\mbox{\hyperlink{classiCub_1_1perception_1_1TactileFinger_afba71b7f67aa3286697efcce3d297987}{directLogic}}?(255.0-\/i[j]):i[j]);}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00160}00160\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00161}00161\ \ \ \ \ \mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}}=Value(\mbox{\hyperlink{classiCub_1_1perception_1_1TactileFinger_a5f326061e01781e74005c545f86c6c13}{outputGain}}*ret);}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00162}00162\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00163}00163\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00164}00164\ \}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00165}00165\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00166}00166\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00167}00167\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00168}\mbox{\hyperlink{classiCub_1_1perception_1_1TactileFingersModel_a401b60039641206529604222a2154bd6}{00168}}\ \mbox{\hyperlink{classiCub_1_1perception_1_1TactileFingersModel_a401b60039641206529604222a2154bd6}{TactileFingersModel::TactileFingersModel}}()}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00169}00169\ \{}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00170}00170\ \ \ \ \ port=\textcolor{keyword}{new}\ \mbox{\hyperlink{classiCub_1_1perception_1_1Port}{iCub::perception::Port}};}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00171}00171\ \ \ \ \ configured=\textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00172}00172\ \}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00173}00173\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00174}00174\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00175}00175\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00176}\mbox{\hyperlink{classiCub_1_1perception_1_1TactileFingersModel_a275a526447f00c2b4793f4d6a0145f86}{00176}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1perception_1_1TactileFingersModel_a275a526447f00c2b4793f4d6a0145f86}{TactileFingersModel::fromProperty}}(\textcolor{keyword}{const}\ Property\ \&options)}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00177}00177\ \{}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00178}00178\ \ \ \ \ \textcolor{keywordflow}{if}\ (!options.check(\textcolor{stringliteral}{"{}name"{}})\ ||\ !options.check(\textcolor{stringliteral}{"{}type"{}}))}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00179}00179\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00180}00180\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Model_a4f01cfcbc00e0adb4c6bd2104c162442}{printMessage}}(\mbox{\hyperlink{namespaceiCub_1_1perception_1_1log_a4808224c7b00400035caa3d15abef2c2afd4de2e4dc4632842cf4fa6263f72443}{log::error}},1,\textcolor{stringliteral}{"{}missing\ mandatory\ options\ \(\backslash\)"{}name\(\backslash\)"{}\ and/or\ \(\backslash\)"{}type\(\backslash\)"{}"{}});}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00181}00181\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00182}00182\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00183}00183\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00184}00184\ \ \ \ \ \textcolor{keywordflow}{if}\ (configured)}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00185}00185\ \ \ \ \ \ \ \ \ close();}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00186}00186\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00187}00187\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Model_ae2117ae02028227ca050199d02a5ec12}{name}}=options.find(\textcolor{stringliteral}{"{}name"{}}).asString();}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00188}00188\ \ \ \ \ type=options.find(\textcolor{stringliteral}{"{}type"{}}).asString();}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00189}00189\ \ \ \ \ robot=options.check(\textcolor{stringliteral}{"{}robot"{}},Value(\textcolor{stringliteral}{"{}icub"{}})).asString();}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00190}00190\ \ \ \ \ carrier=options.check(\textcolor{stringliteral}{"{}carrier"{}},Value(\textcolor{stringliteral}{"{}udp"{}})).asString();}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00191}00191\ \ \ \ \ compensation=(options.check(\textcolor{stringliteral}{"{}compensation"{}},Value(\textcolor{stringliteral}{"{}false"{}})).asString()==\textcolor{stringliteral}{"{}true"{}});}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00192}00192\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Model_ab04b291c81cec684e8bfa2f6dda88e5e}{verbosity}}=options.check(\textcolor{stringliteral}{"{}verbosity"{}},Value(0)).asInt32();}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00193}00193\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00194}00194\ \ \ \ \ port-\/>open(\textcolor{stringliteral}{"{}/"{}}+\mbox{\hyperlink{classiCub_1_1perception_1_1Model_ae2117ae02028227ca050199d02a5ec12}{name}}+\textcolor{stringliteral}{"{}/"{}}+type+\textcolor{stringliteral}{"{}\_hand:i"{}});}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00195}00195\ \ \ \ \ \textcolor{keywordtype}{string}\ skinPortName(\textcolor{stringliteral}{"{}/"{}}+robot+\textcolor{stringliteral}{"{}/skin/"{}}+type+\textcolor{stringliteral}{"{}\_hand"{}});}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00196}00196\ \ \ \ \ \textcolor{keywordflow}{if}\ (compensation)}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00197}00197\ \ \ \ \ \ \ \ \ skinPortName+=\textcolor{stringliteral}{"{}\_comp"{}};}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00198}00198\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00199}00199\ \ \ \ \ \textcolor{keywordflow}{if}\ (!Network::connect(skinPortName,port-\/>getName(),carrier))}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00200}00200\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00201}00201\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Model_a4f01cfcbc00e0adb4c6bd2104c162442}{printMessage}}(\mbox{\hyperlink{namespaceiCub_1_1perception_1_1log_a4808224c7b00400035caa3d15abef2c2afd4de2e4dc4632842cf4fa6263f72443}{log::error}},1,\textcolor{stringliteral}{"{}unable\ to\ connect\ to\ \%s"{}},skinPortName.c\_str());}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00202}00202\ \ \ \ \ \ \ \ \ close();}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00203}00203\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00204}00204\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00205}00205\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00206}00206\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Model_a4f01cfcbc00e0adb4c6bd2104c162442}{printMessage}}(\mbox{\hyperlink{namespaceiCub_1_1perception_1_1log_a4808224c7b00400035caa3d15abef2c2abf13376047f84b3eb3dad0e0059f6d7a}{log::info}},1,\textcolor{stringliteral}{"{}configuring\ port-\/based\ sensors\ ..."{}});}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00207}00207\ \ \ \ \ \textcolor{keywordtype}{void}\ *pPort=\textcolor{keyword}{static\_cast<}\textcolor{keywordtype}{void}*\textcolor{keyword}{>}(port);}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00208}00208\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ j=0;\ j<60;\ j++)}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00209}00209\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00210}00210\ \ \ \ \ \ \ \ \ ostringstream\ tag;}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00211}00211\ \ \ \ \ \ \ \ \ tag<<\textcolor{stringliteral}{"{}In\_"{}}<<(j\%12);}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00212}00212\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00213}00213\ \ \ \ \ \ \ \ \ Property\ prop;}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00214}00214\ \ \ \ \ \ \ \ \ prop.put(\textcolor{stringliteral}{"{}name"{}},tag.str());}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00215}00215\ \ \ \ \ \ \ \ \ prop.put(\textcolor{stringliteral}{"{}index"{}},j);}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00216}00216\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00217}00217\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!sensPort[j].configure(pPort,prop))}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00218}00218\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00219}00219\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Model_a4f01cfcbc00e0adb4c6bd2104c162442}{printMessage}}(\mbox{\hyperlink{namespaceiCub_1_1perception_1_1log_a4808224c7b00400035caa3d15abef2c2afd4de2e4dc4632842cf4fa6263f72443}{log::error}},1,\textcolor{stringliteral}{"{}some\ errors\ occured"{}});}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00220}00220\ \ \ \ \ \ \ \ \ \ \ \ \ close();}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00221}00221\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00222}00222\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00223}00223\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00224}00224\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00225}00225\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Model_a4f01cfcbc00e0adb4c6bd2104c162442}{printMessage}}(\mbox{\hyperlink{namespaceiCub_1_1perception_1_1log_a4808224c7b00400035caa3d15abef2c2abf13376047f84b3eb3dad0e0059f6d7a}{log::info}},1,\textcolor{stringliteral}{"{}configuring\ fingers\ ..."{}});}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00226}00226\ \ \ \ \ Property\ thumb(options.findGroup(\textcolor{stringliteral}{"{}thumb"{}}).toString().c\_str());}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00227}00227\ \ \ \ \ Property\ index(options.findGroup(\textcolor{stringliteral}{"{}index"{}}).toString().c\_str());}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00228}00228\ \ \ \ \ Property\ middle(options.findGroup(\textcolor{stringliteral}{"{}middle"{}}).toString().c\_str());}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00229}00229\ \ \ \ \ Property\ ring(options.findGroup(\textcolor{stringliteral}{"{}ring"{}}).toString().c\_str());}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00230}00230\ \ \ \ \ Property\ little(options.findGroup(\textcolor{stringliteral}{"{}little"{}}).toString().c\_str());}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00231}00231\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00232}00232\ \ \ \ \ \textcolor{keywordtype}{bool}\ fingers\_ok=\textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00233}00233\ \ \ \ \ fingers\_ok\&=fingers[0].\mbox{\hyperlink{classiCub_1_1perception_1_1TactileFinger_a785ce48bd9e94661b6a415ffdb8f5d6d}{fromProperty}}(thumb);}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00234}00234\ \ \ \ \ fingers\_ok\&=fingers[1].\mbox{\hyperlink{classiCub_1_1perception_1_1TactileFinger_a785ce48bd9e94661b6a415ffdb8f5d6d}{fromProperty}}(index);}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00235}00235\ \ \ \ \ fingers\_ok\&=fingers[2].\mbox{\hyperlink{classiCub_1_1perception_1_1TactileFinger_a785ce48bd9e94661b6a415ffdb8f5d6d}{fromProperty}}(middle);}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00236}00236\ \ \ \ \ fingers\_ok\&=fingers[3].\mbox{\hyperlink{classiCub_1_1perception_1_1TactileFinger_a785ce48bd9e94661b6a415ffdb8f5d6d}{fromProperty}}(ring);}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00237}00237\ \ \ \ \ fingers\_ok\&=fingers[4].\mbox{\hyperlink{classiCub_1_1perception_1_1TactileFinger_a785ce48bd9e94661b6a415ffdb8f5d6d}{fromProperty}}(little);}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00238}00238\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00239}00239\ \ \ \ \ \textcolor{keywordflow}{if}\ (!fingers\_ok)}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00240}00240\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00241}00241\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Model_a4f01cfcbc00e0adb4c6bd2104c162442}{printMessage}}(\mbox{\hyperlink{namespaceiCub_1_1perception_1_1log_a4808224c7b00400035caa3d15abef2c2afd4de2e4dc4632842cf4fa6263f72443}{log::error}},1,\textcolor{stringliteral}{"{}some\ errors\ occured"{}});}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00242}00242\ \ \ \ \ \ \ \ \ close();}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00243}00243\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00244}00244\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00245}00245\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00246}00246\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Model_a4f01cfcbc00e0adb4c6bd2104c162442}{printMessage}}(\mbox{\hyperlink{namespaceiCub_1_1perception_1_1log_a4808224c7b00400035caa3d15abef2c2abf13376047f84b3eb3dad0e0059f6d7a}{log::info}},1,\textcolor{stringliteral}{"{}attaching\ sensors\ to\ fingers\ ..."{}});}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00247}00247\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ j=0;\ j<12;\ j++)}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00248}00248\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00249}00249\ \ \ \ \ \ \ \ \ fingers[0].\mbox{\hyperlink{classiCub_1_1perception_1_1Node_a54bde511d88093031e67141c804a91af}{attachSensor}}(sensPort[j+4*12]);}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00250}00250\ \ \ \ \ \ \ \ \ fingers[1].\mbox{\hyperlink{classiCub_1_1perception_1_1Node_a54bde511d88093031e67141c804a91af}{attachSensor}}(sensPort[j]);}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00251}00251\ \ \ \ \ \ \ \ \ fingers[2].\mbox{\hyperlink{classiCub_1_1perception_1_1Node_a54bde511d88093031e67141c804a91af}{attachSensor}}(sensPort[j+12]);}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00252}00252\ \ \ \ \ \ \ \ \ fingers[3].\mbox{\hyperlink{classiCub_1_1perception_1_1Node_a54bde511d88093031e67141c804a91af}{attachSensor}}(sensPort[j+2*12]);}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00253}00253\ \ \ \ \ \ \ \ \ fingers[4].\mbox{\hyperlink{classiCub_1_1perception_1_1Node_a54bde511d88093031e67141c804a91af}{attachSensor}}(sensPort[j+3*12]);}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00254}00254\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00255}00255\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00256}00256\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Model_a72abd48d42a0e026e74c4405867a45cc}{attachNode}}(fingers[0]);}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00257}00257\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Model_a72abd48d42a0e026e74c4405867a45cc}{attachNode}}(fingers[1]);}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00258}00258\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Model_a72abd48d42a0e026e74c4405867a45cc}{attachNode}}(fingers[2]);}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00259}00259\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Model_a72abd48d42a0e026e74c4405867a45cc}{attachNode}}(fingers[3]);}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00260}00260\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Model_a72abd48d42a0e026e74c4405867a45cc}{attachNode}}(fingers[4]);}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00261}00261\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00262}00262\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Model_a4f01cfcbc00e0adb4c6bd2104c162442}{printMessage}}(\mbox{\hyperlink{namespaceiCub_1_1perception_1_1log_a4808224c7b00400035caa3d15abef2c2abf13376047f84b3eb3dad0e0059f6d7a}{log::info}},1,\textcolor{stringliteral}{"{}configuration\ complete"{}});}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00263}00263\ \ \ \ \ \textcolor{keywordflow}{return}\ configured=\textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00264}00264\ \}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00265}00265\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00266}00266\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00267}00267\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00268}\mbox{\hyperlink{classiCub_1_1perception_1_1TactileFingersModel_a402cab4618bc3fb37cd20e80d812065a}{00268}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1perception_1_1TactileFingersModel_a402cab4618bc3fb37cd20e80d812065a}{TactileFingersModel::toProperty}}(Property\ \&options)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00269}00269\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00270}00270\ \ \ \ \ options.clear();}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00271}00271\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00272}00272\ \ \ \ \ \textcolor{keywordflow}{if}\ (configured)}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00273}00273\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00274}00274\ \ \ \ \ \ \ \ \ Property\ prop[5];}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00275}00275\ \ \ \ \ \ \ \ \ fingers[0].\mbox{\hyperlink{classiCub_1_1perception_1_1TactileFinger_a3091462125d6ccfb071c709d648fe4be}{toProperty}}(prop[0]);}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00276}00276\ \ \ \ \ \ \ \ \ fingers[1].\mbox{\hyperlink{classiCub_1_1perception_1_1TactileFinger_a3091462125d6ccfb071c709d648fe4be}{toProperty}}(prop[1]);}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00277}00277\ \ \ \ \ \ \ \ \ fingers[2].\mbox{\hyperlink{classiCub_1_1perception_1_1TactileFinger_a3091462125d6ccfb071c709d648fe4be}{toProperty}}(prop[2]);}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00278}00278\ \ \ \ \ \ \ \ \ fingers[3].\mbox{\hyperlink{classiCub_1_1perception_1_1TactileFinger_a3091462125d6ccfb071c709d648fe4be}{toProperty}}(prop[3]);}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00279}00279\ \ \ \ \ \ \ \ \ fingers[4].\mbox{\hyperlink{classiCub_1_1perception_1_1TactileFinger_a3091462125d6ccfb071c709d648fe4be}{toProperty}}(prop[4]);}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00280}00280\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00281}00281\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{string}\ thumb=\textcolor{stringliteral}{"{}(thumb\ "{}};}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00282}00282\ \ \ \ \ \ \ \ \ thumb+=prop[0].toString();}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00283}00283\ \ \ \ \ \ \ \ \ thumb+=\textcolor{stringliteral}{"{})"{}};}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00284}00284\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00285}00285\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{string}\ index=\textcolor{stringliteral}{"{}(index\ "{}};}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00286}00286\ \ \ \ \ \ \ \ \ index+=prop[1].toString();}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00287}00287\ \ \ \ \ \ \ \ \ index+=\textcolor{stringliteral}{"{})"{}};}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00288}00288\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00289}00289\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{string}\ middle=\textcolor{stringliteral}{"{}(middle\ "{}};}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00290}00290\ \ \ \ \ \ \ \ \ middle+=prop[2].toString();}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00291}00291\ \ \ \ \ \ \ \ \ middle+=\textcolor{stringliteral}{"{})"{}};}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00292}00292\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00293}00293\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{string}\ ring=\textcolor{stringliteral}{"{}(ring\ "{}};}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00294}00294\ \ \ \ \ \ \ \ \ ring+=prop[3].toString();}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00295}00295\ \ \ \ \ \ \ \ \ ring+=\textcolor{stringliteral}{"{})"{}};}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00296}00296\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00297}00297\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{string}\ little=\textcolor{stringliteral}{"{}(little\ "{}};}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00298}00298\ \ \ \ \ \ \ \ \ little+=prop[4].toString();}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00299}00299\ \ \ \ \ \ \ \ \ little+=\textcolor{stringliteral}{"{})"{}};}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00300}00300\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00301}00301\ \ \ \ \ \ \ \ \ options.fromString(thumb+index+middle+ring+little);}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00302}00302\ \ \ \ \ \ \ \ \ options.put(\textcolor{stringliteral}{"{}name"{}},\mbox{\hyperlink{classiCub_1_1perception_1_1Model_ae2117ae02028227ca050199d02a5ec12}{name}});}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00303}00303\ \ \ \ \ \ \ \ \ options.put(\textcolor{stringliteral}{"{}type"{}},type);}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00304}00304\ \ \ \ \ \ \ \ \ options.put(\textcolor{stringliteral}{"{}robot"{}},robot);}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00305}00305\ \ \ \ \ \ \ \ \ options.put(\textcolor{stringliteral}{"{}compensation"{}},compensation?\textcolor{stringliteral}{"{}true"{}}:\textcolor{stringliteral}{"{}false"{}});}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00306}00306\ \ \ \ \ \ \ \ \ options.put(\textcolor{stringliteral}{"{}verbosity"{}},\mbox{\hyperlink{classiCub_1_1perception_1_1Model_ab04b291c81cec684e8bfa2f6dda88e5e}{verbosity}});}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00307}00307\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00308}00308\ \}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00309}00309\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00310}00310\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00311}00311\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00312}\mbox{\hyperlink{classiCub_1_1perception_1_1TactileFingersModel_a6e46520791654cdac8a6e1cc6ad84e9a}{00312}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1perception_1_1TactileFingersModel_a6e46520791654cdac8a6e1cc6ad84e9a}{TactileFingersModel::toStream}}(ostream\ \&str)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00313}00313\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00314}00314\ \ \ \ \ \textcolor{keywordflow}{if}\ (configured)}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00315}00315\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00316}00316\ \ \ \ \ \ \ \ \ str<<\textcolor{stringliteral}{"{}name\ \ \ \ \ \ \ \ \ "{}}<<\mbox{\hyperlink{classiCub_1_1perception_1_1Model_ae2117ae02028227ca050199d02a5ec12}{name}}<<endl;}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00317}00317\ \ \ \ \ \ \ \ \ str<<\textcolor{stringliteral}{"{}type\ \ \ \ \ \ \ \ \ "{}}<<type<<endl;}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00318}00318\ \ \ \ \ \ \ \ \ str<<\textcolor{stringliteral}{"{}robot\ \ \ \ \ \ \ \ "{}}<<robot<<endl;}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00319}00319\ \ \ \ \ \ \ \ \ str<<\textcolor{stringliteral}{"{}compensation\ "{}}<<(compensation?\textcolor{stringliteral}{"{}true"{}}:\textcolor{stringliteral}{"{}false"{}})<<endl;}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00320}00320\ \ \ \ \ \ \ \ \ str<<\textcolor{stringliteral}{"{}verbosity\ \ \ \ "{}}<<\mbox{\hyperlink{classiCub_1_1perception_1_1Model_ab04b291c81cec684e8bfa2f6dda88e5e}{verbosity}}<<endl;}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00321}00321\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00322}00322\ \ \ \ \ \ \ \ \ str<<endl;}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00323}00323\ \ \ \ \ \ \ \ \ str<<\textcolor{stringliteral}{"{}[thumb]"{}}<<endl;}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00324}00324\ \ \ \ \ \ \ \ \ fingers[0].\mbox{\hyperlink{classiCub_1_1perception_1_1TactileFinger_a6023b57e58024c6d3c3e443f31fbe388}{toStream}}(str);}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00325}00325\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00326}00326\ \ \ \ \ \ \ \ \ str<<endl;}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00327}00327\ \ \ \ \ \ \ \ \ str<<\textcolor{stringliteral}{"{}[index]"{}}<<endl;}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00328}00328\ \ \ \ \ \ \ \ \ fingers[1].\mbox{\hyperlink{classiCub_1_1perception_1_1TactileFinger_a6023b57e58024c6d3c3e443f31fbe388}{toStream}}(str);}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00329}00329\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00330}00330\ \ \ \ \ \ \ \ \ str<<endl;}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00331}00331\ \ \ \ \ \ \ \ \ str<<\textcolor{stringliteral}{"{}[middle]"{}}<<endl;}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00332}00332\ \ \ \ \ \ \ \ \ fingers[2].\mbox{\hyperlink{classiCub_1_1perception_1_1TactileFinger_a6023b57e58024c6d3c3e443f31fbe388}{toStream}}(str);}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00333}00333\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00334}00334\ \ \ \ \ \ \ \ \ str<<endl;}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00335}00335\ \ \ \ \ \ \ \ \ str<<\textcolor{stringliteral}{"{}[ring]"{}}<<endl;}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00336}00336\ \ \ \ \ \ \ \ \ fingers[3].\mbox{\hyperlink{classiCub_1_1perception_1_1TactileFinger_a6023b57e58024c6d3c3e443f31fbe388}{toStream}}(str);}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00337}00337\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00338}00338\ \ \ \ \ \ \ \ \ str<<endl;}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00339}00339\ \ \ \ \ \ \ \ \ str<<\textcolor{stringliteral}{"{}[little]"{}}<<endl;}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00340}00340\ \ \ \ \ \ \ \ \ fingers[4].\mbox{\hyperlink{classiCub_1_1perception_1_1TactileFinger_a6023b57e58024c6d3c3e443f31fbe388}{toStream}}(str);}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00341}00341\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00342}00342\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00343}00343\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00344}00344\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00345}00345\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00346}00346\ \}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00347}00347\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00348}00348\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00349}00349\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00350}\mbox{\hyperlink{classiCub_1_1perception_1_1TactileFingersModel_a5f4eba529421d94dd22ce7a67716a140}{00350}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1perception_1_1TactileFingersModel_a5f4eba529421d94dd22ce7a67716a140}{TactileFingersModel::calibrate}}(\textcolor{keyword}{const}\ Property\ \&options)}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00351}00351\ \{}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00352}00352\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Model_a4f01cfcbc00e0adb4c6bd2104c162442}{printMessage}}(\mbox{\hyperlink{namespaceiCub_1_1perception_1_1log_a4808224c7b00400035caa3d15abef2c2a54e412eb8dca6cb90285709ee1f5e85d}{log::warning}},1,\textcolor{stringliteral}{"{}calibration\ not\ available"{}});}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00353}00353\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00354}00354\ \}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00355}00355\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00356}00356\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00357}00357\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00358}\mbox{\hyperlink{classiCub_1_1perception_1_1TactileFingersModel_a64589b99c88e55e09c357ec92012c09a}{00358}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1perception_1_1TactileFingersModel_a64589b99c88e55e09c357ec92012c09a}{TactileFingersModel::isCalibrated}}()\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00359}00359\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00360}00360\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Model_a4f01cfcbc00e0adb4c6bd2104c162442}{printMessage}}(\mbox{\hyperlink{namespaceiCub_1_1perception_1_1log_a4808224c7b00400035caa3d15abef2c2a54e412eb8dca6cb90285709ee1f5e85d}{log::warning}},1,\textcolor{stringliteral}{"{}calibration\ not\ available"{}});}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00361}00361\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00362}00362\ \}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00363}00363\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00364}00364\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00365}00365\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00366}\mbox{\hyperlink{classiCub_1_1perception_1_1TactileFingersModel_a84baa5d8345f0be6487b4c0dda0c2a36}{00366}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1perception_1_1TactileFingersModel_a84baa5d8345f0be6487b4c0dda0c2a36}{TactileFingersModel::getOutput}}(Value\ \&\mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}})\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00367}00367\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00368}00368\ \ \ \ \ \textcolor{keywordflow}{if}\ (configured)}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00369}00369\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00370}00370\ \ \ \ \ \ \ \ \ Value\ val[5];}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00371}00371\ \ \ \ \ \ \ \ \ fingers[0].\mbox{\hyperlink{classiCub_1_1perception_1_1TactileFinger_a8809c1eb2c9f26cb4414d6c79ad7683c}{getOutput}}(val[0]);}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00372}00372\ \ \ \ \ \ \ \ \ fingers[1].\mbox{\hyperlink{classiCub_1_1perception_1_1TactileFinger_a8809c1eb2c9f26cb4414d6c79ad7683c}{getOutput}}(val[1]);}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00373}00373\ \ \ \ \ \ \ \ \ fingers[2].\mbox{\hyperlink{classiCub_1_1perception_1_1TactileFinger_a8809c1eb2c9f26cb4414d6c79ad7683c}{getOutput}}(val[2]);}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00374}00374\ \ \ \ \ \ \ \ \ fingers[3].\mbox{\hyperlink{classiCub_1_1perception_1_1TactileFinger_a8809c1eb2c9f26cb4414d6c79ad7683c}{getOutput}}(val[3]);}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00375}00375\ \ \ \ \ \ \ \ \ fingers[4].\mbox{\hyperlink{classiCub_1_1perception_1_1TactileFinger_a8809c1eb2c9f26cb4414d6c79ad7683c}{getOutput}}(val[4]);}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00376}00376\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00377}00377\ \ \ \ \ \ \ \ \ Bottle\ bOut;\ Bottle\ \&ins=bOut.addList();}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00378}00378\ \ \ \ \ \ \ \ \ ins.addFloat64(val[0].asFloat64());}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00379}00379\ \ \ \ \ \ \ \ \ ins.addFloat64(val[1].asFloat64());}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00380}00380\ \ \ \ \ \ \ \ \ ins.addFloat64(val[2].asFloat64());}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00381}00381\ \ \ \ \ \ \ \ \ ins.addFloat64(val[3].asFloat64());}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00382}00382\ \ \ \ \ \ \ \ \ ins.addFloat64(val[4].asFloat64());}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00383}00383\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00384}00384\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}}=bOut.get(0);}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00385}00385\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00386}00386\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00387}00387\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00388}00388\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00389}00389\ \}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00390}00390\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00391}00391\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00392}00392\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00393}00393\ \textcolor{keywordtype}{void}\ TactileFingersModel::close()}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00394}00394\ \{}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00395}00395\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Model_a4f01cfcbc00e0adb4c6bd2104c162442}{printMessage}}(\mbox{\hyperlink{namespaceiCub_1_1perception_1_1log_a4808224c7b00400035caa3d15abef2c2abf13376047f84b3eb3dad0e0059f6d7a}{log::info}},1,\textcolor{stringliteral}{"{}closing\ ..."{}});}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00396}00396\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00397}00397\ \ \ \ \ \textcolor{keywordflow}{if}\ (!port-\/>isClosed())}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00398}00398\ \ \ \ \ \ \ \ \ port-\/>close();}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00399}00399\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00400}00400\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Model_a8c6cf852fd9533431623c5d1d466c4fb}{nodes}}.clear();}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00401}00401\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00402}00402\ \ \ \ \ configured=\textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00403}00403\ \}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00404}00404\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00405}00405\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00406}00406\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00407}\mbox{\hyperlink{classiCub_1_1perception_1_1TactileFingersModel_a807c1be8fbc342163c50a64799f3d1ef}{00407}}\ \mbox{\hyperlink{classiCub_1_1perception_1_1TactileFingersModel_a807c1be8fbc342163c50a64799f3d1ef}{TactileFingersModel::\string~TactileFingersModel}}()}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00408}00408\ \{}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00409}00409\ \ \ \ \ close();}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00410}00410\ \ \ \ \ \textcolor{keyword}{delete}\ port;}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00411}00411\ \}}
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00412}00412\ }
+\DoxyCodeLine{\Hypertarget{tactileFingers_8cpp_source_l00413}00413\ }
+
+\end{DoxyCode}

@@ -1,0 +1,592 @@
+\doxysection{methods.\+cpp}
+\hypertarget{methods_8cpp_source}{}\label{methods_8cpp_source}\index{icub-\/main/src/tools/depth2kin/src/methods.cpp@{icub-\/main/src/tools/depth2kin/src/methods.cpp}}
+\mbox{\hyperlink{methods_8cpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00001}00001\ \textcolor{comment}{/*\ }}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00002}00002\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2014\ iCub\ Facility\ -\/\ Istituto\ Italiano\ di\ Tecnologia}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00003}00003\ \textcolor{comment}{\ *\ Author:\ Ugo\ Pattacini}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00004}00004\ \textcolor{comment}{\ *\ email:\ \ ugo.pattacini@iit.it}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00005}00005\ \textcolor{comment}{\ *\ Permission\ is\ granted\ to\ copy,\ distribute,\ and/or\ modify\ this\ program}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00006}00006\ \textcolor{comment}{\ *\ under\ the\ terms\ of\ the\ GNU\ General\ Public\ License,\ version\ 2\ or\ any}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00007}00007\ \textcolor{comment}{\ *\ later\ version\ published\ by\ the\ Free\ Software\ Foundation.}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00008}00008\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00009}00009\ \textcolor{comment}{\ *\ A\ copy\ of\ the\ license\ can\ be\ found\ at}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00010}00010\ \textcolor{comment}{\ *\ http://www.robotcub.org/icub/license/gpl.txt}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00011}00011\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00012}00012\ \textcolor{comment}{\ *\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00013}00013\ \textcolor{comment}{\ *\ WITHOUT\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00014}00014\ \textcolor{comment}{\ *\ MERCHANTABILITY\ or\ FITNESS\ FOR\ A\ PARTICULAR\ PURPOSE.\ See\ the\ GNU\ General}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00015}00015\ \textcolor{comment}{\ *\ Public\ License\ for\ more\ details}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00016}00016\ \textcolor{comment}{*/}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00017}00017\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00018}00018\ \textcolor{preprocessor}{\#include\ <cmath>}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00019}00019\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00020}00020\ \textcolor{preprocessor}{\#include\ <yarp/math/Math.h>}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00021}00021\ \textcolor{preprocessor}{\#include\ <yarp/math/SVD.h>}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00022}00022\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00023}00023\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{math_8h}{iCub/ctrl/math.h}}>}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00024}00024\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{algorithms_8h}{iCub/optimization/algorithms.h}}>}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00025}00025\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{affinity_8h}{iCub/optimization/affinity.h}}>}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00026}00026\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{calibReference_8h}{iCub/optimization/calibReference.h}}>}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00027}00027\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{LSSVMLearner_8h}{iCub/learningMachine/LSSVMLearner.h}}>}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00028}00028\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00029}00029\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{methods_8h}{methods.h}}"{}}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00030}00030\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00031}00031\ \textcolor{keyword}{using\ namespace\ }std;}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00032}00032\ \textcolor{keyword}{using\ namespace\ }yarp::os;}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00033}00033\ \textcolor{keyword}{using\ namespace\ }yarp::sig;}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00034}00034\ \textcolor{keyword}{using\ namespace\ }yarp::math;}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00035}00035\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceiCub_1_1ctrl}{iCub::ctrl}};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00036}00036\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceiCub_1_1optimization}{iCub::optimization}};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00037}00037\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceiCub_1_1learningmachine}{iCub::learningmachine}};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00038}00038\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00039}00039\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00040}00040\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00041}\mbox{\hyperlink{classCalibrator_aa2ce4b57c0619af24b8747f8e3ad906d}{00041}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classCalibrator_aa2ce4b57c0619af24b8747f8e3ad906d}{Calibrator::computeSpatialTransformation}}()}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00042}00042\ \{}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00043}00043\ \ \ \ \ \textcolor{keywordtype}{int}\ m=(int)\mbox{\hyperlink{classCalibrator_ac7f7e30636007b9b30703ad01d6df301}{spatialCompetence}}.\mbox{\hyperlink{structCalibrator_1_1SpatialCompetence_a0ac02380504d1b603c1deaae6d758188}{A}}.rows();}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00044}00044\ \ \ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}=(int)\mbox{\hyperlink{classCalibrator_ac7f7e30636007b9b30703ad01d6df301}{spatialCompetence}}.\mbox{\hyperlink{structCalibrator_1_1SpatialCompetence_a0ac02380504d1b603c1deaae6d758188}{A}}.cols();}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00045}00045\ \ \ \ \ Matrix\ U(m,\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}),V(\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}});\ Vector\ S(\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}});}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00046}00046\ \ \ \ \ SVD(\mbox{\hyperlink{classCalibrator_ac7f7e30636007b9b30703ad01d6df301}{spatialCompetence}}.\mbox{\hyperlink{structCalibrator_1_1SpatialCompetence_a0ac02380504d1b603c1deaae6d758188}{A}},U,S,V);}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00047}00047\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00048}00048\ \ \ \ \ \mbox{\hyperlink{classCalibrator_ac7f7e30636007b9b30703ad01d6df301}{spatialCompetence}}.\mbox{\hyperlink{structCalibrator_1_1SpatialCompetence_a410e82c59968d087b6b32c20d693e3c2}{radii}}.resize(3);}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00049}00049\ \ \ \ \ \mbox{\hyperlink{classCalibrator_ac7f7e30636007b9b30703ad01d6df301}{spatialCompetence}}.\mbox{\hyperlink{structCalibrator_1_1SpatialCompetence_a410e82c59968d087b6b32c20d693e3c2}{radii}}[0]=(S[0]!=0.0)?(1.0/sqrt(fabs(S[0]))):0.0;}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00050}00050\ \ \ \ \ \mbox{\hyperlink{classCalibrator_ac7f7e30636007b9b30703ad01d6df301}{spatialCompetence}}.\mbox{\hyperlink{structCalibrator_1_1SpatialCompetence_a410e82c59968d087b6b32c20d693e3c2}{radii}}[1]=(S[1]!=0.0)?(1.0/sqrt(fabs(S[1]))):0.0;}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00051}00051\ \ \ \ \ \mbox{\hyperlink{classCalibrator_ac7f7e30636007b9b30703ad01d6df301}{spatialCompetence}}.\mbox{\hyperlink{structCalibrator_1_1SpatialCompetence_a410e82c59968d087b6b32c20d693e3c2}{radii}}[2]=(S[2]!=0.0)?(1.0/sqrt(fabs(S[2]))):0.0;}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00052}00052\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00053}00053\ \ \ \ \ \textcolor{comment}{//\ check\ if\ we\ have\ a\ right-\/hand\ basis}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00054}00054\ \ \ \ \ Vector\ \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}=V.getCol(0);}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00055}00055\ \ \ \ \ Vector\ \mbox{\hyperlink{show__eyes__axes_8m_a2fb1c5cf58867b5bbc9a1b145a86f3a0}{y}}=V.getCol(1);}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00056}00056\ \ \ \ \ Vector\ \mbox{\hyperlink{show__eyes__axes_8m_a25ed1bcb423b0b7200f485fc5ff71c8e}{z}}=V.getCol(2);}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00057}00057\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(\mbox{\hyperlink{group__Maths_gaf7eef875cc229edd04aaa3e8fcbad989}{cross}}(\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}},\mbox{\hyperlink{show__eyes__axes_8m_a2fb1c5cf58867b5bbc9a1b145a86f3a0}{y}}),\mbox{\hyperlink{show__eyes__axes_8m_a25ed1bcb423b0b7200f485fc5ff71c8e}{z}})<0.0)}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00058}00058\ \ \ \ \ \ \ \ \ V.setCol(2,-\/1.0*\mbox{\hyperlink{show__eyes__axes_8m_a25ed1bcb423b0b7200f485fc5ff71c8e}{z}});}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00059}00059\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00060}00060\ \ \ \ \ Matrix\ R(4,4);\ R.zero();\ R(3,3)=1.0;}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00061}00061\ \ \ \ \ R.setSubmatrix(V,0,0);}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00062}00062\ \ \ \ \ \mbox{\hyperlink{classCalibrator_ac7f7e30636007b9b30703ad01d6df301}{spatialCompetence}}.\mbox{\hyperlink{structCalibrator_1_1SpatialCompetence_abcc28396d443b98812d234ad3d51b09c}{R}}=SE3inv(R);}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00063}00063\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00064}00064\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00065}00065\ \}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00066}00066\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00067}00067\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00068}00068\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00069}\mbox{\hyperlink{classCalibrator_a5df9a637b4aa12c126d7fcb97b1f0578}{00069}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classCalibrator_a5df9a637b4aa12c126d7fcb97b1f0578}{Calibrator::computeSpatialCompetence}}(\textcolor{keyword}{const}\ deque<Vector>\ \&points)}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00070}00070\ \{}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00071}00071\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{group__GenericAlgorithms_ga44ac284818304fe98a6bc0eb52dcb225}{minVolumeEllipsoid}}(points,0.001,\mbox{\hyperlink{classCalibrator_ac7f7e30636007b9b30703ad01d6df301}{spatialCompetence}}.\mbox{\hyperlink{structCalibrator_1_1SpatialCompetence_a0ac02380504d1b603c1deaae6d758188}{A}},\mbox{\hyperlink{classCalibrator_ac7f7e30636007b9b30703ad01d6df301}{spatialCompetence}}.\mbox{\hyperlink{structCalibrator_1_1SpatialCompetence_a53843f07f942fdcee1abbaca57615ef3}{c}}))}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00072}00072\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classCalibrator_aa2ce4b57c0619af24b8747f8e3ad906d}{computeSpatialTransformation}}())}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00073}00073\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00074}00074\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00075}00075\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00076}00076\ \}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00077}00077\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00078}00078\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00079}00079\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00080}\mbox{\hyperlink{classCalibrator_a894895053bd84c54dc891a35e26922d1}{00080}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classCalibrator_a894895053bd84c54dc891a35e26922d1}{Calibrator::copySuperClassData}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{classCalibrator}{Calibrator}}\ \&src)}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00081}00081\ \{}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00082}00082\ \ \ \ \ \mbox{\hyperlink{classCalibrator_a7bf3184a19f4f571bcc69a8df069f7ee}{type}}=src.\mbox{\hyperlink{classCalibrator_a7bf3184a19f4f571bcc69a8df069f7ee}{type}};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00083}00083\ \ \ \ \ \mbox{\hyperlink{classCalibrator_aab9f4ad4154f466b12236c25e725b83c}{in}}=src.\mbox{\hyperlink{classCalibrator_aab9f4ad4154f466b12236c25e725b83c}{in}};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00084}00084\ \ \ \ \ \mbox{\hyperlink{classCalibrator_a1242a8842a01c18ab3431e22274aff94}{out}}=src.\mbox{\hyperlink{classCalibrator_a1242a8842a01c18ab3431e22274aff94}{out}};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00085}00085\ \ \ \ \ \mbox{\hyperlink{classCalibrator_ac7f7e30636007b9b30703ad01d6df301}{spatialCompetence}}=src.\mbox{\hyperlink{classCalibrator_ac7f7e30636007b9b30703ad01d6df301}{spatialCompetence}};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00086}00086\ \}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00087}00087\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00088}00088\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00089}00089\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00090}\mbox{\hyperlink{classCalibrator_afc42473595b08b69f5921522e5d8929a}{00090}}\ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{classCalibrator_afc42473595b08b69f5921522e5d8929a}{Calibrator::getSpatialCompetence}}(\textcolor{keyword}{const}\ Vector\ \&point)}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00091}00091\ \{}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00092}00092\ \ \ \ \ \textcolor{keywordflow}{if}\ (point.length()<3)}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00093}00093\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ 0.0;}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00094}00094\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00095}00095\ \ \ \ \ Vector\ \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}=(point.subVector(0,2)-\/\mbox{\hyperlink{classCalibrator_ac7f7e30636007b9b30703ad01d6df301}{spatialCompetence}}.\mbox{\hyperlink{structCalibrator_1_1SpatialCompetence_a53843f07f942fdcee1abbaca57615ef3}{c}})/\mbox{\hyperlink{classCalibrator_ac7f7e30636007b9b30703ad01d6df301}{spatialCompetence}}.\mbox{\hyperlink{structCalibrator_1_1SpatialCompetence_af9649a2a716ea4a8a2f9af2a3a8690b8}{scale}};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00096}00096\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}},\mbox{\hyperlink{classCalibrator_ac7f7e30636007b9b30703ad01d6df301}{spatialCompetence}}.\mbox{\hyperlink{structCalibrator_1_1SpatialCompetence_a0ac02380504d1b603c1deaae6d758188}{A}}*\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}})<=1.0)}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00097}00097\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ 1.0;}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00098}00098\ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classCalibrator_ac7f7e30636007b9b30703ad01d6df301}{spatialCompetence}}.\mbox{\hyperlink{structCalibrator_1_1SpatialCompetence_a7410be57de84e2d118ba82a08701c139}{extrapolation}})}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00099}00099\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00100}00100\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ getting\ cartesian\ coordinates\ wrt\ (A,c)\ frame}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00101}00101\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}.push\_back(1.0);}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00102}00102\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}=\mbox{\hyperlink{classCalibrator_ac7f7e30636007b9b30703ad01d6df301}{spatialCompetence}}.\mbox{\hyperlink{structCalibrator_1_1SpatialCompetence_abcc28396d443b98812d234ad3d51b09c}{R}}*\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00103}00103\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}.pop\_back();}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00104}00104\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00105}00105\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ distance\ approximated\ as\ ||x-\/xp||,}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00106}00106\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ where\ xp\ is\ the\ projection\ of\ x\ over}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00107}00107\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ the\ ellipsoid\ along\ the\ line\ connecting}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00108}00108\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ x\ with\ the\ origin}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00109}00109\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00110}00110\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ switch\ to\ spherical\ coordinates}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00111}00111\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ cos\_theta=\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}[2]/\mbox{\hyperlink{group__Maths_ga791f0548018b3597da95e70a3b226806}{norm}}(\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}});}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00112}00112\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ theta=acos(cos\_theta);}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00113}00113\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ phi=atan2(\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}[1],\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}[0]);}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00114}00114\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00115}00115\ \ \ \ \ \ \ \ \ Vector\ xp(3);}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00116}00116\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ cos\_phi=cos(phi);}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00117}00117\ \ \ \ \ \ \ \ \ xp[0]=\mbox{\hyperlink{classCalibrator_ac7f7e30636007b9b30703ad01d6df301}{spatialCompetence}}.\mbox{\hyperlink{structCalibrator_1_1SpatialCompetence_a410e82c59968d087b6b32c20d693e3c2}{radii}}[0]*cos\_theta*cos\_phi;}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00118}00118\ \ \ \ \ \ \ \ \ xp[1]=\mbox{\hyperlink{classCalibrator_ac7f7e30636007b9b30703ad01d6df301}{spatialCompetence}}.\mbox{\hyperlink{structCalibrator_1_1SpatialCompetence_a410e82c59968d087b6b32c20d693e3c2}{radii}}[1]*sin(theta)*cos\_phi;}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00119}00119\ \ \ \ \ \ \ \ \ xp[2]=\mbox{\hyperlink{classCalibrator_ac7f7e30636007b9b30703ad01d6df301}{spatialCompetence}}.\mbox{\hyperlink{structCalibrator_1_1SpatialCompetence_a410e82c59968d087b6b32c20d693e3c2}{radii}}[2]*sin(phi);}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00120}00120\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00121}00121\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ d=\mbox{\hyperlink{group__Maths_ga791f0548018b3597da95e70a3b226806}{norm}}(\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}-\/xp);}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00122}00122\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{compute__ekf__sym_8m_afc7c28e2e37e9680fba99ce231839cb2}{exp}}(-\/40.0*d*d);\ \ \textcolor{comment}{//\ competence(0.2\ [m])=0.2}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00123}00123\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00124}00124\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00125}00125\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ 0.0;}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00126}00126\ \}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00127}00127\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00128}00128\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00129}00129\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00130}\mbox{\hyperlink{classCalibrator_a3d7438cebc50a746c0214c517677b848}{00130}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classCalibrator_a3d7438cebc50a746c0214c517677b848}{Calibrator::toProperty}}(Property\ \&info)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00131}00131\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00132}00132\ \ \ \ \ Bottle\ \mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00133}00133\ \ \ \ \ Bottle\ \&values=\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}.addList();}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00134}00134\ \ \ \ \ values.addString(\mbox{\hyperlink{classCalibrator_ac7f7e30636007b9b30703ad01d6df301}{spatialCompetence}}.\mbox{\hyperlink{structCalibrator_1_1SpatialCompetence_a7410be57de84e2d118ba82a08701c139}{extrapolation}}?\textcolor{stringliteral}{"{}true"{}}:\textcolor{stringliteral}{"{}false"{}});}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00135}00135\ \ \ \ \ values.addFloat64(\mbox{\hyperlink{classCalibrator_ac7f7e30636007b9b30703ad01d6df301}{spatialCompetence}}.\mbox{\hyperlink{structCalibrator_1_1SpatialCompetence_af9649a2a716ea4a8a2f9af2a3a8690b8}{scale}});}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00136}00136\ \ \ \ \ values.addFloat64(\mbox{\hyperlink{classCalibrator_ac7f7e30636007b9b30703ad01d6df301}{spatialCompetence}}.\mbox{\hyperlink{structCalibrator_1_1SpatialCompetence_a53843f07f942fdcee1abbaca57615ef3}{c}}[0]);}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00137}00137\ \ \ \ \ values.addFloat64(\mbox{\hyperlink{classCalibrator_ac7f7e30636007b9b30703ad01d6df301}{spatialCompetence}}.\mbox{\hyperlink{structCalibrator_1_1SpatialCompetence_a53843f07f942fdcee1abbaca57615ef3}{c}}[1]);}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00138}00138\ \ \ \ \ values.addFloat64(\mbox{\hyperlink{classCalibrator_ac7f7e30636007b9b30703ad01d6df301}{spatialCompetence}}.\mbox{\hyperlink{structCalibrator_1_1SpatialCompetence_a53843f07f942fdcee1abbaca57615ef3}{c}}[2]);}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00139}00139\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ r=0;\ r<\mbox{\hyperlink{classCalibrator_ac7f7e30636007b9b30703ad01d6df301}{spatialCompetence}}.\mbox{\hyperlink{structCalibrator_1_1SpatialCompetence_a0ac02380504d1b603c1deaae6d758188}{A}}.rows();\ r++)}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00140}00140\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ c=0;\ c<\mbox{\hyperlink{classCalibrator_ac7f7e30636007b9b30703ad01d6df301}{spatialCompetence}}.\mbox{\hyperlink{structCalibrator_1_1SpatialCompetence_a0ac02380504d1b603c1deaae6d758188}{A}}.cols();\ c++)}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00141}00141\ \ \ \ \ \ \ \ \ \ \ \ \ values.addFloat64(\mbox{\hyperlink{classCalibrator_ac7f7e30636007b9b30703ad01d6df301}{spatialCompetence}}.\mbox{\hyperlink{structCalibrator_1_1SpatialCompetence_a0ac02380504d1b603c1deaae6d758188}{A}}(r,c));}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00142}00142\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00143}00143\ \ \ \ \ info.put(\textcolor{stringliteral}{"{}spatial\_competence"{}},\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}.get(0));}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00144}00144\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00145}00145\ \}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00146}00146\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00147}00147\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00148}00148\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00149}\mbox{\hyperlink{classCalibrator_a7b1ac356a61270bf8b540d68e1cc105d}{00149}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classCalibrator_a7b1ac356a61270bf8b540d68e1cc105d}{Calibrator::fromProperty}}(\textcolor{keyword}{const}\ Property\ \&info)}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00150}00150\ \{}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00151}00151\ \ \ \ \ \textcolor{keywordflow}{if}\ (!info.check(\textcolor{stringliteral}{"{}spatial\_competence"{}}))}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00152}00152\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00153}00153\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00154}00154\ \ \ \ \ \mbox{\hyperlink{classCalibrator_ac7f7e30636007b9b30703ad01d6df301}{spatialCompetence}}.\mbox{\hyperlink{structCalibrator_1_1SpatialCompetence_a0ac02380504d1b603c1deaae6d758188}{A}}=eye(3,3);}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00155}00155\ \ \ \ \ \mbox{\hyperlink{classCalibrator_ac7f7e30636007b9b30703ad01d6df301}{spatialCompetence}}.\mbox{\hyperlink{structCalibrator_1_1SpatialCompetence_a53843f07f942fdcee1abbaca57615ef3}{c}}=Vector(3,0.0);}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00156}00156\ \ \ \ \ \mbox{\hyperlink{classCalibrator_ac7f7e30636007b9b30703ad01d6df301}{spatialCompetence}}.\mbox{\hyperlink{structCalibrator_1_1SpatialCompetence_af9649a2a716ea4a8a2f9af2a3a8690b8}{scale}}=1.0;}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00157}00157\ \ \ \ \ \mbox{\hyperlink{classCalibrator_ac7f7e30636007b9b30703ad01d6df301}{spatialCompetence}}.\mbox{\hyperlink{structCalibrator_1_1SpatialCompetence_a7410be57de84e2d118ba82a08701c139}{extrapolation}}=\textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00158}00158\ \ \ \ \ \textcolor{keywordflow}{if}\ (Bottle\ *values=info.find(\textcolor{stringliteral}{"{}spatial\_competence"{}}).asList())}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00159}00159\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00160}00160\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCalibrator_ac7f7e30636007b9b30703ad01d6df301}{spatialCompetence}}.\mbox{\hyperlink{structCalibrator_1_1SpatialCompetence_a7410be57de84e2d118ba82a08701c139}{extrapolation}}=(values-\/>get(0).asString()==\textcolor{stringliteral}{"{}true"{}});}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00161}00161\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCalibrator_ac7f7e30636007b9b30703ad01d6df301}{spatialCompetence}}.\mbox{\hyperlink{structCalibrator_1_1SpatialCompetence_af9649a2a716ea4a8a2f9af2a3a8690b8}{scale}}=values-\/>get(1).asFloat64();}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00162}00162\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCalibrator_ac7f7e30636007b9b30703ad01d6df301}{spatialCompetence}}.\mbox{\hyperlink{structCalibrator_1_1SpatialCompetence_a53843f07f942fdcee1abbaca57615ef3}{c}}[0]=values-\/>get(2).asFloat64();}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00163}00163\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCalibrator_ac7f7e30636007b9b30703ad01d6df301}{spatialCompetence}}.\mbox{\hyperlink{structCalibrator_1_1SpatialCompetence_a53843f07f942fdcee1abbaca57615ef3}{c}}[1]=values-\/>get(3).asFloat64();}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00164}00164\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCalibrator_ac7f7e30636007b9b30703ad01d6df301}{spatialCompetence}}.\mbox{\hyperlink{structCalibrator_1_1SpatialCompetence_a53843f07f942fdcee1abbaca57615ef3}{c}}[2]=values-\/>get(4).asFloat64();}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00165}00165\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ r=0;\ \textcolor{keywordtype}{int}\ c=0;}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00166}00166\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i=5;\ i<values-\/>size();\ i++)}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00167}00167\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00168}00168\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCalibrator_ac7f7e30636007b9b30703ad01d6df301}{spatialCompetence}}.\mbox{\hyperlink{structCalibrator_1_1SpatialCompetence_a0ac02380504d1b603c1deaae6d758188}{A}}(r,c)=values-\/>get(i).asFloat64();}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00169}00169\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (++c>=\mbox{\hyperlink{classCalibrator_ac7f7e30636007b9b30703ad01d6df301}{spatialCompetence}}.\mbox{\hyperlink{structCalibrator_1_1SpatialCompetence_a0ac02380504d1b603c1deaae6d758188}{A}}.cols())}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00170}00170\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00171}00171\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ c=0;}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00172}00172\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (++r>=\mbox{\hyperlink{classCalibrator_ac7f7e30636007b9b30703ad01d6df301}{spatialCompetence}}.\mbox{\hyperlink{structCalibrator_1_1SpatialCompetence_a0ac02380504d1b603c1deaae6d758188}{A}}.rows())}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00173}00173\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00174}00174\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00175}00175\ \ \ \ \ \ \ \ \ \}\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00176}00176\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00177}00177\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00178}00178\ \ \ \ \ \mbox{\hyperlink{classCalibrator_aa2ce4b57c0619af24b8747f8e3ad906d}{computeSpatialTransformation}}();}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00179}00179\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00180}00180\ \}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00181}00181\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00182}00182\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00183}00183\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00184}\mbox{\hyperlink{classMatrixCalibrator_a2a9627e47c605d05e8b3891c7bf00575}{00184}}\ \mbox{\hyperlink{classMatrixCalibrator_a2a9627e47c605d05e8b3891c7bf00575}{MatrixCalibrator::MatrixCalibrator}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{string}\ \&type)}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00185}00185\ \{}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00186}00186\ \ \ \ \ \mbox{\hyperlink{classMatrixCalibrator_a7c305383884e60b731d0e8f2dc7aef93}{H}}=eye(4,4);}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00187}00187\ \ \ \ \ \mbox{\hyperlink{classMatrixCalibrator_a69e617a9cd8888a432ffb44ab9eca70c}{scale}}=1.0;}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00188}00188\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classCalibrator_a7bf3184a19f4f571bcc69a8df069f7ee}{type}}==\textcolor{stringliteral}{"{}affine"{}})}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00189}00189\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00190}00190\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classMatrixCalibrator_a8a08d0911856b8b8b3de03e89008a884}{impl}}=\textcolor{keyword}{new}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints}{AffinityWithMatchedPoints}};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00191}00191\ \ \ \ \ \ \ \ \ this-\/>type=\textcolor{stringliteral}{"{}affine"{}};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00192}00192\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00193}00193\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00194}00194\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00195}00195\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classMatrixCalibrator_a8a08d0911856b8b8b3de03e89008a884}{impl}}=\textcolor{keyword}{new}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints}{CalibReferenceWithMatchedPoints}};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00196}00196\ \ \ \ \ \ \ \ \ this-\/>type=\mbox{\hyperlink{classCalibrator_a7bf3184a19f4f571bcc69a8df069f7ee}{type}};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00197}00197\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ ((this-\/>type!=\textcolor{stringliteral}{"{}se3"{}})\ \&\&\ (this-\/>type!=\textcolor{stringliteral}{"{}se3+scale"{}}))}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00198}00198\ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>type=\textcolor{stringliteral}{"{}se3"{}};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00199}00199\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00200}00200\ \}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00201}00201\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00202}00202\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00203}00203\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00204}\mbox{\hyperlink{classMatrixCalibrator_acd4a262026aad727574a4fe63c4263be}{00204}}\ \mbox{\hyperlink{classMatrixCalibrator_a2a9627e47c605d05e8b3891c7bf00575}{MatrixCalibrator::MatrixCalibrator}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{classMatrixCalibrator}{MatrixCalibrator}}\ \&calibrator)}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00205}00205\ \{}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00206}00206\ \ \ \ \ \mbox{\hyperlink{classCalibrator_a894895053bd84c54dc891a35e26922d1}{copySuperClassData}}(calibrator);}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00207}00207\ \ \ \ \ \mbox{\hyperlink{classMatrixCalibrator_a7c305383884e60b731d0e8f2dc7aef93}{H}}=calibrator.\mbox{\hyperlink{classMatrixCalibrator_a7c305383884e60b731d0e8f2dc7aef93}{H}};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00208}00208\ \ \ \ \ \mbox{\hyperlink{classMatrixCalibrator_a69e617a9cd8888a432ffb44ab9eca70c}{scale}}=calibrator.\mbox{\hyperlink{classMatrixCalibrator_a69e617a9cd8888a432ffb44ab9eca70c}{scale}};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00209}00209\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classCalibrator_a7bf3184a19f4f571bcc69a8df069f7ee}{type}}==\textcolor{stringliteral}{"{}affine"{}})}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00210}00210\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classMatrixCalibrator_a8a08d0911856b8b8b3de03e89008a884}{impl}}=\textcolor{keyword}{new}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints}{AffinityWithMatchedPoints}}(*\textcolor{keyword}{dynamic\_cast<}\mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints}{AffinityWithMatchedPoints}}*\textcolor{keyword}{>}(calibrator.\mbox{\hyperlink{classMatrixCalibrator_a8a08d0911856b8b8b3de03e89008a884}{impl}}));}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00211}00211\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00212}00212\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classMatrixCalibrator_a8a08d0911856b8b8b3de03e89008a884}{impl}}=\textcolor{keyword}{new}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints}{CalibReferenceWithMatchedPoints}}(*\textcolor{keyword}{dynamic\_cast<}\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints}{CalibReferenceWithMatchedPoints}}*\textcolor{keyword}{>}(calibrator.\mbox{\hyperlink{classMatrixCalibrator_a8a08d0911856b8b8b3de03e89008a884}{impl}}));}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00213}00213\ \}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00214}00214\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00215}00215\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00216}00216\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00217}\mbox{\hyperlink{classMatrixCalibrator_acf1deab9f8ade96955aee187bf98c9ad}{00217}}\ \mbox{\hyperlink{classMatrixCalibrator_acf1deab9f8ade96955aee187bf98c9ad}{MatrixCalibrator::\string~MatrixCalibrator}}()}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00218}00218\ \{}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00219}00219\ \ \ \ \ \textcolor{keyword}{delete}\ \mbox{\hyperlink{classMatrixCalibrator_a8a08d0911856b8b8b3de03e89008a884}{impl}};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00220}00220\ \}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00221}00221\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00222}00222\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00223}00223\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00224}\mbox{\hyperlink{classMatrixCalibrator_a85634ed587c1217fe4d6174fb8067746}{00224}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classMatrixCalibrator_a85634ed587c1217fe4d6174fb8067746}{MatrixCalibrator::addPoints}}(\textcolor{keyword}{const}\ Vector\ \&in,\ \textcolor{keyword}{const}\ Vector\ \&\mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}})}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00225}00225\ \{}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00226}00226\ \ \ \ \ \textcolor{keywordflow}{if}\ ((\mbox{\hyperlink{classCalibrator_aab9f4ad4154f466b12236c25e725b83c}{in}}.length()>=3)\ \&\&\ (\mbox{\hyperlink{classCalibrator_a1242a8842a01c18ab3431e22274aff94}{out}}.length()>=3))}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00227}00227\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00228}00228\ \ \ \ \ \ \ \ \ Vector\ \_in=\mbox{\hyperlink{classCalibrator_aab9f4ad4154f466b12236c25e725b83c}{in}}.subVector(0,2);}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00229}00229\ \ \ \ \ \ \ \ \ Vector\ \_out=\mbox{\hyperlink{classCalibrator_a1242a8842a01c18ab3431e22274aff94}{out}}.subVector(0,2);}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00230}00230\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00231}00231\ \ \ \ \ \ \ \ \ this-\/>in.push\_back(\_in);}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00232}00232\ \ \ \ \ \ \ \ \ this-\/>out.push\_back(\_out);}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00233}00233\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classMatrixCalibrator_a8a08d0911856b8b8b3de03e89008a884}{impl}}-\/>\mbox{\hyperlink{classiCub_1_1optimization_1_1MatrixTransformationWithMatchedPoints_a1cefbe0eb85897294f62b6a2cc024a55}{addPoints}}(\_in,\_out);}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00234}00234\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00235}00235\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00236}00236\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00237}00237\ \}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00238}00238\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00239}00239\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00240}00240\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00241}\mbox{\hyperlink{classMatrixCalibrator_a0a911449db26d9e2e57b11ef4611e80c}{00241}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classMatrixCalibrator_a0a911449db26d9e2e57b11ef4611e80c}{MatrixCalibrator::clearPoints}}()}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00242}00242\ \{}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00243}00243\ \ \ \ \ \mbox{\hyperlink{classMatrixCalibrator_a8a08d0911856b8b8b3de03e89008a884}{impl}}-\/>\mbox{\hyperlink{classiCub_1_1optimization_1_1MatrixTransformationWithMatchedPoints_a0879f127129297196ede581cbcd6a3a4}{clearPoints}}();}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00244}00244\ \ \ \ \ \mbox{\hyperlink{classCalibrator_aab9f4ad4154f466b12236c25e725b83c}{in}}.clear();}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00245}00245\ \ \ \ \ \mbox{\hyperlink{classCalibrator_a1242a8842a01c18ab3431e22274aff94}{out}}.clear();\ \ \ \ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00246}00246\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00247}00247\ \}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00248}00248\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00249}00249\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00250}00250\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00251}\mbox{\hyperlink{classMatrixCalibrator_a87a781156db64d81ef45dab765366fd5}{00251}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classMatrixCalibrator_a87a781156db64d81ef45dab765366fd5}{MatrixCalibrator::getPoints}}(deque<Vector>\ \&in,\ deque<Vector>\ \&\mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}})\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00252}00252\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00253}00253\ \ \ \ \ \mbox{\hyperlink{classCalibrator_aab9f4ad4154f466b12236c25e725b83c}{in}}=this-\/>\mbox{\hyperlink{classCalibrator_aab9f4ad4154f466b12236c25e725b83c}{in}};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00254}00254\ \ \ \ \ out=this-\/>\mbox{\hyperlink{classCalibrator_a1242a8842a01c18ab3431e22274aff94}{out}};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00255}00255\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00256}00256\ \}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00257}00257\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00258}00258\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00259}00259\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00260}\mbox{\hyperlink{classMatrixCalibrator_a25e4192259a479d7a0990d854b8f44fb}{00260}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classMatrixCalibrator_a25e4192259a479d7a0990d854b8f44fb}{MatrixCalibrator::calibrate}}(\textcolor{keywordtype}{double}\ \&\mbox{\hyperlink{debugFunctions_8cpp_a7a3172cc98e93d8eadfb9ab30373799e}{error}})}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00261}00261\ \{}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00262}00262\ \ \ \ \ (\mbox{\hyperlink{classCalibrator_a7bf3184a19f4f571bcc69a8df069f7ee}{type}}==\textcolor{stringliteral}{"{}se3+scale"{}})?\textcolor{keyword}{dynamic\_cast<}\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints}{CalibReferenceWithMatchedPoints}}*\textcolor{keyword}{>}(\mbox{\hyperlink{classMatrixCalibrator_a8a08d0911856b8b8b3de03e89008a884}{impl}})-\/>\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a54eb6a837d3717795fa030e7490e8896}{calibrate}}(\mbox{\hyperlink{classMatrixCalibrator_a7c305383884e60b731d0e8f2dc7aef93}{H}},\mbox{\hyperlink{classMatrixCalibrator_a69e617a9cd8888a432ffb44ab9eca70c}{scale}},\mbox{\hyperlink{debugFunctions_8cpp_a7a3172cc98e93d8eadfb9ab30373799e}{error}}):}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00263}00263\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classMatrixCalibrator_a8a08d0911856b8b8b3de03e89008a884}{impl}}-\/>\mbox{\hyperlink{classiCub_1_1optimization_1_1MatrixTransformationWithMatchedPoints_adeaaa8dd50d049cfc49722a4af3a7cdc}{calibrate}}(\mbox{\hyperlink{classMatrixCalibrator_a7c305383884e60b731d0e8f2dc7aef93}{H}},\mbox{\hyperlink{debugFunctions_8cpp_a7a3172cc98e93d8eadfb9ab30373799e}{error}});}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00264}00264\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00265}00265\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classCalibrator_a5df9a637b4aa12c126d7fcb97b1f0578}{computeSpatialCompetence}}(\mbox{\hyperlink{classCalibrator_aab9f4ad4154f466b12236c25e725b83c}{in}}))}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00266}00266\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00267}00267\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCalibrator_ac7f7e30636007b9b30703ad01d6df301}{spatialCompetence}}.\mbox{\hyperlink{structCalibrator_1_1SpatialCompetence_af9649a2a716ea4a8a2f9af2a3a8690b8}{scale}}=1.2;}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00268}00268\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00269}00269\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00270}00270\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00271}00271\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00272}00272\ \}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00273}00273\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00274}00274\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00275}00275\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00276}\mbox{\hyperlink{classMatrixCalibrator_a5e69d7fd1a614fb0f8e2ce09335e720b}{00276}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classMatrixCalibrator_a5e69d7fd1a614fb0f8e2ce09335e720b}{MatrixCalibrator::retrieve}}(\textcolor{keyword}{const}\ Vector\ \&in,\ Vector\ \&\mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}})}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00277}00277\ \{}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00278}00278\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classCalibrator_aab9f4ad4154f466b12236c25e725b83c}{in}}.length()>=3)}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00279}00279\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00280}00280\ \ \ \ \ \ \ \ \ Vector\ \_in=\mbox{\hyperlink{classCalibrator_aab9f4ad4154f466b12236c25e725b83c}{in}}.subVector(0,2);}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00281}00281\ \ \ \ \ \ \ \ \ \_in.push\_back(1.0);}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00282}00282\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCalibrator_a1242a8842a01c18ab3431e22274aff94}{out}}=\mbox{\hyperlink{classMatrixCalibrator_a7c305383884e60b731d0e8f2dc7aef93}{H}}*\_in;}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00283}00283\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCalibrator_a1242a8842a01c18ab3431e22274aff94}{out}}.pop\_back();}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00284}00284\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCalibrator_a1242a8842a01c18ab3431e22274aff94}{out}}*=\mbox{\hyperlink{classMatrixCalibrator_a69e617a9cd8888a432ffb44ab9eca70c}{scale}};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00285}00285\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00286}00286\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00287}00287\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00288}00288\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00289}00289\ \}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00290}00290\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00291}00291\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00292}00292\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00293}\mbox{\hyperlink{classMatrixCalibrator_a85e3ba1fff933a4d48d3356fd8c74876}{00293}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classMatrixCalibrator_a85e3ba1fff933a4d48d3356fd8c74876}{MatrixCalibrator::toProperty}}(Property\ \&info)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00294}00294\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00295}00295\ \ \ \ \ Bottle\ \mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00296}00296\ \ \ \ \ Bottle\ \&values=\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}.addList();}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00297}00297\ \ \ \ \ values.addFloat64(\mbox{\hyperlink{classMatrixCalibrator_a69e617a9cd8888a432ffb44ab9eca70c}{scale}});}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00298}00298\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ r=0;\ r<\mbox{\hyperlink{classMatrixCalibrator_a7c305383884e60b731d0e8f2dc7aef93}{H}}.rows();\ r++)}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00299}00299\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ c=0;\ c<\mbox{\hyperlink{classMatrixCalibrator_a7c305383884e60b731d0e8f2dc7aef93}{H}}.cols();\ c++)}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00300}00300\ \ \ \ \ \ \ \ \ \ \ \ \ values.addFloat64(\mbox{\hyperlink{classMatrixCalibrator_a7c305383884e60b731d0e8f2dc7aef93}{H}}(r,c));}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00301}00301\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00302}00302\ \ \ \ \ info.clear();}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00303}00303\ \ \ \ \ info.put(\textcolor{stringliteral}{"{}type"{}},\mbox{\hyperlink{classCalibrator_a7bf3184a19f4f571bcc69a8df069f7ee}{type}});}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00304}00304\ \ \ \ \ info.put(\textcolor{stringliteral}{"{}calibration\_data"{}},\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}.get(0));}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00305}00305\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classCalibrator_a3d7438cebc50a746c0214c517677b848}{Calibrator::toProperty}}(info);}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00306}00306\ \}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00307}00307\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00308}00308\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00309}00309\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00310}\mbox{\hyperlink{classMatrixCalibrator_a17217271ea93688546b2551a96219f50}{00310}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classMatrixCalibrator_a17217271ea93688546b2551a96219f50}{MatrixCalibrator::fromProperty}}(\textcolor{keyword}{const}\ Property\ \&info)}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00311}00311\ \{}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00312}00312\ \ \ \ \ \textcolor{keywordflow}{if}\ (!info.check(\textcolor{stringliteral}{"{}type"{}}))}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00313}00313\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00314}00314\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00315}00315\ \ \ \ \ \textcolor{keywordtype}{string}\ \mbox{\hyperlink{classCalibrator_a7bf3184a19f4f571bcc69a8df069f7ee}{type}}=info.find(\textcolor{stringliteral}{"{}type"{}}).asString();}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00316}00316\ \ \ \ \ \textcolor{keywordflow}{if}\ ((\mbox{\hyperlink{classCalibrator_a7bf3184a19f4f571bcc69a8df069f7ee}{type}}==\textcolor{stringliteral}{"{}se3"{}})\ ||\ (\mbox{\hyperlink{classCalibrator_a7bf3184a19f4f571bcc69a8df069f7ee}{type}}==\textcolor{stringliteral}{"{}se3+scale"{}}))}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00317}00317\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00318}00318\ \ \ \ \ \ \ \ \ \textcolor{keyword}{delete}\ \mbox{\hyperlink{classMatrixCalibrator_a8a08d0911856b8b8b3de03e89008a884}{impl}};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00319}00319\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classMatrixCalibrator_a8a08d0911856b8b8b3de03e89008a884}{impl}}=\textcolor{keyword}{new}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints}{CalibReferenceWithMatchedPoints}};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00320}00320\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00321}00321\ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classCalibrator_a7bf3184a19f4f571bcc69a8df069f7ee}{type}}==\textcolor{stringliteral}{"{}affine"{}})}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00322}00322\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00323}00323\ \ \ \ \ \ \ \ \ \textcolor{keyword}{delete}\ \mbox{\hyperlink{classMatrixCalibrator_a8a08d0911856b8b8b3de03e89008a884}{impl}};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00324}00324\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classMatrixCalibrator_a8a08d0911856b8b8b3de03e89008a884}{impl}}=\textcolor{keyword}{new}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1AffinityWithMatchedPoints}{AffinityWithMatchedPoints}};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00325}00325\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00326}00326\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00327}00327\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00328}00328\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00329}00329\ \ \ \ \ \mbox{\hyperlink{classMatrixCalibrator_a7c305383884e60b731d0e8f2dc7aef93}{H}}=eye(4,4);}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00330}00330\ \ \ \ \ \mbox{\hyperlink{classMatrixCalibrator_a69e617a9cd8888a432ffb44ab9eca70c}{scale}}=1.0;}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00331}00331\ \ \ \ \ \textcolor{keywordflow}{if}\ (Bottle\ *values=info.find(\textcolor{stringliteral}{"{}calibration\_data"{}}).asList())}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00332}00332\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00333}00333\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classMatrixCalibrator_a69e617a9cd8888a432ffb44ab9eca70c}{scale}}=values-\/>get(0).asFloat64();}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00334}00334\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00335}00335\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ r=0;\ \textcolor{keywordtype}{int}\ c=0;\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00336}00336\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i=1;\ i<values-\/>size();\ i++)}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00337}00337\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00338}00338\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classMatrixCalibrator_a7c305383884e60b731d0e8f2dc7aef93}{H}}(r,c)=values-\/>get(i).asFloat64();}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00339}00339\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (++c>=\mbox{\hyperlink{classMatrixCalibrator_a7c305383884e60b731d0e8f2dc7aef93}{H}}.cols())}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00340}00340\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00341}00341\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ c=0;}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00342}00342\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (++r>=\mbox{\hyperlink{classMatrixCalibrator_a7c305383884e60b731d0e8f2dc7aef93}{H}}.rows())}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00343}00343\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00344}00344\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00345}00345\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00346}00346\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00347}00347\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00348}00348\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classCalibrator_a7b1ac356a61270bf8b540d68e1cc105d}{Calibrator::fromProperty}}(info);}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00349}00349\ \}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00350}00350\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00351}00351\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00352}00352\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00353}\mbox{\hyperlink{classLSSVMCalibrator_a1fc9a1c63f4fa0e42ae6a4000c027d5e}{00353}}\ \mbox{\hyperlink{classLSSVMCalibrator_a1fc9a1c63f4fa0e42ae6a4000c027d5e}{LSSVMCalibrator::LSSVMCalibrator}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{string}\ \&type)}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00354}00354\ \{}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00355}00355\ \ \ \ \ \mbox{\hyperlink{classLSSVMCalibrator_a7be4c1c113406662bf1ed2cd6553cafd}{impl}}=\textcolor{keyword}{new}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1LSSVMLearner}{LSSVMLearner}};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00356}00356\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1LSSVMLearner}{LSSVMLearner}}\ *lssvm=\textcolor{keyword}{dynamic\_cast<}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1LSSVMLearner}{LSSVMLearner}}*\textcolor{keyword}{>}(\mbox{\hyperlink{classLSSVMCalibrator_a7be4c1c113406662bf1ed2cd6553cafd}{impl}});}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00357}00357\ \ \ \ \ lssvm-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1LSSVMLearner_a432b341af09695b124e92f9f7f5e1d9c}{setDomainSize}}(3);}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00358}00358\ \ \ \ \ lssvm-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1LSSVMLearner_a23c698c3227d950bed7a684d5afa4b6c}{setCoDomainSize}}(3);}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00359}00359\ \ \ \ \ lssvm-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1LSSVMLearner_a4ad53f17f32c9a10b768d1570c83fb94}{setC}}(100.0);}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00360}00360\ \ \ \ \ lssvm-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1LSSVMLearner_a9f3231ec94416350944a3333a1442758}{getKernel}}()-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1RBFKernel_a55d6f9487fd82561b35e350146fe36ae}{setGamma}}(10.0);}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00361}00361\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00362}00362\ \ \ \ \ this-\/>type=\textcolor{stringliteral}{"{}lssvm"{}};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00363}00363\ \}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00364}00364\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00365}00365\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00366}00366\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00367}\mbox{\hyperlink{classLSSVMCalibrator_aab534e596a1ca8b7c60c6172bb0e0625}{00367}}\ \mbox{\hyperlink{classLSSVMCalibrator_a1fc9a1c63f4fa0e42ae6a4000c027d5e}{LSSVMCalibrator::LSSVMCalibrator}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{classLSSVMCalibrator}{LSSVMCalibrator}}\ \&calibrator)}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00368}00368\ \{}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00369}00369\ \ \ \ \ \mbox{\hyperlink{classCalibrator_a894895053bd84c54dc891a35e26922d1}{copySuperClassData}}(calibrator);}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00370}00370\ \ \ \ \ \mbox{\hyperlink{classLSSVMCalibrator_a7be4c1c113406662bf1ed2cd6553cafd}{impl}}=\textcolor{keyword}{new}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1LSSVMLearner}{LSSVMLearner}}(*\textcolor{keyword}{dynamic\_cast<}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1LSSVMLearner}{LSSVMLearner}}*\textcolor{keyword}{>}(calibrator.\mbox{\hyperlink{classLSSVMCalibrator_a7be4c1c113406662bf1ed2cd6553cafd}{impl}}));}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00371}00371\ \}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00372}00372\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00373}00373\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00374}00374\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00375}\mbox{\hyperlink{classLSSVMCalibrator_a0711209496854cde3ef15b62a860d151}{00375}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classLSSVMCalibrator_a0711209496854cde3ef15b62a860d151}{LSSVMCalibrator::addPoints}}(\textcolor{keyword}{const}\ Vector\ \&in,\ \textcolor{keyword}{const}\ Vector\ \&\mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}})}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00376}00376\ \{}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00377}00377\ \ \ \ \ \textcolor{keywordflow}{if}\ ((\mbox{\hyperlink{classCalibrator_aab9f4ad4154f466b12236c25e725b83c}{in}}.length()>=3)\ \&\&\ (\mbox{\hyperlink{classCalibrator_a1242a8842a01c18ab3431e22274aff94}{out}}.length()>=3))}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00378}00378\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00379}00379\ \ \ \ \ \ \ \ \ Vector\ \_in=\mbox{\hyperlink{classCalibrator_aab9f4ad4154f466b12236c25e725b83c}{in}}.subVector(0,2);}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00380}00380\ \ \ \ \ \ \ \ \ Vector\ \_out=\mbox{\hyperlink{classCalibrator_a1242a8842a01c18ab3431e22274aff94}{out}}.subVector(0,2);}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00381}00381\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classLSSVMCalibrator_a7be4c1c113406662bf1ed2cd6553cafd}{impl}}-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1IMachineLearner_a966cad73ccbce571d21840d91190b183}{feedSample}}(\mbox{\hyperlink{classCalibrator_aab9f4ad4154f466b12236c25e725b83c}{in}},\mbox{\hyperlink{classCalibrator_a1242a8842a01c18ab3431e22274aff94}{out}});}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00382}00382\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00383}00383\ \ \ \ \ \ \ \ \ this-\/>in.push\_back(\_in);}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00384}00384\ \ \ \ \ \ \ \ \ this-\/>out.push\_back(\_out);}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00385}00385\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00386}00386\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00387}00387\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00388}00388\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00389}00389\ \}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00390}00390\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00391}00391\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00392}00392\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00393}\mbox{\hyperlink{classLSSVMCalibrator_a28820b53d9a6f55ef8011cece2919203}{00393}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classLSSVMCalibrator_a28820b53d9a6f55ef8011cece2919203}{LSSVMCalibrator::clearPoints}}()}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00394}00394\ \{}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00395}00395\ \ \ \ \ \mbox{\hyperlink{classLSSVMCalibrator_a7be4c1c113406662bf1ed2cd6553cafd}{impl}}-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1IMachineLearner_a468da4860475ed208e1d9ab84adc56a6}{reset}}();}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00396}00396\ \ \ \ \ \mbox{\hyperlink{classCalibrator_aab9f4ad4154f466b12236c25e725b83c}{in}}.clear();}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00397}00397\ \ \ \ \ \mbox{\hyperlink{classCalibrator_a1242a8842a01c18ab3431e22274aff94}{out}}.clear();}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00398}00398\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00399}00399\ \}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00400}00400\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00401}00401\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00402}00402\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00403}\mbox{\hyperlink{classLSSVMCalibrator_a15f381219e77ae52bfa8a2c34dea0bdf}{00403}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classLSSVMCalibrator_a15f381219e77ae52bfa8a2c34dea0bdf}{LSSVMCalibrator::getPoints}}(deque<Vector>\ \&in,\ deque<Vector>\ \&\mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}})\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00404}00404\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00405}00405\ \ \ \ \ \mbox{\hyperlink{classCalibrator_aab9f4ad4154f466b12236c25e725b83c}{in}}=this-\/>\mbox{\hyperlink{classCalibrator_aab9f4ad4154f466b12236c25e725b83c}{in}};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00406}00406\ \ \ \ \ out=this-\/>\mbox{\hyperlink{classCalibrator_a1242a8842a01c18ab3431e22274aff94}{out}};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00407}00407\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00408}00408\ \}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00409}00409\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00410}00410\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00411}00411\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00412}\mbox{\hyperlink{classLSSVMCalibrator_a90aabdd464e5d2c3000304d895a0b66a}{00412}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classLSSVMCalibrator_a90aabdd464e5d2c3000304d895a0b66a}{LSSVMCalibrator::calibrate}}(\textcolor{keywordtype}{double}\ \&\mbox{\hyperlink{debugFunctions_8cpp_a7a3172cc98e93d8eadfb9ab30373799e}{error}})}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00413}00413\ \{}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00414}00414\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classCalibrator_ad9502061f44d287e8c87e63b739554bc}{getNumPoints}}()==0)}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00415}00415\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00416}00416\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00417}00417\ \ \ \ \ \mbox{\hyperlink{classLSSVMCalibrator_a7be4c1c113406662bf1ed2cd6553cafd}{impl}}-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1IMachineLearner_a5061f4a4b574928a27bed8d5dfc8cca7}{train}}();}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00418}00418\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00419}00419\ \ \ \ \ error=0.0;}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00420}00420\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<\mbox{\hyperlink{classCalibrator_ad9502061f44d287e8c87e63b739554bc}{getNumPoints}}();\ i++)}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00421}00421\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00422}00422\ \ \ \ \ \ \ \ \ Vector\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00423}00423\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classLSSVMCalibrator_af3f017ce5f039978ed3ab4d93cff2561}{retrieve}}(\mbox{\hyperlink{classCalibrator_aab9f4ad4154f466b12236c25e725b83c}{in}}[i],\mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}});}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00424}00424\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{debugFunctions_8cpp_a7a3172cc98e93d8eadfb9ab30373799e}{error}}+=\mbox{\hyperlink{group__Maths_ga791f0548018b3597da95e70a3b226806}{norm}}(\mbox{\hyperlink{classCalibrator_a1242a8842a01c18ab3431e22274aff94}{out}}[i].subVector(0,2)-\/\mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}});}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00425}00425\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00426}00426\ \ \ \ \ \mbox{\hyperlink{debugFunctions_8cpp_a7a3172cc98e93d8eadfb9ab30373799e}{error}}/=\mbox{\hyperlink{classCalibrator_ad9502061f44d287e8c87e63b739554bc}{getNumPoints}}();}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00427}00427\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00428}00428\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classCalibrator_a5df9a637b4aa12c126d7fcb97b1f0578}{computeSpatialCompetence}}(\mbox{\hyperlink{classCalibrator_aab9f4ad4154f466b12236c25e725b83c}{in}}))}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00429}00429\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00430}00430\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCalibrator_ac7f7e30636007b9b30703ad01d6df301}{spatialCompetence}}.\mbox{\hyperlink{structCalibrator_1_1SpatialCompetence_af9649a2a716ea4a8a2f9af2a3a8690b8}{scale}}=1.0;}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00431}00431\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00432}00432\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00433}00433\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00434}00434\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00435}00435\ \}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00436}00436\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00437}00437\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00438}00438\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00439}\mbox{\hyperlink{classLSSVMCalibrator_af3f017ce5f039978ed3ab4d93cff2561}{00439}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classLSSVMCalibrator_af3f017ce5f039978ed3ab4d93cff2561}{LSSVMCalibrator::retrieve}}(\textcolor{keyword}{const}\ Vector\ \&in,\ Vector\ \&\mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}})}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00440}00440\ \{}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00441}00441\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classCalibrator_aab9f4ad4154f466b12236c25e725b83c}{in}}.length()>=3)}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00442}00442\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00443}00443\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1Prediction}{Prediction}}\ prediction=\mbox{\hyperlink{classLSSVMCalibrator_a7be4c1c113406662bf1ed2cd6553cafd}{impl}}-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1IMachineLearner_a7118f9fa69b43e519c42ce125c70f5c8}{predict}}(\mbox{\hyperlink{classCalibrator_aab9f4ad4154f466b12236c25e725b83c}{in}}.subVector(0,2));}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00444}00444\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCalibrator_a1242a8842a01c18ab3431e22274aff94}{out}}=prediction.\mbox{\hyperlink{classiCub_1_1learningmachine_1_1Prediction_affd3e50f1466283df3ba8cff2c06f2eb}{getPrediction}}();}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00445}00445\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00446}00446\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00447}00447\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00448}00448\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00449}00449\ \}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00450}00450\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00451}00451\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00452}00452\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00453}\mbox{\hyperlink{classLSSVMCalibrator_a8b1aabc15c9f56a75611c1663adf4cf0}{00453}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classLSSVMCalibrator_a8b1aabc15c9f56a75611c1663adf4cf0}{LSSVMCalibrator::toProperty}}(Property\ \&info)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00454}00454\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00455}00455\ \ \ \ \ Bottle\ \mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00456}00456\ \ \ \ \ Bottle\ \&values=\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}.addList();}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00457}00457\ \ \ \ \ values.addString(\mbox{\hyperlink{classLSSVMCalibrator_a7be4c1c113406662bf1ed2cd6553cafd}{impl}}-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1IMachineLearner_aa36205e9a4f900f8aae18033092fb0e7}{toString}}());}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00458}00458\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00459}00459\ \ \ \ \ info.clear();}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00460}00460\ \ \ \ \ info.put(\textcolor{stringliteral}{"{}type"{}},\mbox{\hyperlink{classCalibrator_a7bf3184a19f4f571bcc69a8df069f7ee}{type}});}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00461}00461\ \ \ \ \ info.put(\textcolor{stringliteral}{"{}calibration\_data"{}},\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}.get(0));}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00462}00462\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classCalibrator_a3d7438cebc50a746c0214c517677b848}{Calibrator::toProperty}}(info);}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00463}00463\ \}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00464}00464\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00465}00465\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00466}00466\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00467}\mbox{\hyperlink{classLSSVMCalibrator_ad15276859bb51aa43db94e83f96182c6}{00467}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classLSSVMCalibrator_ad15276859bb51aa43db94e83f96182c6}{LSSVMCalibrator::fromProperty}}(\textcolor{keyword}{const}\ Property\ \&info)}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00468}00468\ \{}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00469}00469\ \ \ \ \ \textcolor{keywordflow}{if}\ (!info.check(\textcolor{stringliteral}{"{}type"{}}))}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00470}00470\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00471}00471\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00472}00472\ \ \ \ \ \textcolor{keywordtype}{string}\ \mbox{\hyperlink{classCalibrator_a7bf3184a19f4f571bcc69a8df069f7ee}{type}}=info.find(\textcolor{stringliteral}{"{}type"{}}).asString();}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00473}00473\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classCalibrator_a7bf3184a19f4f571bcc69a8df069f7ee}{type}}==\textcolor{stringliteral}{"{}lssvm"{}})}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00474}00474\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classLSSVMCalibrator_a28820b53d9a6f55ef8011cece2919203}{clearPoints}}();}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00475}00475\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00476}00476\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00477}00477\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00478}00478\ \ \ \ \ \textcolor{keywordtype}{bool}\ ret=\textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00479}00479\ \ \ \ \ \textcolor{keywordflow}{if}\ (Bottle\ *values=info.find(\textcolor{stringliteral}{"{}calibration\_data"{}}).asList())}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00480}00480\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (values-\/>size()>=1)}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00481}00481\ \ \ \ \ \ \ \ \ \ \ \ \ ret=\mbox{\hyperlink{classLSSVMCalibrator_a7be4c1c113406662bf1ed2cd6553cafd}{impl}}-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1IMachineLearner_a03b76322e94b7e196993f04790f2cae8}{fromString}}(values-\/>toString());}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00482}00482\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00483}00483\ \ \ \ \ ret\&=\mbox{\hyperlink{classCalibrator_a7b1ac356a61270bf8b540d68e1cc105d}{Calibrator::fromProperty}}(info);\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00484}00484\ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00485}00485\ \}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00486}00486\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00487}00487\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00488}00488\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00489}\mbox{\hyperlink{classLSSVMCalibrator_a03e2b26eff217ce75e477467fb45521c}{00489}}\ \mbox{\hyperlink{classLSSVMCalibrator_a03e2b26eff217ce75e477467fb45521c}{LSSVMCalibrator::\string~LSSVMCalibrator}}()}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00490}00490\ \{}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00491}00491\ \ \ \ \ \textcolor{keyword}{delete}\ \mbox{\hyperlink{classLSSVMCalibrator_a7be4c1c113406662bf1ed2cd6553cafd}{impl}};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00492}00492\ \ \ \ \ \mbox{\hyperlink{classCalibrator_aab9f4ad4154f466b12236c25e725b83c}{in}}.clear();}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00493}00493\ \ \ \ \ \mbox{\hyperlink{classCalibrator_a1242a8842a01c18ab3431e22274aff94}{out}}.clear();}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00494}00494\ \}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00495}00495\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00496}00496\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00497}00497\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00498}\mbox{\hyperlink{classLocallyWeightedExperts_ab3feac9679132dea777e5de2e20c69bb}{00498}}\ \mbox{\hyperlink{classCalibrator}{Calibrator}}\ *\mbox{\hyperlink{classLocallyWeightedExperts_ab3feac9679132dea777e5de2e20c69bb}{LocallyWeightedExperts::operator[]}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{size\_t}\ i)}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00499}00499\ \{}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00500}00500\ \ \ \ \ \textcolor{keywordflow}{if}\ (i<\mbox{\hyperlink{classLocallyWeightedExperts_ae0abb50991f83259d5fb206d82da5384}{models}}.size())}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00501}00501\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classLocallyWeightedExperts_ae0abb50991f83259d5fb206d82da5384}{models}}[i];}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00502}00502\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00503}00503\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ NULL;}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00504}00504\ \}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00505}00505\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00506}00506\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00507}00507\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00508}\mbox{\hyperlink{classLocallyWeightedExperts_a04f4bedaefa47fb40164b686d2152b91}{00508}}\ \mbox{\hyperlink{classLocallyWeightedExperts}{LocallyWeightedExperts}}\ \&\mbox{\hyperlink{classLocallyWeightedExperts_a04f4bedaefa47fb40164b686d2152b91}{LocallyWeightedExperts::operator<<}}(\mbox{\hyperlink{classCalibrator}{Calibrator}}\ \&c)}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00509}00509\ \{}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00510}00510\ \ \ \ \ \mbox{\hyperlink{classCalibrator}{Calibrator}}\ *calibrator;}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00511}00511\ \ \ \ \ \textcolor{keywordflow}{if}\ (c.\mbox{\hyperlink{classCalibrator_addded26523d00ca3c0a3bef94f0e58d0}{getType}}()==\textcolor{stringliteral}{"{}lssvm"{}})}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00512}00512\ \ \ \ \ \ \ \ \ calibrator=\textcolor{keyword}{new}\ \mbox{\hyperlink{classLSSVMCalibrator}{LSSVMCalibrator}}(\textcolor{keyword}{dynamic\_cast<}\mbox{\hyperlink{classLSSVMCalibrator}{LSSVMCalibrator}}\&\textcolor{keyword}{>}(c));}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00513}00513\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00514}00514\ \ \ \ \ \ \ \ \ calibrator=\textcolor{keyword}{new}\ \mbox{\hyperlink{classMatrixCalibrator}{MatrixCalibrator}}(\textcolor{keyword}{dynamic\_cast<}\mbox{\hyperlink{classMatrixCalibrator}{MatrixCalibrator}}\&\textcolor{keyword}{>}(c));}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00515}00515\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00516}00516\ \ \ \ \ \mbox{\hyperlink{classLocallyWeightedExperts_ae0abb50991f83259d5fb206d82da5384}{models}}.push\_back(calibrator);}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00517}00517\ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00518}00518\ \}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00519}00519\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00520}00520\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00521}00521\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00522}\mbox{\hyperlink{classLocallyWeightedExperts_ab57363ff344311c965c8044bfef1e211}{00522}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classLocallyWeightedExperts_ab57363ff344311c965c8044bfef1e211}{LocallyWeightedExperts::retrieve}}(\textcolor{keyword}{const}\ Vector\ \&in,\ Vector\ \&\mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}})}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00523}00523\ \{}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00524}00524\ \ \ \ \ \textcolor{keywordflow}{if}\ (in.length()<3)}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00525}00525\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00526}00526\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00527}00527\ \ \ \ \ Vector\ \_in=in.subVector(0,2);}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00528}00528\ \ \ \ \ Vector\ outExperts(\_in.length(),0.0);}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00529}00529\ \ \ \ \ Vector\ outExtrapolators(\_in.length(),0.0);}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00530}00530\ \ \ \ \ \textcolor{keywordtype}{double}\ sumExperts=0.0;}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00531}00531\ \ \ \ \ \textcolor{keywordtype}{double}\ sumExtrapolators=0.0;}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00532}00532\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00533}00533\ \ \ \ \ \textcolor{comment}{//\ collect\ information\ over\ available\ models}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00534}00534\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<\mbox{\hyperlink{classLocallyWeightedExperts_ae0abb50991f83259d5fb206d82da5384}{models}}.size();\ i++)}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00535}00535\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00536}00536\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ competence=\mbox{\hyperlink{classLocallyWeightedExperts_ae0abb50991f83259d5fb206d82da5384}{models}}[i]-\/>getSpatialCompetence(\_in);}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00537}00537\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (competence>0.0)}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00538}00538\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00539}00539\ \ \ \ \ \ \ \ \ \ \ \ \ Vector\ pred;}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00540}00540\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classLocallyWeightedExperts_ae0abb50991f83259d5fb206d82da5384}{models}}[i]-\/>retrieve(\_in,pred);}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00541}00541\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00542}00542\ \ \ \ \ \ \ \ \ \ \ \ \ outExtrapolators+=competence*pred;}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00543}00543\ \ \ \ \ \ \ \ \ \ \ \ \ sumExtrapolators+=competence;}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00544}00544\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (competence>=1.0)}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00545}00545\ \ \ \ \ \ \ \ \ \ \ \ \ \{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00546}00546\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ outExperts+=competence*pred;}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00547}00547\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sumExperts+=competence;}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00548}00548\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00549}00549\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00550}00550\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00551}00551\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00552}00552\ \ \ \ \ \textcolor{comment}{//\ consider\ experts\ first}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00553}00553\ \ \ \ \ \textcolor{keywordflow}{if}\ (sumExperts!=0.0)}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00554}00554\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00555}00555\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}}=outExperts/sumExperts;}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00556}00556\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00557}00557\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00558}00558\ \ \ \ \ \textcolor{comment}{//\ then\ extrapolators}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00559}00559\ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (sumExtrapolators!=0.0)}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00560}00560\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00561}00561\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}}=outExtrapolators/sumExtrapolators;}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00562}00562\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00563}00563\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00564}00564\ \ \ \ \ \textcolor{comment}{//\ no\ models\ found}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00565}00565\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00566}00566\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00567}00567\ \}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00568}00568\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00569}00569\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00570}00570\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00571}\mbox{\hyperlink{classLocallyWeightedExperts_af55db57ba3943647b3ea8cde684813b6}{00571}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classLocallyWeightedExperts_af55db57ba3943647b3ea8cde684813b6}{LocallyWeightedExperts::clear}}()}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00572}00572\ \{}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00573}00573\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<\mbox{\hyperlink{classLocallyWeightedExperts_ae0abb50991f83259d5fb206d82da5384}{models}}.size();\ i++)}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00574}00574\ \ \ \ \ \ \ \ \ \textcolor{keyword}{delete}\ \mbox{\hyperlink{classLocallyWeightedExperts_ae0abb50991f83259d5fb206d82da5384}{models}}[i];}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00575}00575\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00576}00576\ \ \ \ \ \mbox{\hyperlink{classLocallyWeightedExperts_ae0abb50991f83259d5fb206d82da5384}{models}}.clear();}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00577}00577\ \}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00578}00578\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00579}00579\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00580}00580\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00581}\mbox{\hyperlink{classLocallyWeightedExperts_afc6628afc3f14e029049366d46131a1a}{00581}}\ \mbox{\hyperlink{classLocallyWeightedExperts_afc6628afc3f14e029049366d46131a1a}{LocallyWeightedExperts::\string~LocallyWeightedExperts}}()}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00582}00582\ \{}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00583}00583\ \ \ \ \ \mbox{\hyperlink{classLocallyWeightedExperts_af55db57ba3943647b3ea8cde684813b6}{clear}}();}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00584}00584\ \}}
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00585}00585\ }
+\DoxyCodeLine{\Hypertarget{methods_8cpp_source_l00586}00586\ }
+
+\end{DoxyCode}

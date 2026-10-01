@@ -1,0 +1,472 @@
+\doxysection{nlp.\+cpp}
+\hypertarget{nlp_8cpp_source}{}\label{nlp_8cpp_source}\index{icub-\/main/src/tools/depth2kin/src/nlp.cpp@{icub-\/main/src/tools/depth2kin/src/nlp.cpp}}
+\mbox{\hyperlink{nlp_8cpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00001}00001\ \textcolor{comment}{/*\ }}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00002}00002\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2014\ iCub\ Facility\ -\/\ Istituto\ Italiano\ di\ Tecnologia}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00003}00003\ \textcolor{comment}{\ *\ Author:\ Ugo\ Pattacini}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00004}00004\ \textcolor{comment}{\ *\ email:\ \ ugo.pattacini@iit.it}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00005}00005\ \textcolor{comment}{\ *\ Permission\ is\ granted\ to\ copy,\ distribute,\ and/or\ modify\ this\ program}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00006}00006\ \textcolor{comment}{\ *\ under\ the\ terms\ of\ the\ GNU\ General\ Public\ License,\ version\ 2\ or\ any}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00007}00007\ \textcolor{comment}{\ *\ later\ version\ published\ by\ the\ Free\ Software\ Foundation.}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00008}00008\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00009}00009\ \textcolor{comment}{\ *\ A\ copy\ of\ the\ license\ can\ be\ found\ at}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00010}00010\ \textcolor{comment}{\ *\ http://www.robotcub.org/icub/license/gpl.txt}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00011}00011\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00012}00012\ \textcolor{comment}{\ *\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00013}00013\ \textcolor{comment}{\ *\ WITHOUT\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00014}00014\ \textcolor{comment}{\ *\ MERCHANTABILITY\ or\ FITNESS\ FOR\ A\ PARTICULAR\ PURPOSE.\ See\ the\ GNU\ General}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00015}00015\ \textcolor{comment}{\ *\ Public\ License\ for\ more\ details}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00016}00016\ \textcolor{comment}{*/}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00017}00017\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00018}00018\ \textcolor{preprocessor}{\#include\ <cmath>}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00019}00019\ \textcolor{preprocessor}{\#include\ <algorithm>}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00020}00020\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00021}00021\ \textcolor{preprocessor}{\#include\ <deque>}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00022}00022\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00023}00023\ \textcolor{preprocessor}{\#include\ <yarp/sig/all.h>}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00024}00024\ \textcolor{preprocessor}{\#include\ <yarp/dev/all.h>}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00025}00025\ \textcolor{preprocessor}{\#include\ <yarp/math/Math.h>}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00026}00026\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00027}00027\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{math_8h}{iCub/ctrl/math.h}}>}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00028}00028\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00029}00029\ \textcolor{preprocessor}{\#include\ <IpTNLP.hpp>}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00030}00030\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{nlp_8h}{nlp.h}}>}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00031}00031\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00032}00032\ \textcolor{keyword}{using\ namespace\ }std;}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00033}00033\ \textcolor{keyword}{using\ namespace\ }yarp::os;}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00034}00034\ \textcolor{keyword}{using\ namespace\ }yarp::sig;}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00035}00035\ \textcolor{keyword}{using\ namespace\ }yarp::math;}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00036}00036\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceiCub_1_1ctrl}{iCub::ctrl}};}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00037}00037\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00038}00038\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00039}00039\ \textcolor{comment}{/****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00040}\mbox{\hyperlink{nlp_8cpp_aa1b552255e2b036616d2c07383b636df}{00040}}\ Matrix\ \mbox{\hyperlink{nlp_8cpp_aa1b552255e2b036616d2c07383b636df}{computeH}}(\textcolor{keyword}{const}\ Vector\ \&\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}})}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00041}00041\ \{}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00042}00042\ \ \ \ \ Matrix\ \mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}}=rpy2dcm(\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}.subVector(3,5));}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00043}00043\ \ \ \ \ \mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}}(0,3)=\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}[0];\ \mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}}(1,3)=\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}[1];\ \mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}}(2,3)=\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}[2];}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00044}00044\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00045}00045\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}};}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00046}00046\ \}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00047}00047\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00048}00048\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00049}00049\ \textcolor{comment}{/****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00050}\mbox{\hyperlink{nlp_8cpp_a136cd5e745280c73e0bb6bc5cd9621c2}{00050}}\ Matrix\ \mbox{\hyperlink{nlp_8cpp_aa1b552255e2b036616d2c07383b636df}{computeH}}(\textcolor{keyword}{const}\ Ipopt::Number\ *\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}})}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00051}00051\ \{}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00052}00052\ \ \ \ \ Vector\ \_x(6);}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00053}00053\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<\_x.length();\ i++)}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00054}00054\ \ \ \ \ \ \ \ \ \_x[i]=\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}[i];}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00055}00055\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00056}00056\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{nlp_8cpp_aa1b552255e2b036616d2c07383b636df}{computeH}}(\_x);}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00057}00057\ \}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00058}00058\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00059}00059\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00060}00060\ \textcolor{comment}{/****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00061}\mbox{\hyperlink{classEyeAlignerNLP}{00061}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classEyeAlignerNLP}{EyeAlignerNLP}}\ :\ \textcolor{keyword}{public}\ Ipopt::TNLP}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00062}00062\ \{}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00063}00063\ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00064}\mbox{\hyperlink{classEyeAlignerNLP_a6e29c0e383bb906bcd8d71bd8665c065}{00064}}\ \ \ \ \ \textcolor{keyword}{const}\ deque<Vector>\ \&\mbox{\hyperlink{classEyeAlignerNLP_a6e29c0e383bb906bcd8d71bd8665c065}{p2d}};}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00065}\mbox{\hyperlink{classEyeAlignerNLP_a109000d96b9da9d0df981f70e222c10d}{00065}}\ \ \ \ \ \textcolor{keyword}{const}\ deque<Vector>\ \&\mbox{\hyperlink{classEyeAlignerNLP_a109000d96b9da9d0df981f70e222c10d}{p3d}};}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00066}\mbox{\hyperlink{classEyeAlignerNLP_a1c8ddd5899435c637657714b26e92592}{00066}}\ \ \ \ \ \textcolor{keyword}{const}\ Matrix\ \ \ \ \ \ \ \ \&\mbox{\hyperlink{classEyeAlignerNLP_a1c8ddd5899435c637657714b26e92592}{Prj}};}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00067}00067\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00068}\mbox{\hyperlink{classEyeAlignerNLP_a6a5ebbca0a99cff41c5fd68727a3001e}{00068}}\ \ \ \ \ Vector\ \mbox{\hyperlink{classEyeAlignerNLP_a6a5ebbca0a99cff41c5fd68727a3001e}{min}};}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00069}\mbox{\hyperlink{classEyeAlignerNLP_afed3a3bbaa128df25eff7d5779f922ec}{00069}}\ \ \ \ \ Vector\ \mbox{\hyperlink{classEyeAlignerNLP_afed3a3bbaa128df25eff7d5779f922ec}{max}};\ \ \ \ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00070}\mbox{\hyperlink{classEyeAlignerNLP_a30b4e154af02f467b84ddae56deec12b}{00070}}\ \ \ \ \ Vector\ \mbox{\hyperlink{classEyeAlignerNLP_a30b4e154af02f467b84ddae56deec12b}{x0}};}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00071}\mbox{\hyperlink{classEyeAlignerNLP_a7a1d26afa32068eaa40be66a71a7a648}{00071}}\ \ \ \ \ Vector\ \mbox{\hyperlink{classEyeAlignerNLP_a7a1d26afa32068eaa40be66a71a7a648}{x}};}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00072}00072\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00073}00073\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00074}00074\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00075}\mbox{\hyperlink{classEyeAlignerNLP_affc314918c960f1402a13f86be8035a5}{00075}}\ \ \ \ \ \mbox{\hyperlink{classEyeAlignerNLP_affc314918c960f1402a13f86be8035a5}{EyeAlignerNLP}}(\textcolor{keyword}{const}\ deque<Vector>\ \&\_p2d,}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00076}00076\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ deque<Vector>\ \&\_p3d,}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00077}00077\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Vector\ \&\_min,\ \textcolor{keyword}{const}\ Vector\ \&\_max,}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00078}00078\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Matrix\ \&\_Prj)\ :}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00079}00079\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyeAlignerNLP_a6e29c0e383bb906bcd8d71bd8665c065}{p2d}}(\_p2d),\ \mbox{\hyperlink{classEyeAlignerNLP_a109000d96b9da9d0df981f70e222c10d}{p3d}}(\_p3d),\ \mbox{\hyperlink{classEyeAlignerNLP_a1c8ddd5899435c637657714b26e92592}{Prj}}(\_Prj)}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00080}00080\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00081}00081\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyeAlignerNLP_a6a5ebbca0a99cff41c5fd68727a3001e}{min}}=\_min;}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00082}00082\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyeAlignerNLP_afed3a3bbaa128df25eff7d5779f922ec}{max}}=\_max;}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00083}00083\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyeAlignerNLP_a30b4e154af02f467b84ddae56deec12b}{x0}}=0.5*(\mbox{\hyperlink{classEyeAlignerNLP_a6a5ebbca0a99cff41c5fd68727a3001e}{min}}+\mbox{\hyperlink{classEyeAlignerNLP_afed3a3bbaa128df25eff7d5779f922ec}{max}});}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00084}00084\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00085}00085\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00086}00086\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00087}\mbox{\hyperlink{classEyeAlignerNLP_ad0affd5ce3f6136d0dc9b93bc292fb39}{00087}}\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classEyeAlignerNLP_ad0affd5ce3f6136d0dc9b93bc292fb39}{set\_x0}}(\textcolor{keyword}{const}\ Vector\ \&\mbox{\hyperlink{classEyeAlignerNLP_a30b4e154af02f467b84ddae56deec12b}{x0}})}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00088}00088\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00089}00089\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{size\_t}\ len=std::min(this-\/>x0.length(),\mbox{\hyperlink{classEyeAlignerNLP_a30b4e154af02f467b84ddae56deec12b}{x0}}.length());}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00090}00090\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<len;\ i++)}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00091}00091\ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>x0[i]=\mbox{\hyperlink{classEyeAlignerNLP_a30b4e154af02f467b84ddae56deec12b}{x0}}[i];}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00092}00092\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00093}00093\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00094}00094\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00095}\mbox{\hyperlink{classEyeAlignerNLP_af73f8548b5218391694e43bc13271fc0}{00095}}\ \ \ \ \ Vector\ \mbox{\hyperlink{classEyeAlignerNLP_af73f8548b5218391694e43bc13271fc0}{get\_result}}()\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00096}00096\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00097}00097\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classEyeAlignerNLP_a7a1d26afa32068eaa40be66a71a7a648}{x}};}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00098}00098\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00099}00099\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00100}00100\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00101}\mbox{\hyperlink{classEyeAlignerNLP_ae68753b7d7753b893af85ad5d7be7d7a}{00101}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classEyeAlignerNLP_ae68753b7d7753b893af85ad5d7be7d7a}{get\_nlp\_info}}(Ipopt::Index\ \&\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},\ Ipopt::Index\ \&m,\ Ipopt::Index\ \&nnz\_jac\_g,}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00102}00102\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Index\ \&nnz\_h\_lag,\ IndexStyleEnum\ \&index\_style)}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00103}00103\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00104}00104\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}=6;}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00105}00105\ \ \ \ \ \ \ \ \ m=nnz\_jac\_g=nnz\_h\_lag=0;}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00106}00106\ \ \ \ \ \ \ \ \ index\_style=TNLP::C\_STYLE;}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00107}00107\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00108}00108\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00109}00109\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00110}00110\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00111}00111\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00112}\mbox{\hyperlink{classEyeAlignerNLP_a9a606e815b8f778f8c1d2794bae29da2}{00112}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classEyeAlignerNLP_a9a606e815b8f778f8c1d2794bae29da2}{get\_bounds\_info}}(Ipopt::Index\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},\ Ipopt::Number\ *x\_l,\ Ipopt::Number\ *x\_u,}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00113}00113\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Index\ m,\ Ipopt::Number\ *g\_l,\ Ipopt::Number\ *g\_u)}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00114}00114\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00115}00115\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (Ipopt::Index\ i=0;\ i<\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}};\ i++)}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00116}00116\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00117}00117\ \ \ \ \ \ \ \ \ \ \ \ \ x\_l[i]=\mbox{\hyperlink{classEyeAlignerNLP_a6a5ebbca0a99cff41c5fd68727a3001e}{min}}[i];}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00118}00118\ \ \ \ \ \ \ \ \ \ \ \ \ x\_u[i]=\mbox{\hyperlink{classEyeAlignerNLP_afed3a3bbaa128df25eff7d5779f922ec}{max}}[i];}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00119}00119\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00120}00120\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00121}00121\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00122}00122\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00123}00123\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00124}00124\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00125}\mbox{\hyperlink{classEyeAlignerNLP_a1f0d18e561de0b13dfcd72c66974d3ba}{00125}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classEyeAlignerNLP_a1f0d18e561de0b13dfcd72c66974d3ba}{get\_starting\_point}}(Ipopt::Index\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},\ \textcolor{keywordtype}{bool}\ init\_x,\ Ipopt::Number\ *\mbox{\hyperlink{classEyeAlignerNLP_a7a1d26afa32068eaa40be66a71a7a648}{x}},}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00126}00126\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ init\_z,\ Ipopt::Number\ *z\_L,\ Ipopt::Number\ *z\_U,}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00127}00127\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Index\ m,\ \textcolor{keywordtype}{bool}\ init\_lambda,\ Ipopt::Number\ *lambda)}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00128}00128\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00129}00129\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (Ipopt::Index\ i=0;\ i<\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}};\ i++)}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00130}00130\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyeAlignerNLP_a7a1d26afa32068eaa40be66a71a7a648}{x}}[i]=\mbox{\hyperlink{classEyeAlignerNLP_a30b4e154af02f467b84ddae56deec12b}{x0}}[i];}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00131}00131\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00132}00132\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00133}00133\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00134}00134\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00135}00135\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00136}\mbox{\hyperlink{classEyeAlignerNLP_a7fb964004e769af95ce39ed836ad90d5}{00136}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classEyeAlignerNLP_a7fb964004e769af95ce39ed836ad90d5}{eval\_f}}(Ipopt::Index\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},\ \textcolor{keyword}{const}\ Ipopt::Number\ *\mbox{\hyperlink{classEyeAlignerNLP_a7a1d26afa32068eaa40be66a71a7a648}{x}},\ \textcolor{keywordtype}{bool}\ new\_x,}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00137}00137\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Number\ \&obj\_value)}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00138}00138\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00139}00139\ \ \ \ \ \ \ \ \ Matrix\ PrjH=\mbox{\hyperlink{classEyeAlignerNLP_a1c8ddd5899435c637657714b26e92592}{Prj}}*SE3inv(\mbox{\hyperlink{nlp_8cpp_aa1b552255e2b036616d2c07383b636df}{computeH}}(\mbox{\hyperlink{classEyeAlignerNLP_a7a1d26afa32068eaa40be66a71a7a648}{x}}));}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00140}00140\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00141}00141\ \ \ \ \ \ \ \ \ obj\_value=0.0;}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00142}00142\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classEyeAlignerNLP_a6e29c0e383bb906bcd8d71bd8665c065}{p2d}}.size()>0)}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00143}00143\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00144}00144\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<\mbox{\hyperlink{classEyeAlignerNLP_a6e29c0e383bb906bcd8d71bd8665c065}{p2d}}.size();\ i++)}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00145}00145\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00146}00146\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Vector\ p2di=PrjH*\mbox{\hyperlink{classEyeAlignerNLP_a109000d96b9da9d0df981f70e222c10d}{p3d}}[i];}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00147}00147\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ p2di=p2di/p2di[2];}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00148}00148\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ p2di.pop\_back();}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00149}00149\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00150}00150\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ obj\_value+=\mbox{\hyperlink{group__Maths_ga77ee962cf3363413bca2239f9744198a}{norm2}}(\mbox{\hyperlink{classEyeAlignerNLP_a6e29c0e383bb906bcd8d71bd8665c065}{p2d}}[i]-\/p2di);}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00151}00151\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00152}00152\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00153}00153\ \ \ \ \ \ \ \ \ \ \ \ \ obj\_value/=\mbox{\hyperlink{classEyeAlignerNLP_a6e29c0e383bb906bcd8d71bd8665c065}{p2d}}.size();}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00154}00154\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00155}00155\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00156}00156\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00157}00157\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00158}00158\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00159}00159\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00160}\mbox{\hyperlink{classEyeAlignerNLP_a91d49e17549b7e8b5c4433ef91b87a5b}{00160}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classEyeAlignerNLP_a91d49e17549b7e8b5c4433ef91b87a5b}{eval\_grad\_f}}(Ipopt::Index\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},\ \textcolor{keyword}{const}\ Ipopt::Number*\ \mbox{\hyperlink{classEyeAlignerNLP_a7a1d26afa32068eaa40be66a71a7a648}{x}},\ \textcolor{keywordtype}{bool}\ new\_x,}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00161}00161\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Number\ *grad\_f)}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00162}00162\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00163}00163\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ roll=\mbox{\hyperlink{classEyeAlignerNLP_a7a1d26afa32068eaa40be66a71a7a648}{x}}[3];\ \ \textcolor{keywordtype}{double}\ cr=cos(roll);\ \ \textcolor{keywordtype}{double}\ sr=sin(roll);}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00164}00164\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ pitch=\mbox{\hyperlink{classEyeAlignerNLP_a7a1d26afa32068eaa40be66a71a7a648}{x}}[4];\ \textcolor{keywordtype}{double}\ cp=cos(pitch);\ \textcolor{keywordtype}{double}\ sp=sin(pitch);}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00165}00165\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ yaw=\mbox{\hyperlink{classEyeAlignerNLP_a7a1d26afa32068eaa40be66a71a7a648}{x}}[5];\ \ \ \textcolor{keywordtype}{double}\ cy=cos(yaw);\ \ \ \textcolor{keywordtype}{double}\ sy=sin(yaw);}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00166}00166\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00167}00167\ \ \ \ \ \ \ \ \ Matrix\ Rz=eye(4,4);}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00168}00168\ \ \ \ \ \ \ \ \ Rz(0,0)=cy;\ Rz(1,1)=cy;\ Rz(0,1)=-\/sy;\ Rz(1,0)=sy;}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00169}00169\ \ \ \ \ \ \ \ \ Matrix\ dRz=\mbox{\hyperlink{compute__ekf__sym_8m_a35baefda5ec044ac7c1f5a41815b5b45}{zeros}}(4,4);}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00170}00170\ \ \ \ \ \ \ \ \ dRz(0,0)=-\/sy;\ dRz(1,1)=-\/sy;\ dRz(0,1)=-\/cy;\ dRz(1,0)=cy;}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00171}00171\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00172}00172\ \ \ \ \ \ \ \ \ Matrix\ Ry=eye(4,4);}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00173}00173\ \ \ \ \ \ \ \ \ Ry(0,0)=cp;\ Ry(2,2)=cp;\ Ry(0,2)=sp;\ Ry(2,0)=-\/sp;}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00174}00174\ \ \ \ \ \ \ \ \ Matrix\ dRy=\mbox{\hyperlink{compute__ekf__sym_8m_a35baefda5ec044ac7c1f5a41815b5b45}{zeros}}(4,4);}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00175}00175\ \ \ \ \ \ \ \ \ dRy(0,0)=-\/sp;\ dRy(2,2)=-\/sp;\ dRy(0,2)=cp;\ dRy(2,0)=-\/cp;}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00176}00176\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00177}00177\ \ \ \ \ \ \ \ \ Matrix\ Rx=eye(4,4);}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00178}00178\ \ \ \ \ \ \ \ \ Rx(1,1)=cr;\ Rx(2,2)=cr;\ Rx(1,2)=-\/sr;\ Rx(2,1)=sr;}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00179}00179\ \ \ \ \ \ \ \ \ Matrix\ dRx=\mbox{\hyperlink{compute__ekf__sym_8m_a35baefda5ec044ac7c1f5a41815b5b45}{zeros}}(4,4);}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00180}00180\ \ \ \ \ \ \ \ \ dRx(1,1)=-\/sr;\ dRx(2,2)=-\/sr;\ dRx(1,2)=-\/cr;\ dRx(2,1)=cr;}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00181}00181\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00182}00182\ \ \ \ \ \ \ \ \ Matrix\ invRz=Rz.transposed();}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00183}00183\ \ \ \ \ \ \ \ \ Matrix\ invRy=Ry.transposed();}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00184}00184\ \ \ \ \ \ \ \ \ Matrix\ invRx=Rx.transposed();}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00185}00185\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00186}00186\ \ \ \ \ \ \ \ \ Matrix\ invR=(-\/1.0)*invRx*invRy*invRz;}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00187}00187\ \ \ \ \ \ \ \ \ Vector\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}(4,-\/1.0);\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}[0]=-\/\mbox{\hyperlink{classEyeAlignerNLP_a7a1d26afa32068eaa40be66a71a7a648}{x}}[0];\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}[1]=-\/\mbox{\hyperlink{classEyeAlignerNLP_a7a1d26afa32068eaa40be66a71a7a648}{x}}[1];\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}[2]=-\/\mbox{\hyperlink{classEyeAlignerNLP_a7a1d26afa32068eaa40be66a71a7a648}{x}}[2];}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00188}00188\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00189}00189\ \ \ \ \ \ \ \ \ Matrix\ dHdx0=\mbox{\hyperlink{compute__ekf__sym_8m_a35baefda5ec044ac7c1f5a41815b5b45}{zeros}}(4,4);\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ dHdx0.setCol(3,invR.getCol(0));}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00190}00190\ \ \ \ \ \ \ \ \ Matrix\ dHdx1=\mbox{\hyperlink{compute__ekf__sym_8m_a35baefda5ec044ac7c1f5a41815b5b45}{zeros}}(4,4);\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ dHdx1.setCol(3,invR.getCol(1));}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00191}00191\ \ \ \ \ \ \ \ \ Matrix\ dHdx2=\mbox{\hyperlink{compute__ekf__sym_8m_a35baefda5ec044ac7c1f5a41815b5b45}{zeros}}(4,4);\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ dHdx2.setCol(3,invR.getCol(2));}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00192}00192\ \ \ \ \ \ \ \ \ Matrix\ dHdx3=dRx.transposed()*invRy*invRz;\ dHdx3.setCol(3,dHdx3*\mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}});}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00193}00193\ \ \ \ \ \ \ \ \ Matrix\ dHdx4=invRx*dRy.transposed()*invRz;\ dHdx4.setCol(3,dHdx4*\mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}});}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00194}00194\ \ \ \ \ \ \ \ \ Matrix\ dHdx5=invRx*invRy*dRz.transposed();\ dHdx5.setCol(3,dHdx5*\mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}});}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00195}00195\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00196}00196\ \ \ \ \ \ \ \ \ Matrix\ dPrjHdx0=\mbox{\hyperlink{classEyeAlignerNLP_a1c8ddd5899435c637657714b26e92592}{Prj}}*dHdx0;}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00197}00197\ \ \ \ \ \ \ \ \ Matrix\ dPrjHdx1=\mbox{\hyperlink{classEyeAlignerNLP_a1c8ddd5899435c637657714b26e92592}{Prj}}*dHdx1;}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00198}00198\ \ \ \ \ \ \ \ \ Matrix\ dPrjHdx2=\mbox{\hyperlink{classEyeAlignerNLP_a1c8ddd5899435c637657714b26e92592}{Prj}}*dHdx2;}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00199}00199\ \ \ \ \ \ \ \ \ Matrix\ dPrjHdx3=\mbox{\hyperlink{classEyeAlignerNLP_a1c8ddd5899435c637657714b26e92592}{Prj}}*dHdx3;}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00200}00200\ \ \ \ \ \ \ \ \ Matrix\ dPrjHdx4=\mbox{\hyperlink{classEyeAlignerNLP_a1c8ddd5899435c637657714b26e92592}{Prj}}*dHdx4;}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00201}00201\ \ \ \ \ \ \ \ \ Matrix\ dPrjHdx5=\mbox{\hyperlink{classEyeAlignerNLP_a1c8ddd5899435c637657714b26e92592}{Prj}}*dHdx5;}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00202}00202\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00203}00203\ \ \ \ \ \ \ \ \ Matrix\ PrjH=\mbox{\hyperlink{classEyeAlignerNLP_a1c8ddd5899435c637657714b26e92592}{Prj}}*SE3inv(\mbox{\hyperlink{nlp_8cpp_aa1b552255e2b036616d2c07383b636df}{computeH}}(\mbox{\hyperlink{classEyeAlignerNLP_a7a1d26afa32068eaa40be66a71a7a648}{x}}));}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00204}00204\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00205}00205\ \ \ \ \ \ \ \ \ grad\_f[0]=grad\_f[1]=grad\_f[2]=0.0;}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00206}00206\ \ \ \ \ \ \ \ \ grad\_f[3]=grad\_f[4]=grad\_f[5]=0.0;}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00207}00207\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classEyeAlignerNLP_a6e29c0e383bb906bcd8d71bd8665c065}{p2d}}.size()>0)}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00208}00208\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00209}00209\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<\mbox{\hyperlink{classEyeAlignerNLP_a6e29c0e383bb906bcd8d71bd8665c065}{p2d}}.size();\ i++)}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00210}00210\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00211}00211\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Vector\ p2di=PrjH*\mbox{\hyperlink{classEyeAlignerNLP_a109000d96b9da9d0df981f70e222c10d}{p3d}}[i];}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00212}00212\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ p2di=p2di/p2di[2];}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00213}00213\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ p2di.pop\_back();}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00214}00214\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00215}00215\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Vector\ d=\mbox{\hyperlink{classEyeAlignerNLP_a6e29c0e383bb906bcd8d71bd8665c065}{p2d}}[i]-\/p2di;}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00216}00216\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00217}00217\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ u\_num=\mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(PrjH.getRow(0),\mbox{\hyperlink{classEyeAlignerNLP_a109000d96b9da9d0df981f70e222c10d}{p3d}}[i]);}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00218}00218\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ v\_num=\mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(PrjH.getRow(1),\mbox{\hyperlink{classEyeAlignerNLP_a109000d96b9da9d0df981f70e222c10d}{p3d}}[i]);}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00219}00219\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ lambda=\mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(PrjH.getRow(2),\mbox{\hyperlink{classEyeAlignerNLP_a109000d96b9da9d0df981f70e222c10d}{p3d}}[i]);}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00220}00220\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ lambda2=lambda*lambda;}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00221}00221\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ tmp\_dot;}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00222}00222\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00223}00223\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Vector\ dp2d\_dx0(2);}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00224}00224\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ tmp\_dot=\mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(dPrjHdx0.getRow(2),\mbox{\hyperlink{classEyeAlignerNLP_a109000d96b9da9d0df981f70e222c10d}{p3d}}[i]);}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00225}00225\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ dp2d\_dx0[0]=(\mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(dPrjHdx0.getRow(0),\mbox{\hyperlink{classEyeAlignerNLP_a109000d96b9da9d0df981f70e222c10d}{p3d}}[i])*lambda-\/tmp\_dot*u\_num)/lambda2;}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00226}00226\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ dp2d\_dx0[1]=(\mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(dPrjHdx0.getRow(1),\mbox{\hyperlink{classEyeAlignerNLP_a109000d96b9da9d0df981f70e222c10d}{p3d}}[i])*lambda-\/tmp\_dot*v\_num)/lambda2;}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00227}00227\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00228}00228\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Vector\ dp2d\_dx1(2);}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00229}00229\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ tmp\_dot=\mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(dPrjHdx1.getRow(2),\mbox{\hyperlink{classEyeAlignerNLP_a109000d96b9da9d0df981f70e222c10d}{p3d}}[i]);}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00230}00230\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ dp2d\_dx1[0]=(\mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(dPrjHdx1.getRow(0),\mbox{\hyperlink{classEyeAlignerNLP_a109000d96b9da9d0df981f70e222c10d}{p3d}}[i])*lambda-\/tmp\_dot*u\_num)/lambda2;}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00231}00231\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ dp2d\_dx1[1]=(\mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(dPrjHdx1.getRow(1),\mbox{\hyperlink{classEyeAlignerNLP_a109000d96b9da9d0df981f70e222c10d}{p3d}}[i])*lambda-\/tmp\_dot*v\_num)/lambda2;}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00232}00232\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00233}00233\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Vector\ dp2d\_dx2(2);}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00234}00234\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ tmp\_dot=\mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(dPrjHdx2.getRow(2),\mbox{\hyperlink{classEyeAlignerNLP_a109000d96b9da9d0df981f70e222c10d}{p3d}}[i]);}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00235}00235\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ dp2d\_dx2[0]=(\mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(dPrjHdx2.getRow(0),\mbox{\hyperlink{classEyeAlignerNLP_a109000d96b9da9d0df981f70e222c10d}{p3d}}[i])*lambda-\/tmp\_dot*u\_num)/lambda2;}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00236}00236\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ dp2d\_dx2[1]=(\mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(dPrjHdx2.getRow(1),\mbox{\hyperlink{classEyeAlignerNLP_a109000d96b9da9d0df981f70e222c10d}{p3d}}[i])*lambda-\/tmp\_dot*v\_num)/lambda2;}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00237}00237\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00238}00238\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Vector\ dp2d\_dx3(2);}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00239}00239\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ tmp\_dot=\mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(dPrjHdx3.getRow(2),\mbox{\hyperlink{classEyeAlignerNLP_a109000d96b9da9d0df981f70e222c10d}{p3d}}[i]);}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00240}00240\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ dp2d\_dx3[0]=(\mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(dPrjHdx3.getRow(0),\mbox{\hyperlink{classEyeAlignerNLP_a109000d96b9da9d0df981f70e222c10d}{p3d}}[i])*lambda-\/tmp\_dot*u\_num)/lambda2;}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00241}00241\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ dp2d\_dx3[1]=(\mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(dPrjHdx3.getRow(1),\mbox{\hyperlink{classEyeAlignerNLP_a109000d96b9da9d0df981f70e222c10d}{p3d}}[i])*lambda-\/tmp\_dot*v\_num)/lambda2;}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00242}00242\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00243}00243\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Vector\ dp2d\_dx4(2);}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00244}00244\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ tmp\_dot=\mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(dPrjHdx4.getRow(2),\mbox{\hyperlink{classEyeAlignerNLP_a109000d96b9da9d0df981f70e222c10d}{p3d}}[i]);}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00245}00245\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ dp2d\_dx4[0]=(\mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(dPrjHdx4.getRow(0),\mbox{\hyperlink{classEyeAlignerNLP_a109000d96b9da9d0df981f70e222c10d}{p3d}}[i])*lambda-\/tmp\_dot*u\_num)/lambda2;}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00246}00246\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ dp2d\_dx4[1]=(\mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(dPrjHdx4.getRow(1),\mbox{\hyperlink{classEyeAlignerNLP_a109000d96b9da9d0df981f70e222c10d}{p3d}}[i])*lambda-\/tmp\_dot*v\_num)/lambda2;}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00247}00247\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00248}00248\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Vector\ dp2d\_dx5(2);}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00249}00249\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ tmp\_dot=\mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(dPrjHdx5.getRow(2),\mbox{\hyperlink{classEyeAlignerNLP_a109000d96b9da9d0df981f70e222c10d}{p3d}}[i]);}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00250}00250\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ dp2d\_dx5[0]=(\mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(dPrjHdx5.getRow(0),\mbox{\hyperlink{classEyeAlignerNLP_a109000d96b9da9d0df981f70e222c10d}{p3d}}[i])*lambda-\/tmp\_dot*u\_num)/lambda2;}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00251}00251\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ dp2d\_dx5[1]=(\mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(dPrjHdx5.getRow(1),\mbox{\hyperlink{classEyeAlignerNLP_a109000d96b9da9d0df981f70e222c10d}{p3d}}[i])*lambda-\/tmp\_dot*v\_num)/lambda2;}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00252}00252\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00253}00253\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ grad\_f[0]-\/=2.0*\mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(d,dp2d\_dx0);}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00254}00254\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ grad\_f[1]-\/=2.0*\mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(d,dp2d\_dx1);}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00255}00255\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ grad\_f[2]-\/=2.0*\mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(d,dp2d\_dx2);}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00256}00256\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ grad\_f[3]-\/=2.0*\mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(d,dp2d\_dx3);}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00257}00257\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ grad\_f[4]-\/=2.0*\mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(d,dp2d\_dx4);}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00258}00258\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ grad\_f[5]-\/=2.0*\mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(d,dp2d\_dx5);}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00259}00259\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00260}00260\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00261}00261\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (Ipopt::Index\ i=0;\ i<\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}};\ i++)}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00262}00262\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ grad\_f[i]/=\mbox{\hyperlink{classEyeAlignerNLP_a6e29c0e383bb906bcd8d71bd8665c065}{p2d}}.size();}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00263}00263\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00264}00264\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00265}00265\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00266}00266\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00267}00267\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00268}00268\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00269}\mbox{\hyperlink{classEyeAlignerNLP_a6b40435630d0282cda4e01943085c491}{00269}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classEyeAlignerNLP_a6b40435630d0282cda4e01943085c491}{eval\_g}}(Ipopt::Index\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},\ \textcolor{keyword}{const}\ Ipopt::Number\ *\mbox{\hyperlink{classEyeAlignerNLP_a7a1d26afa32068eaa40be66a71a7a648}{x}},\ \textcolor{keywordtype}{bool}\ new\_x,}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00270}00270\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Index\ m,\ Ipopt::Number\ *g)}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00271}00271\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00272}00272\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00273}00273\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00274}00274\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00275}00275\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00276}\mbox{\hyperlink{classEyeAlignerNLP_aeda77f15ce7244dec067de3be7881ea3}{00276}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classEyeAlignerNLP_aeda77f15ce7244dec067de3be7881ea3}{eval\_jac\_g}}(Ipopt::Index\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},\ \textcolor{keyword}{const}\ Ipopt::Number\ *\mbox{\hyperlink{classEyeAlignerNLP_a7a1d26afa32068eaa40be66a71a7a648}{x}},\ \textcolor{keywordtype}{bool}\ new\_x,}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00277}00277\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Index\ m,\ Ipopt::Index\ nele\_jac,\ Ipopt::Index\ *iRow,}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00278}00278\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Index\ *jCol,\ Ipopt::Number\ *values)}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00279}00279\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00280}00280\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00281}00281\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00282}00282\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00283}00283\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00284}00284\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00285}\mbox{\hyperlink{classEyeAlignerNLP_a1079ed2b262c906aa111666e04ff6e95}{00285}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classEyeAlignerNLP_a1079ed2b262c906aa111666e04ff6e95}{eval\_h}}(Ipopt::Index\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},\ \textcolor{keyword}{const}\ Ipopt::Number\ *\mbox{\hyperlink{classEyeAlignerNLP_a7a1d26afa32068eaa40be66a71a7a648}{x}},\ \textcolor{keywordtype}{bool}\ new\_x,}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00286}00286\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Number\ obj\_factor,\ Ipopt::Index\ m,\ \textcolor{keyword}{const}\ Ipopt::Number\ *lambda,}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00287}00287\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ new\_lambda,\ Ipopt::Index\ nele\_hess,\ Ipopt::Index\ *iRow,}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00288}00288\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Index\ *jCol,\ Ipopt::Number\ *values)}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00289}00289\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00290}00290\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00291}00291\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00292}00292\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00293}00293\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00294}00294\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00295}\mbox{\hyperlink{classEyeAlignerNLP_ac336475846e396c9fbcafc20e886a68b}{00295}}\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classEyeAlignerNLP_ac336475846e396c9fbcafc20e886a68b}{finalize\_solution}}(Ipopt::SolverReturn\ status,\ Ipopt::Index\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00296}00296\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Ipopt::Number\ *\mbox{\hyperlink{classEyeAlignerNLP_a7a1d26afa32068eaa40be66a71a7a648}{x}},\ \textcolor{keyword}{const}\ Ipopt::Number\ *z\_L,}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00297}00297\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Ipopt::Number\ *z\_U,\ Ipopt::Index\ m,}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00298}00298\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Ipopt::Number\ *g,\ \textcolor{keyword}{const}\ Ipopt::Number\ *lambda,}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00299}00299\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Number\ obj\_value,\ \textcolor{keyword}{const}\ Ipopt::IpoptData\ *ip\_data,}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00300}00300\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::IpoptCalculatedQuantities\ *ip\_cq)}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00301}00301\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00302}00302\ \ \ \ \ \ \ \ \ this-\/>x.resize(\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}});}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00303}00303\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (Ipopt::Index\ i=0;\ i<\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}};\ i++)}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00304}00304\ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>x[i]=\mbox{\hyperlink{classEyeAlignerNLP_a7a1d26afa32068eaa40be66a71a7a648}{x}}[i];}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00305}00305\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00306}00306\ \};}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00307}00307\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00308}00308\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00309}00309\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00310}00310\ \textcolor{comment}{/****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00311}\mbox{\hyperlink{classEyeAligner_aaafef13aef8dd600958f5cfd9c239f3b}{00311}}\ \mbox{\hyperlink{classEyeAligner_aaafef13aef8dd600958f5cfd9c239f3b}{EyeAligner::EyeAligner}}()\ :\ Prj(eye(3,4))}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00312}00312\ \{}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00313}00313\ \ \ \ \ \mbox{\hyperlink{classEyeAligner_aca1c7101040cd7113294d7d62d0348bf}{min}}.resize(6);\ \mbox{\hyperlink{classEyeAligner_a23a51f50273d80552626c9928c5b85ec}{max}}.resize(6);}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00314}00314\ \ \ \ \ \mbox{\hyperlink{classEyeAligner_aca1c7101040cd7113294d7d62d0348bf}{min}}[0]=-\/1.0;\ \ \ \mbox{\hyperlink{classEyeAligner_a23a51f50273d80552626c9928c5b85ec}{max}}[0]=1.0;}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00315}00315\ \ \ \ \ \mbox{\hyperlink{classEyeAligner_aca1c7101040cd7113294d7d62d0348bf}{min}}[1]=-\/1.0;\ \ \ \mbox{\hyperlink{classEyeAligner_a23a51f50273d80552626c9928c5b85ec}{max}}[1]=1.0;}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00316}00316\ \ \ \ \ \mbox{\hyperlink{classEyeAligner_aca1c7101040cd7113294d7d62d0348bf}{min}}[2]=-\/1.0;\ \ \ \mbox{\hyperlink{classEyeAligner_a23a51f50273d80552626c9928c5b85ec}{max}}[2]=1.0;}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00317}00317\ \ \ \ \ \mbox{\hyperlink{classEyeAligner_aca1c7101040cd7113294d7d62d0348bf}{min}}[3]=-\/\mbox{\hyperlink{XSensMTx_8cpp_ae71449b1cc6e6250b91f539153a7a0d3}{M\_PI}};\ \ \mbox{\hyperlink{classEyeAligner_a23a51f50273d80552626c9928c5b85ec}{max}}[3]=\mbox{\hyperlink{XSensMTx_8cpp_ae71449b1cc6e6250b91f539153a7a0d3}{M\_PI}};}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00318}00318\ \ \ \ \ \mbox{\hyperlink{classEyeAligner_aca1c7101040cd7113294d7d62d0348bf}{min}}[4]=-\/\mbox{\hyperlink{XSensMTx_8cpp_ae71449b1cc6e6250b91f539153a7a0d3}{M\_PI}};\ \ \mbox{\hyperlink{classEyeAligner_a23a51f50273d80552626c9928c5b85ec}{max}}[4]=\mbox{\hyperlink{XSensMTx_8cpp_ae71449b1cc6e6250b91f539153a7a0d3}{M\_PI}};}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00319}00319\ \ \ \ \ \mbox{\hyperlink{classEyeAligner_aca1c7101040cd7113294d7d62d0348bf}{min}}[5]=-\/\mbox{\hyperlink{XSensMTx_8cpp_ae71449b1cc6e6250b91f539153a7a0d3}{M\_PI}};\ \ \mbox{\hyperlink{classEyeAligner_a23a51f50273d80552626c9928c5b85ec}{max}}[5]=\mbox{\hyperlink{XSensMTx_8cpp_ae71449b1cc6e6250b91f539153a7a0d3}{M\_PI}};}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00320}00320\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00321}00321\ \ \ \ \ \mbox{\hyperlink{classEyeAligner_a45b2d71c4e0e2e75005bad4080acf78e}{x0}}=0.5*(\mbox{\hyperlink{classEyeAligner_aca1c7101040cd7113294d7d62d0348bf}{min}}+\mbox{\hyperlink{classEyeAligner_a23a51f50273d80552626c9928c5b85ec}{max}});}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00322}00322\ \ \ \ \ \mbox{\hyperlink{classEyeAligner_a1da69053e31542be1146e35aee07592b}{Prj}}.resize(3,4);\ \mbox{\hyperlink{classEyeAligner_a1da69053e31542be1146e35aee07592b}{Prj}}.zero();}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00323}00323\ \}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00324}00324\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00325}00325\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00326}00326\ \textcolor{comment}{/****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00327}\mbox{\hyperlink{classEyeAligner_a63fc1f4212b964f9f119b2a638b2551f}{00327}}\ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{classEyeAligner_a63fc1f4212b964f9f119b2a638b2551f}{EyeAligner::evalError}}(\textcolor{keyword}{const}\ Matrix\ \&\mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}})}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00328}00328\ \{}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00329}00329\ \ \ \ \ Matrix\ PrjH=\mbox{\hyperlink{classEyeAligner_a1da69053e31542be1146e35aee07592b}{Prj}}*SE3inv(\mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}});}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00330}00330\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00331}00331\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{debugFunctions_8cpp_a7a3172cc98e93d8eadfb9ab30373799e}{error}}=0.0;}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00332}00332\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classEyeAligner_aea9ca6762f638c65604150a64780cd85}{p2d}}.size()>0)}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00333}00333\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00334}00334\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<\mbox{\hyperlink{classEyeAligner_aea9ca6762f638c65604150a64780cd85}{p2d}}.size();\ i++)}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00335}00335\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00336}00336\ \ \ \ \ \ \ \ \ \ \ \ \ Vector\ p2di=PrjH*\mbox{\hyperlink{classEyeAligner_a29df70673093cdaea7eac48ca55fc9ef}{p3d}}[i];}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00337}00337\ \ \ \ \ \ \ \ \ \ \ \ \ p2di=p2di/p2di[2];}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00338}00338\ \ \ \ \ \ \ \ \ \ \ \ \ p2di.pop\_back();}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00339}00339\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00340}00340\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{debugFunctions_8cpp_a7a3172cc98e93d8eadfb9ab30373799e}{error}}+=\mbox{\hyperlink{group__Maths_ga791f0548018b3597da95e70a3b226806}{norm}}(\mbox{\hyperlink{classEyeAligner_aea9ca6762f638c65604150a64780cd85}{p2d}}[i]-\/p2di);}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00341}00341\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00342}00342\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00343}00343\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{debugFunctions_8cpp_a7a3172cc98e93d8eadfb9ab30373799e}{error}}/=\mbox{\hyperlink{classEyeAligner_aea9ca6762f638c65604150a64780cd85}{p2d}}.size();}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00344}00344\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00345}00345\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00346}00346\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{debugFunctions_8cpp_a7a3172cc98e93d8eadfb9ab30373799e}{error}};}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00347}00347\ \}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00348}00348\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00349}00349\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00350}00350\ \textcolor{comment}{/****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00351}\mbox{\hyperlink{classEyeAligner_ae6a55585d2c8c05447b4a7eb7f43a0a2}{00351}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classEyeAligner_ae6a55585d2c8c05447b4a7eb7f43a0a2}{EyeAligner::setProjection}}(\textcolor{keyword}{const}\ Matrix\ \&Prj)}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00352}00352\ \{}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00353}00353\ \ \ \ \ \textcolor{keywordflow}{if}\ ((\mbox{\hyperlink{classEyeAligner_a1da69053e31542be1146e35aee07592b}{Prj}}.rows()>=3)\ \&\&\ (\mbox{\hyperlink{classEyeAligner_a1da69053e31542be1146e35aee07592b}{Prj}}.cols()>=4))}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00354}00354\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00355}00355\ \ \ \ \ \ \ \ \ this-\/>Prj=\mbox{\hyperlink{classEyeAligner_a1da69053e31542be1146e35aee07592b}{Prj}}.submatrix(0,2,0,3);}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00356}00356\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00357}00357\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00358}00358\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00359}00359\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00360}00360\ \}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00361}00361\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00362}00362\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00363}00363\ \textcolor{comment}{/****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00364}\mbox{\hyperlink{classEyeAligner_afda48394ae99b3e1031b978962787a14}{00364}}\ Matrix\ \mbox{\hyperlink{classEyeAligner_afda48394ae99b3e1031b978962787a14}{EyeAligner::getProjection}}()\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00365}00365\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00366}00366\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classEyeAligner_a1da69053e31542be1146e35aee07592b}{Prj}};}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00367}00367\ \}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00368}00368\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00369}00369\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00370}00370\ \textcolor{comment}{/****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00371}\mbox{\hyperlink{classEyeAligner_a4e109281f79a95e270a7c64eac0a0770}{00371}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classEyeAligner_a4e109281f79a95e270a7c64eac0a0770}{EyeAligner::setBounds}}(\textcolor{keyword}{const}\ Vector\ \&min,\ \textcolor{keyword}{const}\ Vector\ \&max)}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00372}00372\ \{}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00373}00373\ \ \ \ \ \textcolor{keywordtype}{size\_t}\ len\_min=std::min(this-\/>min.length(),\mbox{\hyperlink{classEyeAligner_aca1c7101040cd7113294d7d62d0348bf}{min}}.length());}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00374}00374\ \ \ \ \ \textcolor{keywordtype}{size\_t}\ len\_max=std::min(this-\/>max.length(),\mbox{\hyperlink{classEyeAligner_a23a51f50273d80552626c9928c5b85ec}{max}}.length());}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00375}00375\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00376}00376\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<len\_min;\ i++)}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00377}00377\ \ \ \ \ \ \ \ \ this-\/>min[i]=\mbox{\hyperlink{classEyeAligner_aca1c7101040cd7113294d7d62d0348bf}{min}}[i];}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00378}00378\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00379}00379\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<len\_max;\ i++)}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00380}00380\ \ \ \ \ \ \ \ \ this-\/>max[i]=\mbox{\hyperlink{classEyeAligner_a23a51f50273d80552626c9928c5b85ec}{max}}[i];}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00381}00381\ \}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00382}00382\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00383}00383\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00384}00384\ \textcolor{comment}{/****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00385}\mbox{\hyperlink{classEyeAligner_abaf154bdd214d15bf3a7a4f8a4e7d555}{00385}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classEyeAligner_abaf154bdd214d15bf3a7a4f8a4e7d555}{EyeAligner::addPoints}}(\textcolor{keyword}{const}\ Vector\ \&p2di,\ \textcolor{keyword}{const}\ Vector\ \&p3di)}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00386}00386\ \{}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00387}00387\ \ \ \ \ \textcolor{keywordflow}{if}\ ((p2di.length()>=2)\ \&\&\ (p3di.length()>=4))}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00388}00388\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00389}00389\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyeAligner_aea9ca6762f638c65604150a64780cd85}{p2d}}.push\_back(p2di.subVector(0,1));}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00390}00390\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyeAligner_a29df70673093cdaea7eac48ca55fc9ef}{p3d}}.push\_back(p3di.subVector(0,3));}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00391}00391\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00392}00392\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00393}00393\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00394}00394\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00395}00395\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00396}00396\ \}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00397}00397\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00398}00398\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00399}00399\ \textcolor{comment}{/****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00400}\mbox{\hyperlink{classEyeAligner_aec26c9e640831c8827a7e1023b566e42}{00400}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classEyeAligner_aec26c9e640831c8827a7e1023b566e42}{EyeAligner::clearPoints}}()}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00401}00401\ \{}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00402}00402\ \ \ \ \ \mbox{\hyperlink{classEyeAligner_aea9ca6762f638c65604150a64780cd85}{p2d}}.clear();}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00403}00403\ \ \ \ \ \mbox{\hyperlink{classEyeAligner_a29df70673093cdaea7eac48ca55fc9ef}{p3d}}.clear();}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00404}00404\ \}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00405}00405\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00406}00406\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00407}00407\ \textcolor{comment}{/****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00408}\mbox{\hyperlink{classEyeAligner_a44db668ff8ab876f828a10e40eb5426d}{00408}}\ \textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{classEyeAligner_a44db668ff8ab876f828a10e40eb5426d}{EyeAligner::getNumPoints}}()\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00409}00409\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00410}00410\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classEyeAligner_aea9ca6762f638c65604150a64780cd85}{p2d}}.size();}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00411}00411\ \}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00412}00412\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00413}00413\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00414}00414\ \textcolor{comment}{/****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00415}\mbox{\hyperlink{classEyeAligner_a08ea577895e028411a03114f56c4fe8b}{00415}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classEyeAligner_a08ea577895e028411a03114f56c4fe8b}{EyeAligner::setInitialGuess}}(\textcolor{keyword}{const}\ Matrix\ \&\mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}})}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00416}00416\ \{}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00417}00417\ \ \ \ \ \textcolor{keywordflow}{if}\ ((\mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}}.rows()>=4)\ \&\&\ (\mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}}.cols()>=4))}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00418}00418\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00419}00419\ \ \ \ \ \ \ \ \ Vector\ rpy=dcm2rpy(\mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}});}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00420}00420\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyeAligner_a45b2d71c4e0e2e75005bad4080acf78e}{x0}}[0]=\mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}}(0,3);\ \mbox{\hyperlink{classEyeAligner_a45b2d71c4e0e2e75005bad4080acf78e}{x0}}[1]=\mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}}(1,3);\ \mbox{\hyperlink{classEyeAligner_a45b2d71c4e0e2e75005bad4080acf78e}{x0}}[2]=\mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}}(2,3);}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00421}00421\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyeAligner_a45b2d71c4e0e2e75005bad4080acf78e}{x0}}[3]=rpy[0];\ \mbox{\hyperlink{classEyeAligner_a45b2d71c4e0e2e75005bad4080acf78e}{x0}}[4]=rpy[1];\ \mbox{\hyperlink{classEyeAligner_a45b2d71c4e0e2e75005bad4080acf78e}{x0}}[5]=rpy[2];}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00422}00422\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00423}00423\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<\mbox{\hyperlink{classEyeAligner_aca1c7101040cd7113294d7d62d0348bf}{min}}.length();\ i++)}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00424}00424\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEyeAligner_a45b2d71c4e0e2e75005bad4080acf78e}{x0}}[i]=std::min(std::max(\mbox{\hyperlink{classEyeAligner_a45b2d71c4e0e2e75005bad4080acf78e}{x0}}[i],\mbox{\hyperlink{classEyeAligner_aca1c7101040cd7113294d7d62d0348bf}{min}}[i]),\mbox{\hyperlink{classEyeAligner_a23a51f50273d80552626c9928c5b85ec}{max}}[i]);}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00425}00425\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00426}00426\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00427}00427\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00428}00428\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00429}00429\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00430}00430\ \}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00431}00431\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00432}00432\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00433}00433\ \textcolor{comment}{/****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00434}\mbox{\hyperlink{classEyeAligner_aa584f99cd969efbfb91f056ea211ace1}{00434}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classEyeAligner_aa584f99cd969efbfb91f056ea211ace1}{EyeAligner::calibrate}}(Matrix\ \&\mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}},\ \textcolor{keywordtype}{double}\ \&\mbox{\hyperlink{debugFunctions_8cpp_a7a3172cc98e93d8eadfb9ab30373799e}{error}},\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ max\_iter,}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00435}00435\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ print\_level,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{string}\ \&derivative\_test)}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00436}00436\ \{}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00437}00437\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classEyeAligner_aea9ca6762f638c65604150a64780cd85}{p2d}}.size()>0)}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00438}00438\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00439}00439\ \ \ \ \ \ \ \ \ Ipopt::SmartPtr<Ipopt::IpoptApplication>\ app=\textcolor{keyword}{new}\ Ipopt::IpoptApplication;}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00440}00440\ \ \ \ \ \ \ \ \ app-\/>Options()-\/>SetNumericValue(\textcolor{stringliteral}{"{}tol"{}},1\mbox{\hyperlink{compute__ekf__fast_8m_a08a4415e9d594ff960030b921d42b91e}{e}}-\/8);}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00441}00441\ \ \ \ \ \ \ \ \ app-\/>Options()-\/>SetIntegerValue(\textcolor{stringliteral}{"{}acceptable\_iter"{}},0);}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00442}00442\ \ \ \ \ \ \ \ \ app-\/>Options()-\/>SetStringValue(\textcolor{stringliteral}{"{}mu\_strategy"{}},\textcolor{stringliteral}{"{}adaptive"{}});}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00443}00443\ \ \ \ \ \ \ \ \ app-\/>Options()-\/>SetIntegerValue(\textcolor{stringliteral}{"{}max\_iter"{}},max\_iter);}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00444}00444\ \ \ \ \ \ \ \ \ app-\/>Options()-\/>SetStringValue(\textcolor{stringliteral}{"{}nlp\_scaling\_method"{}},\textcolor{stringliteral}{"{}gradient-\/based"{}});}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00445}00445\ \ \ \ \ \ \ \ \ app-\/>Options()-\/>SetStringValue(\textcolor{stringliteral}{"{}hessian\_approximation"{}},\textcolor{stringliteral}{"{}limited-\/memory"{}});}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00446}00446\ \ \ \ \ \ \ \ \ app-\/>Options()-\/>SetIntegerValue(\textcolor{stringliteral}{"{}print\_level"{}},print\_level);}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00447}00447\ \ \ \ \ \ \ \ \ app-\/>Options()-\/>SetStringValue(\textcolor{stringliteral}{"{}derivative\_test"{}},derivative\_test.c\_str());}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00448}00448\ \ \ \ \ \ \ \ \ app-\/>Options()-\/>SetStringValue(\textcolor{stringliteral}{"{}derivative\_test\_print\_all"{}},\textcolor{stringliteral}{"{}yes"{}});}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00449}00449\ \ \ \ \ \ \ \ \ app-\/>Initialize();}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00450}00450\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00451}00451\ \ \ \ \ \ \ \ \ Ipopt::SmartPtr<EyeAlignerNLP>\ nlp=\textcolor{keyword}{new}\ \mbox{\hyperlink{classEyeAlignerNLP}{EyeAlignerNLP}}(\mbox{\hyperlink{classEyeAligner_aea9ca6762f638c65604150a64780cd85}{p2d}},\mbox{\hyperlink{classEyeAligner_a29df70673093cdaea7eac48ca55fc9ef}{p3d}},\mbox{\hyperlink{classEyeAligner_aca1c7101040cd7113294d7d62d0348bf}{min}},\mbox{\hyperlink{classEyeAligner_a23a51f50273d80552626c9928c5b85ec}{max}},\mbox{\hyperlink{classEyeAligner_a1da69053e31542be1146e35aee07592b}{Prj}});}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00452}00452\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00453}00453\ \ \ \ \ \ \ \ \ nlp-\/>set\_x0(\mbox{\hyperlink{classEyeAligner_a45b2d71c4e0e2e75005bad4080acf78e}{x0}});}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00454}00454\ \ \ \ \ \ \ \ \ Ipopt::ApplicationReturnStatus\ status=app-\/>OptimizeTNLP(GetRawPtr(nlp));}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00455}00455\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00456}00456\ \ \ \ \ \ \ \ \ Vector\ \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}=nlp-\/>get\_result();}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00457}00457\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}}=\mbox{\hyperlink{nlp_8h_ac72ae2ba75d531cae95b84134b49df03}{computeH}}(\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}});}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00458}00458\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{debugFunctions_8cpp_a7a3172cc98e93d8eadfb9ab30373799e}{error}}=\mbox{\hyperlink{classEyeAligner_a63fc1f4212b964f9f119b2a638b2551f}{evalError}}(\mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}});}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00459}00459\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00460}00460\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (status==Ipopt::Solve\_Succeeded);}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00461}00461\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00462}00462\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00463}00463\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00464}00464\ \}}
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00465}00465\ }
+\DoxyCodeLine{\Hypertarget{nlp_8cpp_source_l00466}00466\ }
+
+\end{DoxyCode}

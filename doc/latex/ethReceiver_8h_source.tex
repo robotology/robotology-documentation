@@ -1,0 +1,89 @@
+\doxysection{eth\+Receiver.\+h}
+\hypertarget{ethReceiver_8h_source}{}\label{ethReceiver_8h_source}\index{icub-\/main/src/libraries/icubmod/embObjLib/ethReceiver.h@{icub-\/main/src/libraries/icubmod/embObjLib/ethReceiver.h}}
+\mbox{\hyperlink{ethReceiver_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00001}00001\ \textcolor{comment}{//\ -\/*-\/\ mode:C++;\ tab-\/width:4;\ c-\/basic-\/offset:4;\ indent-\/tabs-\/mode:nil\ -\/*-\/}}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00002}00002\ }
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00003}00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00004}00004\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2017\ iCub\ Facility\ -\/\ Istituto\ Italiano\ di\ Tecnologia}}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00005}00005\ \textcolor{comment}{\ *\ Author:\ \ Alberto\ Cardellino,\ Marco\ Accame}}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00006}00006\ \textcolor{comment}{\ *\ email:\ \ \ alberto.cardellino@iit.it,\ marco.accame@iit.it}}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00007}00007\ \textcolor{comment}{\ *\ website:\ www.robotcub.org}}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00008}00008\ \textcolor{comment}{\ *\ Permission\ is\ granted\ to\ copy,\ distribute,\ and/or\ modify\ this\ program}}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00009}00009\ \textcolor{comment}{\ *\ under\ the\ terms\ of\ the\ GNU\ General\ Public\ License,\ version\ 2\ or\ any}}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00010}00010\ \textcolor{comment}{\ *\ later\ version\ published\ by\ the\ Free\ Software\ Foundation.}}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00011}00011\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00012}00012\ \textcolor{comment}{\ *\ A\ copy\ of\ the\ license\ can\ be\ found\ at}}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00013}00013\ \textcolor{comment}{\ *\ http://www.robotcub.org/icub/license/gpl.txt}}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00014}00014\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00015}00015\ \textcolor{comment}{\ *\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but}}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00016}00016\ \textcolor{comment}{\ *\ WITHOUT\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of}}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00017}00017\ \textcolor{comment}{\ *\ MERCHANTABILITY\ or\ FITNESS\ FOR\ A\ PARTICULAR\ PURPOSE.\ See\ the\ GNU\ General}}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00018}00018\ \textcolor{comment}{\ *\ Public\ License\ for\ more\ details}}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00019}00019\ \textcolor{comment}{*/}}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00020}00020\ }
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00021}00021\ \textcolor{comment}{//\ -\/\ include\ guard\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00022}00022\ }
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00023}00023\ \textcolor{preprocessor}{\#ifndef\ \_ETHRECEIVER\_H\_}}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00024}00024\ \textcolor{preprocessor}{\#define\ \_ETHRECEIVER\_H\_}}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00025}00025\ }
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00026}00026\ \textcolor{comment}{//\ -\/-\/\ class\ EthReceiver}}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00027}00027\ \textcolor{comment}{//\ -\/-\/\ it\ is\ a\ rate\ thread\ created\ by\ singleton\ TheEthManager.}}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00028}00028\ \textcolor{comment}{//\ -\/-\/\ it\ regularly\ wakes\ up\ to\ see\ if\ a\ packet\ is\ in\ its\ listening\ socket\ and\ it\ parses\ that\ with\ methods\ made\ available\ by\ TheEthManager.}}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00029}00029\ }
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00030}00030\ \textcolor{comment}{//\#include\ <ethManager.h>}}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00031}00031\ }
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00032}00032\ \textcolor{preprocessor}{\#include\ <ace/SOCK\_Dgram.h>}}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00033}00033\ }
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00034}00034\ \textcolor{preprocessor}{\#include\ <yarp/os/PeriodicThread.h>}}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00035}00035\ }
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00036}00036\ }
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00037}00037\ \textcolor{preprocessor}{\#ifdef\ NETWORK\_PERFORMANCE\_BENCHMARK\ }}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00038}00038\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{PeriodicEventsVerifier_8h}{./tools/include/PeriodicEventsVerifier.h}}>}}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00039}00039\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00040}00040\ }
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00041}00041\ }
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00042}00042\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespaceeth}{eth}}\ \{}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00043}00043\ }
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00044}00044\ \ \ \ \ \textcolor{keyword}{class\ }TheEthManager;}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00045}00045\ }
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00046}\mbox{\hyperlink{classeth_1_1EthReceiver}{00046}}\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{classeth_1_1EthReceiver}{EthReceiver}}\ :\ \textcolor{keyword}{public}\ yarp::os::PeriodicThread}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00047}00047\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00048}00048\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00049}00049\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ rateofthread;}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00050}00050\ }
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00051}00051\ \ \ \ \ \ \ \ \ ACE\_SOCK\_Dgram\ *recv\_socket;}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00052}00052\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classeth_1_1TheEthManager}{eth::TheEthManager}}\ *ethManager;}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00053}00053\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ statPrintInterval;}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00054}00054\ \textcolor{preprocessor}{\#ifdef\ NETWORK\_PERFORMANCE\_BENCHMARK\ }}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00055}00055\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classTools_1_1Emb__PeriodicEventVerifier}{Tools::Emb\_PeriodicEventVerifier}}\ m\_perEvtVerifier;}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00056}00056\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00057}00057\ }
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00058}00058\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00059}00059\ }
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00060}\mbox{\hyperlink{classeth_1_1EthReceiver_a43f1053a45db76a7272747fdbb251ce6a1bedc34d6deac9c444331a88520b1e7a}{00060}}\ \ \ \ \ \ \ \ \ \textcolor{keyword}{enum}\ \{\ \mbox{\hyperlink{classeth_1_1EthReceiver_a43f1053a45db76a7272747fdbb251ce6a1bedc34d6deac9c444331a88520b1e7a}{EthReceiverDefaultRate}}\ =\ 5,\ \mbox{\hyperlink{classeth_1_1EthReceiver_a43f1053a45db76a7272747fdbb251ce6a2ff29d30ed0c4cd894e707bc57242ea7}{EthReceiverMaxRate}}\ =\ 20\ \};}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00061}00061\ }
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00062}00062\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classeth_1_1EthReceiver}{EthReceiver}}(\textcolor{keywordtype}{int}\ rxrate);}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00063}00063\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classeth_1_1EthReceiver_a11e4adadda8c054d28ad0b855b643748}{\string~EthReceiver}}();}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00064}00064\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classeth_1_1EthReceiver_a5ed2903d131c04b95ac31a28e1a1aa63}{config}}(ACE\_SOCK\_Dgram\ *pSocket,\ \mbox{\hyperlink{classeth_1_1TheEthManager}{eth::TheEthManager}}*\ \_ethManager);}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00065}00065\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classeth_1_1EthReceiver_a95e69c134d0dd7b7fe3fe98c8fb8b910}{threadInit}}();}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00066}00066\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classeth_1_1EthReceiver_aa4e16a241bd023bba9da7d74eb735aaa}{run}}();}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00067}00067\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classeth_1_1EthReceiver_a3bf273fb85dc5b8d556264ecfe2158cd}{onStop}}();}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00068}00068\ \ \ \ \ \};}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00069}00069\ }
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00070}00070\ \}\ \textcolor{comment}{//\ namespace\ eth}}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00071}00071\ }
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00072}00072\ }
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00073}00073\ \textcolor{preprocessor}{\#endif\ \ }\textcolor{comment}{//\ include-\/guard}}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00074}00074\ }
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00075}00075\ }
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00076}00076\ \textcolor{comment}{//\ -\/\ end-\/of-\/file\ (leave\ a\ blank\ line\ after)-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00077}00077\ }
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00078}00078\ }
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00079}00079\ }
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00080}00080\ }
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00081}00081\ }
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00082}00082\ }
+\DoxyCodeLine{\Hypertarget{ethReceiver_8h_source_l00083}00083\ }
+
+\end{DoxyCode}

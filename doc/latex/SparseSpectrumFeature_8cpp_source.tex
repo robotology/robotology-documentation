@@ -1,0 +1,182 @@
+\doxysection{Sparse\+Spectrum\+Feature.\+cpp}
+\hypertarget{SparseSpectrumFeature_8cpp_source}{}\label{SparseSpectrumFeature_8cpp_source}\index{icub-\/main/src/libraries/learningMachine/src/SparseSpectrumFeature.cpp@{icub-\/main/src/libraries/learningMachine/src/SparseSpectrumFeature.cpp}}
+\mbox{\hyperlink{SparseSpectrumFeature_8cpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00001}00001\ \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00002}00002\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2007-\/2011\ RobotCub\ Consortium,\ European\ Commission\ FP6\ Project\ IST-\/004370}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00003}00003\ \textcolor{comment}{\ *\ author:\ \ Arjan\ Gijsberts}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00004}00004\ \textcolor{comment}{\ *\ email:\ \ \ arjan.gijsberts@iit.it}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00005}00005\ \textcolor{comment}{\ *\ website:\ www.robotcub.org}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00006}00006\ \textcolor{comment}{\ *\ Permission\ is\ granted\ to\ copy,\ distribute,\ and/or\ modify\ this\ program}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00007}00007\ \textcolor{comment}{\ *\ under\ the\ terms\ of\ the\ GNU\ General\ Public\ License,\ version\ 2\ or\ any}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00008}00008\ \textcolor{comment}{\ *\ later\ version\ published\ by\ the\ Free\ Software\ Foundation.}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00009}00009\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00010}00010\ \textcolor{comment}{\ *\ A\ copy\ of\ the\ license\ can\ be\ found\ at}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00011}00011\ \textcolor{comment}{\ *\ http://www.robotcub.org/icub/license/gpl.txt}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00012}00012\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00013}00013\ \textcolor{comment}{\ *\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00014}00014\ \textcolor{comment}{\ *\ WITHOUT\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00015}00015\ \textcolor{comment}{\ *\ MERCHANTABILITY\ or\ FITNESS\ FOR\ A\ PARTICULAR\ PURPOSE.\ See\ the\ GNU\ General}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00016}00016\ \textcolor{comment}{\ *\ Public\ License\ for\ more\ details}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00017}00017\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00018}00018\ }
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00019}00019\ \textcolor{preprocessor}{\#include\ <cassert>}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00020}00020\ \textcolor{preprocessor}{\#include\ <stdexcept>}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00021}00021\ \textcolor{preprocessor}{\#include\ <sstream>}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00022}00022\ \textcolor{preprocessor}{\#include\ <algorithm>}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00023}00023\ \textcolor{preprocessor}{\#include\ <cmath>}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00024}00024\ }
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00025}00025\ \textcolor{preprocessor}{\#include\ <yarp/math/Math.h>}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00026}00026\ \textcolor{preprocessor}{\#include\ <yarp/math/Rand.h>}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00027}00027\ }
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00028}00028\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{SparseSpectrumFeature_8h}{iCub/learningMachine/SparseSpectrumFeature.h}}"{}}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00029}00029\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{Math_8h}{iCub/learningMachine/Math.h}}"{}}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00030}00030\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{Serialization_8h}{iCub/learningMachine/Serialization.h}}"{}}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00031}00031\ }
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00032}00032\ \textcolor{comment}{//\#define\ TWOPI\ 6.2831853071795862}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00033}00033\ }
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00034}00034\ \textcolor{keyword}{using\ namespace\ }yarp::math;}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00035}00035\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceiCub_1_1learningmachine_1_1math}{iCub::learningmachine::math}};}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00036}00036\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceiCub_1_1learningmachine_1_1serialization}{iCub::learningmachine::serialization}};}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00037}00037\ }
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00038}00038\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespaceiCub}{iCub}}\ \{}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00039}00039\ \textcolor{keyword}{namespace\ }learningmachine\ \{}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00040}00040\ }
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00041}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1SparseSpectrumFeature_ad705d1e1c24b04c18fadc9888af4aa5e}{00041}}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1SparseSpectrumFeature_ad705d1e1c24b04c18fadc9888af4aa5e}{SparseSpectrumFeature::SparseSpectrumFeature}}(\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ dom,\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ cod,\ \textcolor{keywordtype}{double}\ sigma,}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00042}00042\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yarp::sig::Vector\ ell)\ \{}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00043}00043\ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1ITransformer_abcb1fb18e16bbfec4080e520856339e8}{setName}}(\textcolor{stringliteral}{"{}SparseSpectrumFeature"{}});}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00044}00044\ \ \ \ \ \textcolor{comment}{//\ ell\ has\ to\ be\ initialized\ *prior*\ to\ anything\ that\ could\ reset\ this\ instance}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00045}00045\ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1SparseSpectrumFeature_abab6df8f96e33b09918f66c3ea295a27}{setEll}}(ell);}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00046}00046\ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1SparseSpectrumFeature_aa90a5c8f72b11fababec3685b6259c5b}{setDomainSize}}(dom);}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00047}00047\ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1SparseSpectrumFeature_ac7f6cf5d3a6db971fe12d791cab258fe}{setCoDomainSize}}(cod);}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00048}00048\ \ \ \ \ \textcolor{comment}{//\ will\ initiate\ reset\ automatically}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00049}00049\ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1SparseSpectrumFeature_a9e3963edf5aedac6e54ba58368aaee0e}{setSigma}}(sigma);}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00050}00050\ \}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00051}00051\ }
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00052}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1SparseSpectrumFeature_ab99605a661bab39340804522bee47114}{00052}}\ yarp::sig::Vector\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1SparseSpectrumFeature_ab99605a661bab39340804522bee47114}{SparseSpectrumFeature::transform}}(\textcolor{keyword}{const}\ yarp::sig::Vector\&\ input)\ \{}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00053}00053\ \ \ \ \ yarp::sig::Vector\ output\ =\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1IFixedSizeTransformer_a19b03f0221f9ebcd676934ff62a1664e}{IFixedSizeTransformer::transform}}(input);}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00054}00054\ }
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00055}00055\ \ \ \ \ yarp::sig::Vector\ inputW\ =\ (this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1SparseSpectrumFeature_adfd2c04b31b796bddc2de3bbbd782dca}{W}}\ *\ input);}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00056}00056\ \ \ \ \ \textcolor{keywordtype}{int}\ nproj\ =\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1IFixedSizeTransformer_a45b5ac17f27fb2a89c6c32b2fc3928fc}{getCoDomainSize}}()\ >>\ 1;}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00057}00057\ \ \ \ \ \textcolor{keywordtype}{double}\ factor\ =\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1SparseSpectrumFeature_a3874a232b3b6de6c41e8d6e75baa8514}{sigma}}\ /\ sqrt((\textcolor{keywordtype}{double})nproj);}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00058}00058\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i\ =\ 0;\ i\ <\ nproj;\ i++)\ \{}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00059}00059\ \ \ \ \ \ \ \ \ output(i)\ \ \ \ \ \ \ =\ cos(inputW(i))\ *\ factor;}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00060}00060\ \ \ \ \ \ \ \ \ output(i+nproj)\ =\ sin(inputW(i))\ *\ factor;}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00061}00061\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00062}00062\ \ \ \ \ \textcolor{keywordflow}{return}\ output;}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00063}00063\ \}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00064}00064\ }
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00065}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1SparseSpectrumFeature_aa90a5c8f72b11fababec3685b6259c5b}{00065}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1SparseSpectrumFeature_aa90a5c8f72b11fababec3685b6259c5b}{SparseSpectrumFeature::setDomainSize}}(\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ size)\ \{}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00066}00066\ \ \ \ \ \textcolor{comment}{//\ call\ method\ in\ base\ class}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00067}00067\ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1IFixedSizeTransformer_a2ff39a921496445ca51e395cdb527c8e}{IFixedSizeTransformer::setDomainSize}}(size);}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00068}00068\ \ \ \ \ \textcolor{comment}{//\ rebuild\ projection\ matrix}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00069}00069\ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1SparseSpectrumFeature_a83955ed2ef6b5dfbb88868e536c0e324}{reset}}();}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00070}00070\ \}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00071}00071\ }
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00072}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1SparseSpectrumFeature_ac7f6cf5d3a6db971fe12d791cab258fe}{00072}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1SparseSpectrumFeature_ac7f6cf5d3a6db971fe12d791cab258fe}{SparseSpectrumFeature::setCoDomainSize}}(\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ size)\ \{}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00073}00073\ \ \ \ \ \textcolor{keywordflow}{if}((size\ \&\ 0x1)\ ==\ 0)\ \{}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00074}00074\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ call\ method\ in\ base\ class}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00075}00075\ \ \ \ \ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1IFixedSizeTransformer_ab5e67d414277ff30f2d471ebda990201}{IFixedSizeTransformer::setCoDomainSize}}(size);}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00076}00076\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ rebuild\ projection\ matrix}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00077}00077\ \ \ \ \ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1SparseSpectrumFeature_a83955ed2ef6b5dfbb88868e536c0e324}{reset}}();}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00078}00078\ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00079}00079\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{throw}\ std::runtime\_error(\textcolor{stringliteral}{"{}Size\ of\ codomain\ of\ Sparse\ Spectrum\ Features\ has\ to\ be\ even"{}});}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00080}00080\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00081}00081\ \}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00082}00082\ }
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00083}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1SparseSpectrumFeature_a83955ed2ef6b5dfbb88868e536c0e324}{00083}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1SparseSpectrumFeature_a83955ed2ef6b5dfbb88868e536c0e324}{SparseSpectrumFeature::reset}}()\ \{}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00084}00084\ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1ITransformer_a615240b8ad7d6efe746840a966ee6d42}{IFixedSizeTransformer::reset}}();}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00085}00085\ }
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00086}00086\ \ \ \ \ \textcolor{comment}{//\ create\ pseudo\ random\ number\ generators}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00087}00087\ \ \ \ \ yarp::math::RandnScalar\ prng\_normal;}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00088}00088\ }
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00089}00089\ \ \ \ \ \textcolor{comment}{//\ create\ new\ projection\ matrix}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00090}00090\ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1SparseSpectrumFeature_adfd2c04b31b796bddc2de3bbbd782dca}{W}}\ =\ yarp::sig::Matrix((\textcolor{keywordtype}{int})\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1IFixedSizeTransformer_a45b5ac17f27fb2a89c6c32b2fc3928fc}{getCoDomainSize}}()\ /\ 2,\ (\textcolor{keywordtype}{int})\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1IFixedSizeTransformer_acfaa067d9639c9c603fc90f2cacb4e7d}{getDomainSize}}());}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00091}00091\ }
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00092}00092\ \ \ \ \ \textcolor{comment}{//\ fill\ projection\ matrix\ with\ random\ and\ scaled\ data}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00093}00093\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ r\ =\ 0;\ r\ <\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1SparseSpectrumFeature_adfd2c04b31b796bddc2de3bbbd782dca}{W}}.rows();\ r++)\ \{}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00094}00094\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ c\ =\ 0;\ c\ <\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1SparseSpectrumFeature_adfd2c04b31b796bddc2de3bbbd782dca}{W}}.cols();\ c++)\ \{}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00095}00095\ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1SparseSpectrumFeature_adfd2c04b31b796bddc2de3bbbd782dca}{W}}(r,\ c)\ =\ prng\_normal.get()\ /\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1SparseSpectrumFeature_a5e1ad239b0dc7a4f38813ec9944023dc}{ell}}(c);}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00096}00096\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00097}00097\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00098}00098\ \}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00099}00099\ }
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00100}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1SparseSpectrumFeature_ae874ce40253e762c6ce201d04aac7d59}{00100}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1SparseSpectrumFeature_ae874ce40253e762c6ce201d04aac7d59}{SparseSpectrumFeature::writeBottle}}(yarp::os::Bottle\&\ bot)\ \{}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00101}00101\ \ \ \ \ bot\ <<\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1SparseSpectrumFeature_a879adff90a30d8dda6c293bd4281d9bd}{getSigma}}()\ <<\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1SparseSpectrumFeature_a5e1ad239b0dc7a4f38813ec9944023dc}{ell}}\ <<\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1SparseSpectrumFeature_adfd2c04b31b796bddc2de3bbbd782dca}{W}};}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00102}00102\ }
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00103}00103\ \ \ \ \ \textcolor{comment}{//\ make\ sure\ to\ call\ the\ superclass's\ method}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00104}00104\ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1IFixedSizeTransformer_a772c06a6562042ea7419a100d3e3c49a}{IFixedSizeTransformer::writeBottle}}(bot);}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00105}00105\ \}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00106}00106\ }
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00107}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1SparseSpectrumFeature_a8acc87ade0a1d837884b5808962b1870}{00107}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1SparseSpectrumFeature_a8acc87ade0a1d837884b5808962b1870}{SparseSpectrumFeature::readBottle}}(yarp::os::Bottle\&\ bot)\ \{}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00108}00108\ \ \ \ \ \textcolor{comment}{//\ make\ sure\ to\ call\ the\ superclass's\ method}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00109}00109\ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1IFixedSizeTransformer_a2063d8051d0bf8fd9a4f67344b1e18dd}{IFixedSizeTransformer::readBottle}}(bot);}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00110}00110\ }
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00111}00111\ \ \ \ \ \textcolor{comment}{//\ directly\ write\ to\ sigma\ to\ prevent\ resetting\ W}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00112}00112\ \ \ \ \ bot\ >>\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1SparseSpectrumFeature_adfd2c04b31b796bddc2de3bbbd782dca}{W}}\ >>\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1SparseSpectrumFeature_a5e1ad239b0dc7a4f38813ec9944023dc}{ell}}\ >>\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1SparseSpectrumFeature_a3874a232b3b6de6c41e8d6e75baa8514}{sigma}};}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00113}00113\ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1SparseSpectrumFeature_a9e3963edf5aedac6e54ba58368aaee0e}{setSigma}}(sigma);}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00114}00114\ \}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00115}00115\ }
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00116}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1SparseSpectrumFeature_abab6df8f96e33b09918f66c3ea295a27}{00116}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1SparseSpectrumFeature_abab6df8f96e33b09918f66c3ea295a27}{SparseSpectrumFeature::setEll}}(yarp::sig::Vector\&\ ell)\ \{}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00117}00117\ \ \ \ \ yarp::sig::Vector\ ls\ =\ yarp::sig::Vector(this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1IFixedSizeTransformer_acfaa067d9639c9c603fc90f2cacb4e7d}{getDomainSize}}());}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00118}00118\ \ \ \ \ ls\ =\ 1.;}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00119}00119\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ i\ =\ 0;\ (int)i\ <\ std::min(\mbox{\hyperlink{classiCub_1_1learningmachine_1_1SparseSpectrumFeature_a5e1ad239b0dc7a4f38813ec9944023dc}{ell}}.size(),\ ls.size());\ i++)\ \{}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00120}00120\ \ \ \ \ \ \ \ \ ls(i)\ =\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1SparseSpectrumFeature_a5e1ad239b0dc7a4f38813ec9944023dc}{ell}}(i);}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00121}00121\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00122}00122\ \ \ \ \ this-\/>ell\ =\ ls;}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00123}00123\ \ \ \ \ \textcolor{comment}{//\ rebuild\ projection\ matrix}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00124}00124\ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1SparseSpectrumFeature_a83955ed2ef6b5dfbb88868e536c0e324}{reset}}();}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00125}00125\ \}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00126}00126\ }
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00127}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1SparseSpectrumFeature_ab9aab7f5d0ae9034d437927155d99c61}{00127}}\ std::string\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1SparseSpectrumFeature_ab9aab7f5d0ae9034d437927155d99c61}{SparseSpectrumFeature::getInfo}}()\ \{}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00128}00128\ \ \ \ \ std::ostringstream\ buffer;}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00129}00129\ \ \ \ \ buffer\ <<\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1IFixedSizeTransformer_ab6c65ee3aa69b7b9b64408f1228fdc4d}{IFixedSizeTransformer::getInfo}}();}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00130}00130\ \ \ \ \ buffer\ <<\ \textcolor{stringliteral}{"{}\ sigma:\ "{}}\ <<\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1SparseSpectrumFeature_a3874a232b3b6de6c41e8d6e75baa8514}{sigma}}\ <<\ \textcolor{stringliteral}{"{}\ |\ "{}};}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00131}00131\ \ \ \ \ buffer\ <<\ \textcolor{stringliteral}{"{}\ ell:\ "{}}\ <<\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1SparseSpectrumFeature_a5e1ad239b0dc7a4f38813ec9944023dc}{ell}}.toString();}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00132}00132\ \ \ \ \ \textcolor{keywordflow}{return}\ buffer.str();}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00133}00133\ \}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00134}00134\ }
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00135}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1SparseSpectrumFeature_a63da74bd76e18fd3fe05d64025d59b08}{00135}}\ std::string\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1SparseSpectrumFeature_a63da74bd76e18fd3fe05d64025d59b08}{SparseSpectrumFeature::getConfigHelp}}()\ \{}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00136}00136\ \ \ \ \ std::ostringstream\ buffer;}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00137}00137\ \ \ \ \ buffer\ <<\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1IFixedSizeTransformer_a12b1de19cb498137e48c6538b39b8837}{IFixedSizeTransformer::getConfigHelp}}();}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00138}00138\ \ \ \ \ buffer\ <<\ \textcolor{stringliteral}{"{}\ \ sigma\ val\ \ \ \ \ \ \ \ \ \ \ \ \ Set\ sigma\ parameter"{}}\ <<\ std::endl;}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00139}00139\ \ \ \ \ buffer\ <<\ \textcolor{stringliteral}{"{}\ \ ell\ (list)\ \ \ \ \ \ \ \ \ \ \ \ Set\ lambda\ parameter"{}}\ <<\ std::endl;}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00140}00140\ \ \ \ \ \textcolor{keywordflow}{return}\ buffer.str();}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00141}00141\ \}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00142}00142\ }
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00143}\mbox{\hyperlink{classiCub_1_1learningmachine_1_1SparseSpectrumFeature_aab11aa9f3ee7949ba07fef5fa7d51fd9}{00143}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1learningmachine_1_1SparseSpectrumFeature_aab11aa9f3ee7949ba07fef5fa7d51fd9}{SparseSpectrumFeature::configure}}(yarp::os::Searchable\ \&config)\ \{}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00144}00144\ \ \ \ \ \textcolor{keywordtype}{bool}\ success\ =\ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1IFixedSizeTransformer_aa8ab8d6873fdbc46ad2672206bacf917}{IFixedSizeTransformer::configure}}(config);}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00145}00145\ }
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00146}00146\ \ \ \ \ \textcolor{comment}{//\ format:\ set\ sigma\ val}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00147}00147\ \ \ \ \ \textcolor{keywordflow}{if}(config.find(\textcolor{stringliteral}{"{}sigma"{}}).isFloat64()\ ||\ config.find(\textcolor{stringliteral}{"{}sigma"{}}).isInt32())\ \{}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00148}00148\ \ \ \ \ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1SparseSpectrumFeature_a9e3963edf5aedac6e54ba58368aaee0e}{setSigma}}(config.find(\textcolor{stringliteral}{"{}sigma"{}}).asFloat64());}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00149}00149\ \ \ \ \ \ \ \ \ success\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00150}00150\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00151}00151\ }
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00152}00152\ \ \ \ \ \textcolor{comment}{//\ format:\ set\ ell\ val\ |\ set\ ell\ (val\ ...\ val)}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00153}00153\ \ \ \ \ \textcolor{keywordflow}{if}(config.find(\textcolor{stringliteral}{"{}ell"{}}).isFloat64()\ ||\ config.find(\textcolor{stringliteral}{"{}ell"{}}).isInt32())\ \{}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00154}00154\ \ \ \ \ \ \ \ \ yarp::sig::Vector\ ls\ =\ yarp::sig::Vector(this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1IFixedSizeTransformer_acfaa067d9639c9c603fc90f2cacb4e7d}{getDomainSize}}());}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00155}00155\ \ \ \ \ \ \ \ \ ls\ =\ config.find(\textcolor{stringliteral}{"{}ell"{}}).asFloat64();}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00156}00156\ \ \ \ \ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1SparseSpectrumFeature_abab6df8f96e33b09918f66c3ea295a27}{setEll}}(ls);}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00157}00157\ \ \ \ \ \ \ \ \ success\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00158}00158\ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}(config.find(\textcolor{stringliteral}{"{}ell"{}}).isList())\ \{}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00159}00159\ \ \ \ \ \ \ \ \ yarp::os::Bottle*\ b\ =\ config.find(\textcolor{stringliteral}{"{}ell"{}}).asList();}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00160}00160\ \ \ \ \ \ \ \ \ assert(b\ !=\ (yarp::os::Bottle*)\ 0x0);}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00161}00161\ \ \ \ \ \ \ \ \ yarp::sig::Vector\ ls(0);}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00162}00162\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i\ =\ 0;\ i\ <\ b-\/>size();\ i++)\ \{}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00163}00163\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(b-\/>get(i).isFloat64()\ ||\ b-\/>get(i).isInt32())\ \{}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00164}00164\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ls.push\_back(b-\/>get(i).asFloat64());}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00165}00165\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00166}00166\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00167}00167\ \ \ \ \ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1SparseSpectrumFeature_abab6df8f96e33b09918f66c3ea295a27}{setEll}}(ls);}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00168}00168\ \ \ \ \ \ \ \ \ success\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00169}00169\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00170}00170\ \ \ \ \ \textcolor{keywordflow}{return}\ success;}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00171}00171\ \}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00172}00172\ }
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00173}00173\ }
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00174}00174\ \}\ \textcolor{comment}{//\ learningmachine}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00175}00175\ \}\ \textcolor{comment}{//\ iCub}}
+\DoxyCodeLine{\Hypertarget{SparseSpectrumFeature_8cpp_source_l00176}00176\ }
+
+\end{DoxyCode}

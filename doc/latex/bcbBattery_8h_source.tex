@@ -1,0 +1,105 @@
+\doxysection{bcb\+Battery.\+h}
+\hypertarget{bcbBattery_8h_source}{}\label{bcbBattery_8h_source}\index{icub-\/main/src/libraries/icubmod/bcbBattery/bcbBattery.h@{icub-\/main/src/libraries/icubmod/bcbBattery/bcbBattery.h}}
+\mbox{\hyperlink{bcbBattery_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00001}00001\ \textcolor{comment}{//\ -\/*-\/\ mode:C++;\ tab-\/width:4;\ c-\/basic-\/offset:4;\ indent-\/tabs-\/mode:nil\ -\/*-\/}}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00002}00002\ }
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00003}00003\ \textcolor{comment}{//\ Copyright:\ (C)\ 2015\ iCub\ Facility}}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00004}00004\ \textcolor{comment}{//\ Authors:\ Marco\ Randazzo\ <marco.randazzo@iit.it>}}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00005}00005\ \textcolor{comment}{//\ CopyPolicy:\ Released\ under\ the\ terms\ of\ the\ GNU\ GPL\ v2.0.}}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00006}00006\ }
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00007}00007\ \textcolor{preprocessor}{\#ifndef\ \_\_BCBBATTERY\_H\_\_}}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00008}00008\ \textcolor{preprocessor}{\#define\ \_\_BCBBATTERY\_H\_\_}}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00009}00009\ }
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00010}00010\ \textcolor{preprocessor}{\#include\ <mutex>}}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00011}00011\ \textcolor{preprocessor}{\#include\ <yarp/conf/version.h>}}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00012}00012\ \textcolor{preprocessor}{\#include\ <yarp/os/PeriodicThread.h>}}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00013}00013\ \textcolor{preprocessor}{\#include\ <yarp/dev/IBattery.h>}}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00014}00014\ \textcolor{preprocessor}{\#include\ <yarp/dev/PolyDriver.h>}}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00015}00015\ \textcolor{preprocessor}{\#include\ <yarp/dev/ISerialDevice.h>}}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00016}00016\ \textcolor{preprocessor}{\#include\ <yarp/os/ResourceFinder.h>}}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00017}00017\ \textcolor{preprocessor}{\#include\ <yarp/sig/Vector.h>}}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00018}00018\ \textcolor{preprocessor}{\#include\ <regex>}}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00019}00019\ }
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00020}00020\ \textcolor{comment}{//\ This\ is\ to\ provide\ compatibility\ with\ both\ YARP\ 3.11\ and\ 3.12}}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00021}00021\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{YarpDevReturnValueCompat_8h}{iCub/YarpDevReturnValueCompat.h}}>}}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00022}00022\ }
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00023}00023\ \textcolor{keyword}{using\ namespace\ }yarp::os;}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00024}00024\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceyarp_1_1dev}{yarp::dev}};}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00025}00025\ }
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00026}\mbox{\hyperlink{classbatteryReaderThread}{00026}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classbatteryReaderThread}{batteryReaderThread}}\ :\ \textcolor{keyword}{public}\ PeriodicThread}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00027}00027\ \{}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00028}00028\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00029}00029\ \ \ \ \ \textcolor{comment}{//debug}}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00030}\mbox{\hyperlink{classbatteryReaderThread_a98f4efb9a6e46f452a89c9c2c24943d3}{00030}}\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ \ \ \mbox{\hyperlink{classbatteryReaderThread_a98f4efb9a6e46f452a89c9c2c24943d3}{debugTextBufferSize}}\ =\ 10000;}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00031}\mbox{\hyperlink{classbatteryReaderThread_a806f9dc75c71edd4ab5626d274f079f7}{00031}}\ \ \ \ \ \textcolor{keywordtype}{char}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classbatteryReaderThread_a806f9dc75c71edd4ab5626d274f079f7}{debugTextBuffer}}[\mbox{\hyperlink{classbatteryReaderThread_a98f4efb9a6e46f452a89c9c2c24943d3}{debugTextBufferSize}}];}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00032}00032\ }
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00033}00033\ \ \ \ \ \textcolor{comment}{//configuration\ options}}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00034}\mbox{\hyperlink{classbatteryReaderThread_a1f425dececc20db704bab8471bbe4789}{00034}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classbatteryReaderThread_a1f425dececc20db704bab8471bbe4789}{verboseEnable}}\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00035}\mbox{\hyperlink{classbatteryReaderThread_a0ffffc45ed62e3032407342ae08a054f}{00035}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classbatteryReaderThread_a0ffffc45ed62e3032407342ae08a054f}{screenEnable}}\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00036}00036\ }
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00037}00037\ \ \ \ \ \textcolor{comment}{//the\ buffer}}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00038}\mbox{\hyperlink{classbatteryReaderThread_a651c8804419eb29bd2a7b29427107e02}{00038}}\ \ \ \ \ \textcolor{keywordtype}{double}\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classbatteryReaderThread_a651c8804419eb29bd2a7b29427107e02}{timeStamp}};}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00039}\mbox{\hyperlink{classbatteryReaderThread_ad803a955d29a9a57f51a6bd74ead4111}{00039}}\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ \ \ \mbox{\hyperlink{classbatteryReaderThread_ad803a955d29a9a57f51a6bd74ead4111}{buff\_len}}\ =\ 10000;}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00040}\mbox{\hyperlink{classbatteryReaderThread_aa4c624d26d20c9278ef884372bbb5dfc}{00040}}\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{char}\ \ \ \ \ \ \mbox{\hyperlink{classbatteryReaderThread_aa4c624d26d20c9278ef884372bbb5dfc}{tmp\_buff}}[\mbox{\hyperlink{classbatteryReaderThread_ad803a955d29a9a57f51a6bd74ead4111}{buff\_len}}];}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00041}\mbox{\hyperlink{classbatteryReaderThread_ac4f9d40ccfc900a97fb72d72f2c73ef8}{00041}}\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ \ \ \mbox{\hyperlink{classbatteryReaderThread_ac4f9d40ccfc900a97fb72d72f2c73ef8}{packet\_len}}\ =10;}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00042}\mbox{\hyperlink{classbatteryReaderThread_a7879a903c3315fe582d7cb41c9563c49}{00042}}\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{char}\ \ \ \ \ \ \mbox{\hyperlink{classbatteryReaderThread_a7879a903c3315fe582d7cb41c9563c49}{packet}}[\mbox{\hyperlink{classbatteryReaderThread_ac4f9d40ccfc900a97fb72d72f2c73ef8}{packet\_len}}];}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00043}\mbox{\hyperlink{classbatteryReaderThread_af69d9afe06a3cab2d17d436e5a0ff09d}{00043}}\ \ \ \ \ std::regex\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classbatteryReaderThread_af69d9afe06a3cab2d17d436e5a0ff09d}{r\_exp}};}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00044}00044\ }
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00045}\mbox{\hyperlink{classbatteryReaderThread_a3f6b10df6bf9cf1bc5eef6402133f26b}{00045}}\ \ \ \ \ ISerialDevice*\ \ \ \ \ \mbox{\hyperlink{classbatteryReaderThread_a3f6b10df6bf9cf1bc5eef6402133f26b}{iSerial}}\ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00046}\mbox{\hyperlink{classbatteryReaderThread_a7d1452ac3e45ca75ca1b71f8ff210e6a}{00046}}\ \ \ \ \ std::mutex\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classbatteryReaderThread_a7d1452ac3e45ca75ca1b71f8ff210e6a}{datamut}};}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00047}\mbox{\hyperlink{classbatteryReaderThread_aca4686541cfd2a8d2e29458a4ce4fee0}{00047}}\ \ \ \ \ \textcolor{keywordtype}{double}\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classbatteryReaderThread_aca4686541cfd2a8d2e29458a4ce4fee0}{battery\_charge}}\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00048}\mbox{\hyperlink{classbatteryReaderThread_a6558e9a60af4556584e556763c452d19}{00048}}\ \ \ \ \ \textcolor{keywordtype}{double}\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classbatteryReaderThread_a6558e9a60af4556584e556763c452d19}{battery\_voltage}}\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00049}\mbox{\hyperlink{classbatteryReaderThread_a0c4caf70f7730766954d8dd644052fea}{00049}}\ \ \ \ \ \textcolor{keywordtype}{double}\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classbatteryReaderThread_a0c4caf70f7730766954d8dd644052fea}{battery\_current}}\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00050}\mbox{\hyperlink{classbatteryReaderThread_ab0d06d860b41611f39ecb8f5952bdda9}{00050}}\ \ \ \ \ std::string\ \ \ \ \ \ \ \ \mbox{\hyperlink{classbatteryReaderThread_ab0d06d860b41611f39ecb8f5952bdda9}{battery\_info}}\ =\ \textcolor{stringliteral}{"{}icub\ battery\ system\ v1.0"{}};}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00051}\mbox{\hyperlink{classbatteryReaderThread_ab3313f988602164529886a473530621a}{00051}}\ \ \ \ \ \textcolor{keywordtype}{int}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classbatteryReaderThread_ab3313f988602164529886a473530621a}{backpack\_status}}\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00052}\mbox{\hyperlink{classbatteryReaderThread_a1344194a0f89efa514be9bcdeedd5cd0}{00052}}\ \ \ \ \ IBattery::Battery\_status\ \ \ \ \ \mbox{\hyperlink{classbatteryReaderThread_a1344194a0f89efa514be9bcdeedd5cd0}{battery\_status}}\ =\ IBattery::Battery\_status::BATTERY\_OK\_STANDBY;\ \ \ \ }
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00053}00053\ }
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00054}\mbox{\hyperlink{classbatteryReaderThread_a7c50094dbad5dd550763c811f27af75e}{00054}}\ \ \ \ \ \mbox{\hyperlink{classbatteryReaderThread_a7c50094dbad5dd550763c811f27af75e}{batteryReaderThread}}\ (ISerialDevice\ *\_iSerial,\ \textcolor{keywordtype}{double}\ period)\ :}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00055}00055\ \ \ \ \ PeriodicThread((double)period),}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00056}00056\ \ \ \ \ \mbox{\hyperlink{classbatteryReaderThread_a3f6b10df6bf9cf1bc5eef6402133f26b}{iSerial}}(\_iSerial)}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00057}00057\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00058}00058\ \ \ \ \ \ \ \ \textcolor{comment}{//\ the\ following\ regedit\ expressions\ means:\ search\ for\ an\ occurrence\ of\ the\ pattern:}}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00059}00059\ \ \ \ \ \ \ \ \textcolor{comment}{//\ \(\backslash\)0........\(\backslash\)r\(\backslash\)n\ which\ is\ not\ followed\ by\ any\ other\ occurrence\ of\ the\ same\ pattern.}}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00060}00060\ \ \ \ \ \ \ \ \textcolor{comment}{//\ See\ for\ example:\ https://docs.pexip.com/admin/regex\_reference.htm}}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00061}00061\ \ \ \ \ \ \ \ \textcolor{comment}{//}}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00062}00062\ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 01234567\ \ 8\ \ 9*****\ \ 01234567\ \ 8\ \ 9}}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00063}00063\ \ \ \ \ \ \ \ std::string\ c\_exp\ (\textcolor{stringliteral}{"{}\(\backslash\)\(\backslash\)0.......\(\backslash\)\(\backslash\)r\(\backslash\)\(\backslash\)n(?!.*\(\backslash\)\(\backslash\)0.......\(\backslash\)\(\backslash\)r\(\backslash\)\(\backslash\)n)"{}});}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00064}00064\ \ \ \ \ \ \ \ \mbox{\hyperlink{classbatteryReaderThread_af69d9afe06a3cab2d17d436e5a0ff09d}{r\_exp}}=c\_exp;}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00065}00065\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00066}00066\ }
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00067}00067\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classbatteryReaderThread_a18f53269d766d503fbf07bef6a6b86f9}{startTransmission}}();}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00068}00068\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classbatteryReaderThread_afef746b7f1c17484ba8c1940c9662b56}{stopTransmission}}();}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00069}00069\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classbatteryReaderThread_a51ec261c98ccbf8eaa47995b9cdfd1c6}{threadInit}}()\ \textcolor{keyword}{override};}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00070}00070\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classbatteryReaderThread_a42c455fe176d6f5171322e50f76816b4}{threadRelease}}()\ \textcolor{keyword}{override};}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00071}00071\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classbatteryReaderThread_a309f7c4bbdba0f44248d46cb0aac0233}{run}}()\ \textcolor{keyword}{override};}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00072}00072\ \};}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00073}00073\ }
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00074}\mbox{\hyperlink{classBcbBattery}{00074}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classBcbBattery}{BcbBattery}}:\ \textcolor{keyword}{public}\ yarp::dev::IBattery,\ \textcolor{keyword}{public}\ DeviceDriver}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00075}00075\ \{}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00076}00076\ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00077}\mbox{\hyperlink{classBcbBattery_acadd7faefec29d6fcab7e60624b1b8bf}{00077}}\ \ \ \ \ \mbox{\hyperlink{classbatteryReaderThread}{batteryReaderThread}}*\ \mbox{\hyperlink{classBcbBattery_acadd7faefec29d6fcab7e60624b1b8bf}{batteryReader}}\ =\textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00078}00078\ }
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00079}\mbox{\hyperlink{classBcbBattery_a55b4060d208839f9e4d8daf45f83e29a}{00079}}\ \ \ \ \ ResourceFinder\ \ \ \ \ \ \mbox{\hyperlink{classBcbBattery_a55b4060d208839f9e4d8daf45f83e29a}{rf}};}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00080}\mbox{\hyperlink{classBcbBattery_a5e353a9884d5c75a43279cdac96fcd91}{00080}}\ \ \ \ \ PolyDriver\ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classBcbBattery_a5e353a9884d5c75a43279cdac96fcd91}{driver}};}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00081}\mbox{\hyperlink{classBcbBattery_a22b5485d48d95a6e79d02b0722bc6a77}{00081}}\ \ \ \ \ ISerialDevice\ \ \ \ \ \ \ *\mbox{\hyperlink{classBcbBattery_a22b5485d48d95a6e79d02b0722bc6a77}{iSerial}}\ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00082}00082\ }
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00083}00083\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00084}\mbox{\hyperlink{classBcbBattery_a8a1faa598d2d3083854ebe095133b5df}{00084}}\ \ \ \ \ \mbox{\hyperlink{classBcbBattery_a8a1faa598d2d3083854ebe095133b5df}{BcbBattery}}()\ \ \{\}}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00085}\mbox{\hyperlink{classBcbBattery_a7e4516878448d1165a7ec8c33ff1e05d}{00085}}\ \ \ \ \ \mbox{\hyperlink{classBcbBattery_a7e4516878448d1165a7ec8c33ff1e05d}{\string~BcbBattery}}()\ \ \{\}}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00086}00086\ }
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00087}00087\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classBcbBattery_a99b0975b6671050725e134e2ab76ac29}{open}}(yarp::os::Searchable\&\ config);}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00088}00088\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classBcbBattery_a0105829837e93f2f29bf4dacd8915a2a}{close}}();}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00089}00089\ }
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00090}00090\ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{YarpDevReturnValueCompat_8h_aa9fe6d5119aed82807a53228f43b70ce}{YARP\_DEV\_RETURN\_VALUE\_TYPE\_CH312}}\ \mbox{\hyperlink{classBcbBattery_a7859b90b176db5c0cf38213150556f3f}{getBatteryVoltage}}\ \ \ \ \ (\textcolor{keywordtype}{double}\ \&voltage)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00091}00091\ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{YarpDevReturnValueCompat_8h_aa9fe6d5119aed82807a53228f43b70ce}{YARP\_DEV\_RETURN\_VALUE\_TYPE\_CH312}}\ \mbox{\hyperlink{classBcbBattery_a6a5201eb3ac980a1ff00be70eb044a8c}{getBatteryCurrent}}\ \ \ \ \ (\textcolor{keywordtype}{double}\ \&current)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00092}00092\ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{YarpDevReturnValueCompat_8h_aa9fe6d5119aed82807a53228f43b70ce}{YARP\_DEV\_RETURN\_VALUE\_TYPE\_CH312}}\ \mbox{\hyperlink{classBcbBattery_a8cd52ef887c83c7115a4569b3015d42f}{getBatteryCharge}}\ \ \ \ \ \ (\textcolor{keywordtype}{double}\ \&charge)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00093}00093\ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{YarpDevReturnValueCompat_8h_aa9fe6d5119aed82807a53228f43b70ce}{YARP\_DEV\_RETURN\_VALUE\_TYPE\_CH312}}\ \mbox{\hyperlink{classBcbBattery_a92c689bbac24c4e4866bb188c54d900a}{getBatteryStatus}}\ \ \ \ \ \ (Battery\_status\ \&status)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00094}00094\ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{YarpDevReturnValueCompat_8h_aa9fe6d5119aed82807a53228f43b70ce}{YARP\_DEV\_RETURN\_VALUE\_TYPE\_CH312}}\ \mbox{\hyperlink{classBcbBattery_aeb5a9c44e988880c8f2bd8ad8a34c676}{getBatteryInfo}}\ \ \ \ \ \ \ \ (std::string\ \&info)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00095}00095\ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{YarpDevReturnValueCompat_8h_aa9fe6d5119aed82807a53228f43b70ce}{YARP\_DEV\_RETURN\_VALUE\_TYPE\_CH312}}\ \mbox{\hyperlink{classBcbBattery_afb97e060764580782c4271eaf75f391c}{getBatteryTemperature}}\ (\textcolor{keywordtype}{double}\ \&temperature)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00096}00096\ \};}
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00097}00097\ }
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00098}00098\ }
+\DoxyCodeLine{\Hypertarget{bcbBattery_8h_source_l00099}00099\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

@@ -1,0 +1,847 @@
+\doxysection{springy\+Fingers.\+cpp}
+\hypertarget{springyFingers_8cpp_source}{}\label{springyFingers_8cpp_source}\index{icub-\/main/src/libraries/perceptiveModels/src/springyFingers.cpp@{icub-\/main/src/libraries/perceptiveModels/src/springyFingers.cpp}}
+\mbox{\hyperlink{springyFingers_8cpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00001}00001\ \textcolor{comment}{/*\ }}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00002}00002\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2011\ Department\ of\ Robotics\ Brain\ and\ Cognitive\ Sciences\ -\/\ Istituto\ Italiano\ di\ Tecnologia}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00003}00003\ \textcolor{comment}{\ *\ Author:\ Ugo\ Pattacini}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00004}00004\ \textcolor{comment}{\ *\ email:\ \ ugo.pattacini@iit.it}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00005}00005\ \textcolor{comment}{\ *\ Permission\ is\ granted\ to\ copy,\ distribute,\ and/or\ modify\ this\ program}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00006}00006\ \textcolor{comment}{\ *\ under\ the\ terms\ of\ the\ GNU\ General\ Public\ License,\ version\ 2\ or\ any}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00007}00007\ \textcolor{comment}{\ *\ later\ version\ published\ by\ the\ Free\ Software\ Foundation.}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00008}00008\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00009}00009\ \textcolor{comment}{\ *\ A\ copy\ of\ the\ license\ can\ be\ found\ at}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00010}00010\ \textcolor{comment}{\ *\ http://www.robotcub.org/icub/license/gpl.txt}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00011}00011\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00012}00012\ \textcolor{comment}{\ *\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00013}00013\ \textcolor{comment}{\ *\ WITHOUT\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00014}00014\ \textcolor{comment}{\ *\ MERCHANTABILITY\ or\ FITNESS\ FOR\ A\ PARTICULAR\ PURPOSE.\ See\ the\ GNU\ General}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00015}00015\ \textcolor{comment}{\ *\ Public\ License\ for\ more\ details}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00016}00016\ \textcolor{comment}{*/}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00017}00017\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00018}00018\ \textcolor{preprocessor}{\#include\ <sstream>}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00019}00019\ \textcolor{preprocessor}{\#include\ <iomanip>}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00020}00020\ \textcolor{preprocessor}{\#include\ <cmath>}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00021}00021\ \textcolor{preprocessor}{\#include\ <limits>}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00022}00022\ \textcolor{preprocessor}{\#include\ <deque>}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00023}00023\ \textcolor{preprocessor}{\#include\ <set>}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00024}00024\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00025}00025\ \textcolor{preprocessor}{\#include\ <yarp/math/Math.h>}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00026}00026\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00027}00027\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{math_8h}{iCub/ctrl/math.h}}>}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00028}00028\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{ports_8h}{iCub/perception/private/ports.h}}>}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00029}00029\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{private_2models_8h}{iCub/perception/private/models.h}}>}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00030}00030\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{springyFingers_8h}{iCub/perception/springyFingers.h}}>}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00031}00031\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00032}00032\ \textcolor{keyword}{using\ namespace\ }std;}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00033}00033\ \textcolor{keyword}{using\ namespace\ }yarp::os;}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00034}00034\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceyarp_1_1dev}{yarp::dev}};}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00035}00035\ \textcolor{keyword}{using\ namespace\ }yarp::sig;}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00036}00036\ \textcolor{keyword}{using\ namespace\ }yarp::math;}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00037}00037\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceiCub_1_1ctrl}{iCub::ctrl}};}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00038}00038\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceiCub_1_1learningmachine}{iCub::learningmachine}};}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00039}00039\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceiCub_1_1perception}{iCub::perception}};}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00040}00040\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00041}00041\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00042}00042\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00043}\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_a29c97dcfd63f65df61f424d5552a83dd}{00043}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_a29c97dcfd63f65df61f424d5552a83dd}{SpringyFinger::fromProperty}}(\textcolor{keyword}{const}\ Property\ \&options)}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00044}00044\ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00045}00045\ \ \ \ \ \textcolor{keywordflow}{if}\ (!options.check(\textcolor{stringliteral}{"{}name"{}}))}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00046}00046\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00047}00047\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00048}00048\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Node_a31aae1bd10e27d8baebeede7faae2420}{sensors}}.clear();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00049}00049\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Node_a169cfec62924133fcf6b7d5d69ecb779}{callbacks}}.clear();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00050}00050\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Node_a1ed44103061be1fbfb9747ed6aabc91f}{neighbors}}.clear();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00051}00051\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_ac63777ed4372defa7b086932226ac2ae}{lssvm}}.\mbox{\hyperlink{classiCub_1_1learningmachine_1_1LSSVMLearner_a34d7a882bf507561128fb0dfab60d5e8}{reset}}();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00052}00052\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00053}00053\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Node_a8d2d3ccf35d0c4dcca77acd2986d9a45}{name}}=options.find(\textcolor{stringliteral}{"{}name"{}}).asString();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00054}00054\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00055}00055\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_ae8c1822e29e1033a5e761d588e75d4eb}{scaler}}.\mbox{\hyperlink{classiCub_1_1learningmachine_1_1FixedRangeScaler_adde08a16b87ee728322657adb566fe7a}{setLowerBoundIn}}(0.0);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00056}00056\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_ae8c1822e29e1033a5e761d588e75d4eb}{scaler}}.\mbox{\hyperlink{classiCub_1_1learningmachine_1_1FixedRangeScaler_a8bf6e81663b40695ff39c691ca396f4b}{setUpperBoundIn}}(255.0);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00057}00057\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_ae8c1822e29e1033a5e761d588e75d4eb}{scaler}}.\mbox{\hyperlink{classiCub_1_1learningmachine_1_1FixedRangeScaler_a8dc0aee263d791058efdb908a7de5db5}{setLowerBoundOut}}(0.0);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00058}00058\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_ae8c1822e29e1033a5e761d588e75d4eb}{scaler}}.\mbox{\hyperlink{classiCub_1_1learningmachine_1_1FixedRangeScaler_a891a471ec4eb6eb9500167f1226d45d5}{setUpperBoundOut}}(1.0);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00059}00059\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00060}00060\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_ac63777ed4372defa7b086932226ac2ae}{lssvm}}.\mbox{\hyperlink{classiCub_1_1learningmachine_1_1LSSVMLearner_a432b341af09695b124e92f9f7f5e1d9c}{setDomainSize}}(1);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00061}00061\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_ac63777ed4372defa7b086932226ac2ae}{lssvm}}.\mbox{\hyperlink{classiCub_1_1learningmachine_1_1LSSVMLearner_a4ad53f17f32c9a10b768d1570c83fb94}{setC}}(1e4);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00062}00062\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_ac63777ed4372defa7b086932226ac2ae}{lssvm}}.\mbox{\hyperlink{classiCub_1_1learningmachine_1_1LSSVMLearner_a9f3231ec94416350944a3333a1442758}{getKernel}}()-\/>\mbox{\hyperlink{classiCub_1_1learningmachine_1_1RBFKernel_a55d6f9487fd82561b35e350146fe36ae}{setGamma}}(500.0);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00063}00063\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00064}00064\ \ \ \ \ \textcolor{keywordtype}{double}\ defaultCalibVel;}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00065}00065\ \ \ \ \ \textcolor{keywordflow}{if}\ ((\mbox{\hyperlink{classiCub_1_1perception_1_1Node_a8d2d3ccf35d0c4dcca77acd2986d9a45}{name}}==\textcolor{stringliteral}{"{}thumb"{}})\ ||\ (\mbox{\hyperlink{classiCub_1_1perception_1_1Node_a8d2d3ccf35d0c4dcca77acd2986d9a45}{name}}==\textcolor{stringliteral}{"{}index"{}})\ ||\ (\mbox{\hyperlink{classiCub_1_1perception_1_1Node_a8d2d3ccf35d0c4dcca77acd2986d9a45}{name}}==\textcolor{stringliteral}{"{}middle"{}}))}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00066}00066\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00067}00067\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_ac63777ed4372defa7b086932226ac2ae}{lssvm}}.\mbox{\hyperlink{classiCub_1_1learningmachine_1_1LSSVMLearner_a23c698c3227d950bed7a684d5afa4b6c}{setCoDomainSize}}(2);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00068}00068\ \ \ \ \ \ \ \ \ defaultCalibVel=30.0;}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00069}00069\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00070}00070\ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ ((\mbox{\hyperlink{classiCub_1_1perception_1_1Node_a8d2d3ccf35d0c4dcca77acd2986d9a45}{name}}==\textcolor{stringliteral}{"{}ring"{}})\ ||\ (\mbox{\hyperlink{classiCub_1_1perception_1_1Node_a8d2d3ccf35d0c4dcca77acd2986d9a45}{name}}==\textcolor{stringliteral}{"{}little"{}}))}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00071}00071\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00072}00072\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_ac63777ed4372defa7b086932226ac2ae}{lssvm}}.\mbox{\hyperlink{classiCub_1_1learningmachine_1_1LSSVMLearner_a23c698c3227d950bed7a684d5afa4b6c}{setCoDomainSize}}(3);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00073}00073\ \ \ \ \ \ \ \ \ defaultCalibVel=60.0;}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00074}00074\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00075}00075\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00076}00076\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};\ \ \ \ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00077}00077\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00078}00078\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_ae01061b8be984df5389df29b80ce593c}{calibratingVelocity}}=options.check(\textcolor{stringliteral}{"{}calib\_vel"{}},Value(defaultCalibVel)).asFloat64();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00079}00079\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_ac760696436df3508a3865e57fc1e56be}{outputGain}}=options.check(\textcolor{stringliteral}{"{}output\_gain"{}},Value(1.0)).asFloat64();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00080}00080\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_afc5f779ab11a37fb34f52b6276b0433e}{calibrated}}=(options.check(\textcolor{stringliteral}{"{}calibrated"{}},Value(\textcolor{stringliteral}{"{}false"{}})).asString()==\textcolor{stringliteral}{"{}true"{}});}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00081}00081\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00082}00082\ \ \ \ \ \textcolor{keywordflow}{if}\ (options.check(\textcolor{stringliteral}{"{}scaler"{}}))}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00083}00083\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00084}00084\ \ \ \ \ \ \ \ \ Bottle\ *pB=options.find(\textcolor{stringliteral}{"{}scaler"{}}).asList();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00085}00085\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_ae8c1822e29e1033a5e761d588e75d4eb}{scaler}}.\mbox{\hyperlink{classiCub_1_1learningmachine_1_1IScaler_ad5d1bdffac26cc3f40c8fdadf289bdac}{fromString}}(pB-\/>toString());}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00086}00086\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00087}00087\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00088}00088\ \ \ \ \ \textcolor{keywordflow}{if}\ (options.check(\textcolor{stringliteral}{"{}lssvm"{}}))}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00089}00089\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00090}00090\ \ \ \ \ \ \ \ \ Bottle\ *pB=options.find(\textcolor{stringliteral}{"{}lssvm"{}}).asList();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00091}00091\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_ac63777ed4372defa7b086932226ac2ae}{lssvm}}.\mbox{\hyperlink{classiCub_1_1learningmachine_1_1IMachineLearner_a03b76322e94b7e196993f04790f2cae8}{fromString}}(pB-\/>toString());}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00092}00092\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00093}00093\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00094}00094\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00095}00095\ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00096}00096\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00097}00097\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00098}00098\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00099}\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_a887546a96ec703ab6d7c60e1c36c3173}{00099}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_a887546a96ec703ab6d7c60e1c36c3173}{SpringyFinger::toProperty}}(Property\ \&options)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00100}00100\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00101}00101\ \ \ \ \ options.clear();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00102}00102\ \ \ \ \ options.put(\textcolor{stringliteral}{"{}name"{}},\mbox{\hyperlink{classiCub_1_1perception_1_1Node_a8d2d3ccf35d0c4dcca77acd2986d9a45}{name}});}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00103}00103\ \ \ \ \ options.put(\textcolor{stringliteral}{"{}calib\_vel"{}},\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_ae01061b8be984df5389df29b80ce593c}{calibratingVelocity}});}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00104}00104\ \ \ \ \ options.put(\textcolor{stringliteral}{"{}output\_gain"{}},\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_ac760696436df3508a3865e57fc1e56be}{outputGain}});}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00105}00105\ \ \ \ \ options.put(\textcolor{stringliteral}{"{}calibrated"{}},\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_afc5f779ab11a37fb34f52b6276b0433e}{calibrated}}?\textcolor{stringliteral}{"{}true"{}}:\textcolor{stringliteral}{"{}false"{}});}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00106}00106\ \ \ \ \ options.put(\textcolor{stringliteral}{"{}scaler"{}},\textcolor{stringliteral}{"{}("{}}+\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_ae8c1822e29e1033a5e761d588e75d4eb}{scaler}}.\mbox{\hyperlink{classiCub_1_1learningmachine_1_1IScaler_a1cec6517a8e147fb07e7b30623f498c0}{toString}}()+\textcolor{stringliteral}{"{})"{}});}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00107}00107\ \ \ \ \ options.put(\textcolor{stringliteral}{"{}lssvm"{}},\textcolor{stringliteral}{"{}("{}}+\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_ac63777ed4372defa7b086932226ac2ae}{lssvm}}.\mbox{\hyperlink{classiCub_1_1learningmachine_1_1IMachineLearner_aa36205e9a4f900f8aae18033092fb0e7}{toString}}()+\textcolor{stringliteral}{"{})"{}});}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00108}00108\ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00109}00109\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00110}00110\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00111}00111\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00112}\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_a98ddf2cfe968850a9d5228720f8878a6}{00112}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_a98ddf2cfe968850a9d5228720f8878a6}{SpringyFinger::toStream}}(ostream\ \&str)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00113}00113\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00114}00114\ \ \ \ \ str<<\textcolor{stringliteral}{"{}name\ \ \ \ \ \ \ \ "{}}<<\mbox{\hyperlink{classiCub_1_1perception_1_1Node_a8d2d3ccf35d0c4dcca77acd2986d9a45}{name}}<<endl;}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00115}00115\ \ \ \ \ str<<\textcolor{stringliteral}{"{}calib\_vel\ \ \ "{}}<<\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_ae01061b8be984df5389df29b80ce593c}{calibratingVelocity}}<<endl;}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00116}00116\ \ \ \ \ str<<\textcolor{stringliteral}{"{}output\_gain\ "{}}<<\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_ac760696436df3508a3865e57fc1e56be}{outputGain}}<<endl;}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00117}00117\ \ \ \ \ str<<\textcolor{stringliteral}{"{}calibrated\ \ "{}}<<(\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_afc5f779ab11a37fb34f52b6276b0433e}{calibrated}}?\textcolor{stringliteral}{"{}true"{}}:\textcolor{stringliteral}{"{}false"{}})<<endl;}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00118}00118\ \ \ \ \ str<<\textcolor{stringliteral}{"{}scaler\ \ \ \ \ \ "{}}<<\textcolor{stringliteral}{"{}("{}}+\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_ae8c1822e29e1033a5e761d588e75d4eb}{scaler}}.\mbox{\hyperlink{classiCub_1_1learningmachine_1_1IScaler_a1cec6517a8e147fb07e7b30623f498c0}{toString}}()+\textcolor{stringliteral}{"{})"{}}<<endl;}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00119}00119\ \ \ \ \ str<<\textcolor{stringliteral}{"{}lssvm\ \ \ \ \ \ \ "{}}<<\textcolor{stringliteral}{"{}("{}}+\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_ac63777ed4372defa7b086932226ac2ae}{lssvm}}.\mbox{\hyperlink{classiCub_1_1learningmachine_1_1IMachineLearner_aa36205e9a4f900f8aae18033092fb0e7}{toString}}()+\textcolor{stringliteral}{"{})"{}}<<endl;}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00120}00120\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00121}00121\ \ \ \ \ \textcolor{keywordflow}{return}\ !str.fail();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00122}00122\ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00123}00123\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00124}00124\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00125}00125\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00126}\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_ad1053726058e183dbd66d652adc64d0c}{00126}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_ad1053726058e183dbd66d652adc64d0c}{SpringyFinger::getSensorsData}}(Value\ \&\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}})\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00127}00127\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00128}00128\ \ \ \ \ map<string,Sensor*>::const\_iterator\ In\_0=\mbox{\hyperlink{classiCub_1_1perception_1_1Node_a31aae1bd10e27d8baebeede7faae2420}{sensors}}.find(\textcolor{stringliteral}{"{}In\_0"{}});}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00129}00129\ \ \ \ \ map<string,Sensor*>::const\_iterator\ Out\_0=\mbox{\hyperlink{classiCub_1_1perception_1_1Node_a31aae1bd10e27d8baebeede7faae2420}{sensors}}.find(\textcolor{stringliteral}{"{}Out\_0"{}});}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00130}00130\ \ \ \ \ map<string,Sensor*>::const\_iterator\ Out\_1=\mbox{\hyperlink{classiCub_1_1perception_1_1Node_a31aae1bd10e27d8baebeede7faae2420}{sensors}}.find(\textcolor{stringliteral}{"{}Out\_1"{}});}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00131}00131\ \ \ \ \ map<string,Sensor*>::const\_iterator\ Out\_2=\mbox{\hyperlink{classiCub_1_1perception_1_1Node_a31aae1bd10e27d8baebeede7faae2420}{sensors}}.find(\textcolor{stringliteral}{"{}Out\_2"{}});}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00132}00132\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00133}00133\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}}=\textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00134}00134\ \ \ \ \ \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}}\&=In\_0!=\mbox{\hyperlink{classiCub_1_1perception_1_1Node_a31aae1bd10e27d8baebeede7faae2420}{sensors}}.end();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00135}00135\ \ \ \ \ \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}}\&=Out\_0!=\mbox{\hyperlink{classiCub_1_1perception_1_1Node_a31aae1bd10e27d8baebeede7faae2420}{sensors}}.end();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00136}00136\ \ \ \ \ \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}}\&=Out\_1!=\mbox{\hyperlink{classiCub_1_1perception_1_1Node_a31aae1bd10e27d8baebeede7faae2420}{sensors}}.end();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00137}00137\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00138}00138\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_ac63777ed4372defa7b086932226ac2ae}{lssvm}}.\mbox{\hyperlink{classiCub_1_1learningmachine_1_1IFixedSizeLearner_a486eccb3ad4dfd9d8388b3b1845720c6}{getCoDomainSize}}()>2)}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00139}00139\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}}\&=Out\_2!=\mbox{\hyperlink{classiCub_1_1perception_1_1Node_a31aae1bd10e27d8baebeede7faae2420}{sensors}}.end();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00140}00140\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00141}00141\ \ \ \ \ \textcolor{keywordflow}{if}\ (!\mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}})}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00142}00142\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00143}00143\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00144}00144\ \ \ \ \ Value\ val\_in,\ val\_out[3];}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00145}00145\ \ \ \ \ In\_0-\/>second-\/>getOutput(val\_in);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00146}00146\ \ \ \ \ Out\_0-\/>second-\/>getOutput(val\_out[0]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00147}00147\ \ \ \ \ Out\_1-\/>second-\/>getOutput(val\_out[1]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00148}00148\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00149}00149\ \ \ \ \ Vector\ in(\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_ac63777ed4372defa7b086932226ac2ae}{lssvm}}.\mbox{\hyperlink{classiCub_1_1learningmachine_1_1IFixedSizeLearner_affb80d49e0cf11d0c7e310970ea41ad7}{getDomainSize}}());}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00150}00150\ \ \ \ \ in[0]=val\_in.asFloat64();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00151}00151\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00152}00152\ \ \ \ \ Vector\ \mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}}(\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_ac63777ed4372defa7b086932226ac2ae}{lssvm}}.\mbox{\hyperlink{classiCub_1_1learningmachine_1_1IFixedSizeLearner_a486eccb3ad4dfd9d8388b3b1845720c6}{getCoDomainSize}}());}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00153}00153\ \ \ \ \ \mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}}[0]=val\_out[0].asFloat64();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00154}00154\ \ \ \ \ \mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}}[1]=val\_out[1].asFloat64();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00155}00155\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00156}00156\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_ac63777ed4372defa7b086932226ac2ae}{lssvm}}.\mbox{\hyperlink{classiCub_1_1learningmachine_1_1IFixedSizeLearner_a486eccb3ad4dfd9d8388b3b1845720c6}{getCoDomainSize}}()>2)}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00157}00157\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00158}00158\ \ \ \ \ \ \ \ \ Out\_2-\/>second-\/>getOutput(val\_out[2]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00159}00159\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}}[2]=val\_out[2].asFloat64();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00160}00160\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00161}00161\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00162}00162\ \ \ \ \ Property\ prop;}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00163}00163\ \ \ \ \ Bottle\ b;}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00164}00164\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00165}00165\ \ \ \ \ b.addList().read(in);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00166}00166\ \ \ \ \ prop.put(\textcolor{stringliteral}{"{}in"{}},b.get(0));}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00167}00167\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00168}00168\ \ \ \ \ b.addList().read(\mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}});}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00169}00169\ \ \ \ \ prop.put(\textcolor{stringliteral}{"{}out"{}},b.get(1));}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00170}00170\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00171}00171\ \ \ \ \ b.addList().read(prop);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00172}00172\ \ \ \ \ \mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}=b.get(2);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00173}00173\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00174}00174\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00175}00175\ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00176}00176\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00177}00177\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00178}00178\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00179}\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_ad6d69629c3321955f4cdb17ee1db245f}{00179}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_ad6d69629c3321955f4cdb17ee1db245f}{SpringyFinger::extractSensorsData}}(Vector\ \&in,\ Vector\ \&\mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}})\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00180}00180\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00181}00181\ \ \ \ \ \textcolor{keywordtype}{bool}\ ret=\textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00182}00182\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00183}00183\ \ \ \ \ Value\ \mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}};}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00184}00184\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_ad1053726058e183dbd66d652adc64d0c}{getSensorsData}}(\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}))}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00185}00185\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00186}00186\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (Bottle\ *b1=\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}.asList())}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00187}00187\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00188}00188\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (Bottle\ *b2=b1-\/>find(\textcolor{stringliteral}{"{}in"{}}).asList())}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00189}00189\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00190}00190\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ in.resize(b2-\/>size());}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00191}00191\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<in.length();\ i++)}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00192}00192\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ in[i]=b2-\/>get(i).asFloat64();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00193}00193\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00194}00194\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00195}00195\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (Bottle\ *b2=b1-\/>find(\textcolor{stringliteral}{"{}out"{}}).asList())}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00196}00196\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00197}00197\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}}.resize(b2-\/>size());}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00198}00198\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<\mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}}.length();\ i++)}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00199}00199\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}}[i]=b2-\/>get(i).asFloat64();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00200}00200\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00201}00201\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ret=\textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00202}00202\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00203}00203\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00204}00204\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00205}00205\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00206}00206\ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00207}00207\ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00208}00208\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00209}00209\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00210}00210\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00211}\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_a6457b1b426a2e94c5d547bdee0ebfacf}{00211}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_a6457b1b426a2e94c5d547bdee0ebfacf}{SpringyFinger::getOutput}}(Value\ \&\mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}})\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00212}00212\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00213}00213\ \ \ \ \ Vector\ i,o;}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00214}00214\ \ \ \ \ \textcolor{keywordflow}{if}\ (!\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_ad6d69629c3321955f4cdb17ee1db245f}{extractSensorsData}}(i,o))}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00215}00215\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00216}00216\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00217}00217\ \ \ \ \ i[0]=\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_ae8c1822e29e1033a5e761d588e75d4eb}{scaler}}.\mbox{\hyperlink{classiCub_1_1learningmachine_1_1IScaler_ac303738f301e1976dd73119ae5982768}{transform}}(i[0]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00218}00218\ \ \ \ \ Vector\ pred=\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_ac63777ed4372defa7b086932226ac2ae}{lssvm}}.\mbox{\hyperlink{classiCub_1_1learningmachine_1_1LSSVMLearner_a5c757844134eb26f5dcbc945313fab7c}{predict}}(i).\mbox{\hyperlink{classiCub_1_1learningmachine_1_1Prediction_affd3e50f1466283df3ba8cff2c06f2eb}{getPrediction}}();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00219}00219\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00220}00220\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ j=0;\ j<pred.length();\ j++)}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00221}00221\ \ \ \ \ \ \ \ \ pred[j]=\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_ae8c1822e29e1033a5e761d588e75d4eb}{scaler}}.\mbox{\hyperlink{classiCub_1_1learningmachine_1_1IScaler_aef1d069d4b1aaf8c545dd31d881f99f0}{unTransform}}(pred[j]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00222}00222\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00223}00223\ \ \ \ \ \mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}}=Value(\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_ac760696436df3508a3865e57fc1e56be}{outputGain}}*\mbox{\hyperlink{group__Maths_ga791f0548018b3597da95e70a3b226806}{norm}}(o-\/pred));}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00224}00224\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00225}00225\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00226}00226\ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00227}00227\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00228}00228\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00229}00229\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00230}\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_adf1d24aef5cf0e6a2e470bd2744ca646}{00230}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_adf1d24aef5cf0e6a2e470bd2744ca646}{SpringyFinger::calibrate}}(\textcolor{keyword}{const}\ Property\ \&options)}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00231}00231\ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00232}00232\ \ \ \ \ \textcolor{keywordflow}{if}\ (options.check(\textcolor{stringliteral}{"{}reset"{}}))}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00233}00233\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_ac63777ed4372defa7b086932226ac2ae}{lssvm}}.\mbox{\hyperlink{classiCub_1_1learningmachine_1_1LSSVMLearner_a34d7a882bf507561128fb0dfab60d5e8}{reset}}();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00234}00234\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00235}00235\ \ \ \ \ \textcolor{keywordflow}{if}\ (options.check(\textcolor{stringliteral}{"{}feed"{}}))}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00236}00236\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00237}00237\ \ \ \ \ \ \ \ \ Vector\ in,\mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}};}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00238}00238\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_ad6d69629c3321955f4cdb17ee1db245f}{extractSensorsData}}(in,\mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}}))}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00239}00239\ \ \ \ \ \ \ \ \ \{\ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00240}00240\ \ \ \ \ \ \ \ \ \ \ \ \ in[0]=\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_ae8c1822e29e1033a5e761d588e75d4eb}{scaler}}.\mbox{\hyperlink{classiCub_1_1learningmachine_1_1IScaler_ac303738f301e1976dd73119ae5982768}{transform}}(in[0]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00241}00241\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<\mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}}.length();\ i++)}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00242}00242\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}}[i]=\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_ae8c1822e29e1033a5e761d588e75d4eb}{scaler}}.\mbox{\hyperlink{classiCub_1_1learningmachine_1_1IScaler_ac303738f301e1976dd73119ae5982768}{transform}}(\mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}}[i]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00243}00243\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00244}00244\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_ac63777ed4372defa7b086932226ac2ae}{lssvm}}.\mbox{\hyperlink{classiCub_1_1learningmachine_1_1LSSVMLearner_a06a1a64634c50cd0ce4a582ffc198517}{feedSample}}(in,\mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}});}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00245}00245\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00246}00246\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00247}00247\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00248}00248\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00249}00249\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00250}00250\ \ \ \ \ \textcolor{keywordflow}{if}\ (options.check(\textcolor{stringliteral}{"{}train"{}}))}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00251}00251\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00252}00252\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_ac63777ed4372defa7b086932226ac2ae}{lssvm}}.\mbox{\hyperlink{classiCub_1_1learningmachine_1_1LSSVMLearner_a600460553157c0307259b4088750f9ba}{train}}();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00253}00253\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_afc5f779ab11a37fb34f52b6276b0433e}{calibrated}}=\textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00254}00254\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00255}00255\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00256}00256\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00257}00257\ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00258}00258\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00259}00259\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00260}00260\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00261}\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFingersModel_abbef2140831088d164f972aa9bc030b3}{00261}}\ \mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFingersModel_abbef2140831088d164f972aa9bc030b3}{SpringyFingersModel::SpringyFingersModel}}()}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00262}00262\ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00263}00263\ \ \ \ \ configured=\textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00264}00264\ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00265}00265\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00266}00266\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00267}00267\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00268}\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFingersModel_adffda729bc9c7e0af42ab68f0d6112bb}{00268}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFingersModel_adffda729bc9c7e0af42ab68f0d6112bb}{SpringyFingersModel::fromProperty}}(\textcolor{keyword}{const}\ Property\ \&options)}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00269}00269\ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00270}00270\ \ \ \ \ \textcolor{keywordflow}{if}\ (!options.check(\textcolor{stringliteral}{"{}name"{}})\ ||\ !options.check(\textcolor{stringliteral}{"{}type"{}}))}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00271}00271\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00272}00272\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Model_a4f01cfcbc00e0adb4c6bd2104c162442}{printMessage}}(\mbox{\hyperlink{namespaceiCub_1_1perception_1_1log_a4808224c7b00400035caa3d15abef2c2afd4de2e4dc4632842cf4fa6263f72443}{log::error}},1,\textcolor{stringliteral}{"{}missing\ mandatory\ options\ \(\backslash\)"{}name\(\backslash\)"{}\ and/or\ \(\backslash\)"{}type\(\backslash\)"{}"{}});}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00273}00273\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00274}00274\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00275}00275\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00276}00276\ \ \ \ \ \textcolor{keywordflow}{if}\ (configured)}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00277}00277\ \ \ \ \ \ \ \ \ close();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00278}00278\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00279}00279\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Model_ae2117ae02028227ca050199d02a5ec12}{name}}=options.find(\textcolor{stringliteral}{"{}name"{}}).asString();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00280}00280\ \ \ \ \ type=options.find(\textcolor{stringliteral}{"{}type"{}}).asString();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00281}00281\ \ \ \ \ robot=options.check(\textcolor{stringliteral}{"{}robot"{}},Value(\textcolor{stringliteral}{"{}icub"{}})).asString();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00282}00282\ \ \ \ \ carrier=options.check(\textcolor{stringliteral}{"{}carrier"{}},Value(\textcolor{stringliteral}{"{}udp"{}})).asString();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00283}00283\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Model_ab04b291c81cec684e8bfa2f6dda88e5e}{verbosity}}=options.check(\textcolor{stringliteral}{"{}verbosity"{}},Value(0)).asInt32();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00284}00284\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00285}00285\ \ \ \ \ \textcolor{keywordtype}{string}\ part\_motor=string(type+\textcolor{stringliteral}{"{}\_arm"{}});}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00286}00286\ \ \ \ \ \textcolor{keywordtype}{string}\ part\_analog=string(type+\textcolor{stringliteral}{"{}\_hand"{}});}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00287}00287\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00288}00288\ \ \ \ \ Property\ propEncs;}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00289}00289\ \ \ \ \ propEncs.put(\textcolor{stringliteral}{"{}device"{}},\textcolor{stringliteral}{"{}remote\_controlboard"{}});}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00290}00290\ \ \ \ \ propEncs.put(\textcolor{stringliteral}{"{}remote"{}},\textcolor{stringliteral}{"{}/"{}}+robot+\textcolor{stringliteral}{"{}/"{}}+part\_motor);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00291}00291\ \ \ \ \ propEncs.put(\textcolor{stringliteral}{"{}local"{}},\textcolor{stringliteral}{"{}/"{}}+\mbox{\hyperlink{classiCub_1_1perception_1_1Model_ae2117ae02028227ca050199d02a5ec12}{name}}+\textcolor{stringliteral}{"{}/"{}}+part\_motor);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00292}00292\ \ \ \ \ \textcolor{keywordflow}{if}\ (!drvEncs.open(propEncs))}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00293}00293\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00294}00294\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00295}00295\ \ \ \ \ Property\ propMAIS;}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00296}00296\ \ \ \ \ propMAIS.put(\textcolor{stringliteral}{"{}device"{}},\textcolor{stringliteral}{"{}multipleanalogsensorsclient"{}});}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00297}00297\ \ \ \ \ propMAIS.put(\textcolor{stringliteral}{"{}remote"{}},\textcolor{stringliteral}{"{}/"{}}+robot+\textcolor{stringliteral}{"{}/"{}}+part\_analog+\textcolor{stringliteral}{"{}/MAIS"{}});}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00298}00298\ \ \ \ \ propMAIS.put(\textcolor{stringliteral}{"{}local"{}},\textcolor{stringliteral}{"{}/"{}}+\mbox{\hyperlink{classiCub_1_1perception_1_1Model_ae2117ae02028227ca050199d02a5ec12}{name}}+\textcolor{stringliteral}{"{}/"{}}+part\_analog+\textcolor{stringliteral}{"{}/MAIS"{}});}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00299}00299\ \ \ \ \ \textcolor{keywordflow}{if}\ (!drvMAIS.open(propMAIS))}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00300}00300\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00301}00301\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Model_a4f01cfcbc00e0adb4c6bd2104c162442}{printMessage}}(\mbox{\hyperlink{namespaceiCub_1_1perception_1_1log_a4808224c7b00400035caa3d15abef2c2afd4de2e4dc4632842cf4fa6263f72443}{log::error}},1,\textcolor{stringliteral}{"{}unable\ to\ connect\ to\ \%s"{}},propMAIS.find(\textcolor{stringliteral}{"{}remote"{}}).asString().c\_str());}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00302}00302\ \ \ \ \ \ \ \ \ close();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00303}00303\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00304}00304\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00305}00305\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00306}00306\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Model_a4f01cfcbc00e0adb4c6bd2104c162442}{printMessage}}(\mbox{\hyperlink{namespaceiCub_1_1perception_1_1log_a4808224c7b00400035caa3d15abef2c2abf13376047f84b3eb3dad0e0059f6d7a}{log::info}},1,\textcolor{stringliteral}{"{}configuring\ joint\ encoders\ sensors\ ..."{}});\ \ \ \ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00307}00307\ \ \ \ \ IEncoders\ *ienc;\ drvEncs.view(ienc);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00308}00308\ \ \ \ \ \textcolor{keywordtype}{int}\ nAxes;\ ienc-\/>getAxes(\&nAxes);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00309}00309\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00310}00310\ \ \ \ \ Property\ propGen;}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00311}00311\ \ \ \ \ propGen.put(\textcolor{stringliteral}{"{}name"{}},\textcolor{stringliteral}{"{}In\_0"{}});}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00312}00312\ \ \ \ \ propGen.put(\textcolor{stringliteral}{"{}size"{}},nAxes);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00313}00313\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00314}00314\ \ \ \ \ Property\ propThumb=propGen;\ \ propThumb.put(\ \textcolor{stringliteral}{"{}index"{}},10);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00315}00315\ \ \ \ \ Property\ propIndex=propGen;\ \ propIndex.put(\ \textcolor{stringliteral}{"{}index"{}},12);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00316}00316\ \ \ \ \ Property\ propMiddle=propGen;\ propMiddle.put(\textcolor{stringliteral}{"{}index"{}},14);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00317}00317\ \ \ \ \ Property\ propRing=propGen;\ \ \ propRing.put(\ \ \textcolor{stringliteral}{"{}index"{}},15);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00318}00318\ \ \ \ \ Property\ propLittle=propGen;\ propLittle.put(\textcolor{stringliteral}{"{}index"{}},15);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00319}00319\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00320}00320\ \ \ \ \ \textcolor{keywordtype}{bool}\ sensors\_ok=\textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00321}00321\ \ \ \ \ \textcolor{keywordtype}{void}\ *pEncs=\textcolor{keyword}{static\_cast<}\textcolor{keywordtype}{void}*\textcolor{keyword}{>}(ienc);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00322}00322\ \ \ \ \ sensors\_ok\&=sensEncs[0].\mbox{\hyperlink{classiCub_1_1perception_1_1SensorEncoders_aaa2585e7013fdcbfad10e007d225b710}{configure}}(pEncs,propThumb);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00323}00323\ \ \ \ \ sensors\_ok\&=sensEncs[1].\mbox{\hyperlink{classiCub_1_1perception_1_1SensorEncoders_aaa2585e7013fdcbfad10e007d225b710}{configure}}(pEncs,propIndex);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00324}00324\ \ \ \ \ sensors\_ok\&=sensEncs[2].\mbox{\hyperlink{classiCub_1_1perception_1_1SensorEncoders_aaa2585e7013fdcbfad10e007d225b710}{configure}}(pEncs,propMiddle);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00325}00325\ \ \ \ \ sensors\_ok\&=sensEncs[3].\mbox{\hyperlink{classiCub_1_1perception_1_1SensorEncoders_aaa2585e7013fdcbfad10e007d225b710}{configure}}(pEncs,propRing);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00326}00326\ \ \ \ \ sensors\_ok\&=sensEncs[4].\mbox{\hyperlink{classiCub_1_1perception_1_1SensorEncoders_aaa2585e7013fdcbfad10e007d225b710}{configure}}(pEncs,propLittle);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00327}00327\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00328}00328\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Model_a4f01cfcbc00e0adb4c6bd2104c162442}{printMessage}}(\mbox{\hyperlink{namespaceiCub_1_1perception_1_1log_a4808224c7b00400035caa3d15abef2c2abf13376047f84b3eb3dad0e0059f6d7a}{log::info}},1,\textcolor{stringliteral}{"{}configuring\ analog\ encoders\ sensors\ ..."{}});}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00329}00329\ \ \ \ \ IEncoderArrays\ *iencarray;\ drvMAIS.view(iencarray);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00330}00330\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00331}00331\ \ \ \ \ propGen.clear();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00332}00332\ \ \ \ \ propGen.put(\textcolor{stringliteral}{"{}num\_arrays"{}},(\textcolor{keywordtype}{int})iencarray-\/>getNrOfEncoderArrays());}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00333}00333\ \ \ \ \ propGen.put(\textcolor{stringliteral}{"{}index\_array"{}},0);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00334}00334\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00335}00335\ \ \ \ \ Property\ thumb\_mp=propGen;\ \ \ thumb\_mp.put(\ \ \textcolor{stringliteral}{"{}name"{}},\textcolor{stringliteral}{"{}Out\_0"{}});\ \ \ thumb\_mp.put(\textcolor{stringliteral}{"{}index\_element"{}},\textcolor{stringliteral}{"{}1"{}});}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00336}00336\ \ \ \ \ Property\ thumb\_ip=propGen;\ \ \ thumb\_ip.put(\ \ \textcolor{stringliteral}{"{}name"{}},\textcolor{stringliteral}{"{}Out\_1"{}});\ \ \ thumb\_ip.put(\textcolor{stringliteral}{"{}index\_element"{}},\textcolor{stringliteral}{"{}2"{}});}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00337}00337\ \ \ \ \ Property\ index\_mp=propGen;\ \ \ index\_mp.put(\ \ \textcolor{stringliteral}{"{}name"{}},\textcolor{stringliteral}{"{}Out\_0"{}});\ \ \ index\_mp.put(\textcolor{stringliteral}{"{}index\_element"{}},\textcolor{stringliteral}{"{}4"{}});}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00338}00338\ \ \ \ \ Property\ index\_ip=propGen;\ \ \ index\_ip.put(\ \ \textcolor{stringliteral}{"{}name"{}},\textcolor{stringliteral}{"{}Out\_1"{}});\ \ \ index\_ip.put(\textcolor{stringliteral}{"{}index\_element"{}},\textcolor{stringliteral}{"{}5"{}});}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00339}00339\ \ \ \ \ Property\ middle\_mp=propGen;\ \ middle\_mp.put(\ \textcolor{stringliteral}{"{}name"{}},\textcolor{stringliteral}{"{}Out\_0"{}});\ \ middle\_mp.put(\textcolor{stringliteral}{"{}index\_element"{}},\textcolor{stringliteral}{"{}7"{}});}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00340}00340\ \ \ \ \ Property\ middle\_ip=propGen;\ \ middle\_ip.put(\ \textcolor{stringliteral}{"{}name"{}},\textcolor{stringliteral}{"{}Out\_1"{}});\ \ middle\_ip.put(\textcolor{stringliteral}{"{}index\_element"{}},\textcolor{stringliteral}{"{}8"{}});}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00341}00341\ \ \ \ \ Property\ ring\_mp=propGen;\ \ \ \ ring\_mp.put(\ \ \ \textcolor{stringliteral}{"{}name"{}},\textcolor{stringliteral}{"{}Out\_0"{}});\ \ \ \ ring\_mp.put(\textcolor{stringliteral}{"{}index\_element"{}},\textcolor{stringliteral}{"{}9"{}});}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00342}00342\ \ \ \ \ Property\ ring\_pip=propGen;\ \ \ ring\_pip.put(\ \ \textcolor{stringliteral}{"{}name"{}},\textcolor{stringliteral}{"{}Out\_1"{}});\ \ \ ring\_pip.put(\textcolor{stringliteral}{"{}index\_element"{}},\textcolor{stringliteral}{"{}10"{}});}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00343}00343\ \ \ \ \ Property\ ring\_dip=propGen;\ \ \ ring\_dip.put(\ \ \textcolor{stringliteral}{"{}name"{}},\textcolor{stringliteral}{"{}Out\_2"{}});\ \ \ ring\_dip.put(\textcolor{stringliteral}{"{}index\_element"{}},\textcolor{stringliteral}{"{}11"{}});}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00344}00344\ \ \ \ \ Property\ little\_mp=propGen;\ \ little\_mp.put(\ \textcolor{stringliteral}{"{}name"{}},\textcolor{stringliteral}{"{}Out\_0"{}});\ \ little\_mp.put(\textcolor{stringliteral}{"{}index\_element"{}},\textcolor{stringliteral}{"{}12"{}});}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00345}00345\ \ \ \ \ Property\ little\_pip=propGen;\ little\_pip.put(\textcolor{stringliteral}{"{}name"{}},\textcolor{stringliteral}{"{}Out\_1"{}});\ little\_pip.put(\textcolor{stringliteral}{"{}index\_element"{}},\textcolor{stringliteral}{"{}13"{}});}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00346}00346\ \ \ \ \ Property\ little\_dip=propGen;\ little\_dip.put(\textcolor{stringliteral}{"{}name"{}},\textcolor{stringliteral}{"{}Out\_2"{}});\ little\_dip.put(\textcolor{stringliteral}{"{}index\_element"{}},\textcolor{stringliteral}{"{}14"{}});}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00347}00347\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00348}00348\ \ \ \ \ \textcolor{keywordtype}{void}\ *pEncArrays=\textcolor{keyword}{static\_cast<}\textcolor{keywordtype}{void}*\textcolor{keyword}{>}(iencarray);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00349}00349\ \ \ \ \ sensors\_ok\&=sensEncArrays[0].\mbox{\hyperlink{classiCub_1_1perception_1_1SensorEncoderArrays_a85a006cba12fbe1328f54f2f809ae2e6}{configure}}(pEncArrays,thumb\_mp);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00350}00350\ \ \ \ \ sensors\_ok\&=sensEncArrays[1].\mbox{\hyperlink{classiCub_1_1perception_1_1SensorEncoderArrays_a85a006cba12fbe1328f54f2f809ae2e6}{configure}}(pEncArrays,thumb\_ip);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00351}00351\ \ \ \ \ sensors\_ok\&=sensEncArrays[2].\mbox{\hyperlink{classiCub_1_1perception_1_1SensorEncoderArrays_a85a006cba12fbe1328f54f2f809ae2e6}{configure}}(pEncArrays,index\_mp);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00352}00352\ \ \ \ \ sensors\_ok\&=sensEncArrays[3].\mbox{\hyperlink{classiCub_1_1perception_1_1SensorEncoderArrays_a85a006cba12fbe1328f54f2f809ae2e6}{configure}}(pEncArrays,index\_ip);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00353}00353\ \ \ \ \ sensors\_ok\&=sensEncArrays[4].\mbox{\hyperlink{classiCub_1_1perception_1_1SensorEncoderArrays_a85a006cba12fbe1328f54f2f809ae2e6}{configure}}(pEncArrays,middle\_mp);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00354}00354\ \ \ \ \ sensors\_ok\&=sensEncArrays[5].\mbox{\hyperlink{classiCub_1_1perception_1_1SensorEncoderArrays_a85a006cba12fbe1328f54f2f809ae2e6}{configure}}(pEncArrays,middle\_ip);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00355}00355\ \ \ \ \ sensors\_ok\&=sensEncArrays[6].\mbox{\hyperlink{classiCub_1_1perception_1_1SensorEncoderArrays_a85a006cba12fbe1328f54f2f809ae2e6}{configure}}(pEncArrays,ring\_mp);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00356}00356\ \ \ \ \ sensors\_ok\&=sensEncArrays[7].\mbox{\hyperlink{classiCub_1_1perception_1_1SensorEncoderArrays_a85a006cba12fbe1328f54f2f809ae2e6}{configure}}(pEncArrays,ring\_pip);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00357}00357\ \ \ \ \ sensors\_ok\&=sensEncArrays[8].\mbox{\hyperlink{classiCub_1_1perception_1_1SensorEncoderArrays_a85a006cba12fbe1328f54f2f809ae2e6}{configure}}(pEncArrays,ring\_dip);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00358}00358\ \ \ \ \ sensors\_ok\&=sensEncArrays[9].\mbox{\hyperlink{classiCub_1_1perception_1_1SensorEncoderArrays_a85a006cba12fbe1328f54f2f809ae2e6}{configure}}(pEncArrays,little\_mp);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00359}00359\ \ \ \ \ sensors\_ok\&=sensEncArrays[10].\mbox{\hyperlink{classiCub_1_1perception_1_1SensorEncoderArrays_a85a006cba12fbe1328f54f2f809ae2e6}{configure}}(pEncArrays,little\_pip);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00360}00360\ \ \ \ \ sensors\_ok\&=sensEncArrays[11].\mbox{\hyperlink{classiCub_1_1perception_1_1SensorEncoderArrays_a85a006cba12fbe1328f54f2f809ae2e6}{configure}}(pEncArrays,little\_dip);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00361}00361\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00362}00362\ \ \ \ \ \textcolor{keywordflow}{if}\ (!sensors\_ok)}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00363}00363\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00364}00364\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Model_a4f01cfcbc00e0adb4c6bd2104c162442}{printMessage}}(\mbox{\hyperlink{namespaceiCub_1_1perception_1_1log_a4808224c7b00400035caa3d15abef2c2afd4de2e4dc4632842cf4fa6263f72443}{log::error}},1,\textcolor{stringliteral}{"{}some\ errors\ occured"{}});}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00365}00365\ \ \ \ \ \ \ \ \ close();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00366}00366\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00367}00367\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00368}00368\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00369}00369\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Model_a4f01cfcbc00e0adb4c6bd2104c162442}{printMessage}}(\mbox{\hyperlink{namespaceiCub_1_1perception_1_1log_a4808224c7b00400035caa3d15abef2c2abf13376047f84b3eb3dad0e0059f6d7a}{log::info}},1,\textcolor{stringliteral}{"{}configuring\ fingers\ ..."{}});}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00370}00370\ \ \ \ \ Property\ thumb(options.findGroup(\textcolor{stringliteral}{"{}thumb"{}}).toString().c\_str());}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00371}00371\ \ \ \ \ Property\ index(options.findGroup(\textcolor{stringliteral}{"{}index"{}}).toString().c\_str());}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00372}00372\ \ \ \ \ Property\ middle(options.findGroup(\textcolor{stringliteral}{"{}middle"{}}).toString().c\_str());}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00373}00373\ \ \ \ \ Property\ ring(options.findGroup(\textcolor{stringliteral}{"{}ring"{}}).toString().c\_str());}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00374}00374\ \ \ \ \ Property\ little(options.findGroup(\textcolor{stringliteral}{"{}little"{}}).toString().c\_str());}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00375}00375\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00376}00376\ \ \ \ \ \textcolor{keywordtype}{bool}\ fingers\_ok=\textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00377}00377\ \ \ \ \ fingers\_ok\&=fingers[0].\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_a29c97dcfd63f65df61f424d5552a83dd}{fromProperty}}(thumb);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00378}00378\ \ \ \ \ fingers\_ok\&=fingers[1].\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_a29c97dcfd63f65df61f424d5552a83dd}{fromProperty}}(index);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00379}00379\ \ \ \ \ fingers\_ok\&=fingers[2].\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_a29c97dcfd63f65df61f424d5552a83dd}{fromProperty}}(middle);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00380}00380\ \ \ \ \ fingers\_ok\&=fingers[3].\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_a29c97dcfd63f65df61f424d5552a83dd}{fromProperty}}(ring);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00381}00381\ \ \ \ \ fingers\_ok\&=fingers[4].\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_a29c97dcfd63f65df61f424d5552a83dd}{fromProperty}}(little);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00382}00382\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00383}00383\ \ \ \ \ \textcolor{keywordflow}{if}\ (!fingers\_ok)}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00384}00384\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00385}00385\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Model_a4f01cfcbc00e0adb4c6bd2104c162442}{printMessage}}(\mbox{\hyperlink{namespaceiCub_1_1perception_1_1log_a4808224c7b00400035caa3d15abef2c2afd4de2e4dc4632842cf4fa6263f72443}{log::error}},1,\textcolor{stringliteral}{"{}some\ errors\ occured"{}});}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00386}00386\ \ \ \ \ \ \ \ \ close();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00387}00387\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00388}00388\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00389}00389\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00390}00390\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Model_a4f01cfcbc00e0adb4c6bd2104c162442}{printMessage}}(\mbox{\hyperlink{namespaceiCub_1_1perception_1_1log_a4808224c7b00400035caa3d15abef2c2abf13376047f84b3eb3dad0e0059f6d7a}{log::info}},1,\textcolor{stringliteral}{"{}attaching\ sensors\ to\ fingers\ ..."{}});}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00391}00391\ \ \ \ \ fingers[0].\mbox{\hyperlink{classiCub_1_1perception_1_1Node_a54bde511d88093031e67141c804a91af}{attachSensor}}(sensEncs[0]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00392}00392\ \ \ \ \ fingers[0].\mbox{\hyperlink{classiCub_1_1perception_1_1Node_a54bde511d88093031e67141c804a91af}{attachSensor}}(sensEncArrays[0]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00393}00393\ \ \ \ \ fingers[0].\mbox{\hyperlink{classiCub_1_1perception_1_1Node_a54bde511d88093031e67141c804a91af}{attachSensor}}(sensEncArrays[1]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00394}00394\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00395}00395\ \ \ \ \ fingers[1].\mbox{\hyperlink{classiCub_1_1perception_1_1Node_a54bde511d88093031e67141c804a91af}{attachSensor}}(sensEncs[1]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00396}00396\ \ \ \ \ fingers[1].\mbox{\hyperlink{classiCub_1_1perception_1_1Node_a54bde511d88093031e67141c804a91af}{attachSensor}}(sensEncArrays[2]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00397}00397\ \ \ \ \ fingers[1].\mbox{\hyperlink{classiCub_1_1perception_1_1Node_a54bde511d88093031e67141c804a91af}{attachSensor}}(sensEncArrays[3]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00398}00398\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00399}00399\ \ \ \ \ fingers[2].\mbox{\hyperlink{classiCub_1_1perception_1_1Node_a54bde511d88093031e67141c804a91af}{attachSensor}}(sensEncs[2]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00400}00400\ \ \ \ \ fingers[2].\mbox{\hyperlink{classiCub_1_1perception_1_1Node_a54bde511d88093031e67141c804a91af}{attachSensor}}(sensEncArrays[4]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00401}00401\ \ \ \ \ fingers[2].\mbox{\hyperlink{classiCub_1_1perception_1_1Node_a54bde511d88093031e67141c804a91af}{attachSensor}}(sensEncArrays[5]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00402}00402\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00403}00403\ \ \ \ \ fingers[3].\mbox{\hyperlink{classiCub_1_1perception_1_1Node_a54bde511d88093031e67141c804a91af}{attachSensor}}(sensEncs[3]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00404}00404\ \ \ \ \ fingers[3].\mbox{\hyperlink{classiCub_1_1perception_1_1Node_a54bde511d88093031e67141c804a91af}{attachSensor}}(sensEncArrays[6]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00405}00405\ \ \ \ \ fingers[3].\mbox{\hyperlink{classiCub_1_1perception_1_1Node_a54bde511d88093031e67141c804a91af}{attachSensor}}(sensEncArrays[7]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00406}00406\ \ \ \ \ fingers[3].\mbox{\hyperlink{classiCub_1_1perception_1_1Node_a54bde511d88093031e67141c804a91af}{attachSensor}}(sensEncArrays[8]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00407}00407\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00408}00408\ \ \ \ \ fingers[4].\mbox{\hyperlink{classiCub_1_1perception_1_1Node_a54bde511d88093031e67141c804a91af}{attachSensor}}(sensEncs[4]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00409}00409\ \ \ \ \ fingers[4].\mbox{\hyperlink{classiCub_1_1perception_1_1Node_a54bde511d88093031e67141c804a91af}{attachSensor}}(sensEncArrays[9]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00410}00410\ \ \ \ \ fingers[4].\mbox{\hyperlink{classiCub_1_1perception_1_1Node_a54bde511d88093031e67141c804a91af}{attachSensor}}(sensEncArrays[10]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00411}00411\ \ \ \ \ fingers[4].\mbox{\hyperlink{classiCub_1_1perception_1_1Node_a54bde511d88093031e67141c804a91af}{attachSensor}}(sensEncArrays[11]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00412}00412\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00413}00413\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Model_a72abd48d42a0e026e74c4405867a45cc}{attachNode}}(fingers[0]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00414}00414\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Model_a72abd48d42a0e026e74c4405867a45cc}{attachNode}}(fingers[1]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00415}00415\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Model_a72abd48d42a0e026e74c4405867a45cc}{attachNode}}(fingers[2]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00416}00416\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Model_a72abd48d42a0e026e74c4405867a45cc}{attachNode}}(fingers[3]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00417}00417\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Model_a72abd48d42a0e026e74c4405867a45cc}{attachNode}}(fingers[4]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00418}00418\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00419}00419\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Model_a4f01cfcbc00e0adb4c6bd2104c162442}{printMessage}}(\mbox{\hyperlink{namespaceiCub_1_1perception_1_1log_a4808224c7b00400035caa3d15abef2c2abf13376047f84b3eb3dad0e0059f6d7a}{log::info}},1,\textcolor{stringliteral}{"{}configuration\ complete"{}});}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00420}00420\ \ \ \ \ \textcolor{keywordflow}{return}\ configured=\textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00421}00421\ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00422}00422\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00423}00423\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00424}00424\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00425}\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFingersModel_a33119af56e1dce7101bcb1dec4a293ba}{00425}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFingersModel_a33119af56e1dce7101bcb1dec4a293ba}{SpringyFingersModel::toProperty}}(Property\ \&options)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00426}00426\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00427}00427\ \ \ \ \ options.clear();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00428}00428\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00429}00429\ \ \ \ \ \textcolor{keywordflow}{if}\ (configured)}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00430}00430\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00431}00431\ \ \ \ \ \ \ \ \ Property\ prop[5];}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00432}00432\ \ \ \ \ \ \ \ \ fingers[0].\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_a887546a96ec703ab6d7c60e1c36c3173}{toProperty}}(prop[0]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00433}00433\ \ \ \ \ \ \ \ \ fingers[1].\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_a887546a96ec703ab6d7c60e1c36c3173}{toProperty}}(prop[1]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00434}00434\ \ \ \ \ \ \ \ \ fingers[2].\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_a887546a96ec703ab6d7c60e1c36c3173}{toProperty}}(prop[2]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00435}00435\ \ \ \ \ \ \ \ \ fingers[3].\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_a887546a96ec703ab6d7c60e1c36c3173}{toProperty}}(prop[3]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00436}00436\ \ \ \ \ \ \ \ \ fingers[4].\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_a887546a96ec703ab6d7c60e1c36c3173}{toProperty}}(prop[4]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00437}00437\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00438}00438\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{string}\ thumb=\textcolor{stringliteral}{"{}(thumb\ "{}};}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00439}00439\ \ \ \ \ \ \ \ \ thumb+=prop[0].toString();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00440}00440\ \ \ \ \ \ \ \ \ thumb+=\textcolor{stringliteral}{"{})"{}};}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00441}00441\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00442}00442\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{string}\ index=\textcolor{stringliteral}{"{}(index\ "{}};}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00443}00443\ \ \ \ \ \ \ \ \ index+=prop[1].toString();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00444}00444\ \ \ \ \ \ \ \ \ index+=\textcolor{stringliteral}{"{})"{}};}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00445}00445\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00446}00446\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{string}\ middle=\textcolor{stringliteral}{"{}(middle\ "{}};}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00447}00447\ \ \ \ \ \ \ \ \ middle+=prop[2].toString();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00448}00448\ \ \ \ \ \ \ \ \ middle+=\textcolor{stringliteral}{"{})"{}};}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00449}00449\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00450}00450\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{string}\ ring=\textcolor{stringliteral}{"{}(ring\ "{}};}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00451}00451\ \ \ \ \ \ \ \ \ ring+=prop[3].toString();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00452}00452\ \ \ \ \ \ \ \ \ ring+=\textcolor{stringliteral}{"{})"{}};}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00453}00453\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00454}00454\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{string}\ little=\textcolor{stringliteral}{"{}(little\ "{}};}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00455}00455\ \ \ \ \ \ \ \ \ little+=prop[4].toString();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00456}00456\ \ \ \ \ \ \ \ \ little+=\textcolor{stringliteral}{"{})"{}};}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00457}00457\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00458}00458\ \ \ \ \ \ \ \ \ options.fromString(thumb+index+middle+ring+little);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00459}00459\ \ \ \ \ \ \ \ \ options.put(\textcolor{stringliteral}{"{}name"{}},\mbox{\hyperlink{classiCub_1_1perception_1_1Model_ae2117ae02028227ca050199d02a5ec12}{name}});}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00460}00460\ \ \ \ \ \ \ \ \ options.put(\textcolor{stringliteral}{"{}type"{}},type);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00461}00461\ \ \ \ \ \ \ \ \ options.put(\textcolor{stringliteral}{"{}robot"{}},robot);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00462}00462\ \ \ \ \ \ \ \ \ options.put(\textcolor{stringliteral}{"{}verbosity"{}},\mbox{\hyperlink{classiCub_1_1perception_1_1Model_ab04b291c81cec684e8bfa2f6dda88e5e}{verbosity}});}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00463}00463\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00464}00464\ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00465}00465\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00466}00466\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00467}00467\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00468}\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFingersModel_a7fd55034e5567e0ee3db595e86c78811}{00468}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFingersModel_a7fd55034e5567e0ee3db595e86c78811}{SpringyFingersModel::toStream}}(ostream\ \&str)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00469}00469\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00470}00470\ \ \ \ \ \textcolor{keywordflow}{if}\ (configured)}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00471}00471\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00472}00472\ \ \ \ \ \ \ \ \ str<<\textcolor{stringliteral}{"{}name\ \ \ \ \ \ "{}}<<\mbox{\hyperlink{classiCub_1_1perception_1_1Model_ae2117ae02028227ca050199d02a5ec12}{name}}<<endl;}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00473}00473\ \ \ \ \ \ \ \ \ str<<\textcolor{stringliteral}{"{}type\ \ \ \ \ \ "{}}<<type<<endl;}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00474}00474\ \ \ \ \ \ \ \ \ str<<\textcolor{stringliteral}{"{}robot\ \ \ \ \ "{}}<<robot<<endl;}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00475}00475\ \ \ \ \ \ \ \ \ str<<\textcolor{stringliteral}{"{}verbosity\ "{}}<<\mbox{\hyperlink{classiCub_1_1perception_1_1Model_ab04b291c81cec684e8bfa2f6dda88e5e}{verbosity}}<<endl;}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00476}00476\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00477}00477\ \ \ \ \ \ \ \ \ str<<endl;}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00478}00478\ \ \ \ \ \ \ \ \ str<<\textcolor{stringliteral}{"{}[thumb]"{}}<<endl;}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00479}00479\ \ \ \ \ \ \ \ \ fingers[0].\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_a98ddf2cfe968850a9d5228720f8878a6}{toStream}}(str);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00480}00480\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00481}00481\ \ \ \ \ \ \ \ \ str<<endl;}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00482}00482\ \ \ \ \ \ \ \ \ str<<\textcolor{stringliteral}{"{}[index]"{}}<<endl;}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00483}00483\ \ \ \ \ \ \ \ \ fingers[1].\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_a98ddf2cfe968850a9d5228720f8878a6}{toStream}}(str);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00484}00484\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00485}00485\ \ \ \ \ \ \ \ \ str<<endl;}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00486}00486\ \ \ \ \ \ \ \ \ str<<\textcolor{stringliteral}{"{}[middle]"{}}<<endl;}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00487}00487\ \ \ \ \ \ \ \ \ fingers[2].\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_a98ddf2cfe968850a9d5228720f8878a6}{toStream}}(str);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00488}00488\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00489}00489\ \ \ \ \ \ \ \ \ str<<endl;}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00490}00490\ \ \ \ \ \ \ \ \ str<<\textcolor{stringliteral}{"{}[ring]"{}}<<endl;}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00491}00491\ \ \ \ \ \ \ \ \ fingers[3].\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_a98ddf2cfe968850a9d5228720f8878a6}{toStream}}(str);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00492}00492\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00493}00493\ \ \ \ \ \ \ \ \ str<<endl;}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00494}00494\ \ \ \ \ \ \ \ \ str<<\textcolor{stringliteral}{"{}[little]"{}}<<endl;}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00495}00495\ \ \ \ \ \ \ \ \ fingers[4].\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_a98ddf2cfe968850a9d5228720f8878a6}{toStream}}(str);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00496}00496\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00497}00497\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00498}00498\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00499}00499\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00500}00500\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00501}00501\ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00502}00502\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00503}00503\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00504}00504\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00505}\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFingersModel_ac8d68ea7bb06ea021bae73802979f533}{00505}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFingersModel_ac8d68ea7bb06ea021bae73802979f533}{SpringyFingersModel::calibrate}}(\textcolor{keyword}{const}\ Property\ \&options)}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00506}00506\ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00507}00507\ \ \ \ \ \textcolor{keywordflow}{if}\ (configured)}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00508}00508\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00509}00509\ \ \ \ \ \ \ \ \ Value\ fng=options.find(\textcolor{stringliteral}{"{}finger"{}});}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00510}00510\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (fng.isNull())}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00511}00511\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00512}00512\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Model_a4f01cfcbc00e0adb4c6bd2104c162442}{printMessage}}(\mbox{\hyperlink{namespaceiCub_1_1perception_1_1log_a4808224c7b00400035caa3d15abef2c2afd4de2e4dc4632842cf4fa6263f72443}{log::error}},1,\textcolor{stringliteral}{"{}unspecified\ option\ \(\backslash\)"{}finger\(\backslash\)"{}"{}});}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00513}00513\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00514}00514\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00515}00515\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00516}00516\ \ \ \ \ \ \ \ \ IControlMode\ \ \ \ \ *imod;\ drvEncs.view(imod);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00517}00517\ \ \ \ \ \ \ \ \ IControlLimits\ \ \ *ilim;\ drvEncs.view(ilim);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00518}00518\ \ \ \ \ \ \ \ \ IEncoders\ \ \ \ \ \ \ \ *ienc;\ drvEncs.view(ienc);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00519}00519\ \ \ \ \ \ \ \ \ IPositionControl\ *ipos;\ drvEncs.view(ipos);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00520}00520\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00521}00521\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ nAxes;\ ienc-\/>getAxes(\&nAxes);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00522}00522\ \ \ \ \ \ \ \ \ Vector\ qmin(nAxes),qmax(nAxes),vel(nAxes),\mbox{\hyperlink{dataTypes_8h_ae0191316140fce1e08c6f21b0a2dbf0a}{acc}}(nAxes);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00523}00523\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00524}00524\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Model_a4f01cfcbc00e0adb4c6bd2104c162442}{printMessage}}(\mbox{\hyperlink{namespaceiCub_1_1perception_1_1log_a4808224c7b00400035caa3d15abef2c2abf13376047f84b3eb3dad0e0059f6d7a}{log::info}},1,\textcolor{stringliteral}{"{}steering\ the\ hand\ to\ a\ suitable\ starting\ configuration"{}});}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00525}00525\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ j=7;\ j<nAxes;\ j++)}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00526}00526\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00527}00527\ \ \ \ \ \ \ \ \ \ \ \ \ imod-\/>setControlMode(j,VOCAB\_CM\_POSITION);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00528}00528\ \ \ \ \ \ \ \ \ \ \ \ \ ilim-\/>getLimits(j,\&qmin[j],\&qmax[j]);\ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00529}00529\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00530}00530\ \ \ \ \ \ \ \ \ \ \ \ \ ipos-\/>getRefAcceleration(j,\&\mbox{\hyperlink{dataTypes_8h_ae0191316140fce1e08c6f21b0a2dbf0a}{acc}}[j]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00531}00531\ \ \ \ \ \ \ \ \ \ \ \ \ ipos-\/>getRefSpeed(j,\&vel[j]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00532}00532\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00533}00533\ \ \ \ \ \ \ \ \ \ \ \ \ ipos-\/>setRefAcceleration(j,std::numeric\_limits<double>::max());}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00534}00534\ \ \ \ \ \ \ \ \ \ \ \ \ ipos-\/>setRefSpeed(j,60.0);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00535}00535\ \ \ \ \ \ \ \ \ \ \ \ \ ipos-\/>positionMove(j,(j==8)?qmax[j]:qmin[j]);\ \ \ \textcolor{comment}{//\ thumb\ in\ opposition}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00536}00536\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00537}00537\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00538}00538\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Model_a4f01cfcbc00e0adb4c6bd2104c162442}{printMessage}}(\mbox{\hyperlink{namespaceiCub_1_1perception_1_1log_a4808224c7b00400035caa3d15abef2c2abf13376047f84b3eb3dad0e0059f6d7a}{log::info}},1,\textcolor{stringliteral}{"{}proceeding\ with\ the\ calibration"{}});}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00539}00539\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}}=\textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00540}00540\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00541}00541\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (fng.isString())}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00542}00542\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00543}00543\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{string}\ tag=options.check(\textcolor{stringliteral}{"{}finger"{}},Value(\textcolor{stringliteral}{"{}all"{}})).asString();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00544}00544\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (tag==\textcolor{stringliteral}{"{}thumb"{}})}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00545}00545\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00546}00546\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ calibrateFinger(fingers[0],10,qmin[10],qmax[10]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00547}00547\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00548}00548\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (tag==\textcolor{stringliteral}{"{}index"{}})}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00549}00549\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00550}00550\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ calibrateFinger(fingers[1],12,qmin[12],qmax[12]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00551}00551\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00552}00552\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (tag==\textcolor{stringliteral}{"{}middle"{}})}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00553}00553\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00554}00554\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ calibrateFinger(fingers[2],14,qmin[14],qmax[14]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00555}00555\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00556}00556\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (tag==\textcolor{stringliteral}{"{}ring"{}})}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00557}00557\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00558}00558\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ calibrateFinger(fingers[3],15,qmin[15],qmax[15]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00559}00559\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00560}00560\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (tag==\textcolor{stringliteral}{"{}little"{}})}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00561}00561\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00562}00562\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ calibrateFinger(fingers[4],15,qmin[15],qmax[15]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00563}00563\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00564}00564\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ ((tag==\textcolor{stringliteral}{"{}all"{}})\ ||\ (tag==\textcolor{stringliteral}{"{}all\_serial"{}}))}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00565}00565\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00566}00566\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ calibrateFinger(fingers[0],10,qmin[10],qmax[10]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00567}00567\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ calibrateFinger(fingers[1],12,qmin[12],qmax[12]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00568}00568\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ calibrateFinger(fingers[2],14,qmin[14],qmax[14]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00569}00569\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ calibrateFinger(fingers[3],15,qmin[15],qmax[15]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00570}00570\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ calibrateFinger(fingers[4],15,qmin[15],qmax[15]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00571}00571\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00572}00572\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (tag==\textcolor{stringliteral}{"{}all\_parallel"{}})}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00573}00573\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00574}00574\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Bottle\ b;}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00575}00575\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Bottle\ \&bl=b.addList();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00576}00576\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ bl.addString(\textcolor{stringliteral}{"{}thumb"{}});}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00577}00577\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ bl.addString(\textcolor{stringliteral}{"{}index"{}});}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00578}00578\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ bl.addString(\textcolor{stringliteral}{"{}middle"{}});}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00579}00579\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ bl.addString(\textcolor{stringliteral}{"{}ring"{}});}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00580}00580\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ bl.addString(\textcolor{stringliteral}{"{}little"{}});}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00581}00581\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00582}00582\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ fng=b.get(0);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00583}00583\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00584}00584\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00585}00585\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}}=\textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00586}00586\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00587}00587\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00588}00588\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (fng.isList())}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00589}00589\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00590}00590\ \ \ \ \ \ \ \ \ \ \ \ \ deque<CalibThread*>\ db;}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00591}00591\ \ \ \ \ \ \ \ \ \ \ \ \ set<string>\ singletons;}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00592}00592\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00593}00593\ \ \ \ \ \ \ \ \ \ \ \ \ Bottle\ *items=fng.asList();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00594}00594\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i=0;\ i<items-\/>size();\ i++)}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00595}00595\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00596}00596\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{string}\ tag=items-\/>get(i).asString();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00597}00597\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (tag==\textcolor{stringliteral}{"{}thumb"{}})}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00598}00598\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00599}00599\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (singletons.find(tag)==singletons.end())}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00600}00600\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00601}00601\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFingersModel_a096b510d5cacb78e468a4973b905c000}{CalibThread}}\ *thr=\textcolor{keyword}{new}\ \mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFingersModel_a096b510d5cacb78e468a4973b905c000}{CalibThread}};\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00602}00602\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ thr-\/>setInfo(\textcolor{keyword}{this},fingers[0],10,qmin[10],qmax[10]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00603}00603\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ thr-\/>start();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00604}00604\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ db.push\_back(thr);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00605}00605\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ singletons.insert(tag);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00606}00606\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00607}00607\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00608}00608\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (tag==\textcolor{stringliteral}{"{}index"{}})}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00609}00609\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00610}00610\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (singletons.find(tag)==singletons.end())}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00611}00611\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00612}00612\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFingersModel_a096b510d5cacb78e468a4973b905c000}{CalibThread}}\ *thr=\textcolor{keyword}{new}\ \mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFingersModel_a096b510d5cacb78e468a4973b905c000}{CalibThread}};}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00613}00613\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ thr-\/>setInfo(\textcolor{keyword}{this},fingers[1],12,qmin[12],qmax[12]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00614}00614\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ thr-\/>start();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00615}00615\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ db.push\_back(thr);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00616}00616\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ singletons.insert(tag);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00617}00617\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00618}00618\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00619}00619\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (tag==\textcolor{stringliteral}{"{}middle"{}})}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00620}00620\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00621}00621\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (singletons.find(tag)==singletons.end())}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00622}00622\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00623}00623\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFingersModel_a096b510d5cacb78e468a4973b905c000}{CalibThread}}\ *thr=\textcolor{keyword}{new}\ \mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFingersModel_a096b510d5cacb78e468a4973b905c000}{CalibThread}};}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00624}00624\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ thr-\/>setInfo(\textcolor{keyword}{this},fingers[2],14,qmin[14],qmax[14]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00625}00625\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ thr-\/>start();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00626}00626\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ db.push\_back(thr);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00627}00627\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ singletons.insert(tag);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00628}00628\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00629}00629\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00630}00630\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (tag==\textcolor{stringliteral}{"{}ring"{}})}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00631}00631\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00632}00632\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (singletons.find(tag)==singletons.end())}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00633}00633\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00634}00634\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFingersModel_a096b510d5cacb78e468a4973b905c000}{CalibThread}}\ *thr=\textcolor{keyword}{new}\ \mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFingersModel_a096b510d5cacb78e468a4973b905c000}{CalibThread}};}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00635}00635\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ thr-\/>setInfo(\textcolor{keyword}{this},fingers[3],15,qmin[15],qmax[15]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00636}00636\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ thr-\/>start();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00637}00637\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ db.push\_back(thr);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00638}00638\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ singletons.insert(tag);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00639}00639\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00640}00640\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00641}00641\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (tag==\textcolor{stringliteral}{"{}little"{}})}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00642}00642\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00643}00643\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (singletons.find(tag)==singletons.end())}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00644}00644\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00645}00645\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFingersModel_a096b510d5cacb78e468a4973b905c000}{CalibThread}}\ *thr=\textcolor{keyword}{new}\ \mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFingersModel_a096b510d5cacb78e468a4973b905c000}{CalibThread}};}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00646}00646\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ thr-\/>setInfo(\textcolor{keyword}{this},fingers[4],15,qmin[15],qmax[15]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00647}00647\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ thr-\/>start();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00648}00648\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ db.push\_back(thr);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00649}00649\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ singletons.insert(tag);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00650}00650\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00651}00651\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00652}00652\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00653}00653\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00654}00654\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (db.size()>0)}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00655}00655\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00656}00656\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{size\_t}\ i=0;}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00657}00657\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (db.size()>0)}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00658}00658\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00659}00659\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (db[i]-\/>isDone())}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00660}00660\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00661}00661\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ db[i]-\/>stop();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00662}00662\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{delete}\ db[i];}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00663}00663\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ db.erase(db.begin()+i);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00664}00664\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00665}00665\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00666}00666\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Time::delay(0.1);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00667}00667\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (++i>=db.size())}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00668}00668\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ i=0;}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00669}00669\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00670}00670\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00671}00671\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00672}00672\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}}=\textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00673}00673\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00674}00674\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00675}00675\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!fng.isString()\ \&\&\ !fng.isList())}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00676}00676\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}}=\textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00677}00677\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00678}00678\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!\mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}})}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00679}00679\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Model_a4f01cfcbc00e0adb4c6bd2104c162442}{printMessage}}(\mbox{\hyperlink{namespaceiCub_1_1perception_1_1log_a4808224c7b00400035caa3d15abef2c2afd4de2e4dc4632842cf4fa6263f72443}{log::error}},1,\textcolor{stringliteral}{"{}unknown\ finger\ request\ \%s"{}},fng.toString().c\_str());}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00680}00680\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00681}00681\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ j=7;\ j<nAxes;\ j++)}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00682}00682\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00683}00683\ \ \ \ \ \ \ \ \ \ \ \ \ ipos-\/>setRefAcceleration(j,\mbox{\hyperlink{dataTypes_8h_ae0191316140fce1e08c6f21b0a2dbf0a}{acc}}[j]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00684}00684\ \ \ \ \ \ \ \ \ \ \ \ \ ipos-\/>setRefSpeed(j,vel[j]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00685}00685\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00686}00686\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00687}00687\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}};}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00688}00688\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00689}00689\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00690}00690\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00691}00691\ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00692}00692\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00693}00693\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00694}00694\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00695}\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFingersModel_ae513a0763cea0c896815f58fb8678802}{00695}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFingersModel_ae513a0763cea0c896815f58fb8678802}{SpringyFingersModel::getOutput}}(Value\ \&\mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}})\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00696}00696\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00697}00697\ \ \ \ \ \textcolor{keywordflow}{if}\ (configured)}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00698}00698\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00699}00699\ \ \ \ \ \ \ \ \ Value\ val[5];}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00700}00700\ \ \ \ \ \ \ \ \ fingers[0].\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_a6457b1b426a2e94c5d547bdee0ebfacf}{getOutput}}(val[0]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00701}00701\ \ \ \ \ \ \ \ \ fingers[1].\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_a6457b1b426a2e94c5d547bdee0ebfacf}{getOutput}}(val[1]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00702}00702\ \ \ \ \ \ \ \ \ fingers[2].\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_a6457b1b426a2e94c5d547bdee0ebfacf}{getOutput}}(val[2]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00703}00703\ \ \ \ \ \ \ \ \ fingers[3].\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_a6457b1b426a2e94c5d547bdee0ebfacf}{getOutput}}(val[3]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00704}00704\ \ \ \ \ \ \ \ \ fingers[4].\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_a6457b1b426a2e94c5d547bdee0ebfacf}{getOutput}}(val[4]);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00705}00705\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00706}00706\ \ \ \ \ \ \ \ \ Bottle\ bOut;\ Bottle\ \&ins=bOut.addList();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00707}00707\ \ \ \ \ \ \ \ \ ins.addFloat64(val[0].asFloat64());}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00708}00708\ \ \ \ \ \ \ \ \ ins.addFloat64(val[1].asFloat64());}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00709}00709\ \ \ \ \ \ \ \ \ ins.addFloat64(val[2].asFloat64());}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00710}00710\ \ \ \ \ \ \ \ \ ins.addFloat64(val[3].asFloat64());}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00711}00711\ \ \ \ \ \ \ \ \ ins.addFloat64(val[4].asFloat64());}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00712}00712\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00713}00713\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}}=bOut.get(0);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00714}00714\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00715}00715\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00716}00716\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00717}00717\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00718}00718\ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00719}00719\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00720}00720\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00721}00721\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00722}00722\ \textcolor{keywordtype}{void}\ SpringyFingersModel::calibrateFinger(\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger}{SpringyFinger}}\ \&finger,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ joint,}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00723}00723\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ min,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ max)}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00724}00724\ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00725}00725\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Model_a4f01cfcbc00e0adb4c6bd2104c162442}{printMessage}}(\mbox{\hyperlink{namespaceiCub_1_1perception_1_1log_a4808224c7b00400035caa3d15abef2c2abf13376047f84b3eb3dad0e0059f6d7a}{log::info}},1,\textcolor{stringliteral}{"{}calibrating\ finger\ \%s\ ..."{}},finger.\mbox{\hyperlink{classiCub_1_1perception_1_1Node_a98d10bd5ccc2ba53c5f7259b6462d59e}{getName}}().c\_str());}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00726}00726\ \ \ \ \ \textcolor{keywordtype}{double}\ margin=0.1*(max-\/min);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00727}00727\ \ \ \ \ \textcolor{keywordtype}{double}\ \_min=min+margin;}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00728}00728\ \ \ \ \ \textcolor{keywordtype}{double}\ \_max=max-\/margin;}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00729}00729\ \ \ \ \ \textcolor{keywordtype}{double}\ tol\_min=5.0;}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00730}00730\ \ \ \ \ \textcolor{keywordtype}{double}\ tol\_max=5.0;}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00731}00731\ \ \ \ \ \textcolor{keywordtype}{double}\ *val=\&\_min;}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00732}00732\ \ \ \ \ \textcolor{keywordtype}{double}\ *tol=\&tol\_min;}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00733}00733\ \ \ \ \ \textcolor{keywordtype}{double}\ timeout=2.0*(\_max-\/\_min)/finger.\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_aced121fc21f8095d70a8ee6fdcbdc9d2}{getCalibVel}}();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00734}00734\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00735}00735\ \ \ \ \ mtx.lock();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00736}00736\ \ \ \ \ IControlMode\ \ \ \ \ *imod;\ drvEncs.view(imod);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00737}00737\ \ \ \ \ IEncoders\ \ \ \ \ \ \ \ *ienc;\ drvEncs.view(ienc);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00738}00738\ \ \ \ \ IPositionControl\ *ipos;\ drvEncs.view(ipos);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00739}00739\ \ \ \ \ mtx.unlock();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00740}00740\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00741}00741\ \ \ \ \ \textcolor{comment}{//\ workaround}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00742}00742\ \ \ \ \ \textcolor{keywordflow}{if}\ ((finger.\mbox{\hyperlink{classiCub_1_1perception_1_1Node_a98d10bd5ccc2ba53c5f7259b6462d59e}{getName}}()==\textcolor{stringliteral}{"{}ring"{}})\ ||\ (finger.\mbox{\hyperlink{classiCub_1_1perception_1_1Node_a98d10bd5ccc2ba53c5f7259b6462d59e}{getName}}()==\textcolor{stringliteral}{"{}little"{}}))}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00743}00743\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00744}00744\ \ \ \ \ \ \ \ \ \_min=30.0;}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00745}00745\ \ \ \ \ \ \ \ \ \_max=180.0;}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00746}00746\ \ \ \ \ \ \ \ \ tol\_min=20.0;}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00747}00747\ \ \ \ \ \ \ \ \ tol\_max=50.0;}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00748}00748\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00749}00749\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00750}00750\ \ \ \ \ Property\ reset(\textcolor{stringliteral}{"{}(reset)"{}});}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00751}00751\ \ \ \ \ Property\ feed(\textcolor{stringliteral}{"{}(feed)"{}});}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00752}00752\ \ \ \ \ Property\ train(\textcolor{stringliteral}{"{}(train)"{}});}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00753}00753\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00754}00754\ \ \ \ \ finger.\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_adf1d24aef5cf0e6a2e470bd2744ca646}{calibrate}}(reset);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00755}00755\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00756}00756\ \ \ \ \ mtx.lock();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00757}00757\ \ \ \ \ imod-\/>setControlMode(joint,VOCAB\_CM\_POSITION);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00758}00758\ \ \ \ \ ipos-\/>setRefSpeed(joint,finger.\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_aced121fc21f8095d70a8ee6fdcbdc9d2}{getCalibVel}}());}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00759}00759\ \ \ \ \ mtx.unlock();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00760}00760\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00761}00761\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i=0;\ i<5;\ i++)}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00762}00762\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00763}00763\ \ \ \ \ \ \ \ \ mtx.lock();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00764}00764\ \ \ \ \ \ \ \ \ ipos-\/>positionMove(joint,*val);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00765}00765\ \ \ \ \ \ \ \ \ mtx.unlock();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00766}00766\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00767}00767\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{icub-main_2src_2tools_2canBusSniffer_2canBusSnifferV5_2main_8cpp_a1d39aac66e12dae50a24cd7a9100ef33}{done}}=\textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00768}00768\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ fbOld=std::numeric\_limits<double>::max();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00769}00769\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ t0=Time::now();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00770}00770\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (!\mbox{\hyperlink{icub-main_2src_2tools_2canBusSniffer_2canBusSnifferV5_2main_8cpp_a1d39aac66e12dae50a24cd7a9100ef33}{done}})}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00771}00771\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00772}00772\ \ \ \ \ \ \ \ \ \ \ \ \ Time::delay(0.01);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00773}00773\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00774}00774\ \ \ \ \ \ \ \ \ \ \ \ \ mtx.lock();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00775}00775\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ fb;\ ienc-\/>getEncoder(joint,\&fb);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00776}00776\ \ \ \ \ \ \ \ \ \ \ \ \ mtx.unlock();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00777}00777\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00778}00778\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (fabs(fb-\/fbOld)>0.5)}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00779}00779\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00780}00780\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Model_a4f01cfcbc00e0adb4c6bd2104c162442}{printMessage}}(\mbox{\hyperlink{namespaceiCub_1_1perception_1_1log_a4808224c7b00400035caa3d15abef2c2a3ca32e30d4b34ea2c869031cbf12e9ca}{log::no\_info}},2,\textcolor{stringliteral}{"{}feeding\ finger\ \%s"{}},finger.\mbox{\hyperlink{classiCub_1_1perception_1_1Node_a98d10bd5ccc2ba53c5f7259b6462d59e}{getName}}().c\_str());}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00781}00781\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ finger.\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_adf1d24aef5cf0e6a2e470bd2744ca646}{calibrate}}(feed);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00782}00782\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00783}00783\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00784}00784\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{icub-main_2src_2tools_2canBusSniffer_2canBusSnifferV5_2main_8cpp_a1d39aac66e12dae50a24cd7a9100ef33}{done}}=(fabs(*val-\/fb)<*tol)||(Time::now()-\/t0>timeout);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00785}00785\ \ \ \ \ \ \ \ \ \ \ \ \ fbOld=fb;}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00786}00786\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00787}00787\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00788}00788\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (val==\&\_min)}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00789}00789\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00790}00790\ \ \ \ \ \ \ \ \ \ \ \ \ val=\&\_max;}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00791}00791\ \ \ \ \ \ \ \ \ \ \ \ \ tol=\&tol\_max;}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00792}00792\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00793}00793\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00794}00794\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00795}00795\ \ \ \ \ \ \ \ \ \ \ \ \ val=\&\_min;}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00796}00796\ \ \ \ \ \ \ \ \ \ \ \ \ tol=\&tol\_min;}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00797}00797\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00798}00798\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00799}00799\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00800}00800\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Model_a4f01cfcbc00e0adb4c6bd2104c162442}{printMessage}}(\mbox{\hyperlink{namespaceiCub_1_1perception_1_1log_a4808224c7b00400035caa3d15abef2c2abf13376047f84b3eb3dad0e0059f6d7a}{log::info}},1,\textcolor{stringliteral}{"{}training\ finger\ \%s\ ..."{}},finger.\mbox{\hyperlink{classiCub_1_1perception_1_1Node_a98d10bd5ccc2ba53c5f7259b6462d59e}{getName}}().c\_str());\ \ \ \ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00801}00801\ \ \ \ \ finger.\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFinger_adf1d24aef5cf0e6a2e470bd2744ca646}{calibrate}}(train);}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00802}00802\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Model_a4f01cfcbc00e0adb4c6bd2104c162442}{printMessage}}(\mbox{\hyperlink{namespaceiCub_1_1perception_1_1log_a4808224c7b00400035caa3d15abef2c2abf13376047f84b3eb3dad0e0059f6d7a}{log::info}},1,\textcolor{stringliteral}{"{}finger\ \%s\ trained!"{}},finger.\mbox{\hyperlink{classiCub_1_1perception_1_1Node_a98d10bd5ccc2ba53c5f7259b6462d59e}{getName}}().c\_str());}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00803}00803\ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00804}00804\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00805}00805\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00806}00806\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00807}\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFingersModel_aacb13905c47f580034ef15985149c6a7}{00807}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFingersModel_aacb13905c47f580034ef15985149c6a7}{SpringyFingersModel::isCalibrated}}()\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00808}00808\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00809}00809\ \ \ \ \ \textcolor{keywordflow}{return}\ (fingers[0].\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFingersModel_aacb13905c47f580034ef15985149c6a7}{isCalibrated}}()\&\&}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00810}00810\ \ \ \ \ \ \ \ \ \ \ \ \ fingers[1].\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFingersModel_aacb13905c47f580034ef15985149c6a7}{isCalibrated}}()\&\&}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00811}00811\ \ \ \ \ \ \ \ \ \ \ \ \ fingers[2].\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFingersModel_aacb13905c47f580034ef15985149c6a7}{isCalibrated}}()\&\&}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00812}00812\ \ \ \ \ \ \ \ \ \ \ \ \ fingers[3].\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFingersModel_aacb13905c47f580034ef15985149c6a7}{isCalibrated}}()\&\&}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00813}00813\ \ \ \ \ \ \ \ \ \ \ \ \ fingers[4].\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFingersModel_aacb13905c47f580034ef15985149c6a7}{isCalibrated}}());}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00814}00814\ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00815}00815\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00816}00816\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00817}00817\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00818}00818\ \textcolor{keywordtype}{void}\ SpringyFingersModel::close()}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00819}00819\ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00820}00820\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Model_a4f01cfcbc00e0adb4c6bd2104c162442}{printMessage}}(\mbox{\hyperlink{namespaceiCub_1_1perception_1_1log_a4808224c7b00400035caa3d15abef2c2abf13376047f84b3eb3dad0e0059f6d7a}{log::info}},1,\textcolor{stringliteral}{"{}closing\ ..."{}});}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00821}00821\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00822}00822\ \ \ \ \ \textcolor{keywordflow}{if}\ (drvEncs.isValid())}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00823}00823\ \ \ \ \ \ \ \ \ drvEncs.close();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00824}00824\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00825}00825\ \ \ \ \ \textcolor{keywordflow}{if}\ (drvMAIS.isValid())}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00826}00826\ \ \ \ \ \ \ \ \ drvMAIS.close();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00827}00827\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00828}00828\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Model_a8c6cf852fd9533431623c5d1d466c4fb}{nodes}}.clear();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00829}00829\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00830}00830\ \ \ \ \ configured=\textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00831}00831\ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00832}00832\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00833}00833\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00834}00834\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00835}\mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFingersModel_a2d21f3ced22696c568ba455031fb1671}{00835}}\ \mbox{\hyperlink{classiCub_1_1perception_1_1SpringyFingersModel_a2d21f3ced22696c568ba455031fb1671}{SpringyFingersModel::\string~SpringyFingersModel}}()}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00836}00836\ \{}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00837}00837\ \ \ \ \ close();}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00838}00838\ \}}
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00839}00839\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00840}00840\ }
+\DoxyCodeLine{\Hypertarget{springyFingers_8cpp_source_l00841}00841\ }
+
+\end{DoxyCode}

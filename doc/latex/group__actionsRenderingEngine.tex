@@ -1,0 +1,205 @@
+\doxysubsubsection{actions\+Rendering\+Engine}
+\hypertarget{group__actionsRenderingEngine}{}\label{group__actionsRenderingEngine}\index{actionsRenderingEngine@{actionsRenderingEngine}}
+
+
+A module combining multiple libraries and modules from the \doxylink{namespaceiCub}{i\+Cub} repository that allows to execute some basic and complex actions on objects placed on a table in front of the robot.  
+
+
+Collaboration diagram for actions\+Rendering\+Engine\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=333pt]{group__actionsRenderingEngine}
+\end{center}
+\end{figure}
+A module combining multiple libraries and modules from the \doxylink{namespaceiCub}{i\+Cub} repository that allows to execute some basic and complex actions on objects placed on a table in front of the robot. 
+
+\hypertarget{group__tutorial__perceptiveModels_intro_sec}{}\doxysubsubsubsection{\texorpdfstring{Description}{Description}}\label{group__tutorial__perceptiveModels_intro_sec}
+This module makes use of the \doxylink{group__ActionPrimitives}{action\+Primitives} library in order to interact with the objects placed on a table. The module can independently receive visual inputs from a stereo/mono tracker or from an object detector. The module will ask the system to perform the translation from stereo to cartesian information according to the current "{}stereo to cartesian"{} modality chosen\+:
+
+-- homography\+: which assumes that the target point lies on a table and exploits homography to obtain the relative 3D cartesian coordinates.
+
+-- disparity\+: which uses the Stereo\+Disparity module to obtain the 3D cartesian estimate of the 2D target.
+
+-- network\+: which uses a previously trained neural network structure to predict the 3D cartesian coordinate from the stereo input.\hypertarget{group__actionsRenderingEngine_cmd_port}{}\doxysubsubsubsection{\texorpdfstring{Issuing commands}{Issuing commands}}\label{group__actionsRenderingEngine_cmd_port}
+The commands sent as bottles to the module port /$<$mod\+Name$>$/cmd\+:io are described in the following. The response to any command consists in the vocab \mbox{[}ack\mbox{]}/\mbox{[}nack\mbox{]} in case of success/failure.
+
+Some commands require to specify a visual target for the action required. In these cases the parameter \mbox{[}target\mbox{]} can be expressed as follows\+:
+
+(notation\+: \mbox{[}.\mbox{]} identifies a vocab, "{}."{} identifies a string, \texorpdfstring{$<$}{<}.\texorpdfstring{$>$}{>} identifies a double)
+
+--\mbox{[}motion\mbox{]} when using motion cues to detect the visual target.
+
+--\mbox{[}track\mbox{]} when using the output of the visual tracker.
+
+--\mbox{[}fixation\mbox{]} when the target is assumed to be in both cameras image centers.
+
+--\mbox{[}raw\mbox{]} when the target is provided as a raw couple of camera plane coordinates to one of the two \textquotesingle{}raw\+:i\textquotesingle{} ports.
+
+--("{}left"{}\texorpdfstring{$\vert$}{|}"{}right"{} u v) when the target is a 2D couple of camera plane coordinates. If not specified, camera is assumed to be "{}left"{}.
+
+--("{}cartesian"{} x y z) or (x y z) when the target is a 3D cartesian position wrt the robot\textquotesingle{}s reference frame.
+
+--("{}cartesian"{} x y z ax ay az theta) or (x y z ax ay az theta)\+: occasionally also the orientation can be provided.
+
+--"{}object\+\_\+name"{} when using a visual classifier to localize objects. This option represents a label to access online information stored in the databased provided by \doxylink{group__objectsPropertiesCollector}{objects\+Properties\+Collector} module. The label itself is used to access the corresponding object through the "{}name"{} property, whereas the relevant 3D information are available through the "{}position\+\_\+3d"{} property.
+
+General Parameters\+:
+
+The majority of commands can usually be provided with general optional parameters\+:
+
+--$<$arm$>$\+: the user can specify the arm required for the action ("{}left"{}/"{}right"{}). Otherwise the default arm will be used.
+
+--"{}no\+\_\+head"{}/"{}no\+\_\+gaze"{}\+: the action does not affect the gaze of the robot (this parameter does not influece commands that explicitly require to move the head like LOOK).
+
+--"{}no\+\_\+sacc"{}\+: disables the saccadic movements of the gaze controller during the action.
+
+--"{}still"{}\+: prevents the robot from bringing back home the arm after having accomplished the action.
+
+The commands\+:
+
+{\bfseries{IDLE}} ~\newline
+format\+: \mbox{[}idle\mbox{]} ~\newline
+action\+: the gaze controller is reset to the original context stored at start and head/eye control is interrupted.
+
+{\bfseries{HOME}} ~\newline
+format\+: \mbox{[}home\mbox{]} "{}param1"{} "{}param2"{} ~\newline
+action\+: the arms are sent to home position. the optional parameters "{}param1"{} and "{}param2"{} can be independently set to "{}gaze"{} or "{}head"{} in order to bring the gaze controller in home position and "{}fingers"{} or "{}hands"{} to open the robot hands. Alternatively the parameter "{}all"{} can be supplied to perform both optional actions.
+
+{\bfseries{OBSERVE}} ~\newline
+format\+: \mbox{[}observe\mbox{]} ~\newline
+action\+: if the robot is holding an object it brings it in the FoV of its cameras with the final purpose of visually explore it.
+
+{\bfseries{DROP}} ~\newline
+format\+: \mbox{[}drop\mbox{]} "{}param1"{} or \mbox{[}drop\mbox{]} "{}over"{} \mbox{[}target\mbox{]} "{}param1"{} ~\newline
+action\+: if the robot is holding an object it brings it over the table and drops it on a random position approximatively in front of it. Optional parameter "{}away"{} can be provided in orded to have the robot leave the object outside the cameras FoV (on the right or left side of the robot depending on the arm in use). Optional parameter "{}over"{} can be supplied together with the action \mbox{[}target\mbox{]} in order to have the robot drop the object on top of the visual target.
+
+{\bfseries{HAND}} ~\newline
+format\+: \mbox{[}hand\mbox{]} "{}action-\/type"{} "{}hand-\/type"{} ~\newline
+action\+: perform the hand sequence specified by the action-\/type with the hand specified by the hand-\/type.
+
+{\bfseries{TAKE}} ~\newline
+format\+: \mbox{[}take\mbox{]} \mbox{[}target\mbox{]} "{}param1"{} ~\newline
+action\+: the robot tries to reach the specified \mbox{[}target\mbox{]} and grasp it. Optional parameter "{}side"{} or "{}above"{} can be supplied to choose the orientation the robot should try to mantain while performing the action (default\+: "{}above"{}).
+
+{\bfseries{TAKE\+\_\+\+TOOL}} ~\newline
+format\+: \mbox{[}tato\mbox{]} "{}param1"{} ~\newline
+action\+: the robot will reach a specified position to take the tool from a user. Optional parameter "{}left"{} or "{}right"{} can be supplied to choose the orientation the robot
+
+{\bfseries{GRASP}} ~\newline
+format\+: \mbox{[}grasp\mbox{]} \mbox{[}target\mbox{]} ~\newline
+action\+: the robot tries to reach the specified \mbox{[}target\mbox{]} and performs a power grasp. The target must be specified both in cartesian position and orientation. ~\newline
+As further parameter user may specify the way the robot will approach the target by providing the options ("{}approach"{} (dx dy dz wrist\+\_\+pitch)), where dx/dy/dz account for offset displacement in meters wrt to the grasping reference frame and wrist\+\_\+pitch is the apporaching pitch of the wrist given in degrees.
+
+{\bfseries{TOUCH}} ~\newline
+format\+: \mbox{[}touch\mbox{]} \mbox{[}target\mbox{]} "{}param1"{} "{}param2"{} ~\newline
+action\+: the robot tries to reach the specified \mbox{[}target\mbox{]} and then brings the arm back to home position. Optional parameter "{}side"{} or "{}above"{} can be supplied to choose the orientation the robot should try to mantain while performing the action (default\+: "{}above"{}).
+
+{\bfseries{PUSH}} ~\newline
+format\+: \mbox{[}push\mbox{]} \mbox{[}target\mbox{]} "{}param1"{} ~\newline
+action\+: the robot tries to reach the specified \mbox{[}target\mbox{]} from one side and then push it laterally. Optional parameter "{}away"{} can be supplied in order to have the robot push the object away from its root reference frame.
+
+{\bfseries{POINT}} ~\newline
+format\+: \mbox{[}point\mbox{]} \mbox{[}target\mbox{]} ~\newline
+action\+: the robot tries to point at the specified \mbox{[}target\mbox{]} with its index finger.
+
+{\bfseries{POINT\+\_\+\+FAR}} ~\newline
+format\+: \mbox{[}pfar\mbox{]} \mbox{[}target\mbox{]} ~\newline
+action\+: the robot tries to point at the specified \mbox{[}target\mbox{]} located far from the robot.
+
+{\bfseries{LOOK}} ~\newline
+format\+: \mbox{[}look\mbox{]} \mbox{[}target\mbox{]} "{}param1"{} (block\+\_\+eyes $<$ver$>$) ~\newline
+action\+: the robot looks at the specified \mbox{[}target\mbox{]}. "{}param1"{} can be set equal to "{}fixate"{} in order to keep the gaze fixating the requested target also when other commands are issued to the torso. The further option "{}wait"{} can be specified in order to let the robot wait until the target is under fixation before returning.~\newline
+If provided, the option (block\+\_\+eyes $<$ver$>$) serves to block the eyes at the specified vergence while gazing. ~\newline
+Note\+: the special target \mbox{[}hand\mbox{]} (with optional parameter "{}left"{}/"{}right"{}) can be provided to have the robot look at its own hand. The robot will keep looking at its own hand until an idle command.
+
+{\bfseries{EXPECT}} ~\newline
+format\+: \mbox{[}expect\mbox{]} ~\newline
+action\+: the robot puts one arm forward with the palm of the hand facing up and waiting for an object to be put on it.
+
+{\bfseries{GIVE}} ~\newline
+format\+: \mbox{[}give\mbox{]} ~\newline
+action\+: the robot puts one arm forward with the palm of the hand facing up and opens the fingers so that the object held in the hand is free to be taken.
+
+{\bfseries{TRACK}} ~\newline
+format\+: \mbox{[}track\mbox{]} \mbox{[}target\mbox{]} "{}param1"{} ~\newline
+action\+: the specified \mbox{[}target\mbox{]} position is supplied to the tracker module and the gaze controller is updated in order to keep the object constantly inside the robot fovea. The optional "{}param1"{} can be put equal to "{}no\+\_\+sacc"{} in order to disable the saccadic movements of the gaze controller during the tracking process.
+
+{\bfseries{TEACH ACTION}} ~\newline
+format\+: \mbox{[}teach\mbox{]} "{}action\+\_\+name"{} \mbox{[}start/stop\mbox{]} "{}param1"{} ~\newline
+action\+: If parameter \mbox{[}start\mbox{]} is specified and the action "{}action\+\_\+name"{} has not been registered yet, the robot arm is set to torque control mode. The cartesian position (wrt the starting point) and orientation of the robot arm is stored until the command \mbox{[}teach\mbox{]} "{}action\+\_\+name"{} \mbox{[}stop\mbox{]} is received. The learned action is recorded to the file "{}actions/$<$arm$>$/$<$action\+\_\+name$>$.\+txt"{} and can be repeated autonomously using the command {\bfseries{IMITATE ACTION}} (\mbox{[}imitate\mbox{]} "{}action\+\_\+name"{}).
+
+{\bfseries{IMITATE ACTION}} ~\newline
+format\+: \mbox{[}imitate\mbox{]} "{}action\+\_\+name"{} ~\newline
+action\+: the system loads the file "{}actions/$<$arm$>$/$<$action\+\_\+name$>$.\+txt"{} and controls the arm in order to repeat the trajectory previously registered.
+
+{\bfseries{CALIBRATION}}~\newline
+different types of calibrations can be requested by issuing commands of the form\+: \mbox{[}calib\mbox{]} \mbox{[}calibration\+\_\+type\mbox{]} "{}param1"{} "{}param2"{} In the following a short description of the possible values of \mbox{[}calibration\+\_\+type\mbox{]}\+:
+
+--\mbox{[}table\mbox{]} the robot will try to find out the table height exploiting the contact detection based on force control. If the contact is detected then the new table height is sent to the homography module that is in charge of extracting the 3d coordinates of the object from its 2d projection on the image plane. The file containing the table information is also updated accordingly to avoid calibrating always at start-\/up.
+
+--\mbox{[}fingers\mbox{]} the robot will calibrate the fingers in order to detect whether correct grasp has been achieved.
+
+--\mbox{[}kinematics\mbox{]} this option requires a parameter \mbox{[}start/stop\mbox{]}. when started, the system is set to cartesian torque control and the robot arm can be moved around by the human user. When the \mbox{[}calib\mbox{]} \mbox{[}kinematics\mbox{]} \mbox{[}stop\mbox{]} command is received, the system is set to stiff mode and the offset between the initial and the current position is stored. It is also possible to associate a specific kinematic offset to a single object. To do so, it is required to issue the command \mbox{[}calib\mbox{]} \mbox{[}kinematics\mbox{]} \mbox{[}stop\mbox{]} $<$object\+\_\+name$>$. Then, whenever the system will be asked to preform an action over such object, the system will use the learnt offset.
+
+{\bfseries{EXPLORATION}} ~\newline
+different types of explorations can be requested by issuing commands of the form\+: \mbox{[}explore\mbox{]} \mbox{[}exploration\+\_\+type\mbox{]} In the following a short description of the possible values of \mbox{[}exploration\+\_\+type\mbox{]}\+:
+
+--\mbox{[}torso\mbox{]} the robot will start moving its torso exploring different positions (specified in the file exploration\+\_\+poses.\+ini). then it will go back to the initial position.
+
+--\mbox{[}hand\mbox{]} the robot will start moving its hand (typically while holding an object) and at the same time look at it. For safety issues, by default the robot moves the other hand back to home position in order to avoid collision. This behaviour can be modified by providing the optional parameter "{}keep\+\_\+other\+\_\+hand\+\_\+still"{}.\hypertarget{group__actionsRenderingEngine_get_port}{}\doxysubsubsubsection{\texorpdfstring{The "{}\+Get"{} Port}{The "Get" Port}}\label{group__actionsRenderingEngine_get_port}
+The actions\+Rendering\+Engine can be queried via the port /$<$mod\+Name$>$/get\+:io in order to obtain the following data\+:
+
+{\bfseries{GET}} format\+: \mbox{[}get\mbox{]} $<$request$>$ action\+: the system returns the requested element.
+
+$<$request$>$ can be of the form\+:
+
+--\mbox{[}s2c\mbox{]} \mbox{[}target\+\_\+1\mbox{]} ... \mbox{[}target\+\_\+n\mbox{]}\+: returns the current cartesian coordinates of the n visual targets wrt to the robot root reference frame. The number of targets is not predefined.
+
+--\mbox{[}table\mbox{]}\+: returns the current height of the table in front of the robot
+
+--\mbox{[}holding\mbox{]}\+: returns true if the robot is holding an object in its active hand.
+
+--\mbox{[}hand\mbox{]} \mbox{[}image\mbox{]}\+: returns a vector of the form (u\+\_\+left v\+\_\+left u\+\_\+right v\+\_\+right hand-\/head-\/distance) that reports the projection of the end-\/effector of the active arm in both the robot cameras together with the distance (in meters) between the robot forehead and its hand.\hypertarget{group__tutorial__perceptiveModels_lib_sec}{}\doxysubsubsubsection{\texorpdfstring{Libraries}{Libraries}}\label{group__tutorial__perceptiveModels_lib_sec}
+
+\begin{DoxyItemize}
+\item YARP libraries.
+\item \doxylink{group__ActionPrimitives}{action\+Primitives} library.
+\end{DoxyItemize}\hypertarget{group__tutorial__ationPrimitives_portsa_sec}{}\doxysubsubsubsection{\texorpdfstring{Ports Accessed}{Ports Accessed}}\label{group__tutorial__ationPrimitives_portsa_sec}
+Assume that the robot interface is operative and the \doxylink{group__wholeBodyDynamics}{whole\+Body\+Dynamics} is running.\hypertarget{group__tutorial__ationPrimitives_portsc_sec}{}\doxysubsubsubsection{\texorpdfstring{Ports Created}{Ports Created}}\label{group__tutorial__ationPrimitives_portsc_sec}
+Aside from the internal ports created by \doxylink{group__ActionPrimitives}{action\+Primitives} library, we also have\+:
+
+
+\begin{DoxyItemize}
+\item {\itshape /} $<$mod\+Name$>$/wbd\+:rpc to be connected to {\itshape /whole\+Body\+Dynamics/rpc}\+:i in order to allow for resetting force offsets in the computation of internal dynamics of the robot.
+\item {\itshape /} $<$mod\+Name$>$/cmd\+:io receives a bottle containing commands whose formats are specified in the previous section. The port replies as soon as the current action has been completed.
+\item {\itshape /} $<$mod\+Name$>$/rpc remote procedure call. Recognized remote commands\+:~\newline
+ -\/\mbox{[}help\mbox{]}\+: returns the list of available rpc commands.~\newline
+ -\/\mbox{[}get\mbox{]}\+: get requests~\newline
+ -\/\mbox{[}status\mbox{]}\+: returns the bottle (gaze $<$status$>$) (left\+\_\+arm $<$status$>$) (right\+\_\+arm $<$status$>$) where $<$status$>$ can be equal to "{}idle"{}, "{}busy"{} or "{}unavailable"{}.~\newline
+ -\/\mbox{[}impedance\mbox{]} \mbox{[}on\mbox{]}/\mbox{[}off\mbox{]}\+: enable/disable (if available) impedance control.~\newline
+ -\/\mbox{[}waveing\mbox{]} \mbox{[}on\mbox{]}/\mbox{[}off\mbox{]}\+: enable/disable the \doxylink{namespaceiCub}{i\+Cub} arm(s) waving.~\newline
+ -\/\mbox{[}mode\mbox{]} \mbox{[}homography\mbox{]}/\mbox{[}disparity\mbox{]}/\mbox{[}network\mbox{]}\+: sets the desired stereo to cartesian mode.~\newline
+ -\/\mbox{[}interrupt\mbox{]}\+: interrupts any action deleting also the action queue for both arms.~\newline
+ -\/\mbox{[}reinstate\mbox{]}\+: if the module was interrupted reinstate it.~\newline
+ -\/\mbox{[}elbow\mbox{]} "{}left"{}\texorpdfstring{$\vert$}{|}"{}right"{}\texorpdfstring{$\vert$}{|}"{}both"{} $<$height$>$ $<$weight$>$\+: to change elbow parameters. ~\newline
+ -\/\mbox{[}time\mbox{]} $<$time$>$\+: to change default arm movement execution time (in seconds).
+\end{DoxyItemize}\hypertarget{group__tutorial__perceptiveModels_parameters_sec}{}\doxysubsubsubsection{\texorpdfstring{Parameters}{Parameters}}\label{group__tutorial__perceptiveModels_parameters_sec}
+The following are the options that are not usually contained within the configuration file.
+
+--name {\itshape name} 
+\begin{DoxyItemize}
+\item specify the module name, which is {\itshape actions\+Rendering\+Engine} by default.
+\end{DoxyItemize}
+
+--from {\itshape file} 
+\begin{DoxyItemize}
+\item specify the configuration file (use {\itshape -\/-\/context} option to select the current context)
+\end{DoxyItemize}\hypertarget{group__tutorial__ationPrimitives_in_files_sec}{}\doxysubsubsubsection{\texorpdfstring{Input Data Files}{Input Data Files}}\label{group__tutorial__ationPrimitives_in_files_sec}
+-- kinematic\+\_\+offsets.\+ini contains the table height as well as the arms kinematic offsets and is updated on-\/line as result of an exploration phase. -- network.\+ini contains the information needed by the system to load the neural network that computes the stereo2cartesian mapping. -- hands\+\_\+sequences.\+ini contains the list of hand sequences for the action primitives. -- exploration\+\_\+poses.\+ini contains a list of position used to explore multiple points of view with the robot torso. -- grasp\+\_\+model\+\_\+$<$hand$>$.\+ini contains the information needed by the Perceptive\+Model layer. -- actions/$<$arm$>$/$<$action\+\_\+name$>$.actions each action "{}learned by imitation"{} is stored in a .txt file with the same name of the action itself.\hypertarget{group__tutorial__perceptiveModels_tested_os_sec}{}\doxysubsubsubsection{\texorpdfstring{Tested OS}{Tested OS}}\label{group__tutorial__perceptiveModels_tested_os_sec}
+Windows, Linux
+
+\begin{DoxyAuthor}{Author}
+Carlo Ciliberto, Vadim Tikhanoff 
+\end{DoxyAuthor}

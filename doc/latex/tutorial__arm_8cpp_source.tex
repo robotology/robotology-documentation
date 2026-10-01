@@ -1,0 +1,157 @@
+\doxysection{tutorial\+\_\+arm.\+cpp}
+\hypertarget{tutorial__arm_8cpp_source}{}\label{tutorial__arm_8cpp_source}\index{icub-\/tutorials/src/motorControlBasic/tutorial\_arm.cpp@{icub-\/tutorials/src/motorControlBasic/tutorial\_arm.cpp}}
+\mbox{\hyperlink{tutorial__arm_8cpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00001}00001\ \textcolor{comment}{//\ -\/*-\/\ mode:C++;\ tab-\/width:4;\ c-\/basic-\/offset:4;\ indent-\/tabs-\/mode:nil\ -\/*-\/}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00002}00002\ }
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00003}00003\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00004}00004\ \textcolor{preprocessor}{\#include\ <cstdio>}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00005}00005\ }
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00006}00006\ \textcolor{preprocessor}{\#include\ <yarp/os/Network.h>}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00007}00007\ \textcolor{preprocessor}{\#include\ <yarp/dev/ControlBoardInterfaces.h>}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00008}00008\ \textcolor{preprocessor}{\#include\ <yarp/dev/PolyDriver.h>}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00009}00009\ \textcolor{preprocessor}{\#include\ <yarp/os/Time.h>}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00010}00010\ \textcolor{preprocessor}{\#include\ <yarp/sig/Vector.h>}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00011}00011\ }
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00012}00012\ \textcolor{keyword}{using\ namespace\ }std;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00013}00013\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceyarp_1_1dev}{yarp::dev}};}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00014}00014\ \textcolor{keyword}{using\ namespace\ }yarp::sig;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00015}00015\ \textcolor{keyword}{using\ namespace\ }yarp::os;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00016}00016\ }
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00017}\mbox{\hyperlink{tutorial__arm_8cpp_a0ddf1224851353fc92bfbff6f499fa97}{00017}}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{icub-tutorials_2src_2anyRobotCartesianInterface_2src_2fakeRobot_2main_8cpp_ae66f6b31b5ad750f1fe042a706a4e3d4}{main}}(\textcolor{keywordtype}{int}\ argc,\ \textcolor{keywordtype}{char}\ *argv[])\ }
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00018}00018\ \{}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00019}00019\ \ \ \ \ Network\ \mbox{\hyperlink{namespaceyarp}{yarp}};}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00020}00020\ }
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00021}00021\ \ \ \ \ Property\ params;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00022}00022\ \ \ \ \ params.fromCommand(argc,\ argv);}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00023}00023\ }
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00024}00024\ \ \ \ \ \textcolor{keywordflow}{if}\ (!params.check(\textcolor{stringliteral}{"{}robot"{}}))}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00025}00025\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00026}00026\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{saveNetwork_8m_a0eba6f64b9c26507a877bcb0c4f270e2}{fprintf}}(stderr,\ \textcolor{stringliteral}{"{}Please\ specify\ the\ name\ of\ the\ robot\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00027}00027\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{saveNetwork_8m_a0eba6f64b9c26507a877bcb0c4f270e2}{fprintf}}(stderr,\ \textcolor{stringliteral}{"{}-\/-\/robot\ name\ (e.g.\ icub)\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00028}00028\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ 1;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00029}00029\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00030}00030\ \ \ \ \ std::string\ robotName=params.find(\textcolor{stringliteral}{"{}robot"{}}).asString();}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00031}00031\ \ \ \ \ std::string\ remotePorts=\textcolor{stringliteral}{"{}/"{}};}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00032}00032\ \ \ \ \ remotePorts+=robotName;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00033}00033\ \ \ \ \ remotePorts+=\textcolor{stringliteral}{"{}/right\_arm"{}};}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00034}00034\ }
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00035}00035\ \ \ \ \ std::string\ localPorts=\textcolor{stringliteral}{"{}/test/client"{}};}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00036}00036\ }
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00037}00037\ \ \ \ \ Property\ options;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00038}00038\ \ \ \ \ options.put(\textcolor{stringliteral}{"{}device"{}},\ \textcolor{stringliteral}{"{}remote\_controlboard"{}});}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00039}00039\ \ \ \ \ options.put(\textcolor{stringliteral}{"{}local"{}},\ localPorts);\ \ \ \textcolor{comment}{//local\ port\ names}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00040}00040\ \ \ \ \ options.put(\textcolor{stringliteral}{"{}remote"{}},\ remotePorts);\ \textcolor{comment}{//where\ we\ connect\ to}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00041}00041\ }
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00042}00042\ \ \ \ \ \textcolor{comment}{//\ create\ a\ device}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00043}00043\ \ \ \ \ PolyDriver\ robotDevice(options);}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00044}00044\ \ \ \ \ \textcolor{keywordflow}{if}\ (!robotDevice.isValid())\ \{}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00045}00045\ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}Device\ not\ available.\ \ Here\ are\ the\ known\ devices:\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00046}00046\ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\%s"{}},\ Drivers::factory().toString().c\_str());}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00047}00047\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ 0;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00048}00048\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00049}00049\ }
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00050}00050\ \ \ \ \ IPositionControl\ *pos;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00051}00051\ \ \ \ \ IEncoders\ *encs;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00052}00052\ }
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00053}00053\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}};}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00054}00054\ \ \ \ \ \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}}\ =\ robotDevice.view(pos);}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00055}00055\ \ \ \ \ \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}}\ =\ \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}}\ \&\&\ robotDevice.view(encs);}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00056}00056\ }
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00057}00057\ \ \ \ \ \textcolor{keywordflow}{if}\ (!\mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}})\ \{}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00058}00058\ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}Problems\ acquiring\ interfaces\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00059}00059\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ 0;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00060}00060\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00061}00061\ }
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00062}00062\ \ \ \ \ \textcolor{keywordtype}{int}\ nj=0;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00063}00063\ \ \ \ \ pos-\/>getAxes(\&nj);}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00064}00064\ \ \ \ \ Vector\ encoders;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00065}00065\ \ \ \ \ Vector\ command;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00066}00066\ \ \ \ \ Vector\ tmp;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00067}00067\ \ \ \ \ encoders.resize(nj);}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00068}00068\ \ \ \ \ tmp.resize(nj);}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00069}00069\ \ \ \ \ command.resize(nj);}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00070}00070\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00071}00071\ \ \ \ \ \textcolor{keywordtype}{int}\ i;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00072}00072\ \ \ \ \ \textcolor{keywordflow}{for}\ (i\ =\ 0;\ i\ <\ nj;\ i++)\ \{}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00073}00073\ \ \ \ \ \ \ \ \ \ tmp[i]\ =\ 50.0;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00074}00074\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00075}00075\ \ \ \ \ pos-\/>setRefAccelerations(tmp.data());}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00076}00076\ }
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00077}00077\ \ \ \ \ \textcolor{keywordflow}{for}\ (i\ =\ 0;\ i\ <\ nj;\ i++)\ \{}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00078}00078\ \ \ \ \ \ \ \ \ tmp[i]\ =\ 10.0;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00079}00079\ \ \ \ \ \ \ \ \ pos-\/>setRefSpeed(i,\ tmp[i]);}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00080}00080\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00081}00081\ }
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00082}00082\ \ \ \ \ \textcolor{comment}{//pos-\/>setRefSpeeds(tmp.data()))}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00083}00083\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00084}00084\ \ \ \ \ \textcolor{comment}{//fisrst\ read\ all\ encoders}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00085}00085\ \ \ \ \ \textcolor{comment}{//}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00086}00086\ \ \ \ \ printf(\textcolor{stringliteral}{"{}waiting\ for\ encoders"{}});}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00087}00087\ \ \ \ \ \textcolor{keywordflow}{while}(!encs-\/>getEncoders(encoders.data()))}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00088}00088\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00089}00089\ \ \ \ \ \ \ \ \ Time::delay(0.1);}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00090}00090\ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}."{}});}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00091}00091\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00092}00092\ \ \ \ \ printf(\textcolor{stringliteral}{"{}\(\backslash\)n;"{}});}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00093}00093\ }
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00094}00094\ \ \ \ \ command=encoders;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00095}00095\ \ \ \ \ \textcolor{comment}{//now\ set\ the\ shoulder\ to\ some\ value}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00096}00096\ \ \ \ \ command[0]=-\/50;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00097}00097\ \ \ \ \ command[1]=20;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00098}00098\ \ \ \ \ command[2]=-\/10;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00099}00099\ \ \ \ \ command[3]=50;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00100}00100\ \ \ \ \ pos-\/>positionMove(command.data());}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00101}00101\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00102}00102\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{icub-main_2src_2tools_2canBusSniffer_2canBusSnifferV5_2main_8cpp_a1d39aac66e12dae50a24cd7a9100ef33}{done}}=\textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00103}00103\ }
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00104}00104\ \ \ \ \ \textcolor{keywordflow}{while}(!\mbox{\hyperlink{icub-main_2src_2tools_2canBusSniffer_2canBusSnifferV5_2main_8cpp_a1d39aac66e12dae50a24cd7a9100ef33}{done}})}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00105}00105\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00106}00106\ \ \ \ \ \ \ \ \ pos-\/>checkMotionDone(\&\mbox{\hyperlink{icub-main_2src_2tools_2canBusSniffer_2canBusSnifferV5_2main_8cpp_a1d39aac66e12dae50a24cd7a9100ef33}{done}});}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00107}00107\ \ \ \ \ \ \ \ \ Time::delay(0.1);}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00108}00108\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00109}00109\ }
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00110}00110\ \ \ \ \ \textcolor{keywordtype}{int}\ times=0;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00111}00111\ \ \ \ \ \textcolor{keywordflow}{while}(\textcolor{keyword}{true})}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00112}00112\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00113}00113\ \ \ \ \ \ \ \ \ times++;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00114}00114\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (times\%2)}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00115}00115\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00116}00116\ \ \ \ \ \ \ \ \ \ \ \ \ \ command[0]=-\/50;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00117}00117\ \ \ \ \ \ \ \ \ \ \ \ \ \ command[1]=20;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00118}00118\ \ \ \ \ \ \ \ \ \ \ \ \ \ command[2]=-\/10;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00119}00119\ \ \ \ \ \ \ \ \ \ \ \ \ \ command[3]=50;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00120}00120\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00121}00121\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00122}00122\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00123}00123\ \ \ \ \ \ \ \ \ \ \ \ \ \ command[0]=-\/20;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00124}00124\ \ \ \ \ \ \ \ \ \ \ \ \ \ command[1]=40;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00125}00125\ \ \ \ \ \ \ \ \ \ \ \ \ \ command[2]=-\/10;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00126}00126\ \ \ \ \ \ \ \ \ \ \ \ \ \ command[3]=30;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00127}00127\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00128}00128\ }
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00129}00129\ \ \ \ \ \ \ \ \ pos-\/>positionMove(command.data());}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00130}00130\ }
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00131}00131\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ count=50;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00132}00132\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}(count-\/-\/)}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00133}00133\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00134}00134\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Time::delay(0.1);}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00135}00135\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ ret=encs-\/>getEncoders(encoders.data());}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00136}00136\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00137}00137\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!ret)}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00138}00138\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00139}00139\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{saveNetwork_8m_a0eba6f64b9c26507a877bcb0c4f270e2}{fprintf}}(stderr,\ \textcolor{stringliteral}{"{}Error\ receiving\ encoders,\ check\ connectivity\ with\ the\ robot\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00140}00140\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00141}00141\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00142}00142\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ }
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00143}00143\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\%.1lf\ \%.1lf\ \%.1lf\ \%.1lf\(\backslash\)n"{}},\ encoders[0],\ encoders[1],\ encoders[2],\ encoders[3]);}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00144}00144\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00145}00145\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00146}00146\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00147}00147\ }
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00148}00148\ \ \ \ \ robotDevice.close();}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00149}00149\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00150}00150\ \ \ \ \ \textcolor{keywordflow}{return}\ 0;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm_8cpp_source_l00151}00151\ \}}
+
+\end{DoxyCode}

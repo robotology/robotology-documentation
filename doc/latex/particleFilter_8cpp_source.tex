@@ -1,0 +1,977 @@
+\doxysection{particle\+Filter.\+cpp}
+\hypertarget{particleFilter_8cpp_source}{}\label{particleFilter_8cpp_source}\index{icub-\/main/src/modules/templatePFTracker/src/particleFilter.cpp@{icub-\/main/src/modules/templatePFTracker/src/particleFilter.cpp}}
+\mbox{\hyperlink{particleFilter_8cpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00001}00001\ \textcolor{comment}{/*\ }}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00002}00002\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2009\ RobotCub\ Consortium,\ European\ Commission\ FP6\ Project\ IST-\/004370}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00003}00003\ \textcolor{comment}{\ *\ Authors:\ Vadim\ Tikhanoff,\ Carlo\ Ciliberto\ }}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00004}00004\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00005}00005\ \textcolor{comment}{\ *\ Algorithm\ taken\ from\ R.\ Hess,\ A.\ Fern,\ "{}Discriminatively\ trained\ particle\ filters\ for\ complex\ multi-\/object\ tracking,"{}\ cvpr,\ pp.240-\/247,\ 2009\ IEEE\ Conference\ on\ Computer\ Vision\ and\ Pattern\ Recognition,\ 2009}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00006}00006\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00007}00007\ \textcolor{comment}{\ *\ email:\ \ \ vadim.tikhanoff@iit.it}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00008}00008\ \textcolor{comment}{\ *\ website:\ www.robotcub.org\ }}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00009}00009\ \textcolor{comment}{\ *\ Permission\ is\ granted\ to\ copy,\ distribute,\ and/or\ modify\ this\ program}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00010}00010\ \textcolor{comment}{\ *\ under\ the\ terms\ of\ the\ GNU\ General\ Public\ License,\ version\ 2\ or\ any}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00011}00011\ \textcolor{comment}{\ *\ later\ version\ published\ by\ the\ Free\ Software\ Foundation.}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00012}00012\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00013}00013\ \textcolor{comment}{\ *\ A\ copy\ of\ the\ license\ can\ be\ found\ at}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00014}00014\ \textcolor{comment}{\ *\ http://www.robotcub.org/icub/license/gpl.txt}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00015}00015\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00016}00016\ \textcolor{comment}{\ *\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00017}00017\ \textcolor{comment}{\ *\ WITHOUT\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00018}00018\ \textcolor{comment}{\ *\ MERCHANTABILITY\ or\ FITNESS\ FOR\ A\ PARTICULAR\ PURPOSE.\ See\ the\ GNU\ General}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00019}00019\ \textcolor{comment}{\ *\ Public\ License\ for\ more\ details}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00020}00020\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00021}00021\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00022}00022\ \textcolor{preprocessor}{\#include\ <utility>}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00023}00023\ \textcolor{preprocessor}{\#include\ <yarp/cv/Cv.h>}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00024}00024\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{particleFilter_8h}{iCub/particleFilter.h}}>}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00025}00025\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00026}00026\ \textcolor{keyword}{using\ namespace\ }std;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00027}00027\ \textcolor{keyword}{using\ namespace\ }yarp::os;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00028}00028\ \textcolor{keyword}{using\ namespace\ }yarp::sig;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00029}00029\ \textcolor{keyword}{using\ namespace\ }yarp::cv;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00030}00030\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00031}00031\ \textcolor{comment}{/**********************************************************/}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00032}\mbox{\hyperlink{particleFilter_8h_a60ab9c646dde9f65e7f7ec7ea7954f94}{00032}}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{particleFilter_8cpp_a60ab9c646dde9f65e7f7ec7ea7954f94}{particle\_cmp}}(\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{void}*\ p1,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{void}*\ p2\ )\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00033}00033\ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00034}00034\ \ \ \ \ \mbox{\hyperlink{structPARTICLEThread_1_1particle}{PARTICLEThread::particle}}*\ \_p1\ =\ (\mbox{\hyperlink{structPARTICLEThread_1_1particle}{PARTICLEThread::particle}}*)p1;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00035}00035\ \ \ \ \ \mbox{\hyperlink{structPARTICLEThread_1_1particle}{PARTICLEThread::particle}}*\ \_p2\ =\ (\mbox{\hyperlink{structPARTICLEThread_1_1particle}{PARTICLEThread::particle}}*)p2;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00036}00036\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00037}00037\ \ \ \ \ \textcolor{keywordflow}{if}(\ \_p1-\/>\mbox{\hyperlink{structPARTICLEThread_1_1particle_aafbf6dd76487810f90d039683579f429}{w}}\ >\ \_p2-\/>\mbox{\hyperlink{structPARTICLEThread_1_1particle_aafbf6dd76487810f90d039683579f429}{w}}\ )}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00038}00038\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ -\/1;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00039}00039\ \ \ \ \ \textcolor{keywordflow}{if}(\ \_p1-\/>\mbox{\hyperlink{structPARTICLEThread_1_1particle_aafbf6dd76487810f90d039683579f429}{w}}\ <\ \_p2-\/>\mbox{\hyperlink{structPARTICLEThread_1_1particle_aafbf6dd76487810f90d039683579f429}{w}}\ )}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00040}00040\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ 1;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00041}00041\ \ \ \ \ \textcolor{keywordflow}{return}\ 0;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00042}00042\ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00043}00043\ \textcolor{comment}{/**********************************************************/}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00044}00044\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00045}\mbox{\hyperlink{classPARTICLEThread_af080f0bff42d67f345a9e2e879fd2ea0}{00045}}\ \mbox{\hyperlink{classPARTICLEThread_af080f0bff42d67f345a9e2e879fd2ea0}{PARTICLEThread::\string~PARTICLEThread}}()\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00046}00046\ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00047}00047\ \ \ \ \ cout\ <<\ \textcolor{stringliteral}{"{}deleting\ dynamic\ objects"{}}\ <<\ endl;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00048}00048\ \ \ \ \ \textcolor{keywordflow}{if}(regions!=NULL)}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00049}00049\ \ \ \ \ \ \ \ \ free\_regions\ (\ regions,\ num\_objects\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00050}00050\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00051}00051\ \ \ \ \ gsl\_rng\_free\ (\ rng\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00052}00052\ \ \ \ \ free\_histos\ (\ ref\_histos,\ num\_objects);\ \ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00053}00053\ \ \ \ \ \textcolor{keywordflow}{if}(particles\ !=\ NULL)}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00054}00054\ \ \ \ \ \ \ \ \ free\ (\ particles);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00055}00055\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00056}00056\ \ \ \ \ \textcolor{keywordflow}{if}\ (temp)}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00057}00057\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00058}00058\ \ \ \ \ \ \ \ \ cout\ <<\ \textcolor{stringliteral}{"{}releasing\ temp"{}}\ <<\ endl;\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00059}00059\ \ \ \ \ \ \ \ \ cvReleaseImage(\&temp);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00060}00060\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00061}00061\ \ \ \ \ cout\ <<\ \textcolor{stringliteral}{"{}finished\ particle\ thread"{}}\ <<\ endl;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00062}00062\ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00063}00063\ \textcolor{comment}{/**********************************************************/}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00064}\mbox{\hyperlink{classPARTICLEThread_ace2756e6806f6f6ff4562f614f44ad94}{00064}}\ \mbox{\hyperlink{classPARTICLEThread_ace2756e6806f6f6ff4562f614f44ad94}{PARTICLEThread::PARTICLEThread}}()\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00065}00065\ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00066}00066\ \ \ \ \ firstFrame\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00067}00067\ \ \ \ \ num\_objects\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00068}00068\ \ \ \ \ regions\ =\ (CvRect\ **)\ malloc(\textcolor{keyword}{sizeof}(CvRect*));}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00069}00069\ \ \ \ \ num\_particles\ =\ \mbox{\hyperlink{particleFilter_8h_a7b24a37e8ce9d243351bfc9b24945e63}{PARTICLES}};\ \ \ \ \textcolor{comment}{/*\ number\ of\ particles\ */}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00070}00070\ \ \ \ \ rng\ =\ gsl\_rng\_alloc(\ gsl\_rng\_mt19937\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00071}00071\ \ \ \ \ gsl\_rng\_set(\ rng,\ (\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{long})\mbox{\hyperlink{sine_8m_adf373d0d082773c69f688bdb3a56d6aa}{time}}(NULL)\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00072}00072\ \ \ \ \ i\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00073}00073\ \ \ \ \ getTemplate\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00074}00074\ \ \ \ \ gotTemplate\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00075}00075\ \ \ \ \ sendTarget\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00076}00076\ \ \ \ \ getImage\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00077}00077\ \ \ \ \ particles\ =\ NULL;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00078}00078\ \ \ \ \ new\_particles\ =\ NULL;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00079}00079\ \ \ \ \ temp\ =\ NULL;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00080}00080\ \ \ \ \ ref\_histos\ =\ NULL;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00081}00081\ \ \ \ \ tpl\ =\ NULL;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00082}00082\ \ \ \ \ total\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00083}00083\ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00084}00084\ \textcolor{comment}{/**********************************************************/}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00085}\mbox{\hyperlink{classPARTICLEThread_a2446d69584a25bf66d0d28b7491601bc}{00085}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classPARTICLEThread_a2446d69584a25bf66d0d28b7491601bc}{PARTICLEThread::setName}}(\textcolor{keywordtype}{string}\ module)\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00086}00086\ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00087}00087\ \ \ \ \ this-\/>moduleName\ =\ \textcolor{keyword}{module};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00088}00088\ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00089}00089\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00090}00090\ \textcolor{comment}{/**********************************************************/}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00091}\mbox{\hyperlink{classPARTICLEThread_a641460f1b5e54c96c6fbe594853a807a}{00091}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classPARTICLEThread_a641460f1b5e54c96c6fbe594853a807a}{PARTICLEThread::threadInit}}()\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00092}00092\ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00093}00093\ \ \ \ \ \textcolor{comment}{/*\ initialize\ variables\ and\ create\ data-\/structures\ if\ needed\ */}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00094}00094\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00095}00095\ \ \ \ \ inputPortName\ =\ \textcolor{stringliteral}{"{}/"{}}\ +\ moduleName\ +\ \textcolor{stringliteral}{"{}/image:i"{}};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00096}00096\ \ \ \ \ imageIn.open(\ inputPortName.c\_str()\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00097}00097\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00098}00098\ \ \ \ \ outputPortName\ =\ \textcolor{stringliteral}{"{}/"{}}\ +\ moduleName\ +\ \textcolor{stringliteral}{"{}/image:o"{}};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00099}00099\ \ \ \ \ imageOut.open(\ outputPortName.c\_str()\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00100}00100\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00101}00101\ \ \ \ \ outputPortNameBlob\ =\ \textcolor{stringliteral}{"{}/"{}}\ +\ moduleName\ +\ \textcolor{stringliteral}{"{}/blob/image:o"{}};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00102}00102\ \ \ \ \ imageOutBlob.open(\ outputPortNameBlob.c\_str()\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00103}00103\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00104}00104\ \ \ \ \ num\_objects\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00105}00105\ \ \ \ \ init\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00106}00106\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00107}00107\ \ \ \ \ updateNeeded=\textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00108}00108\ \ \ \ \ bestTempl.\mbox{\hyperlink{structTemplateStruct_ae3813582a170a5c33539e5e6b588d2f4}{templ}}=NULL;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00109}00109\ \ \ \ \ bestTempl.\mbox{\hyperlink{structTemplateStruct_a1d40492a10801d1fabee14f1ccd6c7be}{w}}=0.0;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00110}00110\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00111}00111\ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00112}00112\ \textcolor{comment}{/**********************************************************/}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00113}\mbox{\hyperlink{classPARTICLEThread_a357ce622b96f5e2c48b453dfc0cab933}{00113}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classPARTICLEThread_a357ce622b96f5e2c48b453dfc0cab933}{PARTICLEThread::run}}()\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00114}00114\ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00115}00115\ \ \ \ \ \textcolor{keywordflow}{while}\ (isStopping()\ !=\ \textcolor{keyword}{true})\ \{\ \textcolor{comment}{//\ the\ thread\ continues\ to\ run\ until\ isStopping()\ returns\ true}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00116}00116\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00117}00117\ \ \ \ \ \ \ \ \ getImage\ =\ \ (\ imageIn.getInputCount()\ >\ 0\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00118}00118\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00119}00119\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\ !getImage\ )}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00120}00120\ \ \ \ \ \ \ \ \ \ \ \ \ Time::delay(0.1);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00121}00121\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00122}00122\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00123}00123\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (init)}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00124}00124\ \ \ \ \ \ \ \ \ \ \ \ \ \{\textcolor{comment}{//Get\ first\ RGB\ image\ to\ establish\ width,\ height:}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00125}00125\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ cout\ <<\ \textcolor{stringliteral}{"{}initializing"{}}\ <<\ endl;\ \ \ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00126}00126\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ initAll();\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00127}00127\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00128}00128\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00129}00129\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00130}00130\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ iCubImage\ =\ imageIn.read();}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00131}00131\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ lock\_guard<mutex>\ lck(templateMutex);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00132}00132\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ imageIn.getEnvelope(targetTemp);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00133}00133\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00134}00134\ \ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00135}00135\ \ \ \ \ \ \ \ \ \ \ \ \ frame\ =\ cvCreateImage(cvSize(width,height),IPL\_DEPTH\_8U,\ 3\ );\ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00136}00136\ \ \ \ \ \ \ \ \ \ \ \ \ cv::cvtColor(toCvMat(*iCubImage),\ cv::cvarrToMat(frame),\ CV\_RGB2BGR);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00137}00137\ \ \ \ \ \ \ \ \ \ \ \ \ frame\_blob\ =\ cvCreateImage(cvSize(width,height),IPL\_DEPTH\_8U,\ 1\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00138}00138\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00139}00139\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\ tpl\ !=\ NULL\ )}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00140}00140\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00141}00141\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ cv::Mat\ tplMat=toCvMat(*tpl);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00142}00142\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ tpl\_width\ \ =\ tpl-\/>width();}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00143}00143\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ tpl\_height\ =\ tpl-\/>height();}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00144}00144\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ res\_width\ \ =\ width\ -\/\ tpl\_width\ +\ 1;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00145}00145\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ res\_height\ =\ height\ -\/\ tpl\_height\ +\ 1;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00146}00146\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ cvReleaseImage(\&temp);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00147}00147\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ temp\ =\ cvCreateImage(cvSize(tplMat.size().width,tplMat.size().height),tplMat.depth(),tplMat.channels()\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00148}00148\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ cv::cvtColor(tplMat,\ cv::cvarrToMat(temp),\ CV\_RGB2BGR);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00149}00149\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ gotTemplate\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00150}00150\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ firstFrame\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00151}00151\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (num\_objects>0)}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00152}00152\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ free(*regions);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00153}00153\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ num\_objects\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00154}00154\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{delete}\ tpl;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00155}00155\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ tpl\ =\ NULL;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00156}00156\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00157}00157\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ lock\_guard<mutex>\ lck(templateMutex);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00158}00158\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}(tempList.size())}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00159}00159\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ \ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00160}00160\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{delete}\ tempList.back().templ;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00161}00161\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ tempList.pop\_back();}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00162}00162\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00163}00163\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(bestTempl.\mbox{\hyperlink{structTemplateStruct_ae3813582a170a5c33539e5e6b588d2f4}{templ}}!=NULL)}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00164}00164\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{delete}\ bestTempl.\mbox{\hyperlink{structTemplateStruct_ae3813582a170a5c33539e5e6b588d2f4}{templ}};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00165}00165\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ bestTempl.\mbox{\hyperlink{structTemplateStruct_a1d40492a10801d1fabee14f1ccd6c7be}{w}}=0.0;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00166}00166\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ updateNeeded=\textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00167}00167\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00168}00168\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00169}00169\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (gotTemplate)}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00170}00170\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00171}00171\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ runAll(frame);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00172}00172\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00173}00173\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00174}00174\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//send\ it\ all}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00175}00175\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (imageOut.getOutputCount()>0)}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00176}00176\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00177}00177\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ImageOf<PixelBgr>\ \&img\ =\ imageOut.prepare();}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00178}00178\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ img.resize(width,height);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00179}00179\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ cv::cvarrToMat(frame).copyTo(toCvMat(img));}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00180}00180\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ imageOut.write();}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00181}00181\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00182}00182\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (imageOutBlob.getOutputCount()>0)}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00183}00183\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00184}00184\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ImageOf<PixelMono>\ \&imgBlob\ =\ imageOutBlob.prepare();}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00185}00185\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ imgBlob.resize(width,height);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00186}00186\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ cv::cvarrToMat(frame\_blob).copyTo(toCvMat(imgBlob));}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00187}00187\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ imageOutBlob.write();}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00188}00188\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00189}00189\ \ \ \ \ \ \ \ \ \ \ \ \ cvReleaseImage(\&frame);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00190}00190\ \ \ \ \ \ \ \ \ \ \ \ \ cvReleaseImage(\&frame\_blob);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00191}00191\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00192}00192\ \ \ \ \ \}\ \textcolor{comment}{//while}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00193}00193\ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00194}00194\ \textcolor{comment}{/**********************************************************/}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00195}\mbox{\hyperlink{classPARTICLEThread_a1778f9c08acb6a0b63c0395b7a9816a6}{00195}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classPARTICLEThread_a1778f9c08acb6a0b63c0395b7a9816a6}{PARTICLEThread::threadRelease}}()\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00196}00196\ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00197}00197\ \ \ \ \ cout\ <<\ \textcolor{stringliteral}{"{}cleaning\ up..."{}}\ <<\ endl;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00198}00198\ \ \ \ \ cout\ <<\ \textcolor{stringliteral}{"{}attempting\ to\ close\ ports"{}}\ <<\ endl;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00199}00199\ \ \ \ \ imageIn.interrupt();}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00200}00200\ \ \ \ \ imageOut.interrupt();}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00201}00201\ \ \ \ \ imageOutBlob.interrupt();\ \ \ \ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00202}00202\ \ \ \ \ imageIn.close();}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00203}00203\ \ \ \ \ imageOut.close();}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00204}00204\ \ \ \ \ imageOutBlob.close();}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00205}00205\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00206}00206\ \ \ \ \ lock\_guard<mutex>\ lck(templateMutex);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00207}00207\ \ \ \ \ \textcolor{keywordflow}{while}(tempList.size())}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00208}00208\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00209}00209\ \ \ \ \ \ \ \ \ \textcolor{keyword}{delete}\ tempList.back().templ;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00210}00210\ \ \ \ \ \ \ \ \ tempList.pop\_back();}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00211}00211\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00212}00212\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00213}00213\ \ \ \ \ \textcolor{keywordflow}{if}(bestTempl.\mbox{\hyperlink{structTemplateStruct_ae3813582a170a5c33539e5e6b588d2f4}{templ}}!=NULL)}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00214}00214\ \ \ \ \ \ \ \ \ \textcolor{keyword}{delete}\ bestTempl.\mbox{\hyperlink{structTemplateStruct_ae3813582a170a5c33539e5e6b588d2f4}{templ}};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00215}00215\ \ \ \ \ cout\ <<\ \textcolor{stringliteral}{"{}finished\ closing\ ports"{}}\ <<\ endl;\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00216}00216\ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00217}00217\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00218}00218\ \textcolor{comment}{/**********************************************************/}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00219}00219\ \textcolor{keywordtype}{void}\ PARTICLEThread::initAll()}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00220}00220\ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00221}00221\ \ \ \ \ \textcolor{comment}{//here\ some\ initialization}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00222}00222\ \ \ \ \ iCubImage\ =\ imageIn.read();}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00223}00223\ \ \ \ \ width\ =\ iCubImage-\/>width();}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00224}00224\ \ \ \ \ height\ =\ iCubImage-\/>height();}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00225}00225\ \ \ \ \ init\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00226}00226\ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00227}00227\ \textcolor{comment}{/**********************************************************/}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00228}00228\ \textcolor{keywordtype}{void}\ PARTICLEThread::runAll(IplImage\ *img)}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00229}00229\ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00230}00230\ \ \ \ \ img\_hsv\ =\ bgr2hsv(\ img\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00231}00231\ \ \ \ \ \textcolor{keywordflow}{if}\ (firstFrame)}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00232}00232\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00233}00233\ \ \ \ \ \ \ \ \ w\ =\ img-\/>width;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00234}00234\ \ \ \ \ \ \ \ \ h\ =\ img-\/>height;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00235}00235\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00236}00236\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}(\ num\_objects\ ==\ 0\ )}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00237}00237\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00238}00238\ \ \ \ \ \ \ \ \ \ \ \ \ num\_objects\ =\ get\_regionsImage(\ img,\ regions\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00239}00239\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(\ num\_objects\ ==\ 0\ )}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00240}00240\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{saveNetwork_8m_a0eba6f64b9c26507a877bcb0c4f270e2}{fprintf}}(\ stderr,\ \textcolor{stringliteral}{"{}Problem!\ seg\ has\ issues\(\backslash\)n"{}}\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00241}00241\ \ \ \ \ \ \ \ \ \}\ \ \ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00242}00242\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (ref\_histos!=NULL)}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00243}00243\ \ \ \ \ \ \ \ \ \ \ \ \ free\_histos\ (\ ref\_histos,\ num\_objects);\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00244}00244\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00245}00245\ \ \ \ \ \ \ \ \ ref\_histos\ =\ compute\_ref\_histos(\ img\_hsv,\ *regions,\ num\_objects\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00246}00246\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (particles\ !=\ NULL)}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00247}00247\ \ \ \ \ \ \ \ \ \ \ \ \ free\ (particles);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00248}00248\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00249}00249\ \ \ \ \ \ \ \ \ particles=\ init\_distribution(\ *regions,\ ref\_histos,\ num\_objects,\ num\_particles\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00250}00250\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00251}00251\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00252}00252\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00253}00253\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ perform\ prediction\ and\ measurement\ for\ each\ particle}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00254}00254\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\ j\ =\ 0;\ j\ <\ num\_particles;\ j++\ )\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00255}00255\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00256}00256\ \ \ \ \ \ \ \ \ \ \ \ \ particles[j]\ =\ transition(\ particles[j],\ w,\ h,\ rng\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00257}00257\ \ \ \ \ \ \ \ \ \ \ \ \ s\ =\ particles[j].\mbox{\hyperlink{structPARTICLEThread_1_1particle_ae8ad6640cb0d5692858606324f104b5a}{s}};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00258}00258\ \ \ \ \ \ \ \ \ \ \ \ \ particles[j].\mbox{\hyperlink{structPARTICLEThread_1_1particle_aafbf6dd76487810f90d039683579f429}{w}}\ =\ likelihood(\ img\_hsv,\ cvRound(particles[j].y),}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00259}00259\ \ \ \ \ \ \ \ \ \ \ \ \ cvRound(\ particles[j].x\ ),}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00260}00260\ \ \ \ \ \ \ \ \ \ \ \ \ cvRound(\ particles[j].width\ *\ s\ ),}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00261}00261\ \ \ \ \ \ \ \ \ \ \ \ \ cvRound(\ particles[j].height\ *\ s\ ),}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00262}00262\ \ \ \ \ \ \ \ \ \ \ \ \ particles[j].histo\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00263}00263\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00264}00264\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ normalize\ weights\ and\ resample\ a\ set\ of\ unweighted\ particles}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00265}00265\ \ \ \ \ \ \ \ \ normalize\_weights(\ particles,\ num\_particles\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00266}00266\ \ \ \ \ \ \ \ \ new\_particles\ =\ resample(\ particles,\ num\_particles\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00267}00267\ \ \ \ \ \ \ \ \ free(\ particles\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00268}00268\ \ \ \ \ \ \ \ \ particles\ =\ new\_particles;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00269}00269\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00270}00270\ \ \ \ \ qsort(\ particles,\ num\_particles,\ \textcolor{keyword}{sizeof}(\ \mbox{\hyperlink{structPARTICLEThread_1_1particle}{PARTICLEThread::particle}}\ ),\ \&\mbox{\hyperlink{particleFilter_8h_a60ab9c646dde9f65e7f7ec7ea7954f94}{particle\_cmp}}\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00271}00271\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00272}00272\ \ \ \ \ averageMutex.lock();}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00273}00273\ \ \ \ \ \textcolor{keywordflow}{for}(\ j\ =\ 0;\ j\ <\ num\_particles;\ j++\ )\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00274}00274\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classPARTICLEThread_af3467230a390b33fe85bf085f8593072}{average}}\ +=\ particles[j].w;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00275}00275\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00276}00276\ \ \ \ \ \mbox{\hyperlink{classPARTICLEThread_af3467230a390b33fe85bf085f8593072}{average}}\ =\ \mbox{\hyperlink{classPARTICLEThread_af3467230a390b33fe85bf085f8593072}{average}}/num\_particles;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00277}00277\ \ \ \ \ averageMutex.unlock();}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00278}00278\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00279}00279\ \ \ \ \ \textcolor{comment}{//display\ most\ likely\ particle\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00280}00280\ \ \ \ \ color\ =\ cvScalar(255,0,0);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00281}00281\ \ \ \ \ targetMutex.lock();}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00282}00282\ \ \ \ \ targetTemp.clear();}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00283}00283\ \ \ \ \ \textcolor{comment}{//if\ (imageOut.getOutputCount()>0)}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00284}00284\ \ \ \ \ display\_particle(\ frame,\ particles[0],\ color,\ targetTemp\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00285}00285\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00286}00286\ \ \ \ \ \textcolor{keywordflow}{if}\ (imageOutBlob.getOutputCount()>0)}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00287}00287\ \ \ \ \ \ \ \ \ display\_particleBlob(\ frame\_blob,\ particles[0],\ targetTemp\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00288}00288\ \ \ \ \ targetMutex.unlock();}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00289}00289\ \ \ \ \ trace\_template(\ frame,\ particles[0]\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00290}00290\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00291}00291\ \ \ \ \ cvReleaseImage(\&img\_hsv);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00292}00292\ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00293}00293\ \textcolor{comment}{/**********************************************************/}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00294}\mbox{\hyperlink{classPARTICLEThread_a28a87ec749e92c0e46854391eabfd099}{00294}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classPARTICLEThread_a28a87ec749e92c0e46854391eabfd099}{PARTICLEThread::setTemplate}}(ImageOf<PixelRgb>\ *\_tpl)}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00295}00295\ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00296}00296\ \ \ \ \ tpl\ =\ \textcolor{keyword}{new}\ ImageOf<PixelRgb>\ (*\_tpl);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00297}00297\ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00298}00298\ \textcolor{comment}{/**********************************************************/}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00299}\mbox{\hyperlink{classPARTICLEThread_ae1ffb707058998b55df081d96887878e}{00299}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classPARTICLEThread_ae1ffb707058998b55df081d96887878e}{PARTICLEThread::pushTarget}}(Vector\ \&target,\ Stamp\ \&stamp)}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00300}00300\ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00301}00301\ \ \ \ \ lock\_guard<mutex>\ lck(targetMutex);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00302}00302\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<\ targetTemp.length();\ i++\ )}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00303}00303\ \ \ \ \ \ \ \ \ target.push\_back(targetTemp[i]);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00304}00304\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00305}00305\ \ \ \ \ stamp=targetStamp;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00306}00306\ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00307}00307\ \textcolor{comment}{/**********************************************************/}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00308}\mbox{\hyperlink{classPARTICLEThread_a370bbb66ee9c934943af2c06df9b1794}{00308}}\ \textcolor{keywordtype}{float}\ \mbox{\hyperlink{classPARTICLEThread_a370bbb66ee9c934943af2c06df9b1794}{PARTICLEThread::getAverage}}()}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00309}00309\ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00310}00310\ \ \ \ \ lock\_guard<mutex>\ lck(averageMutex);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00311}00311\ \ \ \ \ \textcolor{keywordtype}{float}\ tmpAv\ =\ 0.0;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00312}00312\ \ \ \ \ tmpAv\ =\ \mbox{\hyperlink{classPARTICLEThread_af3467230a390b33fe85bf085f8593072}{average}};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00313}00313\ \ \ \ \ \textcolor{keywordflow}{return}\ tmpAv;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00314}00314\ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00315}00315\ \textcolor{comment}{/**********************************************************/}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00316}00316\ \textcolor{keywordtype}{int}\ PARTICLEThread::get\_regionsImage(\ IplImage*\ frame,\ CvRect**\ regions\ )\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00317}00317\ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00318}00318\ \ \ \ \ firstFrame\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00319}00319\ \ \ \ \ params\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00320}00320\ \ \ \ \ CvRect*\ r;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00321}00321\ \ \ \ \ \textcolor{keywordtype}{int}\ i;\ \textcolor{comment}{//x1,\ y1,\ x2,\ y2,\ w,\ h;}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00322}00322\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00323}00323\ \ \ \ \ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.orig\_img\ =\ cvCloneImage(\ frame\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00324}00324\ \ \ \ \ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.cur\_img\ =\ NULL;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00325}00325\ \ \ \ \ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.n\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00326}00326\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00327}00327\ \ \ \ \ res\ =\ cvCreateImage(\ cvSize(\ res\_width,\ res\_height\ ),\ IPL\_DEPTH\_32F,\ 1\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00328}00328\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00329}00329\ \ \ \ \ cvMatchTemplate(\ frame,\ temp,\ res,\ CV\_TM\_SQDIFF\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00330}00330\ \ \ \ \ cvMinMaxLoc(\ res,\ \&minval,\ \&maxval,\ \&minloc,\ \&maxloc,\ 0\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00331}00331\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00332}00332\ \ \ \ \ cvReleaseImage(\ \&(\mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.orig\_img)\ );\ \ \ \ \textcolor{comment}{//what\ was\ the\ purpose\ of\ this\ image?}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00333}00333\ \ \ \ \ cvReleaseImage(\ \&res\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00334}00334\ \ \ \ \ \textcolor{keywordflow}{if}(\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.cur\_img\ )}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00335}00335\ \ \ \ \ \ \ \ \ cvReleaseImage(\ \&(\mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.cur\_img)\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00336}00336\ \ \ \ \ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.n\ =\ 1;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00337}00337\ \ \ \ \ \textcolor{comment}{//\ extract\ regions\ defined\ by\ user;\ store\ as\ an\ array\ of\ rectangles\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00338}00338\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00339}00339\ \ \ \ \ r\ =\ (CvRect*)\ malloc\ (\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.n\ *\ \textcolor{keyword}{sizeof}(\ CvRect\ )\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00340}00340\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00341}00341\ \ \ \ \ \textcolor{keywordflow}{for}(\ i\ =\ 0;\ i\ <\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.n;\ i++\ )}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00342}00342\ \ \ \ \ \ \ \ \ r[i]\ =\ cvRect(\ minloc.x,\ minloc.y,\ tpl\_width,\ tpl\_height\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00343}00343\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00344}00344\ \ \ \ \ *regions\ =\ r;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00345}00345\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00346}00346\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.n;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00347}00347\ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00348}00348\ \textcolor{comment}{/**********************************************************/}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00349}00349\ \mbox{\hyperlink{structPARTICLEThread_1_1histogram}{PARTICLEThread::histogram}}**\ PARTICLEThread::compute\_ref\_histos(\ IplImage*\ frame,\ CvRect*\ regions,\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}\ )}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00350}00350\ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00351}00351\ \ \ \ \ \mbox{\hyperlink{classPARTICLEThread_a8ee691ded6b3e2e4e3584597b9523d0b}{histogram}}**\ histos\ =\ (\mbox{\hyperlink{classPARTICLEThread_a8ee691ded6b3e2e4e3584597b9523d0b}{histogram}}**)\ malloc(\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}\ *\ \textcolor{keyword}{sizeof}(\ histogram*\ )\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00352}00352\ \ \ \ \ IplImage*\ \mbox{\hyperlink{namespacepython-motor-control_aa48897549d21fee7c0824a33753804e2}{tmp}};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00353}00353\ \ \ \ \ \textcolor{keywordtype}{int}\ i;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00354}00354\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00355}00355\ \ \ \ \ \textcolor{comment}{//\ extract\ each\ region\ from\ frame\ and\ compute\ its\ histogram\ }}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00356}00356\ \ \ \ \ \textcolor{keywordflow}{for}(\ i\ =\ 0;\ i\ <\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}};\ i++\ )}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00357}00357\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00358}00358\ \ \ \ \ \ \ \ \ cvSetImageROI(\ frame,\ regions[i]);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00359}00359\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacepython-motor-control_aa48897549d21fee7c0824a33753804e2}{tmp}}\ =\ cvCreateImage(\ cvGetSize(frame),\ IPL\_DEPTH\_32F,\ 3\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00360}00360\ \ \ \ \ \ \ \ \ cvCopy(\ frame,\ tmp,\ NULL\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00361}00361\ \ \ \ \ \ \ \ \ cvResetImageROI(\ frame\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00362}00362\ \ \ \ \ \ \ \ \ histos[i]\ =\ calc\_histogram(\ \&tmp,\ 1\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00363}00363\ \ \ \ \ \ \ \ \ normalize\_histogram(\ histos[i]\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00364}00364\ \ \ \ \ \ \ \ \ cvReleaseImage(\ \&tmp\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00365}00365\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00366}00366\ \ \ \ \ \textcolor{keywordflow}{return}\ histos;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00367}00367\ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00368}00368\ \textcolor{comment}{/**********************************************************/}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00369}00369\ \mbox{\hyperlink{structPARTICLEThread_1_1histogram}{PARTICLEThread::histogram}}*\ PARTICLEThread::calc\_histogram(\ IplImage**\ imgs,\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}\ )\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00370}00370\ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00371}00371\ \ \ \ \ IplImage*\ img;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00372}00372\ \ \ \ \ \mbox{\hyperlink{classPARTICLEThread_a8ee691ded6b3e2e4e3584597b9523d0b}{histogram}}*\ histo;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00373}00373\ \ \ \ \ IplImage*\ h,\ *\ s,\ *\ v;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00374}00374\ \ \ \ \ \textcolor{keywordtype}{float}*\ hist;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00375}00375\ \ \ \ \ \textcolor{keywordtype}{int}\ i,\ r,\ c,\ bin;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00376}00376\ \ \ \ \ histo\ =\ (\mbox{\hyperlink{classPARTICLEThread_a8ee691ded6b3e2e4e3584597b9523d0b}{histogram}}*)\ malloc(\ \textcolor{keyword}{sizeof}(histogram)\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00377}00377\ \ \ \ \ histo-\/>n\ =\ \mbox{\hyperlink{particleFilter_8h_abc3b05033963c7a33d28a9fc29835b6c}{NH}}*\mbox{\hyperlink{particleFilter_8h_a06c201f90533d5b49cd039c960327968}{NS}}\ +\ \mbox{\hyperlink{particleFilter_8h_af7b1400a617718754e5de5c255467af5}{NV}};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00378}00378\ \ \ \ \ hist\ =\ histo-\/>histo;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00379}00379\ \ \ \ \ memset(\ hist,\ 0,\ histo-\/>n\ *\ \textcolor{keyword}{sizeof}(\textcolor{keywordtype}{float})\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00380}00380\ \ \ \ \ \textcolor{keywordflow}{for}(\ i\ =\ 0;\ i\ <\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}};\ i++\ )}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00381}00381\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00382}00382\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ extract\ individual\ HSV\ planes\ from\ image\ }}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00383}00383\ \ \ \ \ \ \ \ \ img\ =\ imgs[i];}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00384}00384\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{compute__ekf__sym_8m_a5e36941b3d856737e81516acd45edc50}{h}}\ =\ cvCreateImage(\ cvGetSize(img),\ IPL\_DEPTH\_32F,\ 1\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00385}00385\ \ \ \ \ \ \ \ \ s\ =\ cvCreateImage(\ cvGetSize(img),\ IPL\_DEPTH\_32F,\ 1\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00386}00386\ \ \ \ \ \ \ \ \ v\ =\ cvCreateImage(\ cvGetSize(img),\ IPL\_DEPTH\_32F,\ 1\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00387}00387\ \ \ \ \ \ \ \ \ cvSplit(\ img,\ h,\ s,\ v,\ NULL\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00388}00388\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00389}00389\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ increment\ appropriate\ histogram\ bin\ for\ each\ pixel\ }}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00390}00390\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\ r\ =\ 0;\ r\ <\ img-\/>height;\ r++\ )}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00391}00391\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\ c\ =\ 0;\ c\ <\ img-\/>width;\ c++\ )}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00392}00392\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00393}00393\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ bin\ =\ histo\_bin(\ pixval32f(\ h,\ r,\ c\ ),}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00394}00394\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pixval32f(\ s,\ r,\ c\ ),}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00395}00395\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pixval32f(\ v,\ r,\ c\ )\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00396}00396\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ hist[bin]\ +=\ 1;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00397}00397\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00398}00398\ \ \ \ \ \ \ \ \ cvReleaseImage(\ \&h\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00399}00399\ \ \ \ \ \ \ \ \ cvReleaseImage(\ \&s\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00400}00400\ \ \ \ \ \ \ \ \ cvReleaseImage(\ \&v\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00401}00401\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00402}00402\ \ \ \ \ \textcolor{keywordflow}{return}\ histo;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00403}00403\ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00404}00404\ \textcolor{comment}{/**********************************************************/}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00405}00405\ \textcolor{keywordtype}{void}\ PARTICLEThread::free\_histos(\ \mbox{\hyperlink{structPARTICLEThread_1_1histogram}{PARTICLEThread::histogram}}**\ histo,\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}})\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00406}00406\ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00407}00407\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i\ =\ 0;\ i\ <\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}};\ i++)\ \ \ \ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00408}00408\ \ \ \ \ \ \ \ \ free\ (histo[i]);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00409}00409\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00410}00410\ \ \ \ \ free(histo);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00411}00411\ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00412}00412\ \textcolor{comment}{/**********************************************************/}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00413}00413\ \textcolor{keywordtype}{void}\ PARTICLEThread::free\_regions(\ CvRect**\ regions,\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}})\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00414}00414\ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00415}00415\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i\ =\ 0;\ i\ <\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}};\ i++)\ \ \ \ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00416}00416\ \ \ \ \ \ \ \ \ free\ (regions[i]);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00417}00417\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00418}00418\ \ \ \ free(regions);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00419}00419\ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00420}00420\ \textcolor{comment}{/**********************************************************/}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00421}00421\ \textcolor{keywordtype}{void}\ PARTICLEThread::normalize\_histogram(\ \mbox{\hyperlink{structPARTICLEThread_1_1histogram}{PARTICLEThread::histogram}}*\ histo\ )\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00422}00422\ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00423}00423\ \ \ \ \ \textcolor{keywordtype}{float}*\ hist;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00424}00424\ \ \ \ \ \textcolor{keywordtype}{float}\ sum\ =\ 0,\ inv\_sum;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00425}00425\ \ \ \ \ \textcolor{keywordtype}{int}\ i,\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00426}00426\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00427}00427\ \ \ \ \ hist\ =\ histo-\/>\mbox{\hyperlink{structPARTICLEThread_1_1histogram_a81090a6091a4880c20f19282b356b743}{histo}};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00428}00428\ \ \ \ \ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}\ =\ histo-\/>\mbox{\hyperlink{structPARTICLEThread_1_1histogram_ad173c58a85cf3606e7dcae15c9b58362}{n}};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00429}00429\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00430}00430\ \ \ \ \ \textcolor{comment}{//\ compute\ sum\ of\ all\ bins\ and\ multiply\ each\ bin\ by\ the\ sum's\ inverse\ }}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00431}00431\ \ \ \ \ \textcolor{keywordflow}{for}(\ i\ =\ 0;\ i\ <\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}};\ i++\ )}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00432}00432\ \ \ \ \ \ \ \ \ sum\ +=\ hist[i];}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00433}00433\ \ \ \ \ inv\_sum\ =\ 1.0f\ /\ sum;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00434}00434\ \ \ \ \ \textcolor{keywordflow}{for}(\ i\ =\ 0;\ i\ <\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}};\ i++\ )}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00435}00435\ \ \ \ \ \ \ \ \ hist[i]\ *=\ inv\_sum;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00436}00436\ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00437}00437\ \textcolor{comment}{/**********************************************************/}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00438}00438\ \textcolor{keywordtype}{int}\ PARTICLEThread::histo\_bin(\ \textcolor{keywordtype}{float}\ \mbox{\hyperlink{compute__ekf__sym_8m_a5e36941b3d856737e81516acd45edc50}{h}},\ \textcolor{keywordtype}{float}\ s,\ \textcolor{keywordtype}{float}\ v\ )}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00439}00439\ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00440}00440\ \ \ \ \ \textcolor{keywordtype}{int}\ hd,\ sd,\ vd;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00441}00441\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00442}00442\ \ \ \ \ \textcolor{comment}{//\ if\ S\ or\ V\ is\ less\ than\ its\ threshold,\ return\ a\ "{}colorless"{}\ bin\ }}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00443}00443\ \ \ \ \ vd\ =\ \mbox{\hyperlink{lmlibindirect_8cpp_a3acffbd305ee72dcd4593c0d8af64a4f}{MIN}}(\ (\textcolor{keywordtype}{int})(v\ *\ \mbox{\hyperlink{particleFilter_8h_af7b1400a617718754e5de5c255467af5}{NV}}\ /\ \mbox{\hyperlink{particleFilter_8h_abdf34f743a79df4a5405494a5a5ac545}{V\_MAX}}),\ \mbox{\hyperlink{particleFilter_8h_af7b1400a617718754e5de5c255467af5}{NV}}-\/1\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00444}00444\ \ \ \ \ \textcolor{keywordflow}{if}(\ s\ <\ \mbox{\hyperlink{particleFilter_8h_a97fa66682e067bfd5a8866e421426b48}{S\_THRESH}}\ \ ||\ \ v\ <\ \mbox{\hyperlink{particleFilter_8h_a22f0811318f51a256d3247a6915d2d0e}{V\_THRESH}}\ )}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00445}00445\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{particleFilter_8h_abc3b05033963c7a33d28a9fc29835b6c}{NH}}\ *\ \mbox{\hyperlink{particleFilter_8h_a06c201f90533d5b49cd039c960327968}{NS}}\ +\ vd;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00446}00446\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00447}00447\ \ \ \ \ \textcolor{comment}{//\ otherwise\ determine\ "{}colorful"{}\ bin\ }}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00448}00448\ \ \ \ \ hd\ =\ \mbox{\hyperlink{lmlibindirect_8cpp_a3acffbd305ee72dcd4593c0d8af64a4f}{MIN}}(\ (\textcolor{keywordtype}{int})(h\ *\ \mbox{\hyperlink{particleFilter_8h_abc3b05033963c7a33d28a9fc29835b6c}{NH}}\ /\ \mbox{\hyperlink{particleFilter_8h_abf5ab39d48176570edbd2d2d031e4981}{H\_MAX}}),\ \mbox{\hyperlink{particleFilter_8h_abc3b05033963c7a33d28a9fc29835b6c}{NH}}-\/1\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00449}00449\ \ \ \ \ sd\ =\ \mbox{\hyperlink{lmlibindirect_8cpp_a3acffbd305ee72dcd4593c0d8af64a4f}{MIN}}(\ (\textcolor{keywordtype}{int})(s\ *\ \mbox{\hyperlink{particleFilter_8h_a06c201f90533d5b49cd039c960327968}{NS}}\ /\ \mbox{\hyperlink{particleFilter_8h_a4e0f0f0ff3852a9e62c7f907fc309dea}{S\_MAX}}),\ \mbox{\hyperlink{particleFilter_8h_a06c201f90533d5b49cd039c960327968}{NS}}-\/1\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00450}00450\ \ \ \ \ \textcolor{keywordflow}{return}\ sd\ *\ \mbox{\hyperlink{particleFilter_8h_abc3b05033963c7a33d28a9fc29835b6c}{NH}}\ +\ hd;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00451}00451\ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00452}00452\ \textcolor{comment}{/**********************************************************/}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00453}00453\ \mbox{\hyperlink{structPARTICLEThread_1_1particle}{PARTICLEThread::particle}}*\ PARTICLEThread::init\_distribution(\ CvRect*\ regions,\ histogram**\ histos,\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}})\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00454}00454\ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00455}00455\ \ \ \ \ \mbox{\hyperlink{classPARTICLEThread_a5f9a31c2c398d5c26c79e271734c6ce2}{particle}}*\ particles;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00456}00456\ \ \ \ \ \textcolor{keywordtype}{int}\ np;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00457}00457\ \ \ \ \ \textcolor{keywordtype}{float}\ x,\ \mbox{\hyperlink{show__eyes__axes_8m_a2fb1c5cf58867b5bbc9a1b145a86f3a0}{y}};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00458}00458\ \ \ \ \ \textcolor{keywordtype}{int}\ i,\ j,\ width,\ height,\ k\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00459}00459\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00460}00460\ \ \ \ \ particles\ =\ (\mbox{\hyperlink{classPARTICLEThread_a5f9a31c2c398d5c26c79e271734c6ce2}{particle}}*\ )malloc(\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}\ *\ \textcolor{keyword}{sizeof}(\ particle\ )\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00461}00461\ \ \ \ \ np\ =\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}\ /\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00462}00462\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00463}00463\ \ \ \ \ \textcolor{comment}{//\ create\ particles\ at\ the\ centers\ of\ each\ of\ n\ regions\ }}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00464}00464\ \ \ \ \ \textcolor{keywordflow}{for}(\ i\ =\ 0;\ i\ <\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}};\ i++\ )\ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00465}00465\ \ \ \ \ \ \ \ \ width\ =\ regions[i].width;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00466}00466\ \ \ \ \ \ \ \ \ height\ =\ regions[i].height;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00467}00467\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}\ =\ regions[i].x\ +\ (float)(width\ /\ 2);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00468}00468\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{show__eyes__axes_8m_a2fb1c5cf58867b5bbc9a1b145a86f3a0}{y}}\ =\ regions[i].y\ +\ (float)\ (height\ /\ 2);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00469}00469\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\ j\ =\ 0;\ j\ <\ np;\ j++\ )\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00470}00470\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00471}00471\ \ \ \ \ \ \ \ \ \ \ \ \ particles[k].x0\ =\ particles[k].xp\ =\ particles[k].x\ =\ \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00472}00472\ \ \ \ \ \ \ \ \ \ \ \ \ particles[k].y0\ =\ particles[k].yp\ =\ particles[k].y\ =\ \mbox{\hyperlink{show__eyes__axes_8m_a2fb1c5cf58867b5bbc9a1b145a86f3a0}{y}};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00473}00473\ \ \ \ \ \ \ \ \ \ \ \ \ particles[k].sp\ =\ particles[k].s\ =\ 1.0;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00474}00474\ \ \ \ \ \ \ \ \ \ \ \ \ particles[k].width\ =\ width;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00475}00475\ \ \ \ \ \ \ \ \ \ \ \ \ particles[k].height\ =\ height;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00476}00476\ \ \ \ \ \ \ \ \ \ \ \ \ particles[k].histo\ =\ histos[i];}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00477}00477\ \ \ \ \ \ \ \ \ \ \ \ \ particles[k++].w\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00478}00478\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00479}00479\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00480}00480\ \ \ \ \ \textcolor{comment}{//\ make\ sure\ to\ create\ exactly\ p\ particles\ }}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00481}00481\ \ \ \ \ i\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00482}00482\ \ \ \ \ \textcolor{keywordflow}{while}(\ k\ <\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}\ )\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00483}00483\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00484}00484\ \ \ \ \ \ \ \ \ width\ =\ regions[i].width;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00485}00485\ \ \ \ \ \ \ \ \ height\ =\ regions[i].height;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00486}00486\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}\ =\ regions[i].x\ +\ (float)\ (width\ /\ 2);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00487}00487\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{show__eyes__axes_8m_a2fb1c5cf58867b5bbc9a1b145a86f3a0}{y}}\ =\ regions[i].y\ +\ (float)\ (height\ /\ 2);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00488}00488\ \ \ \ \ \ \ \ \ particles[k].x0\ =\ particles[k].xp\ =\ particles[k].x\ =\ \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00489}00489\ \ \ \ \ \ \ \ \ particles[k].y0\ =\ particles[k].yp\ =\ particles[k].y\ =\ \mbox{\hyperlink{show__eyes__axes_8m_a2fb1c5cf58867b5bbc9a1b145a86f3a0}{y}};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00490}00490\ \ \ \ \ \ \ \ \ particles[k].sp\ =\ particles[k].s\ =\ 1.0;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00491}00491\ \ \ \ \ \ \ \ \ particles[k].width\ =\ width;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00492}00492\ \ \ \ \ \ \ \ \ particles[k].height\ =\ height;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00493}00493\ \ \ \ \ \ \ \ \ particles[k].histo\ =\ histos[i];}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00494}00494\ \ \ \ \ \ \ \ \ particles[k++].w\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00495}00495\ \ \ \ \ \ \ \ \ i\ =\ (\ i\ +\ 1\ )\ \%\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00496}00496\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00497}00497\ \ \ \ \ \textcolor{keywordflow}{return}\ particles;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00498}00498\ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00499}00499\ \textcolor{comment}{/**********************************************************/}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00500}00500\ \mbox{\hyperlink{structPARTICLEThread_1_1particle}{PARTICLEThread::particle}}\ PARTICLEThread::transition(\ \textcolor{keyword}{const}\ \mbox{\hyperlink{structPARTICLEThread_1_1particle}{PARTICLEThread::particle}}\ \&\mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}},\ \textcolor{keywordtype}{int}\ w,\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{compute__ekf__sym_8m_a5e36941b3d856737e81516acd45edc50}{h}},\ gsl\_rng*\ rng\ )\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00501}00501\ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00502}00502\ \ \ \ \ \textcolor{keywordtype}{float}\ \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}},\ \mbox{\hyperlink{show__eyes__axes_8m_a2fb1c5cf58867b5bbc9a1b145a86f3a0}{y}},\ s;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00503}00503\ \ \ \ \ \mbox{\hyperlink{structPARTICLEThread_1_1particle}{PARTICLEThread::particle}}\ pn;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00504}00504\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00505}00505\ \ \ \ \ \textcolor{comment}{//\ sample\ new\ state\ using\ second-\/order\ autoregressive\ dynamics\ }}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00506}00506\ \ \ \ \ \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}\ =\ \mbox{\hyperlink{particleFilter_8h_af9d66dbdaba9a4acb62b9e63b9c915dc}{pfot\_A1}}\ *\ (\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.x\ -\/\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.x0\ )\ +\ \mbox{\hyperlink{particleFilter_8h_a77e48d675ff2b1c99db901958e5c2330}{pfot\_A2}}\ *\ (\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.xp\ -\/\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.x0\ )\ +}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00507}00507\ \ \ \ \ \mbox{\hyperlink{particleFilter_8h_a32936db7991f583dd00e1ba06b181549}{pfot\_B0}}\ *\ (float)(gsl\_ran\_gaussian(\ rng,\ \mbox{\hyperlink{particleFilter_8h_afa53e7f4af64824aeeb6be9f13acc9a2}{TRANS\_X\_STD}}\ ))\ +\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.x0;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00508}00508\ \ \ \ \ pn.\mbox{\hyperlink{structPARTICLEThread_1_1particle_afd95e2abeaeab59400b0ed1513ccfedd}{x}}\ =\ MAX(\ 0.0f,\ \mbox{\hyperlink{lmlibindirect_8cpp_a3acffbd305ee72dcd4593c0d8af64a4f}{MIN}}(\ (\textcolor{keywordtype}{float})w\ -\/\ 1.0f,\ x\ )\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00509}00509\ \ \ \ \ \mbox{\hyperlink{show__eyes__axes_8m_a2fb1c5cf58867b5bbc9a1b145a86f3a0}{y}}\ =\ \mbox{\hyperlink{particleFilter_8h_af9d66dbdaba9a4acb62b9e63b9c915dc}{pfot\_A1}}\ *\ (\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.y\ -\/\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.y0\ )\ +\ \mbox{\hyperlink{particleFilter_8h_a77e48d675ff2b1c99db901958e5c2330}{pfot\_A2}}\ *\ (\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.yp\ -\/\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.y0\ )\ +}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00510}00510\ \ \ \ \ \mbox{\hyperlink{particleFilter_8h_a32936db7991f583dd00e1ba06b181549}{pfot\_B0}}\ *\ (float)(gsl\_ran\_gaussian(\ rng,\ \mbox{\hyperlink{particleFilter_8h_ab8baec282830079bc0b092fbcce127ba}{TRANS\_Y\_STD}}\ ))\ +\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.y0;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00511}00511\ \ \ \ \ pn.\mbox{\hyperlink{structPARTICLEThread_1_1particle_a4dc94ea2f452bc4172ce8ff55cec3768}{y}}\ =\ MAX(\ 0.0f,\ \mbox{\hyperlink{lmlibindirect_8cpp_a3acffbd305ee72dcd4593c0d8af64a4f}{MIN}}(\ (\textcolor{keywordtype}{float})h\ -\/\ 1.0f,\ y\ )\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00512}00512\ \ \ \ \ s\ =\ \mbox{\hyperlink{particleFilter_8h_af9d66dbdaba9a4acb62b9e63b9c915dc}{pfot\_A1}}\ *\ (\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.s\ -\/\ 1.0f\ )\ +\ \mbox{\hyperlink{particleFilter_8h_a77e48d675ff2b1c99db901958e5c2330}{pfot\_A2}}\ *\ (\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.sp\ -\/\ 1.0f\ )\ +}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00513}00513\ \ \ \ \ \mbox{\hyperlink{particleFilter_8h_a32936db7991f583dd00e1ba06b181549}{pfot\_B0}}\ *\ (float)(gsl\_ran\_gaussian(\ rng,\ \mbox{\hyperlink{particleFilter_8h_a45d2aabb4483acc92977586bf1a4df43}{TRANS\_S\_STD}}\ ))\ +\ 1.0f;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00514}00514\ \ \ \ \ pn.\mbox{\hyperlink{structPARTICLEThread_1_1particle_ae8ad6640cb0d5692858606324f104b5a}{s}}\ =\ MAX(\ 0.1f,\ s\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00515}00515\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00516}00516\ \ \ \ \ pn.\mbox{\hyperlink{structPARTICLEThread_1_1particle_a76b5d059990e6178fa0c472735d2590f}{xp}}\ =\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.x;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00517}00517\ \ \ \ \ pn.\mbox{\hyperlink{structPARTICLEThread_1_1particle_acadf941fe63d51ab3fd982bebe066176}{yp}}\ =\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.y;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00518}00518\ \ \ \ \ pn.\mbox{\hyperlink{structPARTICLEThread_1_1particle_a6caf40f8ea9c8deca55255ad50381028}{sp}}\ =\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.s;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00519}00519\ \ \ \ \ pn.\mbox{\hyperlink{structPARTICLEThread_1_1particle_a63e7178c199a3af55eb441650638d246}{x0}}\ =\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.x0;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00520}00520\ \ \ \ \ pn.\mbox{\hyperlink{structPARTICLEThread_1_1particle_aec3236da2189085b43d80b5ecc4e9d77}{y0}}\ =\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.y0;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00521}00521\ \ \ \ \ pn.\mbox{\hyperlink{structPARTICLEThread_1_1particle_a502e4c591161dc8d4539deaa01557398}{width}}\ =\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.width;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00522}00522\ \ \ \ \ pn.\mbox{\hyperlink{structPARTICLEThread_1_1particle_a8c077f7890c41653f7f50464c1468476}{height}}\ =\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.height;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00523}00523\ \ \ \ \ pn.\mbox{\hyperlink{structPARTICLEThread_1_1particle_af41c18a48540836ad1dacdf952d95fd8}{histo}}\ =\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.\mbox{\hyperlink{structPARTICLEThread_1_1histogram_a81090a6091a4880c20f19282b356b743}{histo}};\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00524}00524\ \ \ \ \ pn.\mbox{\hyperlink{structPARTICLEThread_1_1particle_aafbf6dd76487810f90d039683579f429}{w}}\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00525}00525\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00526}00526\ \ \ \ \ \textcolor{keywordflow}{return}\ pn;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00527}00527\ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00528}00528\ \textcolor{comment}{/**********************************************************/}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00529}00529\ \textcolor{keywordtype}{float}\ PARTICLEThread::likelihood(\ IplImage*\ img,\ \textcolor{keywordtype}{int}\ r,\ \textcolor{keywordtype}{int}\ c,\ \textcolor{keywordtype}{int}\ w,\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{compute__ekf__sym_8m_a5e36941b3d856737e81516acd45edc50}{h}},\ histogram*\ ref\_histo\ )\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00530}00530\ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00531}00531\ \ \ \ \ IplImage*\ \mbox{\hyperlink{namespacepython-motor-control_aa48897549d21fee7c0824a33753804e2}{tmp}};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00532}00532\ \ \ \ \ \mbox{\hyperlink{classPARTICLEThread_a8ee691ded6b3e2e4e3584597b9523d0b}{histogram}}*\ histo;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00533}00533\ \ \ \ \ \textcolor{keywordtype}{float}\ d\_sq;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00534}00534\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00535}00535\ \ \ \ \ \textcolor{comment}{//\ extract\ region\ around\ (r,c)\ and\ compute\ and\ normalize\ its\ histogram\ }}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00536}00536\ \ \ \ \ cvSetImageROI(\ img,\ cvRect(\ c\ -\/\ w\ /\ 2,\ r\ -\/\ h\ /\ 2,\ w,\ h\ )\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00537}00537\ \ \ \ \ \mbox{\hyperlink{namespacepython-motor-control_aa48897549d21fee7c0824a33753804e2}{tmp}}\ =\ cvCreateImage(\ cvGetSize(img),\ IPL\_DEPTH\_32F,\ 3\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00538}00538\ \ \ \ \ cvCopy(\ img,\ tmp,\ NULL\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00539}00539\ \ \ \ \ cvResetImageROI(\ img\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00540}00540\ \ \ \ \ histo\ =\ calc\_histogram(\ \&tmp,\ 1\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00541}00541\ \ \ \ \ cvReleaseImage(\ \&tmp\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00542}00542\ \ \ \ \ normalize\_histogram(\ histo\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00543}00543\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00544}00544\ \ \ \ \ \textcolor{comment}{//\ compute\ likelihood\ as\ e\string^\{\(\backslash\)lambda\ D\string^2(h,\ h\string^*)\}\ }}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00545}00545\ \ \ \ \ d\_sq\ =\ histo\_dist\_sq(\ histo,\ ref\_histo\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00546}00546\ \ \ \ \ free(\ histo\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00547}00547\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{compute__ekf__sym_8m_afc7c28e2e37e9680fba99ce231839cb2}{exp}}(\ -\/\mbox{\hyperlink{particleFilter_8h_a738607799d6938e1b15f463688029cd5}{LAMBDA}}\ *\ d\_sq\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00548}00548\ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00549}00549\ \textcolor{comment}{/**********************************************************/}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00550}00550\ \textcolor{keywordtype}{float}\ PARTICLEThread::histo\_dist\_sq(\ histogram*\ h1,\ histogram*\ h2\ )\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00551}00551\ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00552}00552\ \ \ \ \ \textcolor{keywordtype}{float}*\ hist1,\ *\ hist2;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00553}00553\ \ \ \ \ \textcolor{keywordtype}{float}\ sum\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00554}00554\ \ \ \ \ \textcolor{keywordtype}{int}\ i,\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00555}00555\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00556}00556\ \ \ \ \ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}\ =\ h1-\/>n;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00557}00557\ \ \ \ \ hist1\ =\ h1-\/>histo;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00558}00558\ \ \ \ \ hist2\ =\ h2-\/>histo;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00559}00559\ \ \ \ \ \textcolor{comment}{//\ \ According\ the\ the\ Battacharyya\ similarity\ coefficient,}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00560}00560\ \ \ \ \ \textcolor{comment}{//\ \ D\ =\ \(\backslash\)sqrt\{\ 1\ -\/\ \(\backslash\)sum\_1\string^n\{\ \(\backslash\)sqrt\{\ h\_1(i)\ *\ h\_2(i)\ \}\ \}\ \}}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00561}00561\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00562}00562\ \ \ \ \ \textcolor{keywordflow}{for}(\ i\ =\ 0;\ i\ <\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}};\ i++\ )}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00563}00563\ \ \ \ \ \ \ \ \ sum\ +=\ sqrt(\ hist1[i]*hist2[i]\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00564}00564\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00565}00565\ \ \ \ \ \textcolor{keywordflow}{if}(sum<1.0f)}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00566}00566\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ sqrt(1.0f\ -\/\ sum);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00567}00567\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00568}00568\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00569}00569\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ should\ be\ impossible\ to\ get\ here...}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00570}00570\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{saveNetwork_8m_a0eba6f64b9c26507a877bcb0c4f270e2}{fprintf}}(stdout,\textcolor{stringliteral}{"{}Error\ in\ similarity\ computation!\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00571}00571\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ 1.0f-\/sum;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00572}00572\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00573}00573\ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00574}00574\ \textcolor{comment}{/**********************************************************/}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00575}00575\ \textcolor{keywordtype}{void}\ PARTICLEThread::normalize\_weights(\ particle*\ particles,\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}\ )\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00576}00576\ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00577}00577\ \ \ \ \ \textcolor{keywordtype}{float}\ sum\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00578}00578\ \ \ \ \ \textcolor{keywordtype}{int}\ i;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00579}00579\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00580}00580\ \ \ \ \ \textcolor{keywordflow}{for}(\ i\ =\ 0;\ i\ <\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}};\ i++\ )}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00581}00581\ \ \ \ \ \ \ \ \ sum\ +=\ particles[i].w;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00582}00582\ \ \ \ \ \textcolor{keywordflow}{for}(\ i\ =\ 0;\ i\ <\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}};\ i++\ )}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00583}00583\ \ \ \ \ \ \ \ \ particles[i].w\ /=\ sum;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00584}00584\ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00585}00585\ \textcolor{comment}{/**********************************************************/}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00586}00586\ \mbox{\hyperlink{structPARTICLEThread_1_1particle}{PARTICLEThread::particle}}*\ PARTICLEThread::resample(\ particle*\ particles,\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}\ )\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00587}00587\ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00588}00588\ \ \ \ \ \mbox{\hyperlink{classPARTICLEThread_a5f9a31c2c398d5c26c79e271734c6ce2}{particle}}*\ \_new\_particles;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00589}00589\ \ \ \ \ \textcolor{keywordtype}{int}\ i,\ j,\ np,\ k\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00590}00590\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00591}00591\ \ \ \ \ \textcolor{comment}{//new\_particles\ =\ (particle*\ )malloc(\ sizeof(\ particle\ )\ );}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00592}00592\ \ \ \ \ qsort(\ particles,\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},\ \textcolor{keyword}{sizeof}(\ particle\ ),\ \&\mbox{\hyperlink{particleFilter_8h_a60ab9c646dde9f65e7f7ec7ea7954f94}{particle\_cmp}}\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00593}00593\ \ \ \ \ \_new\_particles\ =\ (\mbox{\hyperlink{classPARTICLEThread_a5f9a31c2c398d5c26c79e271734c6ce2}{particle}}*\ )\ malloc(\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}\ *\ \textcolor{keyword}{sizeof}(\ particle\ )\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00594}00594\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00595}00595\ \ \ \ \ \textcolor{keywordflow}{for}(\ i\ =\ 0;\ i\ <\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}};\ i++\ )\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00596}00596\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00597}00597\ \ \ \ \ \ \ \ \ np\ =\ cvRound(\ particles[i].w\ *\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00598}00598\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\ j\ =\ 0;\ j\ <\ np;\ j++\ )\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00599}00599\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00600}00600\ \ \ \ \ \ \ \ \ \ \ \ \ \_new\_particles[k++]\ =\ particles[i];}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00601}00601\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(\ k\ ==\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}\ )}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00602}00602\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{goto}\ exit;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00603}00603\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00604}00604\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00605}00605\ \ \ \ \ \textcolor{keywordflow}{while}(\ k\ <\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}\ )}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00606}00606\ \ \ \ \ \ \ \ \ \_new\_particles[k++]\ =\ particles[0];}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00607}00607\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00608}00608\ \ \ \ \ exit:}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00609}00609\ \ \ \ \ \textcolor{keywordflow}{return}\ \_new\_particles;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00610}00610\ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00611}00611\ \textcolor{comment}{/**********************************************************/}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00612}00612\ \textcolor{keywordtype}{void}\ PARTICLEThread::display\_particle(\ IplImage*\ img,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{structPARTICLEThread_1_1particle}{PARTICLEThread::particle}}\ \&\mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}},\ CvScalar\ color,\ Vector\&\ target\ )\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00613}00613\ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00614}00614\ \ \ \ \ \textcolor{keywordtype}{int}\ x0,\ y0,\ \mbox{\hyperlink{compute__ekf__sym_8m_ac39b33361203e68d7820336db48d45e6}{x1}},\ y1;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00615}00615\ \ \ \ \ x0\ =\ cvRound(\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.x\ -\/\ 0.5\ *\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.s\ *\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.width\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00616}00616\ \ \ \ \ y0\ =\ cvRound(\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.y\ -\/\ 0.5\ *\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.s\ *\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.height\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00617}00617\ \ \ \ \ \mbox{\hyperlink{compute__ekf__sym_8m_ac39b33361203e68d7820336db48d45e6}{x1}}\ =\ x0\ +\ cvRound(\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.s\ *\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.width\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00618}00618\ \ \ \ \ y1\ =\ y0\ +\ cvRound(\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.s\ *\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.height\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00619}00619\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00620}00620\ \ \ \ \ cvRectangle(\ img,\ cvPoint(\ x0,\ y0\ ),\ cvPoint(\ \mbox{\hyperlink{compute__ekf__sym_8m_ac39b33361203e68d7820336db48d45e6}{x1}},\ y1\ ),\ color,\ 1,\ 8,\ 0\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00621}00621\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00622}00622\ \ \ \ \ cvCircle\ (img,\ cvPoint((x0+\mbox{\hyperlink{compute__ekf__sym_8m_ac39b33361203e68d7820336db48d45e6}{x1}})/2,\ (y0+y1)/2),\ 3,\ cvScalar(255,0\ ,0),1);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00623}00623\ \ \ \ \ cvCircle\ (img,\ cvPoint(\ x0,\ y0),\ 3,\ cvScalar(0,\ 255\ ,0),1);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00624}00624\ \ \ \ \ cvCircle\ (img,\ cvPoint(\ \mbox{\hyperlink{compute__ekf__sym_8m_ac39b33361203e68d7820336db48d45e6}{x1}},\ y1),\ 3,\ cvScalar(0,\ 255\ ,0),1);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00625}00625\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00626}00626\ \ \ \ \ target.push\_back((x0+\mbox{\hyperlink{compute__ekf__sym_8m_ac39b33361203e68d7820336db48d45e6}{x1}})/2);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00627}00627\ \ \ \ \ target.push\_back((y0+y1)/2);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00628}00628\ \ \ \ \ target.push\_back(x0);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00629}00629\ \ \ \ \ target.push\_back(y0);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00630}00630\ \ \ \ \ target.push\_back(\mbox{\hyperlink{compute__ekf__sym_8m_ac39b33361203e68d7820336db48d45e6}{x1}});}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00631}00631\ \ \ \ \ target.push\_back(y1);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00632}00632\ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00633}00633\ \textcolor{comment}{/**********************************************************/}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00634}00634\ \textcolor{keywordtype}{void}\ PARTICLEThread::display\_particleBlob(\ IplImage*\ img,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{structPARTICLEThread_1_1particle}{PARTICLEThread::particle}}\ \&\mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}},\ Vector\&\ target\ )\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00635}00635\ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00636}00636\ \ \ \ \ \textcolor{keywordtype}{int}\ x0,\ y0,\ \mbox{\hyperlink{compute__ekf__sym_8m_ac39b33361203e68d7820336db48d45e6}{x1}},\ y1;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00637}00637\ \ \ \ \ x0\ =\ cvRound(\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.x\ -\/\ 0.5\ *\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.s\ *\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.width\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00638}00638\ \ \ \ \ y0\ =\ cvRound(\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.y\ -\/\ 0.5\ *\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.s\ *\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.height\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00639}00639\ \ \ \ \ \mbox{\hyperlink{compute__ekf__sym_8m_ac39b33361203e68d7820336db48d45e6}{x1}}\ =\ x0\ +\ cvRound(\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.s\ *\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.width\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00640}00640\ \ \ \ \ y1\ =\ y0\ +\ cvRound(\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.s\ *\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.height\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00641}00641\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00642}00642\ \ \ \ \ \textcolor{keywordtype}{int}\ step\ \ \ \ \ \ \ =\ img-\/>widthStep/\textcolor{keyword}{sizeof}(uchar);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00643}00643\ \ \ \ \ uchar*\ \mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}\ \ \ \ =\ (uchar\ *)img-\/>imageData;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00644}00644\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00645}00645\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i=0;\ i<img-\/>height;\ i++)}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00646}00646\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00647}00647\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ j=0;\ j<img-\/>width;\ j++)}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00648}00648\ \ \ \ \ \ \ \ \ \{\ \ \ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00649}00649\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}[i*step+j]\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00650}00650\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00651}00651\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00652}00652\ \ \ \ \ cvRectangle(img,\ cvPoint(x0,y0),\ cvPoint(\mbox{\hyperlink{compute__ekf__sym_8m_ac39b33361203e68d7820336db48d45e6}{x1}},y1),\ cvScalar(255,255,\ 255),\ CV\_FILLED);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00653}00653\ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00654}00654\ \textcolor{comment}{/**********************************************************/}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00655}00655\ \textcolor{keywordtype}{void}\ PARTICLEThread::trace\_template(\ IplImage*\ img,\ \textcolor{keyword}{const}\ particle\ \&\mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}\ )}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00656}00656\ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00657}00657\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.w>\mbox{\hyperlink{particleFilter_8h_abaf902db2a5d74292965b2088ca850cc}{TEMP\_LIST\_PARTICLE\_THRES\_HIGH}})}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00658}00658\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00659}00659\ \ \ \ \ \ \ \ \ \textcolor{comment}{//create\ the\ template\ image}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00660}00660\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structTemplateStruct}{TemplateStruct}}\ t;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00661}00661\ \ \ \ \ \ \ \ \ t.\mbox{\hyperlink{structTemplateStruct_a1d40492a10801d1fabee14f1ccd6c7be}{w}}=\mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.w;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00662}00662\ \ \ \ \ \ \ \ \ t.\mbox{\hyperlink{structTemplateStruct_ae3813582a170a5c33539e5e6b588d2f4}{templ}}=\textcolor{keyword}{new}\ ImageOf<PixelRgb>;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00663}00663\ \ \ \ \ \ \ \ \ t.\mbox{\hyperlink{structTemplateStruct_ae3813582a170a5c33539e5e6b588d2f4}{templ}}-\/>resize(cvRound(\mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.s*\mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.width),cvRound(\mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.s*\mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.height));}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00664}00664\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00665}00665\ \ \ \ \ \ \ \ \ cv::Mat\ imgMat(cv::cvarrToMat(img),cv::Rect(cvRound(\mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.x-\/0.5*\mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.s*\mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.width),}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00666}00666\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ cvRound(\mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.y-\/0.5*\mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.s*\mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.height),}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00667}00667\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ cvRound(\mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.s*\mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.width),}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00668}00668\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ cvRound(\mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.s*\mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.height)));}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00669}00669\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00670}00670\ \ \ \ \ \ \ \ \ cv::cvtColor(imgMat,toCvMat(*t.\mbox{\hyperlink{structTemplateStruct_ae3813582a170a5c33539e5e6b588d2f4}{templ}}),CV\_BGR2RGB);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00671}00671\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00672}00672\ \ \ \ \ \ \ \ \ cvResetImageROI(img);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00673}00673\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00674}00674\ \ \ \ \ \ \ \ \ tempList.push\_front(t);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00675}00675\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (tempList.size()>\mbox{\hyperlink{particleFilter_8h_a3a87aaaec73c008fc61377861ad29e28}{TEMP\_LIST\_SIZE}})}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00676}00676\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00677}00677\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{delete}\ tempList.back().templ;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00678}00678\ \ \ \ \ \ \ \ \ \ \ \ \ tempList.pop\_back();}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00679}00679\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00680}00680\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00681}00681\ \ \ \ \ \textcolor{comment}{//keep\ in\ check\ the\ best\ template}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00682}00682\ \ \ \ \ lock\_guard<mutex>\ lck(templateMutex);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00683}00683\ \ \ \ \ \textcolor{comment}{//detect\ if\ the\ image\ tracker\ should\ be\ updated\ with\ a\ template\ from\ the\ stored\ ones}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00684}00684\ \ \ \ \ \textcolor{keywordflow}{if}(\mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.w<\mbox{\hyperlink{particleFilter_8h_ad22c28c2c6a97f7c2b9a54ccbf06a7b0}{TEMP\_LIST\_PARTICLE\_THRES\_LOW}})}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00685}00685\ \ \ \ \ \ \ \ \ updateNeeded=\textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00686}00686\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00687}00687\ \ \ \ \ \textcolor{keywordtype}{int}\ best\_idx=-\/1;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00688}00688\ \ \ \ \ \textcolor{keywordtype}{float}\ best\_w=0.0;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00689}00689\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ i=0;\ i<tempList.size();\ i++)}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00690}00690\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00691}00691\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(tempList[i].w<best\_w)}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00692}00692\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00693}00693\ \ \ \ \ \ \ \ \ \ \ \ \ best\_idx=i;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00694}00694\ \ \ \ \ \ \ \ \ \ \ \ \ best\_w=tempList[i].w;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00695}00695\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00696}00696\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00697}00697\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00698}00698\ \ \ \ \ \textcolor{keywordflow}{if}(best\_idx==-\/1)}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00699}00699\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00700}00700\ \ \ \ \ \ \ \ \ updateNeeded=\textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00701}00701\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00702}00702\ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}(bestTempl.\mbox{\hyperlink{structTemplateStruct_a1d40492a10801d1fabee14f1ccd6c7be}{w}}!=best\_w)\ \textcolor{comment}{//avoid\ releasing\ and\ copying\ the\ same\ image}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00703}00703\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00704}00704\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(bestTempl.\mbox{\hyperlink{structTemplateStruct_ae3813582a170a5c33539e5e6b588d2f4}{templ}}==NULL)}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00705}00705\ \ \ \ \ \ \ \ \ \ \ \ \ bestTempl.\mbox{\hyperlink{structTemplateStruct_ae3813582a170a5c33539e5e6b588d2f4}{templ}}=\textcolor{keyword}{new}\ ImageOf<PixelRgb>;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00706}00706\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00707}00707\ \ \ \ \ \ \ \ \ *bestTempl.\mbox{\hyperlink{structTemplateStruct_ae3813582a170a5c33539e5e6b588d2f4}{templ}}=*tempList[best\_idx].templ;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00708}00708\ \ \ \ \ \ \ \ \ bestTempl.\mbox{\hyperlink{structTemplateStruct_a1d40492a10801d1fabee14f1ccd6c7be}{w}}=best\_w;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00709}00709\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00710}00710\ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00711}00711\ \textcolor{comment}{/**********************************************************/}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00712}00712\ \textcolor{keywordtype}{float}\ PARTICLEThread::pixval32f(IplImage*\ img,\ \textcolor{keywordtype}{int}\ r,\ \textcolor{keywordtype}{int}\ c)\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00713}00713\ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00714}00714\ \ \ \ \ \textcolor{keywordflow}{return}\ (\ (\textcolor{keywordtype}{float}*)(img-\/>imageData\ +\ img-\/>widthStep*r)\ )[c];}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00715}00715\ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00716}00716\ \textcolor{comment}{/**********************************************************/}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00717}00717\ IplImage*\ PARTICLEThread::bgr2hsv(\ IplImage*\ bgr\ )\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00718}00718\ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00719}00719\ \ \ \ \ IplImage*\ bgr32f,\ *\ hsv;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00720}00720\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00721}00721\ \ \ \ \ bgr32f\ =\ cvCreateImage(\ cvGetSize(bgr),\ IPL\_DEPTH\_32F,\ 3\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00722}00722\ \ \ \ \ hsv\ =\ cvCreateImage(\ cvGetSize(bgr),\ IPL\_DEPTH\_32F,\ 3\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00723}00723\ \ \ \ \ cvConvertScale(\ bgr,\ bgr32f,\ 1.0\ /\ 255.0,\ 0\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00724}00724\ \ \ \ \ cvCvtColor(\ bgr32f,\ hsv,\ CV\_BGR2HSV\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00725}00725\ \ \ \ \ cvReleaseImage(\ \&bgr32f\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00726}00726\ \ \ \ \ \textcolor{keywordflow}{return}\ hsv;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00727}00727\ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00728}00728\ \textcolor{comment}{/**********************************************************/}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00729}\mbox{\hyperlink{classPARTICLEThread_a13a39e63b53e38d07d1f8ab811ee34f6}{00729}}\ \mbox{\hyperlink{structTemplateStruct}{TemplateStruct}}\ \mbox{\hyperlink{classPARTICLEThread_a13a39e63b53e38d07d1f8ab811ee34f6}{PARTICLEThread::getBestTemplate}}()}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00730}00730\ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00731}00731\ \ \ \ \ \mbox{\hyperlink{structTemplateStruct}{TemplateStruct}}\ best;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00732}00732\ \ \ \ \ best.\mbox{\hyperlink{structTemplateStruct_ae3813582a170a5c33539e5e6b588d2f4}{templ}}=NULL;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00733}00733\ \ \ \ \ best.\mbox{\hyperlink{structTemplateStruct_a1d40492a10801d1fabee14f1ccd6c7be}{w}}=0.0;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00734}00734\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00735}00735\ \ \ \ \ lock\_guard<mutex>\ lck(templateMutex);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00736}00736\ \ \ \ \ \textcolor{keywordflow}{if}(updateNeeded)}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00737}00737\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00738}00738\ \ \ \ \ \ \ \ \ best.\mbox{\hyperlink{structTemplateStruct_ae3813582a170a5c33539e5e6b588d2f4}{templ}}=\textcolor{keyword}{new}\ ImageOf<PixelRgb>;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00739}00739\ \ \ \ \ \ \ \ \ *best.\mbox{\hyperlink{structTemplateStruct_ae3813582a170a5c33539e5e6b588d2f4}{templ}}=*bestTempl.\mbox{\hyperlink{structTemplateStruct_ae3813582a170a5c33539e5e6b588d2f4}{templ}};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00740}00740\ \ \ \ \ \ \ \ \ best.\mbox{\hyperlink{structTemplateStruct_a1d40492a10801d1fabee14f1ccd6c7be}{w}}=bestTempl.\mbox{\hyperlink{structTemplateStruct_a1d40492a10801d1fabee14f1ccd6c7be}{w}};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00741}00741\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00742}00742\ \ \ \ \ \textcolor{keywordflow}{return}\ best;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00743}00743\ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00744}00744\ \textcolor{comment}{/**********************************************************/}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00745}\mbox{\hyperlink{classPARTICLEManager_aee734e612bfa91226ec1fb80676b14b1}{00745}}\ \mbox{\hyperlink{classPARTICLEManager_aee734e612bfa91226ec1fb80676b14b1}{PARTICLEManager::PARTICLEManager}}()\ :\ PeriodicThread(0.02)\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00746}00746\ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00747}00747\ \ \ \ \ tpl\ =\ NULL;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00748}00748\ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00749}00749\ \textcolor{comment}{/**********************************************************/}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00750}\mbox{\hyperlink{classPARTICLEManager_a82c77b34270c52cb9f1bb5858b1aa726}{00750}}\ \mbox{\hyperlink{classPARTICLEManager_a82c77b34270c52cb9f1bb5858b1aa726}{PARTICLEManager::\string~PARTICLEManager}}()\ \{\ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00751}00751\ \textcolor{comment}{/**********************************************************/}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00752}\mbox{\hyperlink{classPARTICLEManager_a263fff2293326fd46f2fd1365ff3dc91}{00752}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classPARTICLEManager_a263fff2293326fd46f2fd1365ff3dc91}{PARTICLEManager::setName}}(\textcolor{keywordtype}{string}\ module)\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00753}00753\ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00754}00754\ \ \ \ \ this-\/>moduleName\ =\ \textcolor{keyword}{module};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00755}00755\ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00756}00756\ \textcolor{comment}{/**********************************************************/}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00757}\mbox{\hyperlink{classPARTICLEManager_a302e5d1add1fd7158aadfdb4cf369c25}{00757}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classPARTICLEManager_a302e5d1add1fd7158aadfdb4cf369c25}{PARTICLEManager::threadInit}}()\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00758}00758\ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00759}00759\ \ \ \ \ \textcolor{comment}{//create\ all\ ports}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00760}00760\ \ \ \ \ inputPortNameTemp\ =\ \textcolor{stringliteral}{"{}/"{}}\ +\ moduleName\ +\ \textcolor{stringliteral}{"{}/template/image:i"{}};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00761}00761\ \ \ \ \ imageInTemp.open(\ inputPortNameTemp.c\_str()\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00762}00762\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00763}00763\ \ \ \ \ outputPortNameTarget\ =\ \textcolor{stringliteral}{"{}/"{}}\ +\ moduleName\ +\ \textcolor{stringliteral}{"{}/target:o"{}};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00764}00764\ \ \ \ \ target.open(\ outputPortNameTarget.c\_str()\ );}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00765}00765\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00766}00766\ \ \ \ \ disparityPort.open((\textcolor{stringliteral}{"{}/"{}}+moduleName+\textcolor{stringliteral}{"{}/triangulation:io"{}}).c\_str());}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00767}00767\ \ \ \ \ target3D.open((\textcolor{stringliteral}{"{}/"{}}+moduleName+\textcolor{stringliteral}{"{}/target3d:o"{}}).c\_str());}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00768}00768\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00769}00769\ \ \ \ \ particleThreadLeft\ =\ \textcolor{keyword}{new}\ \mbox{\hyperlink{classPARTICLEThread}{PARTICLEThread}}();}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00770}00770\ \ \ \ \ particleThreadRight\ =\ \textcolor{keyword}{new}\ \mbox{\hyperlink{classPARTICLEThread}{PARTICLEThread}}();}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00771}00771\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00772}00772\ \ \ \ \ particleThreadLeft-\/>\mbox{\hyperlink{classPARTICLEThread_a2446d69584a25bf66d0d28b7491601bc}{setName}}((moduleName\ +\ \textcolor{stringliteral}{"{}/left"{}}).c\_str());}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00773}00773\ \ \ \ \ particleThreadRight-\/>\mbox{\hyperlink{classPARTICLEThread_a2446d69584a25bf66d0d28b7491601bc}{setName}}((moduleName\ +\ \textcolor{stringliteral}{"{}/right"{}}).c\_str());}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00774}00774\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00775}00775\ \ \ \ \ \mbox{\hyperlink{classPARTICLEManager_ac8a3945da4870b98f353dc9c24d709fa}{shouldSend}}\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00776}00776\ \ \ \ \ particleThreadLeft-\/>start();}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00777}00777\ \ \ \ \ particleThreadRight-\/>start();}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00778}00778\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00779}00779\ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00780}00780\ \textcolor{comment}{/**********************************************************/}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00781}\mbox{\hyperlink{classPARTICLEManager_ae8f54e618787cb601cb3849444dd851c}{00781}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classPARTICLEManager_ae8f54e618787cb601cb3849444dd851c}{PARTICLEManager::run}}()\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00782}00782\ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00783}00783\ \ \ \ \ \mbox{\hyperlink{structTemplateStruct}{TemplateStruct}}\ templLeft,templRight;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00784}00784\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00785}00785\ \ \ \ \ \textcolor{comment}{//\ if\ there\ is\ no\ need\ for\ a\ template\ update,\ the\ NULL\ pointers\ are\ returned}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00786}00786\ \ \ \ \ templLeft=particleThreadLeft-\/>\mbox{\hyperlink{classPARTICLEThread_a13a39e63b53e38d07d1f8ab811ee34f6}{getBestTemplate}}();}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00787}00787\ \ \ \ \ templRight=particleThreadRight-\/>\mbox{\hyperlink{classPARTICLEThread_a13a39e63b53e38d07d1f8ab811ee34f6}{getBestTemplate}}();}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00788}00788\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00789}00789\ \ \ \ \ ImageOf<PixelRgb>\ *tmp\_tpl=templLeft.\mbox{\hyperlink{structTemplateStruct_a1d40492a10801d1fabee14f1ccd6c7be}{w}}>templRight.\mbox{\hyperlink{structTemplateStruct_a1d40492a10801d1fabee14f1ccd6c7be}{w}}?templLeft.\mbox{\hyperlink{structTemplateStruct_ae3813582a170a5c33539e5e6b588d2f4}{templ}}:templRight.\mbox{\hyperlink{structTemplateStruct_ae3813582a170a5c33539e5e6b588d2f4}{templ}};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00790}00790\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00791}00791\ \ \ \ \ \textcolor{comment}{//\ copy\ tmp\_tpl\ whether\ it\ is\ NULL\ or\ not}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00792}00792\ \ \ \ \ tpl\ =\ \ tmp\_tpl;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00793}00793\ \ \ \ \ tpl\ =\ imageInTemp.read(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00794}00794\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00795}00795\ \ \ \ \ \textcolor{keywordflow}{if}\ (tpl!=NULL)\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00796}00796\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00797}00797\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classPARTICLEManager_ac8a3945da4870b98f353dc9c24d709fa}{shouldSend}}\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00798}00798\ \ \ \ \ \ \ \ \ particleThreadLeft-\/>\mbox{\hyperlink{classPARTICLEThread_a28a87ec749e92c0e46854391eabfd099}{setTemplate}}(tpl);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00799}00799\ \ \ \ \ \ \ \ \ particleThreadRight-\/>\mbox{\hyperlink{classPARTICLEThread_a28a87ec749e92c0e46854391eabfd099}{setTemplate}}(tpl);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00800}00800\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00801}00801\ \ \ \ \ Vector\ targetTemp;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00802}00802\ \ \ \ \ Stamp\ leftStamp,rightStamp;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00803}00803\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00804}00804\ \ \ \ \ particleThreadLeft-\/>\mbox{\hyperlink{classPARTICLEThread_ae1ffb707058998b55df081d96887878e}{pushTarget}}(targetTemp,leftStamp);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00805}00805\ \ \ \ \ particleThreadRight-\/>\mbox{\hyperlink{classPARTICLEThread_ae1ffb707058998b55df081d96887878e}{pushTarget}}(targetTemp,rightStamp);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00806}00806\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00807}00807\ \ \ \ \ \textcolor{keywordtype}{float}\ averageTempLeft\ =\ 0.0;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00808}00808\ \ \ \ \ \textcolor{keywordtype}{float}\ averageTempRight\ =\ 0.0;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00809}00809\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00810}00810\ \ \ \ \ averageTempLeft\ =\ particleThreadLeft-\/>\mbox{\hyperlink{classPARTICLEThread_a370bbb66ee9c934943af2c06df9b1794}{getAverage}}();}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00811}00811\ \ \ \ \ averageTempLeft\ =\ averageTempLeft\ *100;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00812}00812\ \ \ \ \ \ \ \ \ \textcolor{comment}{//fprintf(stdout,"{}the\ average\ is\ \%lf\ \(\backslash\)n"{},averageTempLeft\ *100);}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00813}00813\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00814}00814\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00815}00815\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classPARTICLEManager_ac8a3945da4870b98f353dc9c24d709fa}{shouldSend}})}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00816}00816\ \ \ \ \ \{\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00817}00817\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (target.getOutputCount()\ >\ 0\ \&\&\ targetTemp.size()\ >\ 4\ \&\&\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00818}00818\ \ \ \ \ \ \ \ \ \ \ \ \ fabs(leftStamp.getTime()-\/rightStamp.getTime())<0.002)\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00819}00819\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00820}00820\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//fprintf(stdout,"{}output\ \%lf\ \%lf\ \%lf\ \%lf\(\backslash\)n"{},\ targetTemp[0],\ targetTemp[1],\ targetTemp[2],\ targetTemp[3]);}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00821}00821\ \ \ \ \ \ \ \ \ \ \ \ \ Stamp\ propagatedStamp(leftStamp.getCount(),0.5*(leftStamp.getTime()+rightStamp.getTime()));}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00822}00822\ \ \ \ \ \ \ \ \ \ \ \ \ target.setEnvelope(propagatedStamp);\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00823}00823\ \ \ \ \ \ \ \ \ \ \ \ \ target.write(targetTemp);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00824}00824\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00825}00825\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (disparityPort.getOutputCount()\ >\ 0\ \&\&\ targetTemp.size())}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00826}00826\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00827}00827\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//fprintf(stdout,"{}getting\ ready\ to\ send\(\backslash\)n"{});}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00828}00828\ \ \ \ \ \ \ \ \ \ \ \ \ Bottle\ \mbox{\hyperlink{dataTypes_8h_a4d43e8212bdc9dbee866506f04effcea}{cmd}},\ reply;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00829}00829\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{dataTypes_8h_a4d43e8212bdc9dbee866506f04effcea}{cmd}}.addFloat64(targetTemp[0]);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00830}00830\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{dataTypes_8h_a4d43e8212bdc9dbee866506f04effcea}{cmd}}.addFloat64(targetTemp[1]);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00831}00831\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{dataTypes_8h_a4d43e8212bdc9dbee866506f04effcea}{cmd}}.addFloat64(targetTemp[6]);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00832}00832\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{dataTypes_8h_a4d43e8212bdc9dbee866506f04effcea}{cmd}}.addFloat64(targetTemp[7]);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00833}00833\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{saveNetwork_8m_a0eba6f64b9c26507a877bcb0c4f270e2}{fprintf}}(stdout,\textcolor{stringliteral}{"{}output\ \%lf\ \%lf\ \%lf\ \%lf\(\backslash\)n"{}},\ targetTemp[0],\ targetTemp[1],\ targetTemp[6],\ targetTemp[7]);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00834}00834\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00835}00835\ \ \ \ \ \ \ \ \ \ \ \ \ disparityPort.write(\mbox{\hyperlink{dataTypes_8h_a4d43e8212bdc9dbee866506f04effcea}{cmd}},reply);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00836}00836\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00837}00837\ \ \ \ \ \ \ \ \ \ \ \ \ Bottle\ targets;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00838}00838\ \ \ \ \ \ \ \ \ \ \ \ \ targets.addFloat64(reply.get(0).asFloat64());}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00839}00839\ \ \ \ \ \ \ \ \ \ \ \ \ targets.addFloat64(reply.get(1).asFloat64());}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00840}00840\ \ \ \ \ \ \ \ \ \ \ \ \ targets.addFloat64(reply.get(2).asFloat64());}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00841}00841\ \ \ \ \ \ \ \ \ \ \ \ \ targets.addFloat64(0.0);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00842}00842\ \ \ \ \ \ \ \ \ \ \ \ \ targets.addFloat64(0.0);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00843}00843\ \ \ \ \ \ \ \ \ \ \ \ \ targets.addFloat64(0.0);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00844}00844\ \ \ \ \ \ \ \ \ \ \ \ \ targets.addFloat64(averageTempLeft);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00845}00845\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00846}00846\ \ \ \ \ \ \ \ \ \ \ \ \ target3D.write(targets);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00847}00847\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00848}00848\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00849}00849\ \ \ \ \ \textcolor{comment}{//clear\ templates}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00850}00850\ \ \ \ \ \textcolor{keywordflow}{if}(templLeft.\mbox{\hyperlink{structTemplateStruct_ae3813582a170a5c33539e5e6b588d2f4}{templ}}!=NULL)}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00851}00851\ \ \ \ \ \ \ \ \ \textcolor{keyword}{delete}\ templLeft.\mbox{\hyperlink{structTemplateStruct_ae3813582a170a5c33539e5e6b588d2f4}{templ}};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00852}00852\ \ \ \ \ \textcolor{keywordflow}{if}(templRight.\mbox{\hyperlink{structTemplateStruct_ae3813582a170a5c33539e5e6b588d2f4}{templ}}!=NULL)}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00853}00853\ \ \ \ \ \ \ \ \ \textcolor{keyword}{delete}\ templRight.\mbox{\hyperlink{structTemplateStruct_ae3813582a170a5c33539e5e6b588d2f4}{templ}};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00854}00854\ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00855}00855\ \textcolor{comment}{/**********************************************************/}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00856}\mbox{\hyperlink{classPARTICLEManager_a7762b3b5ff890e4c8247371100670f77}{00856}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classPARTICLEManager_a7762b3b5ff890e4c8247371100670f77}{PARTICLEManager::threadRelease}}()\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00857}00857\ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00858}00858\ \ \ \ \ cout\ <<\ \textcolor{stringliteral}{"{}cleaning\ up\ Manager..."{}}\ <<\ endl;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00859}00859\ \ \ \ \ cout\ <<\ \textcolor{stringliteral}{"{}attempting\ to\ close\ ports\ Manager"{}}\ <<\ endl;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00860}00860\ \ \ \ \ particleThreadLeft-\/>stop();}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00861}00861\ \ \ \ \ particleThreadRight-\/>stop();}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00862}00862\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00863}00863\ \ \ \ \ imageInTemp.interrupt();}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00864}00864\ \ \ \ \ target.interrupt();}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00865}00865\ \ \ \ \ imageInTemp.close();}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00866}00866\ \ \ \ \ target.close();}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00867}00867\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00868}00868\ \ \ \ \ disparityPort.interrupt();}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00869}00869\ \ \ \ \ disparityPort.close();}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00870}00870\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00871}00871\ \ \ \ \ target3D.interrupt();}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00872}00872\ \ \ \ \ target3D.close();}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00873}00873\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00874}00874\ \ \ \ \ cout\ <<\ \textcolor{stringliteral}{"{}deleteing\ thread\ "{}}\ <<\ endl;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00875}00875\ \ \ \ \ \textcolor{keyword}{delete}\ particleThreadLeft;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00876}00876\ \ \ \ \ \textcolor{keyword}{delete}\ particleThreadRight;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00877}00877\ \ \ \ \ cout\ <<\ \textcolor{stringliteral}{"{}finished\ closing\ ports\ Manager"{}}\ <<\ endl;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00878}00878\ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00879}00879\ \textcolor{comment}{/**********************************************************/}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00880}\mbox{\hyperlink{classPARTICLEModule_a98a89256c0a608d0ed3301c31e3503a4}{00880}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classPARTICLEModule_a98a89256c0a608d0ed3301c31e3503a4}{PARTICLEModule::configure}}(yarp::os::ResourceFinder\ \&rf)}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00881}00881\ \{\ \ \ \ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00882}00882\ \ \ \ \ \textcolor{comment}{/*\ Process\ all\ parameters\ from\ both\ command-\/line\ and\ .ini\ file\ */}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00883}00883\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00884}00884\ \ \ \ \ moduleName\ \ \ \ \ \ \ \ \ \ \ \ =\ rf.check(\textcolor{stringliteral}{"{}name"{}},\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00885}00885\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Value(\textcolor{stringliteral}{"{}templatePFTracker"{}}),\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00886}00886\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}module\ name\ (string)"{}}).asString();}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00887}00887\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00888}00888\ \ \ \ \ setName(moduleName.c\_str());}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00889}00889\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00890}00890\ \ \ \ \ handlerPortName\ =\ \ \textcolor{stringliteral}{"{}/"{}};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00891}00891\ \ \ \ \ handlerPortName\ +=\ getName();\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ use\ getName()\ rather\ than\ a\ literal\ }}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00892}00892\ \ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00893}00893\ \ \ \ \ \textcolor{keywordflow}{if}\ (!handlerPort.open(handlerPortName.c\_str()))\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00894}00894\ \ \ \ \ \{\ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00895}00895\ \ \ \ \ \ \ \ \ cout\ <<\ getName()\ <<\ \textcolor{stringliteral}{"{}:\ Unable\ to\ open\ port\ "{}}\ <<\ handlerPortName\ <<\ endl;\ \ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00896}00896\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00897}00897\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00898}00898\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00899}00899\ \ \ \ \ attach(handlerPort);}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00900}00900\ \ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00901}00901\ \ \ \ \ \textcolor{comment}{/*\ create\ the\ thread\ and\ pass\ pointers\ to\ the\ module\ parameters\ */}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00902}00902\ \ \ \ \ particleManager\ =\ \textcolor{keyword}{new}\ \mbox{\hyperlink{classPARTICLEManager}{PARTICLEManager}}();}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00903}00903\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00904}00904\ \ \ \ \ \textcolor{comment}{/*pass\ the\ name\ of\ the\ module\ in\ order\ to\ create\ ports*/}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00905}00905\ \ \ \ \ particleManager-\/>\mbox{\hyperlink{classPARTICLEManager_a263fff2293326fd46f2fd1365ff3dc91}{setName}}(moduleName);\ \ \ \ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00906}00906\ \ \ \ \ \textcolor{comment}{/*\ now\ start\ the\ thread\ to\ do\ the\ work\ */}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00907}00907\ \ \ \ \ particleManager-\/>start();}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00908}00908\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00909}00909\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00910}00910\ \ \ \ \ \textcolor{keywordflow}{return}\ true\ ;\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00911}00911\ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00912}00912\ \textcolor{comment}{/**********************************************************/}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00913}\mbox{\hyperlink{classPARTICLEModule_a50f962611ec895e479569d2212793384}{00913}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classPARTICLEModule_a50f962611ec895e479569d2212793384}{PARTICLEModule::interruptModule}}()}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00914}00914\ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00915}00915\ \ \ \ \ handlerPort.interrupt();}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00916}00916\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00917}00917\ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00918}00918\ \textcolor{comment}{/**********************************************************/}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00919}\mbox{\hyperlink{classPARTICLEModule_acf5e66fceaea1026faf277a39e36432a}{00919}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classPARTICLEModule_acf5e66fceaea1026faf277a39e36432a}{PARTICLEModule::close}}()}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00920}00920\ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00921}00921\ \ \ \ \ handlerPort.close();}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00922}00922\ \ \ \ \ \textcolor{comment}{/*\ stop\ the\ thread\ */}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00923}00923\ \ \ \ \ particleManager-\/>stop();}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00924}00924\ \ \ \ \ cout\ <<\ \textcolor{stringliteral}{"{}deleteing\ thread\ "{}}\ <<\ endl;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00925}00925\ \ \ \ \ \textcolor{keyword}{delete}\ particleManager;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00926}00926\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00927}00927\ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00928}00928\ \textcolor{comment}{/**********************************************************/}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00929}\mbox{\hyperlink{classPARTICLEModule_a7e15b96b4360622d86e5ec9ad8bded1e}{00929}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classPARTICLEModule_a7e15b96b4360622d86e5ec9ad8bded1e}{PARTICLEModule::respond}}(\textcolor{keyword}{const}\ Bottle\&\ command,\ Bottle\&\ reply)\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00930}00930\ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00931}00931\ \ \ \ \ \textcolor{keywordtype}{string}\ helpMessage\ =\ \ string(getName().c\_str())\ +\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00932}00932\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\ commands\ are:\ \(\backslash\)n"{}}\ +\ \ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00933}00933\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}help\ \(\backslash\)n"{}}\ +\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00934}00934\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}quit\ \(\backslash\)n"{}};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00935}00935\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00936}00936\ \ \ \ \ reply.clear();\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00937}00937\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00938}00938\ \ \ \ \ \textcolor{keywordflow}{if}\ (command.get(0).asString()==\textcolor{stringliteral}{"{}quit"{}})\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00939}00939\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00940}00940\ \ \ \ \ \ \ \ \ reply.addString(\textcolor{stringliteral}{"{}quitting"{}});}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00941}00941\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00942}00942\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00943}00943\ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (command.get(0).asString()==\textcolor{stringliteral}{"{}help"{}})\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00944}00944\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00945}00945\ \ \ \ \ \ \ \ \ cout\ <<\ helpMessage;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00946}00946\ \ \ \ \ \ \ \ \ reply.addString(\textcolor{stringliteral}{"{}ok"{}});}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00947}00947\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00948}00948\ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (command.get(0).asString()==\textcolor{stringliteral}{"{}reset"{}})\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00949}00949\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00950}00950\ \ \ \ \ \ \ \ \ cout\ <<\ \textcolor{stringliteral}{"{}reset\ has\ been\ asked\ "{}}<<\ endl;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00951}00951\ \ \ \ \ \ \ \ \ particleManager-\/>\mbox{\hyperlink{classPARTICLEManager_ac8a3945da4870b98f353dc9c24d709fa}{shouldSend}}=\textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00952}00952\ \ \ \ \ \ \ \ \ reply.addString(\textcolor{stringliteral}{"{}ok"{}});}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00953}00953\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00954}00954\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00955}00955\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00956}00956\ \ \ \ \ \ \ \ \ cout\ <<\ \textcolor{stringliteral}{"{}command\ not\ known\ -\/\ type\ help\ for\ more\ info"{}}\ <<\ endl;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00957}00957\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00958}00958\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00959}00959\ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00960}00960\ \textcolor{comment}{/**********************************************************/}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00961}\mbox{\hyperlink{classPARTICLEModule_ad6573a7e38d268202a5365409852811d}{00961}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classPARTICLEModule_ad6573a7e38d268202a5365409852811d}{PARTICLEModule::updateModule}}()}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00962}00962\ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00963}00963\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00964}00964\ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00965}00965\ \textcolor{comment}{/**********************************************************/}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00966}\mbox{\hyperlink{classPARTICLEModule_abc0bfff5186c4fac92c9eca884ef5f57}{00966}}\ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{classPARTICLEModule_abc0bfff5186c4fac92c9eca884ef5f57}{PARTICLEModule::getPeriod}}()\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00967}00967\ \{}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00968}00968\ \ \ \ \ \textcolor{keywordflow}{return}\ 0.1;}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00969}00969\ \}}
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00970}00970\ }
+\DoxyCodeLine{\Hypertarget{particleFilter_8cpp_source_l00971}00971\ }
+
+\end{DoxyCode}

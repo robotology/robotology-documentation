@@ -1,0 +1,369 @@
+\doxysection{Pinhole\+Calibration\+Engine.\+cpp}
+\hypertarget{PinholeCalibrationEngine_8cpp_source}{}\label{PinholeCalibrationEngine_8cpp_source}\index{icub-\/main/src/tools/stereoCalib/src/PinholeCalibrationEngine.cpp@{icub-\/main/src/tools/stereoCalib/src/PinholeCalibrationEngine.cpp}}
+\mbox{\hyperlink{PinholeCalibrationEngine_8cpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00001}00001\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{PinholeCalibrationEngine_8h}{PinholeCalibrationEngine.h}}"{}}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00002}00002\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00003}00003\ \textcolor{keyword}{namespace}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00004}00004\ \{}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00005}00005\ \ \ \ \ \textcolor{keyword}{constexpr}\ std::size\_t\ minimumObservations\ =\ 30;}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00006}00006\ \ \ \ \ \textcolor{keyword}{constexpr}\ std::size\_t\ minimumPointsPerObservation\ =\ 12;}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00007}00007\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00008}00008\ \ \ \ \ \textcolor{keywordtype}{bool}\ isFinite(\textcolor{keyword}{const}\ cv::Point2f\&\ point)}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00009}00009\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00010}00010\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ std::isfinite(point.x)\ \&\&\ std::isfinite(point.y);}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00011}00011\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00012}00012\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00013}00013\ \ \ \ \ \textcolor{keywordtype}{bool}\ isFinite(\textcolor{keyword}{const}\ cv::Point3f\&\ point)}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00014}00014\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00015}00015\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ std::isfinite(point.x)\ \&\&\ std::isfinite(point.y)\ \&\&\ std::isfinite(point.z);}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00016}00016\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00017}00017\ \}\ \textcolor{comment}{//\ namespace}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00018}00018\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00019}00019\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespacestereo__calib}{stereo\_calib}}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00020}00020\ \{}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00021}\mbox{\hyperlink{classstereo__calib_1_1PinholeCalibrationEngine_a4c5e2b62642e1611e07041a6fbe09609}{00021}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classstereo__calib_1_1PinholeCalibrationEngine_a4c5e2b62642e1611e07041a6fbe09609}{PinholeCalibrationEngine::calibrate}}(}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00022}00022\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<StereoObservation>\&\ observations,\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00023}00023\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{structstereo__calib_1_1PinholeCalibrationOptions}{PinholeCalibrationOptions}}\&\ options,\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00024}00024\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structstereo__calib_1_1CalibrationResult}{CalibrationResult}}\&\ result,}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00025}00025\ \ \ \ \ \ \ \ \ std::string\&\ errorMessage)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00026}00026\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00027}00027\ \ \ \ \ \ \ \ \ result\ =\ \mbox{\hyperlink{structstereo__calib_1_1CalibrationResult}{CalibrationResult}}\{\};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00028}00028\ \ \ \ \ \ \ \ \ errorMessage.clear();}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00029}00029\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00030}00030\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structstereo__calib_1_1CalibrationResult}{CalibrationResult}}\ calculated;}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00031}00031\ \ \ \ \ \ \ \ \ calculated.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_ab1636abe1a77f6ad474412ae9be44a3d}{model}}\ =\ \mbox{\hyperlink{namespacestereo__calib_ab3b6f1658e60950989d03fd07f822174a7d1cdfb9791af070cb401cd584adaf9d}{CameraModel::Pinhole}};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00032}00032\ \ \ \ \ \ \ \ \ calculated.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_a3002915b3b94994684c06d9a6e9a4b17}{leftCamera}}.\mbox{\hyperlink{structstereo__calib_1_1CameraCalibrationResult_a0646ac40415508f00515af410353b00c}{model}}\ =\ \mbox{\hyperlink{namespacestereo__calib_ab3b6f1658e60950989d03fd07f822174a7d1cdfb9791af070cb401cd584adaf9d}{CameraModel::Pinhole}};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00033}00033\ \ \ \ \ \ \ \ \ calculated.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_aa0c5bc3e1e97ae981d7041b9148a4a68}{rightCamera}}.\mbox{\hyperlink{structstereo__calib_1_1CameraCalibrationResult_a0646ac40415508f00515af410353b00c}{model}}\ =\ \mbox{\hyperlink{namespacestereo__calib_ab3b6f1658e60950989d03fd07f822174a7d1cdfb9791af070cb401cd584adaf9d}{CameraModel::Pinhole}};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00034}00034\ \ \ \ \ \ \ \ \ calculated.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_a31f11e28eb4f6d0faa9b91e4b385a351}{mode}}\ =\ options.\mbox{\hyperlink{structstereo__calib_1_1PinholeCalibrationOptions_ab8904f1d6a0b13cecb45b42225aa1d6b}{common}}.\mbox{\hyperlink{structstereo__calib_1_1CommonCalibrationOptions_a8ec226a5bb1606bf0dc30735ce067c29}{calibrationMode}};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00035}00035\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00036}00036\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00037}00037\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00038}00038\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(!options.\mbox{\hyperlink{structstereo__calib_1_1PinholeCalibrationOptions_a8c48b0a2722f57363f098afae21aa3ea}{isValid}}())}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00039}00039\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00040}00040\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ errorMessage\ =\ \textcolor{stringliteral}{"{}Invalid\ pinhole\ calibration\ options."{}};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00041}00041\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00042}00042\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00043}00043\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00044}00044\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(!validateObservations(observations,\ options.\mbox{\hyperlink{structstereo__calib_1_1PinholeCalibrationOptions_ab8904f1d6a0b13cecb45b42225aa1d6b}{common}}.\mbox{\hyperlink{structstereo__calib_1_1CommonCalibrationOptions_a9962bb01e45b46334f47407f94a02fc7}{imageSize}},\ errorMessage))}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00045}00045\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00046}00046\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00047}00047\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00048}00048\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00049}00049\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{switch}\ (options.\mbox{\hyperlink{structstereo__calib_1_1PinholeCalibrationOptions_ab8904f1d6a0b13cecb45b42225aa1d6b}{common}}.\mbox{\hyperlink{structstereo__calib_1_1CommonCalibrationOptions_a8ec226a5bb1606bf0dc30735ce067c29}{calibrationMode}})}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00050}00050\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00051}00051\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ \mbox{\hyperlink{namespacestereo__calib_a0645d0e70d31718fe1c9c42699345c2fa792eeb7b550156b7b655edf421c0493f}{CalibrationMode::MonocularLeft}}:}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00052}00052\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(!calibrateMonocular(observations,\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00053}00053\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacestereo__calib_ad0e478d5f359c9a833469ef23f26d03ea945d5e233cf7d6240f6b783b36a374ff}{CameraSide::Left}},\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00054}00054\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ options,\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00055}00055\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ calculated.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_a3002915b3b94994684c06d9a6e9a4b17}{leftCamera}},\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00056}00056\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ errorMessage))}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00057}00057\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00058}00058\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00059}00059\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00060}00060\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00061}00061\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ \mbox{\hyperlink{namespacestereo__calib_a0645d0e70d31718fe1c9c42699345c2fa5e3f0e200908947d31e69445d554141b}{CalibrationMode::MonocularRight}}:}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00062}00062\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(!calibrateMonocular(}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00063}00063\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ observations,\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00064}00064\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacestereo__calib_ad0e478d5f359c9a833469ef23f26d03ea92b09c7c48c520c3c55e497875da437c}{CameraSide::Right}},\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00065}00065\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ options,\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00066}00066\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ calculated.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_aa0c5bc3e1e97ae981d7041b9148a4a68}{rightCamera}},\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00067}00067\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ errorMessage))}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00068}00068\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00069}00069\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00070}00070\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00071}00071\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00072}00072\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ \mbox{\hyperlink{namespacestereo__calib_a0645d0e70d31718fe1c9c42699345c2fa2c39d0e718a3970bb027538cc588f288}{CalibrationMode::MonocularBoth}}:}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00073}00073\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!calibrateMonocular(observations,\ \mbox{\hyperlink{namespacestereo__calib_ad0e478d5f359c9a833469ef23f26d03ea945d5e233cf7d6240f6b783b36a374ff}{CameraSide::Left}},\ options,}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00074}00074\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ calculated.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_a3002915b3b94994684c06d9a6e9a4b17}{leftCamera}},\ errorMessage)\ ||}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00075}00075\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ !calibrateMonocular(observations,\ \mbox{\hyperlink{namespacestereo__calib_ad0e478d5f359c9a833469ef23f26d03ea92b09c7c48c520c3c55e497875da437c}{CameraSide::Right}},\ options,}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00076}00076\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ calculated.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_aa0c5bc3e1e97ae981d7041b9148a4a68}{rightCamera}},\ errorMessage))}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00077}00077\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00078}00078\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00079}00079\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00080}00080\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00081}00081\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00082}00082\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ \mbox{\hyperlink{namespacestereo__calib_a0645d0e70d31718fe1c9c42699345c2faede6d8d2c158731a395cefefd37ac309}{CalibrationMode::StereoFull}}:}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00083}00083\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!calibrateMonocular(observations,\ \mbox{\hyperlink{namespacestereo__calib_ad0e478d5f359c9a833469ef23f26d03ea945d5e233cf7d6240f6b783b36a374ff}{CameraSide::Left}},\ options,}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00084}00084\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ calculated.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_a3002915b3b94994684c06d9a6e9a4b17}{leftCamera}},\ errorMessage)\ ||}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00085}00085\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ !calibrateMonocular(observations,\ \mbox{\hyperlink{namespacestereo__calib_ad0e478d5f359c9a833469ef23f26d03ea92b09c7c48c520c3c55e497875da437c}{CameraSide::Right}},\ options,}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00086}00086\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ calculated.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_aa0c5bc3e1e97ae981d7041b9148a4a68}{rightCamera}},\ errorMessage)\ ||}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00087}00087\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ !calibrateStereo(observations,\ options,\ calculated.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_a3002915b3b94994684c06d9a6e9a4b17}{leftCamera}},}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00088}00088\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ calculated.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_aa0c5bc3e1e97ae981d7041b9148a4a68}{rightCamera}},\ calculated.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_a5a68f5b815115306665ec16a976e60d2}{stereo}},\ errorMessage))}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00089}00089\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00090}00090\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00091}00091\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00092}00092\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00093}00093\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{default}:}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00094}00094\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ errorMessage\ =\ \textcolor{stringliteral}{"{}Unknown\ calibration\ mode."{}};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00095}00095\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00096}00096\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00097}00097\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00098}00098\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00099}00099\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!calculated.\mbox{\hyperlink{structstereo__calib_1_1CalibrationResult_a3b5343e58a83d6cd789ac5f4adc9cf84}{isValid}}())}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00100}00100\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00101}00101\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ errorMessage\ =\ \textcolor{stringliteral}{"{}Calibration\ produced\ an\ invalid\ result."{}};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00102}00102\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00103}00103\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00104}00104\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00105}00105\ \ \ \ \ \ \ \ \ \ \ \ \ result\ =\ std::move(calculated);}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00106}00106\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00107}00107\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00108}00108\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{catch}(\textcolor{keyword}{const}\ cv::Exception\&\ \mbox{\hyperlink{compute__ekf__fast_8m_a08a4415e9d594ff960030b921d42b91e}{e}})}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00109}00109\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00110}00110\ \ \ \ \ \ \ \ \ \ \ \ \ errorMessage\ =\ std::string(\textcolor{stringliteral}{"{}OpenCV\ exception\ during\ calibration:\ "{}})\ +\ \mbox{\hyperlink{compute__ekf__fast_8m_a08a4415e9d594ff960030b921d42b91e}{e}}.what();}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00111}00111\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00112}00112\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{catch}(\textcolor{keyword}{const}\ std::exception\&\ \mbox{\hyperlink{compute__ekf__fast_8m_a08a4415e9d594ff960030b921d42b91e}{e}})}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00113}00113\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00114}00114\ \ \ \ \ \ \ \ \ \ \ \ \ errorMessage\ =\ std::string(\textcolor{stringliteral}{"{}Standard\ exception\ during\ calibration:\ "{}})\ +\ \mbox{\hyperlink{compute__ekf__fast_8m_a08a4415e9d594ff960030b921d42b91e}{e}}.what();}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00115}00115\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00116}00116\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{catch}(...)}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00117}00117\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00118}00118\ \ \ \ \ \ \ \ \ \ \ \ \ errorMessage\ =\ \textcolor{stringliteral}{"{}Unknown\ exception\ during\ calibration."{}};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00119}00119\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00120}00120\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00121}00121\ \ \ \ \ \ \ \ \ result\ =\ \mbox{\hyperlink{structstereo__calib_1_1CalibrationResult}{CalibrationResult}}\{\};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00122}00122\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00123}00123\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00124}00124\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00125}00125\ \ \ \ \ \textcolor{keywordtype}{bool}\ PinholeCalibrationEngine::validateObservations(}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00126}00126\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<StereoObservation>\&\ observations,\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00127}00127\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ cv::Size\&\ expectedImageSize,\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00128}00128\ \ \ \ \ \ \ \ \ std::string\&\ errorMessage)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00129}00129\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00130}00130\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (observations.size()\ <\ minimumObservations)}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00131}00131\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00132}00132\ \ \ \ \ \ \ \ \ \ \ \ \ errorMessage\ =\ \textcolor{stringliteral}{"{}At\ least\ "{}}\ +\ std::to\_string(minimumObservations)\ +}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00133}00133\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\ stereo\ observations\ are\ required."{}};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00134}00134\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00135}00135\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00136}00136\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00137}00137\ \ \ \ \ \ \ \ \ std::size\_t\ expectedPointCount\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00138}00138\ \ \ \ \ \ \ \ \ std::vector<cv::Point3f>\ referenceObjectPoints;}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00139}00139\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (std::size\_t\ index\ =\ 0;\ index\ <\ observations.size();\ ++index)}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00140}00140\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00141}00141\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ StereoObservation\&\ observation\ =\ observations[index];}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00142}00142\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::string\ prefix\ =\ \textcolor{stringliteral}{"{}Observation\ \#"{}}\ +\ std::to\_string(index\ +\ 1)\ +\ \textcolor{stringliteral}{"{}:\ "{}};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00143}00143\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00144}00144\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (observation.imageSize\ !=\ expectedImageSize)}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00145}00145\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00146}00146\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::ostringstream\ message;}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00147}00147\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ message\ <<\ prefix\ <<\ \textcolor{stringliteral}{"{}image\ size\ is\ "{}}\ <<\ observation.imageSize.width\ <<\ \textcolor{stringliteral}{"{}x"{}}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00148}00148\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ observation.imageSize.height\ <<\ \textcolor{stringliteral}{"{},\ expected\ "{}}\ <<\ expectedImageSize.width}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00149}00149\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ \textcolor{stringliteral}{"{}x"{}}\ <<\ expectedImageSize.height\ <<\ \textcolor{stringliteral}{"{}."{}};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00150}00150\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ errorMessage\ =\ message.str();}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00151}00151\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00152}00152\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00153}00153\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00154}00154\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!observation.isValid())}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00155}00155\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00156}00156\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ errorMessage\ =\ prefix\ +\ \textcolor{stringliteral}{"{}has\ inconsistent\ point\ lists\ or\ an\ invalid\ timestamp\ delta."{}};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00157}00157\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00158}00158\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00159}00159\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00160}00160\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (observation.objectPoints.size()\ <\ minimumPointsPerObservation)}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00161}00161\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00162}00162\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ errorMessage\ =\ prefix\ +\ \textcolor{stringliteral}{"{}contains\ fewer\ than\ "{}}\ +}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00163}00163\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::to\_string(minimumPointsPerObservation)\ +\ \textcolor{stringliteral}{"{}\ calibration\ points."{}};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00164}00164\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00165}00165\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00166}00166\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00167}00167\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!std::isfinite(observation.leftTimestampSeconds)\ ||}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00168}00168\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ !std::isfinite(observation.rightTimestampSeconds)\ ||}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00169}00169\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ !std::isfinite(observation.timestampDeltaSeconds))}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00170}00170\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00171}00171\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ errorMessage\ =\ prefix\ +\ \textcolor{stringliteral}{"{}contains\ a\ non-\/finite\ timestamp."{}};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00172}00172\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00173}00173\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00174}00174\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00175}00175\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (std::size\_t\ pointIndex\ =\ 0;\ pointIndex\ <\ observation.objectPoints.size();\ ++pointIndex)}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00176}00176\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00177}00177\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!isFinite(observation.objectPoints[pointIndex])\ ||}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00178}00178\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ !isFinite(observation.leftImagePoints[pointIndex])\ ||}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00179}00179\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ !isFinite(observation.rightImagePoints[pointIndex]))}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00180}00180\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00181}00181\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ errorMessage\ =\ prefix\ +\ \textcolor{stringliteral}{"{}point\ \#"{}}\ +\ std::to\_string(pointIndex\ +\ 1)\ +}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00182}00182\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\ contains\ a\ non-\/finite\ coordinate."{}};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00183}00183\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00184}00184\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00185}00185\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00186}00186\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00187}00187\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (index\ ==\ 0)}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00188}00188\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00189}00189\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ expectedPointCount\ =\ observation.objectPoints.size();}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00190}00190\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ referenceObjectPoints\ =\ observation.objectPoints;}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00191}00191\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00192}00192\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (observation.objectPoints.size()\ !=\ expectedPointCount)}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00193}00193\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00194}00194\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ errorMessage\ =\ prefix\ +\ \textcolor{stringliteral}{"{}has\ "{}}\ +\ std::to\_string(observation.objectPoints.size())\ +}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00195}00195\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\ object\ points,\ expected\ "{}}\ +\ std::to\_string(expectedPointCount)\ +\ \textcolor{stringliteral}{"{}."{}};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00196}00196\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00197}00197\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00198}00198\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00199}00199\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00200}00200\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (std::size\_t\ pointIndex\ =\ 0;\ pointIndex\ <\ expectedPointCount;\ ++pointIndex)}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00201}00201\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00202}00202\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (cv::norm(observation.objectPoints[pointIndex]\ -\/\ referenceObjectPoints[pointIndex])\ >\ 1\mbox{\hyperlink{compute__ekf__fast_8m_a08a4415e9d594ff960030b921d42b91e}{e}}-\/6)}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00203}00203\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00204}00204\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ errorMessage\ =\ prefix\ +\ \textcolor{stringliteral}{"{}uses\ object\ points\ different\ from\ observation\ \#1."{}};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00205}00205\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00206}00206\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00207}00207\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00208}00208\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00209}00209\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00210}00210\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00211}00211\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00212}00212\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00213}00213\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00214}00214\ \ \ \ \ \textcolor{keywordtype}{bool}\ PinholeCalibrationEngine::calibrateMonocular(}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00215}00215\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<StereoObservation>\&\ observations,\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00216}00216\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacestereo__calib_ad0e478d5f359c9a833469ef23f26d03e}{CameraSide}}\ cameraSide,\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00217}00217\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ PinholeCalibrationOptions\&\ options,}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00218}00218\ \ \ \ \ \ \ \ \ CameraCalibrationResult\&\ result,\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00219}00219\ \ \ \ \ \ \ \ \ std::string\&\ errorMessage)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00220}00220\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00221}00221\ \ \ \ \ \ \ \ \ std::vector<std::vector<cv::Point3f>>\ objectPoints;}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00222}00222\ \ \ \ \ \ \ \ \ std::vector<std::vector<cv::Point2f>>\ leftImagePoints;}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00223}00223\ \ \ \ \ \ \ \ \ std::vector<std::vector<cv::Point2f>>\ rightImagePoints;}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00224}00224\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!extractCalibrationPoints(observations,\ objectPoints,\ leftImagePoints,\ rightImagePoints,\ errorMessage))}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00225}00225\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00226}00226\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00227}00227\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00228}00228\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00229}00229\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<std::vector<cv::Point2f>>\&\ imagePoints\ =}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00230}00230\ \ \ \ \ \ \ \ \ \ \ \ \ cameraSide\ ==\ \mbox{\hyperlink{namespacestereo__calib_ad0e478d5f359c9a833469ef23f26d03ea945d5e233cf7d6240f6b783b36a374ff}{CameraSide::Left}}\ ?\ leftImagePoints\ :\ rightImagePoints;}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00231}00231\ \ \ \ \ \ \ \ \ cv::Mat\ intrinsic\ =\ cv::Mat::eye(3,\ 3,\ CV\_64F);}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00232}00232\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(options.cameraFocalLengthGuess\ >\ 0.0\ \&\&\ (options.monocularFlags\ \&\ cv::CALIB\_USE\_INTRINSIC\_GUESS))}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00233}00233\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00234}00234\ \ \ \ \ \ \ \ \ \ \ \ \ intrinsic.at<\textcolor{keywordtype}{double}>(0,\ 0)\ =\ options.cameraFocalLengthGuess;}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00235}00235\ \ \ \ \ \ \ \ \ \ \ \ \ intrinsic.at<\textcolor{keywordtype}{double}>(1,\ 1)\ =\ options.cameraFocalLengthGuess;}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00236}00236\ \ \ \ \ \ \ \ \ \ \ \ \ intrinsic.at<\textcolor{keywordtype}{double}>(0,\ 2)\ =\ options.common.imageSize.width\ *\ 0.5;}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00237}00237\ \ \ \ \ \ \ \ \ \ \ \ \ intrinsic.at<\textcolor{keywordtype}{double}>(1,\ 2)\ =\ options.common.imageSize.height\ *\ 0.5;}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00238}00238\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00239}00239\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ OpenCV's\ standard\ pinhole\ calibration\ vector\ contains\ k3\ as\ its}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00240}00240\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ fifth\ entry.\ Keep\ it\ fixed\ to\ zero\ during\ optimization,\ then\ expose}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00241}00241\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ only\ the\ four\ coefficients\ consumed\ by\ camCalib.}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00242}00242\ \ \ \ \ \ \ \ \ cv::Mat\ distortion\ =\ cv::Mat::zeros(5,\ 1,\ CV\_64F);}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00243}00243\ \ \ \ \ \ \ \ \ std::vector<cv::Mat>\ rotationVectors;}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00244}00244\ \ \ \ \ \ \ \ \ std::vector<cv::Mat>\ translationVectors;}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00245}00245\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00246}00246\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ rms\ =\ cv::calibrateCamera(objectPoints,\ imagePoints,\ options.common.imageSize,}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00247}00247\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ intrinsic,\ distortion,\ rotationVectors,}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00248}00248\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ translationVectors,\ options.monocularFlags,}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00249}00249\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ options.criteria);}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00250}00250\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00251}00251\ \ \ \ \ \ \ \ \ result\ =\ CameraCalibrationResult\{\};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00252}00252\ \ \ \ \ \ \ \ \ result.model\ =\ \mbox{\hyperlink{namespacestereo__calib_ab3b6f1658e60950989d03fd07f822174a7d1cdfb9791af070cb401cd584adaf9d}{CameraModel::Pinhole}};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00253}00253\ \ \ \ \ \ \ \ \ result.imageSize\ =\ options.common.imageSize;}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00254}00254\ \ \ \ \ \ \ \ \ result.K\ =\ intrinsic.clone();}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00255}00255\ \ \ \ \ \ \ \ \ result.D\ =\ distortion.reshape(1,\ 5).rowRange(0,\ 4).clone();}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00256}00256\ \ \ \ \ \ \ \ \ result.rotationVectors\ =\ std::move(rotationVectors);}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00257}00257\ \ \ \ \ \ \ \ \ result.translationVectors\ =\ std::move(translationVectors);}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00258}00258\ \ \ \ \ \ \ \ \ result.rms\ =\ rms;}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00259}00259\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00260}00260\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (result.rotationVectors.size()\ !=\ observations.size()\ ||}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00261}00261\ \ \ \ \ \ \ \ \ \ \ \ \ result.translationVectors.size()\ !=\ observations.size())}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00262}00262\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00263}00263\ \ \ \ \ \ \ \ \ \ \ \ \ errorMessage\ =\ \textcolor{stringliteral}{"{}OpenCV\ returned\ an\ incomplete\ set\ of\ monocular\ poses."{}};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00264}00264\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00265}00265\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00266}00266\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00267}00267\ \ \ \ \ \ \ \ \ result.perViewRms.reserve(observations.size());}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00268}00268\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (std::size\_t\ index\ =\ 0;\ index\ <\ observations.size();\ ++index)}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00269}00269\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00270}00270\ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<cv::Point2f>\ projectedPoints;}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00271}00271\ \ \ \ \ \ \ \ \ \ \ \ \ cv::projectPoints(objectPoints[index],}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00272}00272\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ result.rotationVectors[index],\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00273}00273\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ result.translationVectors[index],}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00274}00274\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ result.K,\ result.D,}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00275}00275\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ projectedPoints);}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00276}00276\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (projectedPoints.size()\ !=\ imagePoints[index].size())}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00277}00277\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00278}00278\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ errorMessage\ =\ \textcolor{stringliteral}{"{}OpenCV\ returned\ an\ incomplete\ projected\ point\ set."{}};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00279}00279\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00280}00280\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00281}00281\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ viewRms\ =\ cv::norm(projectedPoints,\ imagePoints[index],\ cv::NORM\_L2)\ /}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00282}00282\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::sqrt(\textcolor{keyword}{static\_cast<}\textcolor{keywordtype}{double}\textcolor{keyword}{>}(projectedPoints.size()));}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00283}00283\ \ \ \ \ \ \ \ \ \ \ \ \ result.perViewRms.push\_back(viewRms);}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00284}00284\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00285}00285\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00286}00286\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!result.isValid())}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00287}00287\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00288}00288\ \ \ \ \ \ \ \ \ \ \ \ \ errorMessage\ =\ \textcolor{stringliteral}{"{}Monocular\ calibration\ produced\ invalid\ camera\ parameters."{}};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00289}00289\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00290}00290\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00291}00291\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00292}00292\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00293}00293\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00294}00294\ \ \ \ \ \textcolor{keywordtype}{bool}\ PinholeCalibrationEngine::calibrateStereo(}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00295}00295\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<StereoObservation>\&\ observations,}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00296}00296\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ PinholeCalibrationOptions\&\ options,\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00297}00297\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ CameraCalibrationResult\&\ leftCamera,}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00298}00298\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ CameraCalibrationResult\&\ rightCamera,\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00299}00299\ \ \ \ \ \ \ \ \ StereoCalibrationResult\&\ result,\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00300}00300\ \ \ \ \ \ \ \ \ std::string\&\ errorMessage)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00301}00301\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00302}00302\ \ \ \ \ \ \ \ \ std::vector<std::vector<cv::Point3f>>\ objectPoints;}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00303}00303\ \ \ \ \ \ \ \ \ std::vector<std::vector<cv::Point2f>>\ leftImagePoints;}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00304}00304\ \ \ \ \ \ \ \ \ std::vector<std::vector<cv::Point2f>>\ rightImagePoints;}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00305}00305\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!extractCalibrationPoints(observations,\ objectPoints,\ leftImagePoints,\ rightImagePoints,\ errorMessage))}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00306}00306\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00307}00307\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00308}00308\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00309}00309\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00310}00310\ \ \ \ \ \ \ \ \ cv::Mat\ leftK\ =\ leftCamera.K.clone();}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00311}00311\ \ \ \ \ \ \ \ \ cv::Mat\ rightK\ =\ rightCamera.K.clone();}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00312}00312\ \ \ \ \ \ \ \ \ cv::Mat\ leftD\ =\ leftCamera.D.clone();}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00313}00313\ \ \ \ \ \ \ \ \ cv::Mat\ rightD\ =\ rightCamera.D.clone();}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00314}00314\ \ \ \ \ \ \ \ \ cv::Mat\ Rotation,\ Translation,\ Essential,\ Fundamental;}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00315}00315\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00316}00316\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ rms\ =\ cv::stereoCalibrate(}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00317}00317\ \ \ \ \ \ \ \ \ \ \ \ \ objectPoints,\ leftImagePoints,\ rightImagePoints,}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00318}00318\ \ \ \ \ \ \ \ \ \ \ \ \ leftK,\ leftD,\ rightK,\ rightD,}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00319}00319\ \ \ \ \ \ \ \ \ \ \ \ \ options.common.imageSize,\ Rotation,\ Translation,\ Essential,\ Fundamental,}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00320}00320\ \ \ \ \ \ \ \ \ \ \ \ \ options.stereoFlags,\ options.criteria);}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00321}00321\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00322}00322\ \ \ \ \ \ \ \ \ result\ =\ StereoCalibrationResult\{\};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00323}00323\ \ \ \ \ \ \ \ \ result.R\ =\ Rotation.clone();}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00324}00324\ \ \ \ \ \ \ \ \ result.T\ =\ Translation.reshape(1,\ 3).clone();}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00325}00325\ \ \ \ \ \ \ \ \ result.rms\ =\ rms;}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00326}00326\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00327}00327\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!result.isValid())}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00328}00328\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00329}00329\ \ \ \ \ \ \ \ \ \ \ \ \ errorMessage\ =\ \textcolor{stringliteral}{"{}Stereo\ calibration\ produced\ an\ invalid\ result."{}};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00330}00330\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00331}00331\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00332}00332\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00333}00333\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00334}00334\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00335}00335\ \ \ \ \ \textcolor{keywordtype}{bool}\ PinholeCalibrationEngine::extractCalibrationPoints(}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00336}00336\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<StereoObservation>\&\ observations,\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00337}00337\ \ \ \ \ \ \ \ \ std::vector<std::vector<cv::Point3f>>\&\ objectPoints,}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00338}00338\ \ \ \ \ \ \ \ \ std::vector<std::vector<cv::Point2f>>\&\ leftImagePoints,\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00339}00339\ \ \ \ \ \ \ \ \ std::vector<std::vector<cv::Point2f>>\&\ rightImagePoints,}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00340}00340\ \ \ \ \ \ \ \ \ std::string\&\ errorMessage)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00341}00341\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00342}00342\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00343}00343\ \ \ \ \ \ \ \ \ objectPoints.clear();}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00344}00344\ \ \ \ \ \ \ \ \ leftImagePoints.clear();}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00345}00345\ \ \ \ \ \ \ \ \ rightImagePoints.clear();}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00346}00346\ \ \ \ \ \ \ \ \ objectPoints.reserve(observations.size());}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00347}00347\ \ \ \ \ \ \ \ \ leftImagePoints.reserve(observations.size());}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00348}00348\ \ \ \ \ \ \ \ \ rightImagePoints.reserve(observations.size());}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00349}00349\ }
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00350}00350\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keyword}{const}\ StereoObservation\&\ observation\ :\ observations)}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00351}00351\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00352}00352\ \ \ \ \ \ \ \ \ \ \ \ \ objectPoints.push\_back(observation.objectPoints);}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00353}00353\ \ \ \ \ \ \ \ \ \ \ \ \ leftImagePoints.push\_back(observation.leftImagePoints);}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00354}00354\ \ \ \ \ \ \ \ \ \ \ \ \ rightImagePoints.push\_back(observation.rightImagePoints);}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00355}00355\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00356}00356\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (objectPoints.empty())}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00357}00357\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00358}00358\ \ \ \ \ \ \ \ \ \ \ \ \ errorMessage\ =\ \textcolor{stringliteral}{"{}No\ calibration\ points\ are\ available."{}};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00359}00359\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00360}00360\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00361}00361\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00362}00362\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{PinholeCalibrationEngine_8cpp_source_l00363}00363\ \}}
+
+\end{DoxyCode}

@@ -1,0 +1,1013 @@
+\doxysection{gravity\+Thread.\+cpp}
+\hypertarget{gravityThread_8cpp_source}{}\label{gravityThread_8cpp_source}\index{icub-\/main/src/modules/gravityCompensator/gravityThread.cpp@{icub-\/main/src/modules/gravityCompensator/gravityThread.cpp}}
+\mbox{\hyperlink{gravityThread_8cpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00001}00001\ \textcolor{comment}{/*\ }}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00002}00002\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2011\ RobotCub\ Consortium,\ European\ Commission\ FP6\ Project\ IST-\/004370}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00003}00003\ \textcolor{comment}{\ *\ Author:\ Marco\ Randazzo,\ Matteo\ Fumagalli}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00004}00004\ \textcolor{comment}{\ *\ email:\ \ marco.randazzo@iit.it}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00005}00005\ \textcolor{comment}{\ *\ website:\ www.robotcub.org}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00006}00006\ \textcolor{comment}{\ *\ Permission\ is\ granted\ to\ copy,\ distribute,\ and/or\ modify\ this\ program}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00007}00007\ \textcolor{comment}{\ *\ under\ the\ terms\ of\ the\ GNU\ General\ Public\ License,\ version\ 2\ or\ any}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00008}00008\ \textcolor{comment}{\ *\ later\ version\ published\ by\ the\ Free\ Software\ Foundation.}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00009}00009\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00010}00010\ \textcolor{comment}{\ *\ A\ copy\ of\ the\ license\ can\ be\ found\ at}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00011}00011\ \textcolor{comment}{\ *\ http://www.robotcub.org/icub/license/gpl.txt}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00012}00012\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00013}00013\ \textcolor{comment}{\ *\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00014}00014\ \textcolor{comment}{\ *\ WITHOUT\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00015}00015\ \textcolor{comment}{\ *\ MERCHANTABILITY\ or\ FITNESS\ FOR\ A\ PARTICULAR\ PURPOSE.\ See\ the\ GNU\ General}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00016}00016\ \textcolor{comment}{\ *\ Public\ License\ for\ more\ details}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00017}00017\ \textcolor{comment}{*/}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00018}00018\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00019}00019\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{gravityThread_8h}{gravityThread.h}}"{}}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00020}00020\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00021}00021\ \textcolor{preprocessor}{\#include\ <yarp/os/BufferedPort.h>}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00022}00022\ \textcolor{preprocessor}{\#include\ <yarp/os/Time.h>}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00023}00023\ \textcolor{preprocessor}{\#include\ <yarp/os/Network.h>}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00024}00024\ \textcolor{preprocessor}{\#include\ <yarp/os/PeriodicThread.h>}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00025}00025\ \textcolor{preprocessor}{\#include\ <yarp/os/Stamp.h>}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00026}00026\ \textcolor{preprocessor}{\#include\ <yarp/sig/Vector.h>}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00027}00027\ \textcolor{preprocessor}{\#include\ <yarp/dev/PolyDriver.h>}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00028}00028\ \textcolor{preprocessor}{\#include\ <yarp/dev/ControlBoardInterfaces.h>}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00029}00029\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{math_8h}{iCub/ctrl/math.h}}>}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00030}00030\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{adaptWinPolyEstimator_8h}{iCub/ctrl/adaptWinPolyEstimator.h}}>}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00031}00031\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{iDyn_8h}{iCub/iDyn/iDyn.h}}>}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00032}00032\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{iDynBody_8h}{iCub/iDyn/iDynBody.h}}>}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00033}00033\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{common_8h}{iCub/skinDynLib/common.h}}>}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00034}00034\ \textcolor{preprocessor}{\#include\ <yarp/os/Log.h>}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00035}00035\ \textcolor{preprocessor}{\#include\ <yarp/os/LogStream.h>}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00036}00036\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00037}00037\ \textcolor{keyword}{using\ namespace\ }yarp::os;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00038}00038\ \textcolor{keyword}{using\ namespace\ }yarp::sig;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00039}00039\ \textcolor{keyword}{using\ namespace\ }yarp::math;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00040}00040\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceyarp_1_1dev}{yarp::dev}};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00041}00041\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceiCub_1_1ctrl}{iCub::ctrl}};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00042}00042\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceiCub_1_1iDyn}{iCub::iDyn}};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00043}00043\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceiCub_1_1skinDynLib}{iCub::skinDynLib}};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00044}00044\ \textcolor{keyword}{using\ namespace\ }std;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00045}00045\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00046}00046\ Vector\ gravityCompensatorThread::evalVelUp(\textcolor{keyword}{const}\ Vector\ \&\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}})}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00047}00047\ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00048}00048\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyElement}{AWPolyElement}}\ el;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00049}00049\ \ \ \ \ el.\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyElement_a2338ed1ed9cda6f80d6e2fdb3a82b8d0}{data}}=\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00050}00050\ \ \ \ \ el.\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyElement_ac0f7b42cf009594358465ec997ddd39e}{time}}=Time::now();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00051}00051\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00052}00052\ \ \ \ \ \textcolor{keywordflow}{return}\ linEstUp-\/>\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a0dc22d3239efc6d0e5288a8ad6c9b221}{estimate}}(el);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00053}00053\ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00054}00054\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00055}00055\ Vector\ gravityCompensatorThread::evalVelLow(\textcolor{keyword}{const}\ Vector\ \&\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}})}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00056}00056\ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00057}00057\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyElement}{AWPolyElement}}\ el;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00058}00058\ \ \ \ \ el.\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyElement_a2338ed1ed9cda6f80d6e2fdb3a82b8d0}{data}}=\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00059}00059\ \ \ \ \ el.\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyElement_ac0f7b42cf009594358465ec997ddd39e}{time}}=Time::now();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00060}00060\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00061}00061\ \ \ \ \ \textcolor{keywordflow}{return}\ linEstLow-\/>\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a0dc22d3239efc6d0e5288a8ad6c9b221}{estimate}}(el);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00062}00062\ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00063}00063\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00064}00064\ Vector\ gravityCompensatorThread::evalAccUp(\textcolor{keyword}{const}\ Vector\ \&\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}})}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00065}00065\ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00066}00066\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyElement}{AWPolyElement}}\ el;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00067}00067\ \ \ \ \ el.\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyElement_a2338ed1ed9cda6f80d6e2fdb3a82b8d0}{data}}=\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00068}00068\ \ \ \ \ el.\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyElement_ac0f7b42cf009594358465ec997ddd39e}{time}}=Time::now();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00069}00069\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00070}00070\ \ \ \ \ \textcolor{keywordflow}{return}\ quadEstUp-\/>\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a0dc22d3239efc6d0e5288a8ad6c9b221}{estimate}}(el);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00071}00071\ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00072}00072\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00073}00073\ Vector\ gravityCompensatorThread::evalAccLow(\textcolor{keyword}{const}\ Vector\ \&\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}})}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00074}00074\ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00075}00075\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyElement}{AWPolyElement}}\ el;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00076}00076\ \ \ \ \ el.\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyElement_a2338ed1ed9cda6f80d6e2fdb3a82b8d0}{data}}=\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00077}00077\ \ \ \ \ el.\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyElement_ac0f7b42cf009594358465ec997ddd39e}{time}}=Time::now();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00078}00078\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00079}00079\ \ \ \ \ \textcolor{keywordflow}{return}\ quadEstLow-\/>\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a0dc22d3239efc6d0e5288a8ad6c9b221}{estimate}}(el);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00080}00080\ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00081}00081\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00082}00082\ \textcolor{keywordtype}{void}\ gravityCompensatorThread::init\_upper()}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00083}00083\ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00084}00084\ \ \ \ \ \textcolor{comment}{//-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/PARTS-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\///}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00085}00085\ \ \ \ \ \textcolor{comment}{//\ Left\_arm\ variables}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00086}00086\ \ \ \ \ allJnt\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00087}00087\ \ \ \ \ \textcolor{keywordtype}{int}\ jnt=16;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00088}00088\ \ \ \ \ encoders\_arm\_left.resize(jnt,0.0);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00089}00089\ \ \ \ \ F\_LArm.resize(6,0.0);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00090}00090\ \ \ \ \ F\_iDyn\_LArm.resize(6,0.0);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00091}00091\ \ \ \ \ Offset\_LArm.resize(6,0.0);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00092}00092\ \ \ \ \ q\_larm.resize(7,0.0);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00093}00093\ \ \ \ \ dq\_larm.resize(7,0.0);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00094}00094\ \ \ \ \ d2q\_larm.resize(7,0.0);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00095}00095\ \ \ \ \ allJnt+=jnt;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00096}00096\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00097}00097\ \ \ \ \ \textcolor{comment}{//\ Right\_arm\ variables}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00098}00098\ \ \ \ \ jnt\ =\ 16;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00099}00099\ \ \ \ \ encoders\_arm\_right.resize(jnt,0.0);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00100}00100\ \ \ \ \ F\_RArm.resize(6,0.0);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00101}00101\ \ \ \ \ F\_iDyn\_RArm.resize(6,0.0);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00102}00102\ \ \ \ \ Offset\_RArm.resize(6,0.0);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00103}00103\ \ \ \ \ q\_rarm.resize(7,0.0);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00104}00104\ \ \ \ \ dq\_rarm.resize(7,0.0);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00105}00105\ \ \ \ \ d2q\_rarm.resize(7,0.0);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00106}00106\ \ \ \ \ allJnt+=jnt;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00107}00107\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00108}00108\ \ \ \ \ \textcolor{comment}{//\ Head\ variables}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00109}00109\ \ \ \ \ jnt\ =\ 6;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00110}00110\ \ \ \ \ encoders\_head.resize(jnt,0.0);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00111}00111\ \ \ \ \ q\_head.resize(3,0.0);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00112}00112\ \ \ \ \ dq\_head.resize(3,0.0);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00113}00113\ \ \ \ \ d2q\_head.resize(3,0.0);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00114}00114\ \ \ \ \ allJnt+=jnt;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00115}00115\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00116}00116\ \ \ \ \ all\_q\_up.resize(allJnt,0.0);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00117}00117\ \ \ \ \ all\_dq\_up.resize(allJnt,0.0);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00118}00118\ \ \ \ \ all\_d2q\_up.resize(allJnt,0.0);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00119}00119\ \ \ \ \ ampli\_LA.resize(7);ampli\_LA=1.0;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00120}00120\ \ \ \ \ ampli\_RA.resize(7);ampli\_RA=1.0;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00121}00121\ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00122}00122\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00123}00123\ \textcolor{keywordtype}{void}\ gravityCompensatorThread::init\_lower()}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00124}00124\ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00125}00125\ \ \ \ \ \textcolor{comment}{//-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/PARTS-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\///}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00126}00126\ \ \ \ \ \textcolor{comment}{//\ Left\_leg\ variables}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00127}00127\ \ \ \ \ allJnt\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00128}00128\ \ \ \ \ \textcolor{keywordtype}{int}\ jnt\ =\ 6;\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00129}00129\ \ \ \ \ encoders\_leg\_left.resize(jnt,0.0);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00130}00130\ \ \ \ \ q\_lleg.resize(6,0.0);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00131}00131\ \ \ \ \ dq\_lleg.resize(6,0.0);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00132}00132\ \ \ \ \ d2q\_lleg.resize(6,0.0);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00133}00133\ \ \ \ \ allJnt+=jnt;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00134}00134\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00135}00135\ \ \ \ \ \textcolor{comment}{//\ Right\_leg\ variables}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00136}00136\ \ \ \ \ jnt\ =\ 6;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00137}00137\ \ \ \ \ encoders\_leg\_right.resize(jnt,0.0);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00138}00138\ \ \ \ \ q\_rleg.resize(6,0.0);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00139}00139\ \ \ \ \ dq\_rleg.resize(6,0.0);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00140}00140\ \ \ \ \ d2q\_rleg.resize(6,0.0);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00141}00141\ \ \ \ \ allJnt+=jnt;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00142}00142\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00143}00143\ \ \ \ \ \textcolor{comment}{//\ Torso\ variables}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00144}00144\ \ \ \ \ jnt\ =\ 3;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00145}00145\ \ \ \ \ encoders\_torso.resize(jnt,0.0);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00146}00146\ \ \ \ \ q\_torso.resize(3,0.0);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00147}00147\ \ \ \ \ dq\_torso.resize(3,0.0);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00148}00148\ \ \ \ \ d2q\_torso.resize(3,0.0);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00149}00149\ \ \ \ \ allJnt+=jnt;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00150}00150\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00151}00151\ \ \ \ \ all\_q\_low.resize(allJnt,0.0);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00152}00152\ \ \ \ \ all\_dq\_low.resize(allJnt,0.0);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00153}00153\ \ \ \ \ all\_d2q\_low.resize(allJnt,0.0);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00154}00154\ \ \ \ \ ampli\_TO.resize(3);ampli\_TO=1.0;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00155}00155\ \ \ \ \ ampli\_LL.resize(6);ampli\_LL=1.0;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00156}00156\ \ \ \ \ ampli\_RL.resize(6);ampli\_RL=1.0;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00157}00157\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00158}00158\ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00159}00159\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00160}00160\ \textcolor{keywordtype}{void}\ \ gravityCompensatorThread::setLowerMeasure()}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00161}00161\ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00162}00162\ \ \ \ \ icub-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iCubWholeBody_aaf51afaccad44b54d9efccd0a35b36cb}{lowerTorso}}-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iDynSensorTorsoNode_ab800fa08f1e01581eb84b3c7294e55b1}{setAng}}(\textcolor{stringliteral}{"{}torso"{}},\mbox{\hyperlink{namespaceiCub_1_1ctrl_a52299223f405fb68877b56af10f9a3f2}{CTRL\_DEG2RAD}}\ *\ q\_torso);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00163}00163\ \ \ \ \ icub-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iCubWholeBody_aaf51afaccad44b54d9efccd0a35b36cb}{lowerTorso}}-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iDynSensorTorsoNode_a509f0656aff53ccc817553f414d6e9cb}{setDAng}}(\textcolor{stringliteral}{"{}torso"{}},\mbox{\hyperlink{namespaceiCub_1_1ctrl_a52299223f405fb68877b56af10f9a3f2}{CTRL\_DEG2RAD}}\ *\ dq\_torso);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00164}00164\ \ \ \ \ icub-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iCubWholeBody_aaf51afaccad44b54d9efccd0a35b36cb}{lowerTorso}}-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iDynSensorTorsoNode_a5aa44cb3617a5d3856d5e2166b75bc94}{setD2Ang}}(\textcolor{stringliteral}{"{}torso"{}},\mbox{\hyperlink{namespaceiCub_1_1ctrl_a52299223f405fb68877b56af10f9a3f2}{CTRL\_DEG2RAD}}\ *\ d2q\_torso);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00165}00165\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00166}00166\ \ \ \ \ icub-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iCubWholeBody_aaf51afaccad44b54d9efccd0a35b36cb}{lowerTorso}}-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iDynSensorTorsoNode_ab800fa08f1e01581eb84b3c7294e55b1}{setAng}}(\textcolor{stringliteral}{"{}left\_leg"{}},\mbox{\hyperlink{namespaceiCub_1_1ctrl_a52299223f405fb68877b56af10f9a3f2}{CTRL\_DEG2RAD}}\ *\ q\_lleg);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00167}00167\ \ \ \ \ icub-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iCubWholeBody_aaf51afaccad44b54d9efccd0a35b36cb}{lowerTorso}}-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iDynSensorTorsoNode_a509f0656aff53ccc817553f414d6e9cb}{setDAng}}(\textcolor{stringliteral}{"{}left\_leg"{}},\mbox{\hyperlink{namespaceiCub_1_1ctrl_a52299223f405fb68877b56af10f9a3f2}{CTRL\_DEG2RAD}}\ *\ dq\_lleg);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00168}00168\ \ \ \ \ icub-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iCubWholeBody_aaf51afaccad44b54d9efccd0a35b36cb}{lowerTorso}}-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iDynSensorTorsoNode_a5aa44cb3617a5d3856d5e2166b75bc94}{setD2Ang}}(\textcolor{stringliteral}{"{}left\_leg"{}},\mbox{\hyperlink{namespaceiCub_1_1ctrl_a52299223f405fb68877b56af10f9a3f2}{CTRL\_DEG2RAD}}\ *\ d2q\_lleg);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00169}00169\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00170}00170\ \ \ \ \ icub-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iCubWholeBody_aaf51afaccad44b54d9efccd0a35b36cb}{lowerTorso}}-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iDynSensorTorsoNode_ab800fa08f1e01581eb84b3c7294e55b1}{setAng}}(\textcolor{stringliteral}{"{}right\_leg"{}},\mbox{\hyperlink{namespaceiCub_1_1ctrl_a52299223f405fb68877b56af10f9a3f2}{CTRL\_DEG2RAD}}\ *\ q\_rleg);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00171}00171\ \ \ \ \ icub-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iCubWholeBody_aaf51afaccad44b54d9efccd0a35b36cb}{lowerTorso}}-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iDynSensorTorsoNode_a509f0656aff53ccc817553f414d6e9cb}{setDAng}}(\textcolor{stringliteral}{"{}right\_leg"{}},\mbox{\hyperlink{namespaceiCub_1_1ctrl_a52299223f405fb68877b56af10f9a3f2}{CTRL\_DEG2RAD}}\ *\ dq\_rleg);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00172}00172\ \ \ \ \ icub-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iCubWholeBody_aaf51afaccad44b54d9efccd0a35b36cb}{lowerTorso}}-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iDynSensorTorsoNode_a5aa44cb3617a5d3856d5e2166b75bc94}{setD2Ang}}(\textcolor{stringliteral}{"{}right\_leg"{}},\mbox{\hyperlink{namespaceiCub_1_1ctrl_a52299223f405fb68877b56af10f9a3f2}{CTRL\_DEG2RAD}}\ *\ d2q\_rleg);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00173}00173\ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00174}00174\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00175}00175\ \textcolor{keywordtype}{void}\ \ gravityCompensatorThread::setUpperMeasure()}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00176}00176\ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00177}00177\ \ \ \ \ icub-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iCubWholeBody_a289d8ae77f8353cd399bde21b4015245}{upperTorso}}-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iDynSensorTorsoNode_ab800fa08f1e01581eb84b3c7294e55b1}{setAng}}(\textcolor{stringliteral}{"{}head"{}},\mbox{\hyperlink{namespaceiCub_1_1ctrl_a52299223f405fb68877b56af10f9a3f2}{CTRL\_DEG2RAD}}\ *\ q\_head);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00178}00178\ \ \ \ \ icub-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iCubWholeBody_a289d8ae77f8353cd399bde21b4015245}{upperTorso}}-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iDynSensorTorsoNode_ab800fa08f1e01581eb84b3c7294e55b1}{setAng}}(\textcolor{stringliteral}{"{}left\_arm"{}},\mbox{\hyperlink{namespaceiCub_1_1ctrl_a52299223f405fb68877b56af10f9a3f2}{CTRL\_DEG2RAD}}\ *\ q\_larm);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00179}00179\ \ \ \ \ icub-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iCubWholeBody_a289d8ae77f8353cd399bde21b4015245}{upperTorso}}-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iDynSensorTorsoNode_ab800fa08f1e01581eb84b3c7294e55b1}{setAng}}(\textcolor{stringliteral}{"{}right\_arm"{}},\mbox{\hyperlink{namespaceiCub_1_1ctrl_a52299223f405fb68877b56af10f9a3f2}{CTRL\_DEG2RAD}}\ *\ q\_rarm);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00180}00180\ \ \ \ \ icub-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iCubWholeBody_a289d8ae77f8353cd399bde21b4015245}{upperTorso}}-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iDynSensorTorsoNode_a509f0656aff53ccc817553f414d6e9cb}{setDAng}}(\textcolor{stringliteral}{"{}head"{}},\mbox{\hyperlink{namespaceiCub_1_1ctrl_a52299223f405fb68877b56af10f9a3f2}{CTRL\_DEG2RAD}}\ *\ dq\_head);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00181}00181\ \ \ \ \ icub-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iCubWholeBody_a289d8ae77f8353cd399bde21b4015245}{upperTorso}}-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iDynSensorTorsoNode_a509f0656aff53ccc817553f414d6e9cb}{setDAng}}(\textcolor{stringliteral}{"{}left\_arm"{}},\mbox{\hyperlink{namespaceiCub_1_1ctrl_a52299223f405fb68877b56af10f9a3f2}{CTRL\_DEG2RAD}}\ *\ dq\_larm);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00182}00182\ \ \ \ \ icub-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iCubWholeBody_a289d8ae77f8353cd399bde21b4015245}{upperTorso}}-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iDynSensorTorsoNode_a509f0656aff53ccc817553f414d6e9cb}{setDAng}}(\textcolor{stringliteral}{"{}right\_arm"{}},\mbox{\hyperlink{namespaceiCub_1_1ctrl_a52299223f405fb68877b56af10f9a3f2}{CTRL\_DEG2RAD}}\ *\ dq\_rarm);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00183}00183\ \ \ \ \ icub-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iCubWholeBody_a289d8ae77f8353cd399bde21b4015245}{upperTorso}}-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iDynSensorTorsoNode_a5aa44cb3617a5d3856d5e2166b75bc94}{setD2Ang}}(\textcolor{stringliteral}{"{}head"{}},\mbox{\hyperlink{namespaceiCub_1_1ctrl_a52299223f405fb68877b56af10f9a3f2}{CTRL\_DEG2RAD}}\ *\ d2q\_head);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00184}00184\ \ \ \ \ icub-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iCubWholeBody_a289d8ae77f8353cd399bde21b4015245}{upperTorso}}-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iDynSensorTorsoNode_a5aa44cb3617a5d3856d5e2166b75bc94}{setD2Ang}}(\textcolor{stringliteral}{"{}left\_arm"{}},\mbox{\hyperlink{namespaceiCub_1_1ctrl_a52299223f405fb68877b56af10f9a3f2}{CTRL\_DEG2RAD}}\ *\ d2q\_larm);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00185}00185\ \ \ \ \ icub-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iCubWholeBody_a289d8ae77f8353cd399bde21b4015245}{upperTorso}}-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iDynSensorTorsoNode_a5aa44cb3617a5d3856d5e2166b75bc94}{setD2Ang}}(\textcolor{stringliteral}{"{}right\_arm"{}},\mbox{\hyperlink{namespaceiCub_1_1ctrl_a52299223f405fb68877b56af10f9a3f2}{CTRL\_DEG2RAD}}\ *\ d2q\_rarm);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00186}00186\ \ \ \ \ icub-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iCubWholeBody_a289d8ae77f8353cd399bde21b4015245}{upperTorso}}-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iDynSensorTorsoNode_ac599295443dc6c837d671bd8269c2b61}{setInertialMeasure}}(w0,dw0,d2p0);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00187}00187\ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00188}00188\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00189}\mbox{\hyperlink{classgravityCompensatorThread_a4fa5d964b395b110a04949bbaeb7b519}{00189}}\ \mbox{\hyperlink{classgravityCompensatorThread_a4fa5d964b395b110a04949bbaeb7b519}{gravityCompensatorThread::gravityCompensatorThread}}(\textcolor{keywordtype}{string}\ \_wholeBodyName,\ \textcolor{keywordtype}{int}\ \_rate,\ PolyDriver\ *\_ddLA,}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00190}00190\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ PolyDriver\ *\_ddRA,\ PolyDriver\ *\_ddH,\ PolyDriver\ *\_ddLL,}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00191}00191\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ PolyDriver\ *\_ddRL,\ PolyDriver\ *\_ddT,\ \mbox{\hyperlink{structiCub_1_1iDyn_1_1version__tag}{version\_tag}}\ icub\_type,}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00192}00192\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \_inertial\_enabled)\ :\ PeriodicThread((double)\_rate/1000.0),\ ddLA(\_ddLA),}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00193}00193\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ddRA(\_ddRA),\ ddLL(\_ddLL),\ ddRL(\_ddRL),}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00194}00194\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ddH(\_ddH),\ ddT(\_ddT),\ gravity\_torques\_LA(7,0.0),}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00195}00195\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ gravity\_torques\_RA(7,0.0),\ exec\_torques\_LA(7,0.0),}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00196}00196\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ exec\_torques\_RA(7,0.0),\ externalcmd\_torques\_LA(7,0.0),}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00197}00197\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ externalcmd\_torques\_RA(7,0.0),\ gravity\_torques\_TO(3,0.0),}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00198}00198\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ gravity\_torques\_LL(6,0.0),\ gravity\_torques\_RL(6,0.0),}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00199}00199\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ exec\_torques\_TO(3,0.0),\ exec\_torques\_LL(6,0.0),}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00200}00200\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ exec\_torques\_RL(6,0.0),\ externalcmd\_torques\_TO(3,0.0),}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00201}00201\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ externalcmd\_torques\_LL(6,0.0),\ externalcmd\_torques\_RL(6,0.0)}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00202}00202\ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00203}00203\ \ \ \ \ \mbox{\hyperlink{classgravityCompensatorThread_a4309319cf0322c298e9b155e1fe259f6}{gravity\_mode}}\ =\ \mbox{\hyperlink{gravityThread_8h_a96a58e29e8dbf2b5bdeb775cba46556ea8c355f2fd1443ba3a14bdcf1bec05cf3}{GRAVITY\_COMPENSATION\_ON}};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00204}00204\ \ \ \ \ \mbox{\hyperlink{classgravityCompensatorThread_a1200cad968e6a6f0497889ea3f9e2937}{external\_mode}}\ =\ \mbox{\hyperlink{gravityThread_8h_ab48899087cc647f0f791ed0c459adc53ac46a84ee32e7178408bff8510c90e5b3}{EXTERNAL\_TRQ\_ON}};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00205}00205\ \ \ \ \ wholeBodyName\ =\ std::move(\_wholeBodyName);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00206}00206\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00207}00207\ \ \ \ \ \textcolor{comment}{//-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/INTERFACE\ INITIALIZATION-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\///}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00208}00208\ \ \ \ \ iencs\_arm\_left\ \ \ \ \ \ \ \ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00209}00209\ \ \ \ \ iencs\_arm\_right\ \ \ \ \ \ \ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00210}00210\ \ \ \ \ iencs\_head\ \ \ \ \ \ \ \ \ \ \ \ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00211}00211\ \ \ \ \ iCtrlMode\_arm\_left\ \ \ \ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00212}00212\ \ \ \ \ iCtrlMode\_arm\_right\ \ \ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00213}00213\ \ \ \ \ iCtrlMode\_torso\ \ \ \ \ \ \ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00214}00214\ \ \ \ \ iIntMode\_arm\_left\ \ \ \ \ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00215}00215\ \ \ \ \ iIntMode\_arm\_right\ \ \ \ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00216}00216\ \ \ \ \ iIntMode\_torso\ \ \ \ \ \ \ \ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00217}00217\ \ \ \ \ iImp\_torso\ \ \ \ \ \ \ \ \ \ \ \ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00218}00218\ \ \ \ \ iTqs\_torso\ \ \ \ \ \ \ \ \ \ \ \ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00219}00219\ \ \ \ \ iImp\_arm\_left\ \ \ \ \ \ \ \ \ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00220}00220\ \ \ \ \ iTqs\_arm\_left\ \ \ \ \ \ \ \ \ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00221}00221\ \ \ \ \ iImp\_arm\_right\ \ \ \ \ \ \ \ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00222}00222\ \ \ \ \ iTqs\_arm\_right\ \ \ \ \ \ \ \ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00223}00223\ \ \ \ \ iencs\_leg\_left\ \ \ \ \ \ \ \ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00224}00224\ \ \ \ \ iencs\_leg\_right\ \ \ \ \ \ \ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00225}00225\ \ \ \ \ iencs\_torso\ \ \ \ \ \ \ \ \ \ \ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00226}00226\ \ \ \ \ iCtrlMode\_leg\_left\ \ \ \ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00227}00227\ \ \ \ \ iCtrlMode\_leg\_right\ \ \ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00228}00228\ \ \ \ \ iIntMode\_leg\_left\ \ \ \ \ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00229}00229\ \ \ \ \ iIntMode\_leg\_right\ \ \ \ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00230}00230\ \ \ \ \ iImp\_leg\_left\ \ \ \ \ \ \ \ \ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00231}00231\ \ \ \ \ iTqs\_leg\_left\ \ \ \ \ \ \ \ \ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00232}00232\ \ \ \ \ iImp\_leg\_right\ \ \ \ \ \ \ \ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00233}00233\ \ \ \ \ iTqs\_leg\_right\ \ \ \ \ \ \ \ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00234}00234\ \ \ \ \ isCalibrated\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00235}00235\ \ \ \ \ inertial\_enabled=\_inertial\_enabled;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00236}00236\ \ \ \ \ icub\ =\ \textcolor{keyword}{new}\ \mbox{\hyperlink{classiCub_1_1iDyn_1_1iCubWholeBody}{iCubWholeBody}}\ (icub\_type,\mbox{\hyperlink{namespaceiCub_1_1iDyn_a6b03dffbe5b7a4931b1d7afeff96b362ac034feb4663b0e2591e629606ef5e2f3}{DYNAMIC}},\ \mbox{\hyperlink{namespaceiCub_1_1skinDynLib_a790824a527802db93c40eca73839b72da16220311c35a0345c00855ea2032c695}{VERBOSE}});}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00237}00237\ \ \ \ \ thread\_status=\mbox{\hyperlink{gravityThread_8h_a314e728fcd25c89c20cb03b841fd1559a97207f3457ed3b04ca92ff55d1aec3d6}{STATUS\_DISCONNECTED}};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00238}00238\ \ \ \ \ port\_inertial\ \ \ \ \ \ \ \ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00239}00239\ \ \ \ \ la\_additional\_offset\ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00240}00240\ \ \ \ \ ra\_additional\_offset\ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00241}00241\ \ \ \ \ ll\_additional\_offset\ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00242}00242\ \ \ \ \ rl\_additional\_offset\ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00243}00243\ \ \ \ \ to\_additional\_offset\ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00244}00244\ \ \ \ \ left\_arm\_exec\_torques\ \ \ \ \ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00245}00245\ \ \ \ \ right\_arm\_exec\_torques\ \ \ \ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00246}00246\ \ \ \ \ left\_leg\_exec\_torques\ \ \ \ \ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00247}00247\ \ \ \ \ right\_leg\_exec\_torques\ \ \ \ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00248}00248\ \ \ \ \ torso\_exec\_torques\ \ \ \ \ \ \ \ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00249}00249\ \ \ \ \ left\_arm\_gravity\_torques\ \ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00250}00250\ \ \ \ \ right\_arm\_gravity\_torques\ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00251}00251\ \ \ \ \ left\_leg\_gravity\_torques\ \ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00252}00252\ \ \ \ \ right\_leg\_gravity\_torques\ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00253}00253\ \ \ \ \ torso\_gravity\_torques\ \ \ \ \ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00254}00254\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00255}00255\ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00256}00256\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00257}\mbox{\hyperlink{classgravityCompensatorThread_a78d8f0c9e443abc8020dbc2d6dee081a}{00257}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classgravityCompensatorThread_a78d8f0c9e443abc8020dbc2d6dee081a}{gravityCompensatorThread::setZeroJntAngVelAcc}}()}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00258}00258\ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00259}00259\ \ \ \ \ dq\_head\ =\ 0.0;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00260}00260\ \ \ \ \ d2q\_head\ =\ 0.0;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00261}00261\ \ \ \ \ dq\_larm\ =\ 0.0;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00262}00262\ \ \ \ \ d2q\_larm\ =\ 0.0;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00263}00263\ \ \ \ \ dq\_rarm\ =\ 0.0;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00264}00264\ \ \ \ \ d2q\_rarm\ =\ 0.0;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00265}00265\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00266}00266\ \ \ \ \ dq\_rleg=0.0;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00267}00267\ \ \ \ \ d2q\_rleg=0.0;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00268}00268\ \ \ \ \ dq\_lleg=0.0;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00269}00269\ \ \ \ \ d2q\_lleg=0.0;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00270}00270\ \ \ \ \ dq\_torso=0.0;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00271}00271\ \ \ \ \ d2q\_torso=0.0;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00272}00272\ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00273}00273\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00274}\mbox{\hyperlink{classgravityCompensatorThread_a1405d58684cfa6e684cd39ffac268182}{00274}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classgravityCompensatorThread_a1405d58684cfa6e684cd39ffac268182}{gravityCompensatorThread::readAndUpdate}}(\textcolor{keywordtype}{bool}\ waitMeasure)}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00275}00275\ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00276}00276\ \ \ \ \ \textcolor{keywordtype}{int}\ sz\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00277}00277\ \ \ \ \ \textcolor{keywordtype}{bool}\ b\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00278}00278\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00279}00279\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00280}00280\ \textcolor{comment}{\ \ \ \ //offset\ currently\ not\ implemented}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00281}00281\ \textcolor{comment}{\ \ \ \ Vector\ *offset\_input\ =\ additional\_offset-\/>read(false);}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00282}00282\ \textcolor{comment}{\ \ \ \ if(offset\_input!=0)}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00283}00283\ \textcolor{comment}{\ \ \ \ \{}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00284}00284\ \textcolor{comment}{\ \ \ \ \ \ \ \ sz\ =\ offset\_input-\/>length();}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00285}00285\ \textcolor{comment}{\ \ \ \ \ \ \ \ if(sz!=ctrlJnt)}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00286}00286\ \textcolor{comment}{\ \ \ \ \ \ \ \ \{}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00287}00287\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ yWarning"{}warning...controlled\ joint\ <\ of\ offsets\ size!!!"{});}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00288}00288\ \textcolor{comment}{\ \ \ \ \ \ \ \ \}}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00289}00289\ \textcolor{comment}{\ \ \ \ \ \ \ \ else}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00290}00290\ \textcolor{comment}{\ \ \ \ \ \ \ \ \{}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00291}00291\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ Vector\ o=*offset\_input;}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00292}00292\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ torque\_offset\ =\ 0.0;}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00293}00293\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ for(int\ i=0;i<ctrlJnt;i++)}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00294}00294\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ torque\_offset[i]\ =\ o[i];}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00295}00295\ \textcolor{comment}{\ \ \ \ \ \ \ \ \}}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00296}00296\ \textcolor{comment}{\ \ \ \ \}}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00297}00297\ \textcolor{comment}{\ \ \ \ */}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00298}00298\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00299}00299\ \ \ \ \ \textcolor{keywordflow}{if}\ (inertial\_enabled)}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00300}00300\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00301}00301\ \ \ \ \ \ \ \ \ inertial\ =\ port\_inertial-\/>read(waitMeasure);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00302}00302\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(inertial!=\textcolor{keyword}{nullptr})}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00303}00303\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00304}00304\ \ \ \ \ \ \ \ \ \ \ \ \ sz\ =\ inertial-\/>length();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00305}00305\ \ \ \ \ \ \ \ \ \ \ \ \ inertial\_measurements.resize(sz)\ ;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00306}00306\ \ \ \ \ \ \ \ \ \ \ \ \ inertial\_measurements=\ *inertial;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00307}00307\ \ \ \ \ \ \ \ \ \ \ \ \ d2p0[0]\ =\ inertial\_measurements[0];}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00308}00308\ \ \ \ \ \ \ \ \ \ \ \ \ d2p0[1]\ =\ inertial\_measurements[1];}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00309}00309\ \ \ \ \ \ \ \ \ \ \ \ \ d2p0[2]\ =\ inertial\_measurements[2];}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00310}00310\ \ \ \ \ \ \ \ \ \ \ \ \ w0\ [0]\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00311}00311\ \ \ \ \ \ \ \ \ \ \ \ \ w0\ [1]\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00312}00312\ \ \ \ \ \ \ \ \ \ \ \ \ w0\ [2]\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00313}00313\ \ \ \ \ \ \ \ \ \ \ \ \ dw0\ [0]\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00314}00314\ \ \ \ \ \ \ \ \ \ \ \ \ dw0\ [1]\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00315}00315\ \ \ \ \ \ \ \ \ \ \ \ \ dw0\ [2]\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00316}00316\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00317}00317\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00318}00318\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00319}00319\ \ \ \ \ \ \ \ \ \ \ \ \ b\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00320}00320\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00321}00321\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00322}00322\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00323}00323\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00324}00324\ \ \ \ \ \ \ \ \ d2p0[0]\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00325}00325\ \ \ \ \ \ \ \ \ d2p0[1]\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00326}00326\ \ \ \ \ \ \ \ \ d2p0[2]\ =\ 9.81;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00327}00327\ \ \ \ \ \ \ \ \ w0\ [0]\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00328}00328\ \ \ \ \ \ \ \ \ w0\ [1]\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00329}00329\ \ \ \ \ \ \ \ \ w0\ [2]\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00330}00330\ \ \ \ \ \ \ \ \ dw0\ [0]\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00331}00331\ \ \ \ \ \ \ \ \ dw0\ [1]\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00332}00332\ \ \ \ \ \ \ \ \ dw0\ [2]\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00333}00333\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00334}00334\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00335}00335\ \ \ \ \ b\ \&=\ \mbox{\hyperlink{classgravityCompensatorThread_a0eb21d408c0fceb472cff02fbe0f0837}{getUpperEncodersSpeedAndAcceleration}}();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00336}00336\ \ \ \ \ setUpperMeasure();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00337}00337\ \ \ \ \ b\ \&=\ \mbox{\hyperlink{classgravityCompensatorThread_a0fce4c71a14a9df8583e86dab789bccc}{getLowerEncodersSpeedAndAcceleration}}();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00338}00338\ \ \ \ \ setLowerMeasure();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00339}00339\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00340}00340\ \ \ \ \ \textcolor{keywordflow}{return}\ b;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00341}00341\ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00342}00342\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00343}\mbox{\hyperlink{classgravityCompensatorThread_a0fce4c71a14a9df8583e86dab789bccc}{00343}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classgravityCompensatorThread_a0fce4c71a14a9df8583e86dab789bccc}{gravityCompensatorThread::getLowerEncodersSpeedAndAcceleration}}()}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00344}00344\ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00345}00345\ \ \ \ \ \textcolor{keywordtype}{bool}\ b\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00346}00346\ \ \ \ \ \textcolor{keywordflow}{if}\ (iencs\_leg\_left)\ \ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00347}00347\ \ \ \ \ \{b\ \&=\ iencs\_leg\_left-\/>getEncoders(encoders\_leg\_left.data());\}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00348}00348\ \ \ \ \ \textcolor{keywordflow}{else}\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00349}00349\ \ \ \ \ \{encoders\_leg\_left.zero();\}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00350}00350\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00351}00351\ \ \ \ \ \textcolor{keywordflow}{if}\ (iencs\_leg\_right)\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00352}00352\ \ \ \ \ \{b\ \&=\ iencs\_leg\_right-\/>getEncoders(encoders\_leg\_right.data());\}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00353}00353\ \ \ \ \ \textcolor{keywordflow}{else}\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00354}00354\ \ \ \ \ \{encoders\_leg\_right.zero();\}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00355}00355\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00356}00356\ \ \ \ \ \textcolor{keywordflow}{if}\ (iencs\_torso)\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00357}00357\ \ \ \ \ \{b\ \&=\ iencs\_torso-\/>getEncoders(encoders\_torso.data());\}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00358}00358\ \ \ \ \ \textcolor{keywordflow}{else}\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00359}00359\ \ \ \ \ \{encoders\_torso.zero();\}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00360}00360\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00361}00361\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;i<q\_torso.length();i++)}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00362}00362\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00363}00363\ \ \ \ \ \ \ \ \ q\_torso(i)\ =\ encoders\_torso(2-\/i);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00364}00364\ \ \ \ \ \ \ \ \ all\_q\_low(i)\ =\ q\_torso(i);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00365}00365\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00366}00366\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;i<q\_lleg.length();i++)}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00367}00367\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00368}00368\ \ \ \ \ \ \ \ \ q\_lleg(i)\ =\ encoders\_leg\_left(i);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00369}00369\ \ \ \ \ \ \ \ \ all\_q\_low(q\_torso.length()+i)\ =\ q\_lleg(i);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00370}00370\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00371}00371\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;i<q\_rleg.length();i++)}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00372}00372\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00373}00373\ \ \ \ \ \ \ \ \ q\_rleg(i)\ =\ encoders\_leg\_right(i);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00374}00374\ \ \ \ \ \ \ \ \ all\_q\_low(q\_torso.length()+q\_lleg.length()+i)\ =\ q\_rleg(i);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00375}00375\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00376}00376\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00377}00377\ \ \ \ \ \mbox{\hyperlink{classgravityCompensatorThread_a78d8f0c9e443abc8020dbc2d6dee081a}{setZeroJntAngVelAcc}}();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00378}00378\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00379}00379\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00380}00380\ \textcolor{comment}{\ \ \ \ all\_dq\_low\ =\ evalVelLow(all\_q\_low);}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00381}00381\ \textcolor{comment}{\ \ \ \ all\_d2q\_low\ =\ evalAccLow(all\_q\_low);}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00382}00382\ \textcolor{comment}{\ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00383}00383\ \textcolor{comment}{\ \ \ \ for\ (int\ i=0;i<q\_torso.length();i++)}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00384}00384\ \textcolor{comment}{\ \ \ \ \{}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00385}00385\ \textcolor{comment}{\ \ \ \ \ \ \ \ dq\_torso(i)\ =\ all\_dq\_low(i);}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00386}00386\ \textcolor{comment}{\ \ \ \ \ \ \ \ d2q\_torso(i)\ =\ all\_d2q\_low(i);}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00387}00387\ \textcolor{comment}{\ \ \ \ \}}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00388}00388\ \textcolor{comment}{\ \ \ \ for\ (int\ i=0;i<q\_lleg.length();i++)}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00389}00389\ \textcolor{comment}{\ \ \ \ \{}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00390}00390\ \textcolor{comment}{\ \ \ \ \ \ \ \ dq\_lleg(i)\ =\ all\_dq\_low(i+q\_torso.length());}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00391}00391\ \textcolor{comment}{\ \ \ \ \ \ \ \ d2q\_lleg(i)\ =\ all\_d2q\_low(i+q\_torso.length());}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00392}00392\ \textcolor{comment}{\ \ \ \ \}}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00393}00393\ \textcolor{comment}{\ \ \ \ for\ (int\ i=0;i<q\_rleg.length();i++)}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00394}00394\ \textcolor{comment}{\ \ \ \ \{}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00395}00395\ \textcolor{comment}{\ \ \ \ \ \ \ \ dq\_rleg(i)\ =\ all\_dq\_low(i+q\_torso.length()+q\_lleg.length());}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00396}00396\ \textcolor{comment}{\ \ \ \ \ \ \ \ d2q\_rleg(i)\ =\ all\_d2q\_low(i+q\_torso.length()+q\_lleg.length());}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00397}00397\ \textcolor{comment}{\ \ \ \ \}*/}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00398}00398\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00399}00399\ \ \ \ \ \textcolor{keywordflow}{return}\ b;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00400}00400\ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00401}00401\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00402}00402\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00403}\mbox{\hyperlink{classgravityCompensatorThread_a0eb21d408c0fceb472cff02fbe0f0837}{00403}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classgravityCompensatorThread_a0eb21d408c0fceb472cff02fbe0f0837}{gravityCompensatorThread::getUpperEncodersSpeedAndAcceleration}}()}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00404}00404\ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00405}00405\ \ \ \ \ \textcolor{keywordtype}{bool}\ b\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00406}00406\ \ \ \ \ \textcolor{keywordflow}{if}\ (iencs\_arm\_left)\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00407}00407\ \ \ \ \ \{b\ \&=\ iencs\_arm\_left-\/>getEncoders(encoders\_arm\_left.data());\}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00408}00408\ \ \ \ \ \textcolor{keywordflow}{else}\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00409}00409\ \ \ \ \ \{encoders\_arm\_left.zero();\}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00410}00410\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00411}00411\ \ \ \ \ \textcolor{keywordflow}{if}\ (iencs\_arm\_right)\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00412}00412\ \ \ \ \ \{b\ \&=\ iencs\_arm\_right-\/>getEncoders(encoders\_arm\_right.data());\}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00413}00413\ \ \ \ \ \textcolor{keywordflow}{else}\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00414}00414\ \ \ \ \ \{encoders\_arm\_right.zero();\}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00415}00415\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00416}00416\ \ \ \ \ \textcolor{keywordflow}{if}\ (iencs\_head)\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00417}00417\ \ \ \ \ \{b\ \&=\ iencs\_head-\/>getEncoders(encoders\_head.data());\}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00418}00418\ \ \ \ \ \textcolor{keywordflow}{else}\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00419}00419\ \ \ \ \ \{encoders\_head.zero();\}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00420}00420\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00421}00421\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;i<q\_head.length();i++)}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00422}00422\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00423}00423\ \ \ \ \ \ \ \ \ q\_head(i)\ =\ encoders\_head(i);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00424}00424\ \ \ \ \ \ \ \ \ all\_q\_up(i)\ =\ q\_head(i);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00425}00425\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00426}00426\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;i<q\_larm.length();i++)}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00427}00427\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00428}00428\ \ \ \ \ \ \ \ \ q\_larm(i)\ =\ encoders\_arm\_left(i);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00429}00429\ \ \ \ \ \ \ \ \ all\_q\_up(q\_head.length()+i)\ =\ q\_larm(i);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00430}00430\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00431}00431\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;i<q\_rarm.length();i++)}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00432}00432\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00433}00433\ \ \ \ \ \ \ \ \ q\_rarm(i)\ =\ encoders\_arm\_right(i);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00434}00434\ \ \ \ \ \ \ \ \ all\_q\_up(q\_head.length()+q\_larm.length()+i)\ =\ q\_rarm(i);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00435}00435\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00436}00436\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00437}00437\ \ \ \ \ \mbox{\hyperlink{classgravityCompensatorThread_a78d8f0c9e443abc8020dbc2d6dee081a}{setZeroJntAngVelAcc}}();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00438}00438\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00439}00439\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00440}00440\ \textcolor{comment}{\ \ \ \ all\_dq\_up\ =\ evalVelUp(all\_q\_up);}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00441}00441\ \textcolor{comment}{\ \ \ \ all\_d2q\_up\ =\ evalAccUp(all\_q\_up);}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00442}00442\ \textcolor{comment}{\ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00443}00443\ \textcolor{comment}{\ \ \ \ for\ (int\ i=0;i<q\_head.length();i++)}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00444}00444\ \textcolor{comment}{\ \ \ \ \{}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00445}00445\ \textcolor{comment}{\ \ \ \ \ \ \ \ dq\_head(i)\ =\ all\_dq\_up(i);}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00446}00446\ \textcolor{comment}{\ \ \ \ \ \ \ \ d2q\_head(i)\ =\ all\_d2q\_up(i);}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00447}00447\ \textcolor{comment}{\ \ \ \ \}}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00448}00448\ \textcolor{comment}{\ \ \ \ for\ (int\ i=0;i<q\_larm.length();i++)}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00449}00449\ \textcolor{comment}{\ \ \ \ \{}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00450}00450\ \textcolor{comment}{\ \ \ \ \ \ \ \ dq\_larm(i)\ =\ all\_dq\_up(i+q\_head.length());}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00451}00451\ \textcolor{comment}{\ \ \ \ \ \ \ \ d2q\_larm(i)\ =\ all\_d2q\_up(i+q\_head.length());}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00452}00452\ \textcolor{comment}{\ \ \ \ \}}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00453}00453\ \textcolor{comment}{\ \ \ \ for\ (int\ i=0;i<q\_rarm.length();i++)}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00454}00454\ \textcolor{comment}{\ \ \ \ \{}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00455}00455\ \textcolor{comment}{\ \ \ \ \ \ \ \ dq\_rarm(i)\ =\ all\_dq\_up(i+q\_head.length()+q\_larm.length());}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00456}00456\ \textcolor{comment}{\ \ \ \ \ \ \ \ d2q\_rarm(i)\ =\ all\_d2q\_up(i+q\_head.length()+q\_larm.length());}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00457}00457\ \textcolor{comment}{\ \ \ \ \}*/}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00458}00458\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00459}00459\ \ \ \ \ \textcolor{keywordflow}{return}\ b;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00460}00460\ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00461}00461\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00462}\mbox{\hyperlink{classgravityCompensatorThread_a7703bd59b4decf6990f9c22d06d98c54}{00462}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classgravityCompensatorThread_a7703bd59b4decf6990f9c22d06d98c54}{gravityCompensatorThread::threadInit}}()}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00463}00463\ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00464}00464\ \ \ \ \ \textcolor{comment}{//-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/PORTS-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\///}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00465}00465\ \ \ \ \ port\_inertial=\textcolor{keyword}{new}\ BufferedPort<Vector>;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00466}00466\ \ \ \ \ \textcolor{keywordflow}{if}\ (!port\_inertial-\/>open(\textcolor{stringliteral}{"{}/gravityCompensator/inertial:i"{}}))\ \ \{yError(\textcolor{stringliteral}{"{}Another\ gravityCompensator\ module\ is\ running?\ quitting"{}});\ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};\}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00467}00467\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00468}00468\ \ \ \ \ la\_additional\_offset=\textcolor{keyword}{new}\ BufferedPort<Vector>;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00469}00469\ \ \ \ \ \textcolor{keywordflow}{if}\ (!la\_additional\_offset-\/>open(\textcolor{stringliteral}{"{}/gravityCompensator/left\_arm/ctrl\_offset:i"{}}))\ \{yError(\textcolor{stringliteral}{"{}Another\ gravityCompensator\ module\ is\ running?\ quitting"{}});\ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};\}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00470}00470\ \ \ \ \ ra\_additional\_offset=\textcolor{keyword}{new}\ BufferedPort<Vector>;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00471}00471\ \ \ \ \ \textcolor{keywordflow}{if}\ (!ra\_additional\_offset-\/>open(\textcolor{stringliteral}{"{}/gravityCompensator/right\_arm/ctrl\_offset:i"{}}))\ \{yError(\textcolor{stringliteral}{"{}Another\ gravityCompensator\ module\ is\ running?\ quitting"{}});\ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};\}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00472}00472\ \ \ \ \ ll\_additional\_offset=\textcolor{keyword}{new}\ BufferedPort<Vector>;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00473}00473\ \ \ \ \ \textcolor{keywordflow}{if}\ (!ll\_additional\_offset-\/>open(\textcolor{stringliteral}{"{}/gravityCompensator/left\_leg/ctrl\_offset:i"{}}))\ \{yError(\textcolor{stringliteral}{"{}Another\ gravityCompensator\ module\ is\ running?\ quitting"{}});\ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};\}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00474}00474\ \ \ \ \ rl\_additional\_offset=\textcolor{keyword}{new}\ BufferedPort<Vector>;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00475}00475\ \ \ \ \ \textcolor{keywordflow}{if}\ (!rl\_additional\_offset-\/>open(\textcolor{stringliteral}{"{}/gravityCompensator/right\_leg/ctrl\_offset:i"{}}))\ \{yError(\textcolor{stringliteral}{"{}Another\ gravityCompensator\ module\ is\ running?\ quitting"{}});\ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};\}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00476}00476\ \ \ \ \ to\_additional\_offset=\textcolor{keyword}{new}\ BufferedPort<Vector>;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00477}00477\ \ \ \ \ \textcolor{keywordflow}{if}\ (!to\_additional\_offset-\/>open(\textcolor{stringliteral}{"{}/gravityCompensator/torso/ctrl\_offset:i"{}}))\ \{yError(\textcolor{stringliteral}{"{}Another\ gravityCompensator\ module\ is\ running?\ quitting"{}});\ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};\}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00478}00478\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00479}00479\ \ \ \ \ left\_arm\_exec\_torques\ =\ \textcolor{keyword}{new}\ BufferedPort<Vector>;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00480}00480\ \ \ \ \ \textcolor{keywordflow}{if}\ (!left\_arm\_exec\_torques-\/>open(\textcolor{stringliteral}{"{}/gravityCompensator/left\_arm/exec\_torques:o"{}}))\ \{yError(\textcolor{stringliteral}{"{}Another\ gravityCompensator\ module\ is\ running?\ quitting"{}});\ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};\}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00481}00481\ \ \ \ \ right\_arm\_exec\_torques\ =\ \textcolor{keyword}{new}\ BufferedPort<Vector>;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00482}00482\ \ \ \ \ \textcolor{keywordflow}{if}\ (!right\_arm\_exec\_torques-\/>open(\textcolor{stringliteral}{"{}/gravityCompensator/right\_arm/exec\_torques:o"{}}))\ \{yError(\textcolor{stringliteral}{"{}Another\ gravityCompensator\ module\ is\ running?\ quitting"{}});\ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};\}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00483}00483\ \ \ \ \ left\_leg\_exec\_torques\ =\ \textcolor{keyword}{new}\ BufferedPort<Vector>;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00484}00484\ \ \ \ \ \textcolor{keywordflow}{if}\ (!left\_leg\_exec\_torques-\/>open(\textcolor{stringliteral}{"{}/gravityCompensator/left\_leg/exec\_torques:o"{}}))\ \{yError(\textcolor{stringliteral}{"{}Another\ gravityCompensator\ module\ is\ running?\ quitting"{}});\ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};\}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00485}00485\ \ \ \ \ right\_leg\_exec\_torques\ =\ \textcolor{keyword}{new}\ BufferedPort<Vector>;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00486}00486\ \ \ \ \ \textcolor{keywordflow}{if}\ (!right\_leg\_exec\_torques-\/>open(\textcolor{stringliteral}{"{}/gravityCompensator/right\_leg/exec\_torques:o"{}}))\ \{yError(\textcolor{stringliteral}{"{}Another\ gravityCompensator\ module\ is\ running?\ quitting"{}});\ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};\}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00487}00487\ \ \ \ \ torso\_exec\_torques\ =\ \textcolor{keyword}{new}\ BufferedPort<Vector>;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00488}00488\ \ \ \ \ \textcolor{keywordflow}{if}\ (!torso\_exec\_torques-\/>open(\textcolor{stringliteral}{"{}/gravityCompensator/torso/exec\_torques:o"{}}))\ \{yError(\textcolor{stringliteral}{"{}Another\ gravityCompensator\ module\ is\ running?\ quitting"{}});\ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};\}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00489}00489\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00490}00490\ \ \ \ \ left\_arm\_gravity\_torques\ =\ \textcolor{keyword}{new}\ BufferedPort<Vector>;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00491}00491\ \ \ \ \ \textcolor{keywordflow}{if}\ (!left\_arm\_gravity\_torques-\/>open(\textcolor{stringliteral}{"{}/gravityCompensator/left\_arm/gravity\_torques:o"{}}))\ \{yError(\textcolor{stringliteral}{"{}Another\ gravityCompensator\ module\ is\ running?\ quitting"{}});\ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};\}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00492}00492\ \ \ \ \ right\_arm\_gravity\_torques\ =\ \textcolor{keyword}{new}\ BufferedPort<Vector>;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00493}00493\ \ \ \ \ \textcolor{keywordflow}{if}\ (!right\_arm\_gravity\_torques-\/>open(\textcolor{stringliteral}{"{}/gravityCompensator/right\_arm/gravity\_torques:o"{}}))\ \{yError(\textcolor{stringliteral}{"{}Another\ gravityCompensator\ module\ is\ running?\ quitting"{}});\ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};\}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00494}00494\ \ \ \ \ left\_leg\_gravity\_torques\ =\ \textcolor{keyword}{new}\ BufferedPort<Vector>;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00495}00495\ \ \ \ \ \textcolor{keywordflow}{if}\ (!left\_leg\_gravity\_torques-\/>open(\textcolor{stringliteral}{"{}/gravityCompensator/left\_leg/gravity\_torques:o"{}}))\ \{yError(\textcolor{stringliteral}{"{}Another\ gravityCompensator\ module\ is\ running?\ quitting"{}});\ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};\}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00496}00496\ \ \ \ \ right\_leg\_gravity\_torques\ =\ \textcolor{keyword}{new}\ BufferedPort<Vector>;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00497}00497\ \ \ \ \ \textcolor{keywordflow}{if}\ (!right\_leg\_gravity\_torques-\/>open(\textcolor{stringliteral}{"{}/gravityCompensator/right\_leg/gravity\_torques:o"{}}))\ \{yError(\textcolor{stringliteral}{"{}Another\ gravityCompensator\ module\ is\ running?\ quitting"{}});\ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};\}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00498}00498\ \ \ \ \ torso\_gravity\_torques\ =\ \textcolor{keyword}{new}\ BufferedPort<Vector>;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00499}00499\ \ \ \ \ \textcolor{keywordflow}{if}\ (!torso\_gravity\_torques-\/>open(\textcolor{stringliteral}{"{}/gravityCompensator/torso/gravity\_torques:o"{}}))\ \{yError(\textcolor{stringliteral}{"{}Another\ gravityCompensator\ module\ is\ running?\ quitting"{}});\ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};\}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00500}00500\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00501}00501\ \ \ \ \ \textcolor{comment}{//-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/DEVICES-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\///}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00502}00502\ \ \ \ \ \textcolor{keywordflow}{if}\ (ddLA)\ ddLA-\/>view(iencs\_arm\_left);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00503}00503\ \ \ \ \ \textcolor{keywordflow}{if}\ (ddRA)\ ddRA-\/>view(iencs\_arm\_right);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00504}00504\ \ \ \ \ \textcolor{keywordflow}{if}\ (ddH)\ \ ddH-\/>view(iencs\_head);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00505}00505\ \ \ \ \ \textcolor{keywordflow}{if}\ (ddLL)\ ddLL-\/>view(iencs\_leg\_left);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00506}00506\ \ \ \ \ \textcolor{keywordflow}{if}\ (ddRL)\ ddRL-\/>view(iencs\_leg\_right);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00507}00507\ \ \ \ \ \textcolor{keywordflow}{if}\ (ddT)\ \ ddT-\/>view(iencs\_torso);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00508}00508\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00509}00509\ \ \ \ \ \textcolor{keywordflow}{if}\ (ddLA)\ ddLA-\/>view(iCtrlMode\_arm\_left);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00510}00510\ \ \ \ \ \textcolor{keywordflow}{if}\ (ddRA)\ ddRA-\/>view(iCtrlMode\_arm\_right);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00511}00511\ \ \ \ \ \textcolor{keywordflow}{if}\ (ddLA)\ ddLA-\/>view(iIntMode\_arm\_left);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00512}00512\ \ \ \ \ \textcolor{keywordflow}{if}\ (ddRA)\ ddRA-\/>view(iIntMode\_arm\_right);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00513}00513\ \ \ \ \ \textcolor{keywordflow}{if}\ (ddLA)\ ddLA-\/>view(iImp\_arm\_left);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00514}00514\ \ \ \ \ \textcolor{keywordflow}{if}\ (ddLA)\ ddLA-\/>view(iTqs\_arm\_left);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00515}00515\ \ \ \ \ \textcolor{keywordflow}{if}\ (ddRA)\ ddRA-\/>view(iImp\_arm\_right);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00516}00516\ \ \ \ \ \textcolor{keywordflow}{if}\ (ddRA)\ ddRA-\/>view(iTqs\_arm\_right);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00517}00517\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00518}00518\ \ \ \ \ \textcolor{keywordflow}{if}\ (ddT)\ \ ddT-\/>view(iCtrlMode\_torso);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00519}00519\ \ \ \ \ \textcolor{keywordflow}{if}\ (ddT)\ \ ddT-\/>view(iIntMode\_torso);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00520}00520\ \ \ \ \ \textcolor{keywordflow}{if}\ (ddT)\ \ ddT-\/>view(iImp\_torso);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00521}00521\ \ \ \ \ \textcolor{keywordflow}{if}\ (ddT)\ \ ddT-\/>view(iTqs\_torso);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00522}00522\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00523}00523\ \ \ \ \ \textcolor{keywordflow}{if}\ (ddLL)\ ddLL-\/>view(iCtrlMode\_leg\_left);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00524}00524\ \ \ \ \ \textcolor{keywordflow}{if}\ (ddRL)\ ddRL-\/>view(iCtrlMode\_leg\_right);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00525}00525\ \ \ \ \ \textcolor{keywordflow}{if}\ (ddLL)\ ddLL-\/>view(iIntMode\_leg\_left);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00526}00526\ \ \ \ \ \textcolor{keywordflow}{if}\ (ddRL)\ ddRL-\/>view(iIntMode\_leg\_right);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00527}00527\ \ \ \ \ \textcolor{keywordflow}{if}\ (ddLL)\ ddLL-\/>view(iImp\_leg\_left);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00528}00528\ \ \ \ \ \textcolor{keywordflow}{if}\ (ddLL)\ ddLL-\/>view(iTqs\_leg\_left);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00529}00529\ \ \ \ \ \textcolor{keywordflow}{if}\ (ddRL)\ ddRL-\/>view(iImp\_leg\_right);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00530}00530\ \ \ \ \ \textcolor{keywordflow}{if}\ (ddRL)\ ddRL-\/>view(iTqs\_leg\_right);\ \ \ \ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00531}00531\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00532}00532\ \ \ \ \ linEstUp\ =\textcolor{keyword}{new}\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1AWLinEstimator}{AWLinEstimator}}(16,1.0);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00533}00533\ \ \ \ \ quadEstUp=\textcolor{keyword}{new}\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1AWQuadEstimator}{AWQuadEstimator}}(25,1.0);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00534}00534\ \ \ \ \ linEstLow\ =\textcolor{keyword}{new}\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1AWLinEstimator}{AWLinEstimator}}(16,1.0);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00535}00535\ \ \ \ \ quadEstLow=\textcolor{keyword}{new}\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1AWQuadEstimator}{AWQuadEstimator}}(25,1.0);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00536}00536\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00537}00537\ \ \ \ \ \textcolor{comment}{//-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/parts\ INIT\ VARIABLES-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\///}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00538}00538\ \ \ \ \ init\_upper();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00539}00539\ \ \ \ \ init\_lower();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00540}00540\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00541}00541\ \ \ \ \ \textcolor{comment}{//-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/CARTESIAN\ INIT\ VARIABLES-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\///}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00542}00542\ \ \ \ \ left\_arm\_ctrlJnt\ \ =\ 5;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00543}00543\ \ \ \ \ right\_arm\_ctrlJnt\ =\ 5;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00544}00544\ \ \ \ \ left\_leg\_ctrlJnt\ \ =\ 4;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00545}00545\ \ \ \ \ right\_leg\_ctrlJnt\ =\ 4;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00546}00546\ \ \ \ \ torso\_ctrlJnt\ \ \ \ \ =\ 3;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00547}00547\ \ \ \ \ w0.resize(3,0.0);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00548}00548\ \ \ \ \ dw0.resize(3,0.0);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00549}00549\ \ \ \ \ d2p0.resize(3,0.0);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00550}00550\ \ \ \ \ Fend.resize(3,0.0);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00551}00551\ \ \ \ \ Muend.resize(3,0.0);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00552}00552\ \ \ \ \ F\_ext\_up.resize(6,3);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00553}00553\ \ \ \ \ F\_ext\_up\ =\ 0.0;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00554}00554\ \ \ \ \ F\_ext\_low.resize(6,3);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00555}00555\ \ \ \ \ F\_ext\_low\ =\ 0.0;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00556}00556\ \ \ \ \ inertial\_measurements.resize(12);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00557}00557\ \ \ \ \ inertial\_measurements.zero();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00558}00558\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00559}00559\ \ \ \ \ \textcolor{keywordtype}{int}\ ctrl\_mode\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00560}00560\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00561}00561\ \ \ \ \ \textcolor{keywordflow}{switch}(\mbox{\hyperlink{classgravityCompensatorThread_a4309319cf0322c298e9b155e1fe259f6}{gravity\_mode}})}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00562}00562\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00563}00563\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ \mbox{\hyperlink{gravityThread_8h_a96a58e29e8dbf2b5bdeb775cba46556eac5d70801ee7381499876f89baadd267d}{GRAVITY\_COMPENSATION\_OFF}}:\ \ \ \ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}GRAVITY\_COMPENSATION\_OFF\ \ \ \ \ \(\backslash\)n"{}});\ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00564}00564\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ \mbox{\hyperlink{gravityThread_8h_a96a58e29e8dbf2b5bdeb775cba46556ea8c355f2fd1443ba3a14bdcf1bec05cf3}{GRAVITY\_COMPENSATION\_ON}}:\ \ \ \ \ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}GRAVITY\_COMPENSATION\_ON\ \ \ \ \ \ \(\backslash\)n"{}});\ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00565}00565\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{default}:}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00566}00566\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ VOCAB\_CM\_UNKNOWN:\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}UNKNOWN\ \ \(\backslash\)n"{}});\ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00567}00567\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00568}00568\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00569}00569\ \ \ \ \ thread\_status\ =\ \mbox{\hyperlink{gravityThread_8h_a314e728fcd25c89c20cb03b841fd1559a7e4a42e3b6dd63708c64cf3db6f69566}{STATUS\_OK}};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00570}00570\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00571}00571\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00572}00572\ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00573}00573\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00574}00574\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00575}\mbox{\hyperlink{classgravityCompensatorThread_a556fab9b5d4e4139922f1c289d91c38d}{00575}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classgravityCompensatorThread_a556fab9b5d4e4139922f1c289d91c38d}{gravityCompensatorThread::feedFwdGravityControl}}(\textcolor{keywordtype}{int}\ part\_ctrlJnt,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{string}\&\ s\_part,\ IControlMode\ *iCtrlMode,\ ITorqueControl\ *iTqs,\ IImpedanceControl\ *iImp,\ IInteractionMode\ *iIntMode,\ \textcolor{keyword}{const}\ Vector\ \&command,\ \textcolor{keywordtype}{bool}\ releasing)}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00576}00576\ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00577}00577\ \ \ \ \ \textcolor{comment}{//check\ if\ interfaces\ are\ still\ up\ (icubinterface\ running)\ \ }}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00578}00578\ \ \ \ \ \textcolor{keywordflow}{if}\ (iCtrlMode\ ==\ \textcolor{keyword}{nullptr})}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00579}00579\ \ \ \ \ \ \ \ \ \{yError(\textcolor{stringliteral}{"{}ControlMode\ interface\ already\ closed,\ unable\ to\ reset\ compensation\ offset.\(\backslash\)n"{}});\ \ \ \ \textcolor{keywordflow}{return};\}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00580}00580\ \ \ \ \ \textcolor{keywordflow}{if}\ (iTqs\ ==\ \textcolor{keyword}{nullptr})}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00581}00581\ \ \ \ \ \ \ \ \ \{yError(\textcolor{stringliteral}{"{}TorqueControl\ interface\ already\ closed,\ unable\ to\ reset\ compensation\ offset.\(\backslash\)n"{}});\ \ \textcolor{keywordflow}{return};\}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00582}00582\ \ \ \ \ \textcolor{keywordflow}{if}\ (iIntMode\ ==\ \textcolor{keyword}{nullptr})}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00583}00583\ \ \ \ \ \ \ \ \ \{yError(\textcolor{stringliteral}{"{}InteractionMode\ interface\ already\ closed,\ unable\ to\ reset\ compensation\ offset.\(\backslash\)n"{}});\ \ \textcolor{keywordflow}{return};\}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00584}00584\ \ \ \ \ \textcolor{keywordflow}{if}\ (iImp\ ==\ \textcolor{keyword}{nullptr})}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00585}00585\ \ \ \ \ \ \ \ \ \{yError(\textcolor{stringliteral}{"{}Impedance\ interface\ already\ closed,\ unable\ to\ reset\ compensation\ offset.\(\backslash\)n"{}});\ \ \ \ \ \ \textcolor{keywordflow}{return};\}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00586}00586\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00587}00587\ \ \ \ \ \textcolor{comment}{//set\ to\ zero\ all\ the\ offsets\ if\ the\ module\ is\ closing}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00588}00588\ \ \ \ \ \textcolor{keywordflow}{if}(releasing)}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00589}00589\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00590}00590\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i=0;i<part\_ctrlJnt;i++)}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00591}00591\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00592}00592\ \ \ \ \ \ \ \ \ \ \ \ \ iImp-\/>setImpedanceOffset(i,0.0);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00593}00593\ \ \ \ \ \ \ \ \ \ \ \ \ iTqs-\/>setRefTorque(i,0.0);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00594}00594\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00595}00595\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00596}00596\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00597}00597\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00598}00598\ \ \ \ \ \textcolor{comment}{//set\ the\ appropriate\ feedforward\ term\ (normal\ operation)}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00599}00599\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i=0;i<part\_ctrlJnt;i++)}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00600}00600\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00601}00601\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ ctrl\_mode=0;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00602}00602\ \ \ \ \ \ \ \ \ yarp::dev::InteractionModeEnum\ int\_mode;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00603}00603\ \ \ \ \ \ \ \ \ iCtrlMode-\/>getControlMode(i,\&ctrl\_mode);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00604}00604\ \ \ \ \ \ \ \ \ iIntMode-\/>getInteractionMode(i,\&int\_mode);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00605}00605\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{switch}(ctrl\_mode)}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00606}00606\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00607}00607\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//for\ all\ this\ control\ modes\ do\ nothing}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00608}00608\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ VOCAB\_CM\_CURRENT:}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00609}00609\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ VOCAB\_CM\_PWM:}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00610}00610\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ VOCAB\_CM\_IDLE:}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00611}00611\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ VOCAB\_CM\_UNKNOWN:}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00612}00612\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ VOCAB\_CM\_HW\_FAULT:}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00613}00613\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00614}00614\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00615}00615\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ VOCAB\_CM\_TORQUE:}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00616}00616\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ iTqs-\/>setRefTorque(i,command[i]);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00617}00617\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00618}00618\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00619}00619\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ VOCAB\_CM\_POSITION:}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00620}00620\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ VOCAB\_CM\_POSITION\_DIRECT:}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00621}00621\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ VOCAB\_CM\_MIXED:}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00622}00622\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ VOCAB\_CM\_VELOCITY:}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00623}00623\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (int\_mode\ ==\ VOCAB\_IM\_COMPLIANT)}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00624}00624\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00625}00625\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ iImp-\/>setImpedanceOffset(i,command[i]);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00626}00626\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00627}00627\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00628}00628\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00629}00629\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//stiff\ or\ unknown\ mode,\ nothing\ to\ do}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00630}00630\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00631}00631\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00632}00632\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00633}00633\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ VOCAB\_CM\_IMPEDANCE\_POS:}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00634}00634\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ VOCAB\_CM\_IMPEDANCE\_VEL:}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00635}00635\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ iImp-\/>setImpedanceOffset(i,command[i]);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00636}00636\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00637}00637\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00638}00638\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{default}:}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00639}00639\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (s\_part==\textcolor{stringliteral}{"{}torso"{}}\ \&\&\ i==3)}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00640}00640\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00641}00641\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ do\ nothing,\ because\ joint\ 3\ of\ the\ torso\ is\ only\ virtual}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00642}00642\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00643}00643\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00644}00644\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00645}00645\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}Unknown\ control\ mode\ (part:\ \%s\ jnt:\%d).\(\backslash\)n"{}},s\_part.c\_str(),\ i);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00646}00646\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00647}00647\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00648}00648\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00649}00649\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00650}00650\ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00651}00651\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00652}\mbox{\hyperlink{classgravityCompensatorThread_aec7c7ecfd10c05c0d09dba98be439d6f}{00652}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classgravityCompensatorThread_aec7c7ecfd10c05c0d09dba98be439d6f}{gravityCompensatorThread::run}}()}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00653}00653\ \{\ \ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00654}00654\ \ \ \ \ thread\_status\ =\ \mbox{\hyperlink{gravityThread_8h_a314e728fcd25c89c20cb03b841fd1559a7e4a42e3b6dd63708c64cf3db6f69566}{STATUS\_OK}};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00655}00655\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{int}\ delay\_check=0;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00656}00656\ \ \ \ \ \textcolor{keywordflow}{if}(isCalibrated)}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00657}00657\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00658}00658\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!\mbox{\hyperlink{classgravityCompensatorThread_a1405d58684cfa6e684cd39ffac268182}{readAndUpdate}}(\textcolor{keyword}{false}))}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00659}00659\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00660}00660\ \ \ \ \ \ \ \ \ \ \ \ \ delay\_check++;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00661}00661\ \ \ \ \ \ \ \ \ \ \ \ \ yWarning\ (\textcolor{stringliteral}{"{}network\ delays\ detected\ (\%d/10)\(\backslash\)n"{}},\ delay\_check);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00662}00662\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (delay\_check>=10)}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00663}00663\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00664}00664\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yError\ (\textcolor{stringliteral}{"{}gravityCompensatorThread\ lost\ connection\ with\ wholeBodyDynamics.\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00665}00665\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ thread\_status\ =\ \mbox{\hyperlink{gravityThread_8h_a314e728fcd25c89c20cb03b841fd1559a97207f3457ed3b04ca92ff55d1aec3d6}{STATUS\_DISCONNECTED}};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00666}00666\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00667}00667\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00668}00668\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00669}00669\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00670}00670\ \ \ \ \ \ \ \ \ \ \ \ \ delay\_check\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00671}00671\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00672}00672\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00673}00673\ \ \ \ \ \ \ \ \ Vector\ F\_up(6,0.0);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00674}00674\ \ \ \ \ \ \ \ \ icub-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iCubWholeBody_a289d8ae77f8353cd399bde21b4015245}{upperTorso}}-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iDynSensorTorsoNode_ac599295443dc6c837d671bd8269c2b61}{setInertialMeasure}}(w0,dw0,d2p0);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00675}00675\ \ \ \ \ \ \ \ \ icub-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iCubWholeBody_a289d8ae77f8353cd399bde21b4015245}{upperTorso}}-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iDynNode_a80b3da23a78324dff920a4d90e9050bb}{solveKinematics}}();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00676}00676\ \ \ \ \ \ \ \ \ icub-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iCubWholeBody_a289d8ae77f8353cd399bde21b4015245}{upperTorso}}-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iDynSensorNode_a6c3f09586f4cba4d18446fabbeb7394d}{solveWrench}}();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00677}00677\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00678}00678\ \ \ \ \ \ \ \ \ \textcolor{comment}{//compute\ the\ arm\ torques}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00679}00679\ \ \ \ \ \ \ \ \ Matrix\ F\_sens\_up\ =\ icub-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iCubWholeBody_a289d8ae77f8353cd399bde21b4015245}{upperTorso}}-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iDynSensorTorsoNode_a3c6cabcfc0c355e1cf9e48e4e589116b}{estimateSensorsWrench}}(F\_ext\_up,\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00680}00680\ \ \ \ \ \ \ \ \ gravity\_torques\_LA\ =\ icub-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iCubWholeBody_a289d8ae77f8353cd399bde21b4015245}{upperTorso}}-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iDynSensorTorsoNode_a4a5dcb30191147c0dc5a7732f1220462}{left}}-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iDynChain_a847edb2cd39ef10a8c59468c13e00b8c}{getTorques}}();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00681}00681\ \ \ \ \ \ \ \ \ gravity\_torques\_RA\ =\ icub-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iCubWholeBody_a289d8ae77f8353cd399bde21b4015245}{upperTorso}}-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iDynSensorTorsoNode_a810063ba2557e7fa823f48790d281fec}{right}}-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iDynChain_a847edb2cd39ef10a8c59468c13e00b8c}{getTorques}}();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00682}00682\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00683}00683\ \ \ \ \ \ \ \ \ \textcolor{comment}{//compute\ the\ torso\ torques}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00684}00684\ \ \ \ \ \ \ \ \ icub-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iCubWholeBody_adb72f8f92753e5f3045efa739dc4d0a5}{attachLowerTorso}}(F\_up,F\_up);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00685}00685\ \ \ \ \ \ \ \ \ icub-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iCubWholeBody_aaf51afaccad44b54d9efccd0a35b36cb}{lowerTorso}}-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iDynNode_a80b3da23a78324dff920a4d90e9050bb}{solveKinematics}}();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00686}00686\ \ \ \ \ \ \ \ \ icub-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iCubWholeBody_aaf51afaccad44b54d9efccd0a35b36cb}{lowerTorso}}-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iDynSensorNode_a6c3f09586f4cba4d18446fabbeb7394d}{solveWrench}}();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00687}00687\ \ \ \ \ \ \ \ \ Vector\ tmp;\ tmp.resize(3);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00688}00688\ \ \ \ \ \ \ \ \ tmp\ =\ icub-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iCubWholeBody_aaf51afaccad44b54d9efccd0a35b36cb}{lowerTorso}}-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iDynSensorTorsoNode_a358f6ee6faf57a9e751c7918c865c3fe}{getTorques}}(\textcolor{stringliteral}{"{}torso"{}});}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00689}00689\ \ \ \ \ \ \ \ \ gravity\_torques\_TO[0]\ =\ tmp\ [2];}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00690}00690\ \ \ \ \ \ \ \ \ gravity\_torques\_TO[1]\ =\ tmp\ [1];}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00691}00691\ \ \ \ \ \ \ \ \ gravity\_torques\_TO[2]\ =\ tmp\ [0];}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00692}00692\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00693}00693\ \ \ \ \ \ \ \ \ \textcolor{comment}{//compute\ the\ leg\ torques}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00694}00694\ \ \ \ \ \ \ \ \ Matrix\ F\_sens\_low\ =\ icub-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iCubWholeBody_aaf51afaccad44b54d9efccd0a35b36cb}{lowerTorso}}-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iDynSensorTorsoNode_a3c6cabcfc0c355e1cf9e48e4e589116b}{estimateSensorsWrench}}(F\_ext\_low,\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00695}00695\ \ \ \ \ \ \ \ \ gravity\_torques\_LL\ =\ icub-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iCubWholeBody_aaf51afaccad44b54d9efccd0a35b36cb}{lowerTorso}}-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iDynSensorTorsoNode_a358f6ee6faf57a9e751c7918c865c3fe}{getTorques}}(\textcolor{stringliteral}{"{}left\_leg"{}});}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00696}00696\ \ \ \ \ \ \ \ \ gravity\_torques\_RL\ =\ icub-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iCubWholeBody_aaf51afaccad44b54d9efccd0a35b36cb}{lowerTorso}}-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iDynSensorTorsoNode_a358f6ee6faf57a9e751c7918c865c3fe}{getTorques}}(\textcolor{stringliteral}{"{}right\_leg"{}});\ \ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00697}00697\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00698}00698\ \textcolor{comment}{//\#define\ DEBUG\_TORQUES}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00699}00699\ \textcolor{preprocessor}{\#ifdef\ \ DEBUG\_TORQUES}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00700}00700\ \ \ \ \ yDebug\ (\textcolor{stringliteral}{"{}TORQUES:\ \ \ \ \ \%s\ ***\ \ \(\backslash\)n\(\backslash\)n"{}},\ torques\_TO.toString().c\_str());}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00701}00701\ \ \ \ \ yDebug\ (\textcolor{stringliteral}{"{}LL\ TORQUES:\ \ \%s\ ***\ \ \(\backslash\)n\(\backslash\)n"{}},\ torques\_LL.toString().c\_str());}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00702}00702\ \ \ \ \ yDebug\ (\textcolor{stringliteral}{"{}RL\ TORQUES:\ \ \%s\ ***\ \ \(\backslash\)n\(\backslash\)n"{}},\ torques\_RL.toString().c\_str());}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00703}00703\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00704}00704\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00705}00705\ \ \ \ \ \ \ \ \ \textcolor{comment}{//read\ the\ external\ command\ ports}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00706}00706\ \ \ \ \ \ \ \ \ Vector\ *offset\_input\_la\ =\ la\_additional\_offset-\/>read(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00707}00707\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(offset\_input\_la!=\textcolor{keyword}{nullptr})}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00708}00708\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00709}00709\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{auto}\ size\ =\ (offset\_input\_la-\/>size()\ <\ 7)\ ?\ offset\_input\_la-\/>size():7;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00710}00710\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<size;\ i++)}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00711}00711\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{externalcmd\_torques\_LA[i]=(*offset\_input\_la)[i];\}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00712}00712\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00713}00713\ \ \ \ \ \ \ \ \ Vector\ *offset\_input\_ra\ =\ ra\_additional\_offset-\/>read(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00714}00714\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(offset\_input\_ra!=\textcolor{keyword}{nullptr})}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00715}00715\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00716}00716\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{auto}\ size\ =\ (offset\_input\_ra-\/>size()\ <\ 7)\ ?\ offset\_input\_ra-\/>size():7;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00717}00717\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<size;\ i++)}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00718}00718\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{externalcmd\_torques\_RA[i]=(*offset\_input\_ra)[i];\}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00719}00719\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00720}00720\ \ \ \ \ \ \ \ \ Vector\ *offset\_input\_ll\ =\ ll\_additional\_offset-\/>read(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00721}00721\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(offset\_input\_ll!=\textcolor{keyword}{nullptr})}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00722}00722\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00723}00723\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{auto}\ size\ =\ (offset\_input\_ll-\/>size()\ <\ 6)\ ?\ offset\_input\_ll-\/>size():6;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00724}00724\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<size;\ i++)}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00725}00725\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{externalcmd\_torques\_LL[i]=(*offset\_input\_ll)[i];\}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00726}00726\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00727}00727\ \ \ \ \ \ \ \ \ Vector\ *offset\_input\_rl\ =\ rl\_additional\_offset-\/>read(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00728}00728\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(offset\_input\_rl!=\textcolor{keyword}{nullptr})}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00729}00729\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00730}00730\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{auto}\ size\ =\ (offset\_input\_rl-\/>size()\ <\ 6)\ ?\ offset\_input\_rl-\/>size():6;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00731}00731\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<size;\ i++)}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00732}00732\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{externalcmd\_torques\_RL[i]=(*offset\_input\_rl)[i];\}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00733}00733\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00734}00734\ \ \ \ \ \ \ \ \ Vector\ *offset\_input\_to\ =\ to\_additional\_offset-\/>read(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00735}00735\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(offset\_input\_to!=\textcolor{keyword}{nullptr})}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00736}00736\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00737}00737\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{auto}\ size\ =\ (offset\_input\_to-\/>size()\ <\ 3)\ ?\ offset\_input\_to-\/>size():3;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00738}00738\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<size;\ i++)}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00739}00739\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{externalcmd\_torques\_TO[i]=(*offset\_input\_to)[i];\}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00740}00740\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00741}00741\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00742}00742\ \ \ \ \ \ \ \ \ \textcolor{comment}{//compute\ the\ command\ to\ be\ given\ to\ the\ joint}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00743}00743\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classgravityCompensatorThread_a4309319cf0322c298e9b155e1fe259f6}{gravity\_mode}}==\mbox{\hyperlink{gravityThread_8h_a96a58e29e8dbf2b5bdeb775cba46556ea8c355f2fd1443ba3a14bdcf1bec05cf3}{GRAVITY\_COMPENSATION\_ON}})}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00744}00744\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00745}00745\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classgravityCompensatorThread_a1200cad968e6a6f0497889ea3f9e2937}{external\_mode}}==\mbox{\hyperlink{gravityThread_8h_ab48899087cc647f0f791ed0c459adc53ac46a84ee32e7178408bff8510c90e5b3}{EXTERNAL\_TRQ\_ON}})}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00746}00746\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00747}00747\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ exec\_torques\_LA\ =\ ampli\_LA*gravity\_torques\_LA\ +\ externalcmd\_torques\_LA;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00748}00748\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ exec\_torques\_RA\ =\ ampli\_RA*gravity\_torques\_RA\ +\ externalcmd\_torques\_RA;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00749}00749\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ exec\_torques\_LL\ =\ ampli\_LL*gravity\_torques\_LL\ +\ externalcmd\_torques\_LL;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00750}00750\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ exec\_torques\_RL\ =\ ampli\_RL*gravity\_torques\_RL\ +\ externalcmd\_torques\_RL;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00751}00751\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ exec\_torques\_TO\ =\ ampli\_TO*gravity\_torques\_TO\ +\ externalcmd\_torques\_TO;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00752}00752\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00753}00753\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00754}00754\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00755}00755\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ exec\_torques\_LA\ =\ ampli\_LA*gravity\_torques\_LA;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00756}00756\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ exec\_torques\_RA\ =\ ampli\_RA*gravity\_torques\_RA;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00757}00757\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ exec\_torques\_LL\ =\ ampli\_LL*gravity\_torques\_LL;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00758}00758\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ exec\_torques\_RL\ =\ ampli\_RL*gravity\_torques\_RL;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00759}00759\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ exec\_torques\_TO\ =\ ampli\_TO*gravity\_torques\_TO;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00760}00760\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00761}00761\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00762}00762\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00763}00763\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00764}00764\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classgravityCompensatorThread_a1200cad968e6a6f0497889ea3f9e2937}{external\_mode}}==\mbox{\hyperlink{gravityThread_8h_ab48899087cc647f0f791ed0c459adc53ac46a84ee32e7178408bff8510c90e5b3}{EXTERNAL\_TRQ\_ON}})}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00765}00765\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00766}00766\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ exec\_torques\_LA\ =\ externalcmd\_torques\_LA;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00767}00767\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ exec\_torques\_RA\ =\ externalcmd\_torques\_RA;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00768}00768\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ exec\_torques\_LL\ =\ externalcmd\_torques\_LL;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00769}00769\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ exec\_torques\_RL\ =\ externalcmd\_torques\_RL;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00770}00770\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ exec\_torques\_TO\ =\ externalcmd\_torques\_TO;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00771}00771\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00772}00772\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00773}00773\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00774}00774\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ externalcmd\_torques\_LA.zero();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00775}00775\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ externalcmd\_torques\_RA.zero();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00776}00776\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ externalcmd\_torques\_LL.zero();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00777}00777\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ externalcmd\_torques\_RL.zero();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00778}00778\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ externalcmd\_torques\_TO.zero();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00779}00779\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00780}00780\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00781}00781\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00782}00782\ \ \ \ \ \ \ \ \ \textcolor{comment}{//execute\ the\ commands}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00783}00783\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static}\ yarp::os::Stamp\ timestamp;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00784}00784\ \ \ \ \ \ \ \ \ timestamp.update();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00785}00785\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (iCtrlMode\_arm\_left)}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00786}00786\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00787}00787\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classgravityCompensatorThread_a556fab9b5d4e4139922f1c289d91c38d}{feedFwdGravityControl}}(left\_arm\_ctrlJnt,\ \textcolor{stringliteral}{"{}left\_arm"{}},\ iCtrlMode\_arm\_left,iTqs\_arm\_left,iImp\_arm\_left,iIntMode\_arm\_left,exec\_torques\_LA);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00788}00788\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (left\_arm\_exec\_torques\ \&\&\ left\_arm\_exec\_torques-\/>getOutputCount()>0)}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00789}00789\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00790}00790\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ left\_arm\_exec\_torques-\/>prepare()\ \ =\ \ exec\_torques\_LA;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00791}00791\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ left\_arm\_exec\_torques-\/>setEnvelope(timestamp);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00792}00792\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ left\_arm\_exec\_torques-\/>write();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00793}00793\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00794}00794\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (left\_arm\_gravity\_torques\ \&\&\ left\_arm\_gravity\_torques-\/>getOutputCount()>0)}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00795}00795\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00796}00796\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ left\_arm\_gravity\_torques-\/>prepare()\ \ =\ \ gravity\_torques\_LA;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00797}00797\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ left\_arm\_gravity\_torques-\/>setEnvelope(timestamp);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00798}00798\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ left\_arm\_gravity\_torques-\/>write();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00799}00799\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00800}00800\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00801}00801\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (iCtrlMode\_arm\_right)}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00802}00802\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00803}00803\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classgravityCompensatorThread_a556fab9b5d4e4139922f1c289d91c38d}{feedFwdGravityControl}}(right\_arm\_ctrlJnt,\ \textcolor{stringliteral}{"{}right\_arm"{}},\ iCtrlMode\_arm\_right,iTqs\_arm\_right,iImp\_arm\_right,iIntMode\_arm\_right,exec\_torques\_RA);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00804}00804\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (right\_arm\_exec\_torques\ \&\&\ right\_arm\_exec\_torques-\/>getOutputCount()>0)}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00805}00805\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00806}00806\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ right\_arm\_exec\_torques-\/>prepare()\ =\ \ exec\_torques\_RA;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00807}00807\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ right\_arm\_exec\_torques-\/>setEnvelope(timestamp);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00808}00808\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ right\_arm\_exec\_torques-\/>write();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00809}00809\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00810}00810\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (right\_arm\_gravity\_torques\ \&\&\ right\_arm\_gravity\_torques-\/>getOutputCount()>0)}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00811}00811\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00812}00812\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ right\_arm\_gravity\_torques-\/>prepare()\ \ =\ \ gravity\_torques\_RA;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00813}00813\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ right\_arm\_gravity\_torques-\/>setEnvelope(timestamp);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00814}00814\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ right\_arm\_gravity\_torques-\/>write();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00815}00815\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00816}00816\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00817}00817\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (iCtrlMode\_torso)\ \ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00818}00818\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00819}00819\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classgravityCompensatorThread_a556fab9b5d4e4139922f1c289d91c38d}{feedFwdGravityControl}}(torso\_ctrlJnt,\ \textcolor{stringliteral}{"{}torso"{}},\ iCtrlMode\_torso,iTqs\_torso,iImp\_torso,iIntMode\_torso,exec\_torques\_TO);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00820}00820\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (torso\_exec\_torques\ \&\&\ torso\_exec\_torques-\/>getOutputCount()>0)}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00821}00821\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00822}00822\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ torso\_exec\_torques-\/>prepare()\ \ =\ \ exec\_torques\_TO;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00823}00823\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ torso\_exec\_torques-\/>setEnvelope(timestamp);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00824}00824\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ torso\_exec\_torques-\/>write();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00825}00825\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00826}00826\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (torso\_gravity\_torques\ \&\&\ torso\_gravity\_torques-\/>getOutputCount()>0)}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00827}00827\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00828}00828\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ torso\_gravity\_torques-\/>prepare()\ \ =\ \ gravity\_torques\_TO;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00829}00829\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ torso\_gravity\_torques-\/>setEnvelope(timestamp);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00830}00830\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ torso\_gravity\_torques-\/>write();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00831}00831\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00832}00832\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00833}00833\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (iCtrlMode\_leg\_left)\ \ \ \ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00834}00834\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00835}00835\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classgravityCompensatorThread_a556fab9b5d4e4139922f1c289d91c38d}{feedFwdGravityControl}}(left\_leg\_ctrlJnt,\ \textcolor{stringliteral}{"{}left\_leg"{}},\ iCtrlMode\_leg\_left,iTqs\_leg\_left,iImp\_leg\_left,iIntMode\_leg\_left,exec\_torques\_LL);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00836}00836\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (left\_leg\_exec\_torques\ \&\&\ left\_leg\_exec\_torques-\/>getOutputCount()>0)}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00837}00837\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00838}00838\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ left\_leg\_exec\_torques-\/>prepare()\ =\ \ exec\_torques\_LL;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00839}00839\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ left\_leg\_exec\_torques-\/>setEnvelope(timestamp);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00840}00840\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ left\_leg\_exec\_torques-\/>write();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00841}00841\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00842}00842\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (left\_leg\_gravity\_torques\ \&\&\ left\_leg\_gravity\_torques-\/>getOutputCount()>0)}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00843}00843\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00844}00844\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ left\_leg\_gravity\_torques-\/>prepare()\ =\ \ gravity\_torques\_LL;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00845}00845\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ left\_leg\_gravity\_torques-\/>setEnvelope(timestamp);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00846}00846\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ left\_leg\_gravity\_torques-\/>write();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00847}00847\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00848}00848\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00849}00849\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (iCtrlMode\_leg\_right)}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00850}00850\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00851}00851\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classgravityCompensatorThread_a556fab9b5d4e4139922f1c289d91c38d}{feedFwdGravityControl}}(right\_leg\_ctrlJnt,\ \textcolor{stringliteral}{"{}right\_leg"{}},\ iCtrlMode\_leg\_right,iTqs\_leg\_right,iImp\_leg\_right,iIntMode\_leg\_right,exec\_torques\_RL);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00852}00852\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (right\_leg\_exec\_torques\ \&\&\ right\_leg\_exec\_torques-\/>getOutputCount()>0)}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00853}00853\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00854}00854\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ right\_leg\_exec\_torques-\/>prepare()\ \ =\ \ exec\_torques\_RL;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00855}00855\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ right\_leg\_exec\_torques-\/>setEnvelope(timestamp);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00856}00856\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ right\_leg\_exec\_torques-\/>write();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00857}00857\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00858}00858\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (right\_leg\_gravity\_torques\ \&\&\ right\_leg\_gravity\_torques-\/>getOutputCount()>0)}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00859}00859\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00860}00860\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ right\_leg\_gravity\_torques-\/>prepare()\ \ =\ \ gravity\_torques\_RL;}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00861}00861\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ right\_leg\_gravity\_torques-\/>setEnvelope(timestamp);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00862}00862\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ right\_leg\_gravity\_torques-\/>write();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00863}00863\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00864}00864\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00865}00865\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00866}00866\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00867}00867\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00868}00868\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(Network::exists(\textcolor{stringliteral}{"{}/"{}}+wholeBodyName+\textcolor{stringliteral}{"{}/filtered/inertial:o"{}}))}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00869}00869\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00870}00870\ \ \ \ \ \ \ \ \ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}connection\ exists!\ starting\ calibration...\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00871}00871\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//the\ following\ delay\ is\ required\ because\ even\ if\ the\ filtered\ port\ exists,\ may\ be\ the\ }}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00872}00872\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//low\ pass\ filtered\ values\ have\ not\ reached\ yet\ the\ correct\ value.\ }}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00873}00873\ \ \ \ \ \ \ \ \ \ \ \ \ Time::delay(1.0);\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00874}00874\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00875}00875\ \ \ \ \ \ \ \ \ \ \ \ \ isCalibrated\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00876}00876\ \ \ \ \ \ \ \ \ \ \ \ \ Network::connect(\textcolor{stringliteral}{"{}/"{}}+wholeBodyName+\textcolor{stringliteral}{"{}/filtered/inertial:o"{}},\textcolor{stringliteral}{"{}/gravityCompensator/inertial:i"{}});}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00877}00877\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classgravityCompensatorThread_a78d8f0c9e443abc8020dbc2d6dee081a}{setZeroJntAngVelAcc}}();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00878}00878\ \ \ \ \ \ \ \ \ \ \ \ \ setUpperMeasure();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00879}00879\ \ \ \ \ \ \ \ \ \ \ \ \ setLowerMeasure();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00880}00880\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00881}00881\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classgravityCompensatorThread_a1405d58684cfa6e684cd39ffac268182}{readAndUpdate}}(\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00882}00882\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00883}00883\ \ \ \ \ \ \ \ \ \ \ \ \ icub-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iCubWholeBody_a289d8ae77f8353cd399bde21b4015245}{upperTorso}}-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iDynSensorTorsoNode_ac599295443dc6c837d671bd8269c2b61}{setInertialMeasure}}(w0,dw0,d2p0);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00884}00884\ \ \ \ \ \ \ \ \ \ \ \ \ Matrix\ F\_sens\_up\ =\ icub-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iCubWholeBody_a289d8ae77f8353cd399bde21b4015245}{upperTorso}}-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iDynSensorTorsoNode_a3c6cabcfc0c355e1cf9e48e4e589116b}{estimateSensorsWrench}}(F\_ext\_up,\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00885}00885\ \ \ \ \ \ \ \ \ \ \ \ \ icub-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iCubWholeBody_aaf51afaccad44b54d9efccd0a35b36cb}{lowerTorso}}-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iDynSensorTorsoNode_ac599295443dc6c837d671bd8269c2b61}{setInertialMeasure}}(icub-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iCubWholeBody_a289d8ae77f8353cd399bde21b4015245}{upperTorso}}-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iDynSensorTorsoNode_ad291f77f40962e743a4208232a71b0ed}{getTorsoAngVel}}(),}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00886}00886\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ icub-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iCubWholeBody_a289d8ae77f8353cd399bde21b4015245}{upperTorso}}-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iDynSensorTorsoNode_a55c83138f8b4a10d394ec2c9ad14fcfc}{getTorsoAngAcc}}(),}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00887}00887\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ icub-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iCubWholeBody_a289d8ae77f8353cd399bde21b4015245}{upperTorso}}-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iDynSensorTorsoNode_a5d9116c8d5816a9189ff9d18fe03ee1b}{getTorsoLinAcc}}());}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00888}00888\ \ \ \ \ \ \ \ \ \ \ \ \ Matrix\ F\_sens\_low\ =\ icub-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iCubWholeBody_aaf51afaccad44b54d9efccd0a35b36cb}{lowerTorso}}-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iDynSensorTorsoNode_a3c6cabcfc0c355e1cf9e48e4e589116b}{estimateSensorsWrench}}(F\_ext\_low,\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00889}00889\ \ \ \ \ \ \ \ \ \ \ \ \ gravity\_torques\_LA\ =\ icub-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iCubWholeBody_a289d8ae77f8353cd399bde21b4015245}{upperTorso}}-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iDynSensorTorsoNode_a358f6ee6faf57a9e751c7918c865c3fe}{getTorques}}(\textcolor{stringliteral}{"{}left\_arm"{}});}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00890}00890\ \ \ \ \ \ \ \ \ \ \ \ \ gravity\_torques\_RA\ =\ icub-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iCubWholeBody_a289d8ae77f8353cd399bde21b4015245}{upperTorso}}-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iDynSensorTorsoNode_a358f6ee6faf57a9e751c7918c865c3fe}{getTorques}}(\textcolor{stringliteral}{"{}right\_arm"{}});}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00891}00891\ \ \ \ \ \ \ \ \ \ \ \ \ gravity\_torques\_LL\ =\ icub-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iCubWholeBody_aaf51afaccad44b54d9efccd0a35b36cb}{lowerTorso}}-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iDynSensorTorsoNode_a358f6ee6faf57a9e751c7918c865c3fe}{getTorques}}(\textcolor{stringliteral}{"{}left\_leg"{}});}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00892}00892\ \ \ \ \ \ \ \ \ \ \ \ \ gravity\_torques\_RL\ =\ icub-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iCubWholeBody_aaf51afaccad44b54d9efccd0a35b36cb}{lowerTorso}}-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iDynSensorTorsoNode_a358f6ee6faf57a9e751c7918c865c3fe}{getTorques}}(\textcolor{stringliteral}{"{}right\_leg"{}});\ \ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00893}00893\ \ \ \ \ \ \ \ \ \ \ \ \ Vector\ LATorques\ =\ icub-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iCubWholeBody_a289d8ae77f8353cd399bde21b4015245}{upperTorso}}-\/>\mbox{\hyperlink{classiCub_1_1iDyn_1_1iDynSensorTorsoNode_a358f6ee6faf57a9e751c7918c865c3fe}{getTorques}}(\textcolor{stringliteral}{"{}left\_arm"{}});}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00894}00894\ \ \ \ \ \ \ \ \ \ \ \ \ yDebug(\textcolor{stringliteral}{"{}encoders:\ \ \%.1lf,\ \%.1lf,\ \%.1lf,\ \%.1lf,\ \%.1lf,\ \%.1lf,\ \%.1lf\(\backslash\)n"{}},\ encoders\_arm\_left(0),\ encoders\_arm\_left(1),\ encoders\_arm\_left(2),\ encoders\_arm\_left(3),\ encoders\_arm\_left(4),\ encoders\_arm\_left(5),\ encoders\_arm\_left(6));\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00895}00895\ \ \ \ \ \ \ \ \ \ \ \ \ yDebug(\textcolor{stringliteral}{"{}left\ \ arm:\ \%.3lf,\ \%.3lf,\ \%.3lf,\ \%.3lf,\ \%.3lf,\ \%.3lf,\ \%.3lf\(\backslash\)n"{}},\ gravity\_torques\_LA(0),\ gravity\_torques\_LA(1),\ gravity\_torques\_LA(2),\ gravity\_torques\_LA(3),\ gravity\_torques\_LA(4),\ gravity\_torques\_LA(5),\ gravity\_torques\_LA(6));\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00896}00896\ \ \ \ \ \ \ \ \ \ \ \ \ yDebug(\textcolor{stringliteral}{"{}right\ arm:\ \%.3lf,\ \%.3lf,\ \%.3lf,\ \%.3lf,\ \%.3lf,\ \%.3lf,\ \%.3lf\(\backslash\)n"{}},\ gravity\_torques\_RA(0),\ gravity\_torques\_RA(1),\ gravity\_torques\_RA(2),\ gravity\_torques\_RA(3),\ gravity\_torques\_RA(4),\ gravity\_torques\_RA(5),\ gravity\_torques\_RA(6));\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00897}00897\ \ \ \ \ \ \ \ \ \ \ \ \ yDebug(\textcolor{stringliteral}{"{}left\ \ leg:\ \%.3lf,\ \%.3lf,\ \%.3lf,\ \%.3lf,\ \%.3lf,\ \%.3lf\(\backslash\)n"{}},\ \ \ \ \ \ \ \ gravity\_torques\_LL(0),\ gravity\_torques\_LL(1),\ gravity\_torques\_LL(2),\ gravity\_torques\_LL(3),\ gravity\_torques\_LL(4),\ gravity\_torques\_LL(5));\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00898}00898\ \ \ \ \ \ \ \ \ \ \ \ \ yDebug(\textcolor{stringliteral}{"{}right\ leg:\ \%.3lf,\ \%.3lf,\ \%.3lf,\ \%.3lf,\ \%.3lf,\ \%.3lf\(\backslash\)n"{}},\ \ \ \ \ \ \ \ gravity\_torques\_RL(0),\ gravity\_torques\_RL(1),\ gravity\_torques\_RL(2),\ gravity\_torques\_RL(3),\ gravity\_torques\_RL(4),\ gravity\_torques\_RL(5));\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00899}00899\ \ \ \ \ \ \ \ \ \ \ \ \ yDebug(\textcolor{stringliteral}{"{}inertial:\ \ \%.1lf,\ \%.1lf,\ \%.1lf,\ \%.1lf,\ \%.1lf,\ \%.1lf,\ \%.1lf,\ \%.1lf,\ \%.1lf\(\backslash\)n"{}},\ d2p0(0),\ d2p0(1),\ d2p0(2),\ w0(0),\ w0(1),\ w0(2),\ dw0(0),\ dw0(1),\ dw0(2));\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00900}00900\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00901}00901\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00902}00902\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00903}00903\ \ \ \ \ \ \ \ \ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}waiting\ for\ connections\ from\ wholeBodyDynamics\ (port:\ \%s)...\(\backslash\)n"{}},\ wholeBodyName.c\_str());}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00904}00904\ \ \ \ \ \ \ \ \ \ \ \ \ Time::delay(1.0);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00905}00905\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00906}00906\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00907}00907\ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00908}00908\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00909}\mbox{\hyperlink{classgravityCompensatorThread_ad1d015a6f6f08639e93c84c4e5e43a8a}{00909}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classgravityCompensatorThread_ad1d015a6f6f08639e93c84c4e5e43a8a}{gravityCompensatorThread::threadRelease}}()}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00910}00910\ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00911}00911\ \ \ \ \ externalcmd\_torques\_LA.zero();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00912}00912\ \ \ \ \ externalcmd\_torques\_RA.zero();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00913}00913\ \ \ \ \ externalcmd\_torques\_LL.zero();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00914}00914\ \ \ \ \ externalcmd\_torques\_RL.zero();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00915}00915\ \ \ \ \ externalcmd\_torques\_TO.zero();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00916}00916\ \ \ \ \ gravity\_torques\_LA.zero();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00917}00917\ \ \ \ \ gravity\_torques\_RA.zero();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00918}00918\ \ \ \ \ gravity\_torques\_LL.zero();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00919}00919\ \ \ \ \ gravity\_torques\_RL.zero();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00920}00920\ \ \ \ \ gravity\_torques\_TO.zero();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00921}00921\ \ \ \ \ exec\_torques\_LA.zero();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00922}00922\ \ \ \ \ exec\_torques\_RA.zero();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00923}00923\ \ \ \ \ exec\_torques\_LL.zero();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00924}00924\ \ \ \ \ exec\_torques\_RL.zero();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00925}00925\ \ \ \ \ exec\_torques\_TO.zero();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00926}00926\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00927}00927\ \ \ \ \ \textcolor{keywordflow}{if}\ (iCtrlMode\_arm\_left)}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00928}00928\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00929}00929\ \ \ \ \ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}Setting\ gravity\ compensation\ offset\ to\ zero,\ left\ arm\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00930}00930\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classgravityCompensatorThread_a556fab9b5d4e4139922f1c289d91c38d}{feedFwdGravityControl}}(left\_arm\_ctrlJnt,\ \textcolor{stringliteral}{"{}left\_arm"{}},iCtrlMode\_arm\_left,iTqs\_arm\_left,iImp\_arm\_left,iIntMode\_arm\_left,exec\_torques\_LA,\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00931}00931\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00932}00932\ \ \ \ \ \textcolor{keywordflow}{if}\ (iCtrlMode\_arm\_right)\ \ \ \ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00933}00933\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00934}00934\ \ \ \ \ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}Setting\ gravity\ compensation\ offset\ to\ zero,\ right\ arm\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00935}00935\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classgravityCompensatorThread_a556fab9b5d4e4139922f1c289d91c38d}{feedFwdGravityControl}}(right\_arm\_ctrlJnt,\ \textcolor{stringliteral}{"{}right\_arm"{}},iCtrlMode\_arm\_right,iTqs\_arm\_right,iImp\_arm\_right,iIntMode\_arm\_right,exec\_torques\_RA,\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00936}00936\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00937}00937\ \ \ \ \ \textcolor{keywordflow}{if}\ (iCtrlMode\_leg\_left)\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00938}00938\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00939}00939\ \ \ \ \ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}Setting\ gravity\ compensation\ offset\ to\ zero,\ left\ leg\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00940}00940\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classgravityCompensatorThread_a556fab9b5d4e4139922f1c289d91c38d}{feedFwdGravityControl}}(left\_leg\_ctrlJnt,\ \textcolor{stringliteral}{"{}left\_leg"{}},\ iCtrlMode\_leg\_left,iTqs\_leg\_left,iImp\_leg\_left,iIntMode\_leg\_left,exec\_torques\_LL,\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00941}00941\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00942}00942\ \ \ \ \ \textcolor{keywordflow}{if}\ (iCtrlMode\_leg\_right)}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00943}00943\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00944}00944\ \ \ \ \ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}Setting\ gravity\ compensation\ offset\ to\ zero,\ right\ leg\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00945}00945\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classgravityCompensatorThread_a556fab9b5d4e4139922f1c289d91c38d}{feedFwdGravityControl}}(right\_leg\_ctrlJnt,\ \textcolor{stringliteral}{"{}right\_leg"{}},iCtrlMode\_leg\_right,iTqs\_leg\_right,iImp\_leg\_right,iIntMode\_leg\_right,exec\_torques\_RL,\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00946}00946\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00947}00947\ \ \ \ \ \textcolor{keywordflow}{if}\ (iCtrlMode\_torso)}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00948}00948\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00949}00949\ \ \ \ \ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}Setting\ gravity\ compensation\ offset\ to\ zero,\ torso\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00950}00950\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classgravityCompensatorThread_a556fab9b5d4e4139922f1c289d91c38d}{feedFwdGravityControl}}(torso\_ctrlJnt,\ \textcolor{stringliteral}{"{}torso"{}},iCtrlMode\_torso,iTqs\_torso,iImp\_torso,iIntMode\_torso,exec\_torques\_TO,\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00951}00951\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00952}00952\ \ \ \ \ Time::delay(0.5);}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00953}00953\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00954}00954\ \ \ \ \ left\_arm\_exec\_torques-\/>interrupt();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00955}00955\ \ \ \ \ right\_arm\_exec\_torques-\/>interrupt();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00956}00956\ \ \ \ \ left\_leg\_exec\_torques-\/>interrupt();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00957}00957\ \ \ \ \ right\_leg\_exec\_torques-\/>interrupt();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00958}00958\ \ \ \ \ torso\_exec\_torques-\/>interrupt();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00959}00959\ \ \ \ \ left\_arm\_exec\_torques-\/>close();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00960}00960\ \ \ \ \ right\_arm\_exec\_torques-\/>close();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00961}00961\ \ \ \ \ left\_leg\_exec\_torques-\/>close();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00962}00962\ \ \ \ \ right\_leg\_exec\_torques-\/>close();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00963}00963\ \ \ \ \ torso\_exec\_torques-\/>close();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00964}00964\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00965}00965\ \ \ \ \ left\_arm\_gravity\_torques-\/>interrupt();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00966}00966\ \ \ \ \ right\_arm\_gravity\_torques-\/>interrupt();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00967}00967\ \ \ \ \ left\_leg\_gravity\_torques-\/>interrupt();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00968}00968\ \ \ \ \ right\_leg\_gravity\_torques-\/>interrupt();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00969}00969\ \ \ \ \ torso\_gravity\_torques-\/>interrupt();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00970}00970\ \ \ \ \ left\_arm\_gravity\_torques-\/>close();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00971}00971\ \ \ \ \ right\_arm\_gravity\_torques-\/>close();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00972}00972\ \ \ \ \ left\_leg\_gravity\_torques-\/>close();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00973}00973\ \ \ \ \ right\_leg\_gravity\_torques-\/>close();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00974}00974\ \ \ \ \ torso\_gravity\_torques-\/>close();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00975}00975\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00976}00976\ \ \ \ \ \textcolor{keywordflow}{if}\ (left\_arm\_exec\_torques)\ \ \{\textcolor{keyword}{delete}\ left\_arm\_exec\_torques;\ \ left\_arm\_exec\_torques\ =\ \textcolor{keyword}{nullptr};\}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00977}00977\ \ \ \ \ \textcolor{keywordflow}{if}\ (right\_arm\_exec\_torques)\ \{\textcolor{keyword}{delete}\ right\_arm\_exec\_torques;\ right\_arm\_exec\_torques\ =\ \textcolor{keyword}{nullptr};\}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00978}00978\ \ \ \ \ \textcolor{keywordflow}{if}\ (left\_leg\_exec\_torques)\ \ \{\textcolor{keyword}{delete}\ left\_leg\_exec\_torques;\ \ left\_leg\_exec\_torques\ =\ \textcolor{keyword}{nullptr};\}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00979}00979\ \ \ \ \ \textcolor{keywordflow}{if}\ (right\_leg\_exec\_torques)\ \{\textcolor{keyword}{delete}\ right\_leg\_exec\_torques;\ right\_leg\_exec\_torques\ =\ \textcolor{keyword}{nullptr};\}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00980}00980\ \ \ \ \ \textcolor{keywordflow}{if}\ (torso\_exec\_torques)\ \ \ \ \ \{\textcolor{keyword}{delete}\ torso\_exec\_torques;\ \ \ \ \ torso\_exec\_torques\ =\ \textcolor{keyword}{nullptr};\}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00981}00981\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00982}00982\ \ \ \ \ \textcolor{keywordflow}{if}\ (left\_arm\_gravity\_torques)\ \ \{\textcolor{keyword}{delete}\ left\_arm\_gravity\_torques;\ \ left\_arm\_gravity\_torques\ =\ \textcolor{keyword}{nullptr};\}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00983}00983\ \ \ \ \ \textcolor{keywordflow}{if}\ (right\_arm\_gravity\_torques)\ \{\textcolor{keyword}{delete}\ right\_arm\_gravity\_torques;\ right\_arm\_gravity\_torques\ =\ \textcolor{keyword}{nullptr};\}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00984}00984\ \ \ \ \ \textcolor{keywordflow}{if}\ (left\_leg\_gravity\_torques)\ \ \{\textcolor{keyword}{delete}\ left\_leg\_gravity\_torques;\ \ left\_leg\_gravity\_torques\ =\ \textcolor{keyword}{nullptr};\}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00985}00985\ \ \ \ \ \textcolor{keywordflow}{if}\ (right\_leg\_gravity\_torques)\ \{\textcolor{keyword}{delete}\ right\_leg\_gravity\_torques;\ right\_leg\_gravity\_torques\ =\ \textcolor{keyword}{nullptr};\}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00986}00986\ \ \ \ \ \textcolor{keywordflow}{if}\ (torso\_gravity\_torques)\ \ \ \ \ \{\textcolor{keyword}{delete}\ torso\_gravity\_torques;\ \ \ \ \ torso\_gravity\_torques\ =\ \textcolor{keyword}{nullptr};\}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00987}00987\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00988}00988\ \ \ \ \ \textcolor{keywordflow}{if}\ (linEstUp)\ \ \ \ \ \ \ \ \ \ \{\textcolor{keyword}{delete}\ linEstUp;\ \ \ linEstUp\ =\ \textcolor{keyword}{nullptr};\}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00989}00989\ \ \ \ \ \textcolor{keywordflow}{if}\ (quadEstUp)\ \ \ \ \ \ \ \ \ \{\textcolor{keyword}{delete}\ quadEstUp;\ \ quadEstUp\ =\ \textcolor{keyword}{nullptr};\}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00990}00990\ \ \ \ \ \textcolor{keywordflow}{if}\ (linEstLow)\ \ \ \ \ \ \ \ \ \{\textcolor{keyword}{delete}\ linEstLow;\ \ linEstLow\ =\ \textcolor{keyword}{nullptr};\}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00991}00991\ \ \ \ \ \textcolor{keywordflow}{if}\ (quadEstLow)\ \ \ \ \ \ \ \ \{\textcolor{keyword}{delete}\ quadEstLow;\ quadEstLow\ =\ \textcolor{keyword}{nullptr};\}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00992}00992\ }
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00993}00993\ \ \ \ \ \textcolor{comment}{//closing\ ports}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00994}00994\ \ \ \ \ port\_inertial-\/>interrupt();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00995}00995\ \ \ \ \ port\_inertial-\/>close();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00996}00996\ \ \ \ \ la\_additional\_offset-\/>interrupt();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00997}00997\ \ \ \ \ la\_additional\_offset-\/>close();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00998}00998\ \ \ \ \ ra\_additional\_offset-\/>interrupt();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l00999}00999\ \ \ \ \ ra\_additional\_offset-\/>close();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l01000}01000\ \ \ \ \ ll\_additional\_offset-\/>interrupt();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l01001}01001\ \ \ \ \ ll\_additional\_offset-\/>close();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l01002}01002\ \ \ \ \ rl\_additional\_offset-\/>interrupt();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l01003}01003\ \ \ \ \ rl\_additional\_offset-\/>close();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l01004}01004\ \ \ \ \ to\_additional\_offset-\/>interrupt();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l01005}01005\ \ \ \ \ to\_additional\_offset-\/>close();}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l01006}01006\ \ \ \ \ \textcolor{keywordflow}{if}\ (icub)\ \ \ \ \ \ \{\textcolor{keyword}{delete}\ icub;\ icub=\textcolor{keyword}{nullptr};\}}
+\DoxyCodeLine{\Hypertarget{gravityThread_8cpp_source_l01007}01007\ \}}
+
+\end{DoxyCode}

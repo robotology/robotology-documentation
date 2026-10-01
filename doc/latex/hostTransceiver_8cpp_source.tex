@@ -1,0 +1,1181 @@
+\doxysection{host\+Transceiver.\+cpp}
+\hypertarget{hostTransceiver_8cpp_source}{}\label{hostTransceiver_8cpp_source}\index{icub-\/main/src/libraries/icubmod/embObjLib/hostTransceiver.cpp@{icub-\/main/src/libraries/icubmod/embObjLib/hostTransceiver.cpp}}
+\mbox{\hyperlink{hostTransceiver_8cpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00001}00001\ \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00002}00002\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2012\ iCub\ Facility,\ Istituto\ Italiano\ di\ Tecnologia}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00003}00003\ \textcolor{comment}{\ *\ Author:\ \ Alberto\ Cardellino,\ Marco\ Accame}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00004}00004\ \textcolor{comment}{\ *\ email:\ \ \ alberto.cardellino@iit.it,\ marco.accame@iit.it}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00005}00005\ \textcolor{comment}{\ *\ CopyPolicy:\ Released\ under\ the\ terms\ of\ the\ LGPLv2.1\ or\ later,\ see\ LGPL.TXT}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00006}00006\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00007}00007\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00008}00008\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00009}00009\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00010}00010\ \textcolor{comment}{//\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00011}00011\ \textcolor{comment}{//\ -\/\ macros}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00012}00012\ \textcolor{comment}{//\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00013}00013\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00014}\mbox{\hyperlink{hostTransceiver_8cpp_a51890eb853a5c87bbd81baa39fd91776}{00014}}\ \textcolor{preprocessor}{\#define\ HOSTTRANSCEIVER\_USE\_INTERNAL\_MUTEXES}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00015}00015\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00016}00016\ \textcolor{comment}{//\ if\ this\ macro\ is\ defined\ then\ ethManager\ sends\ pkts\ even\ if\ they\ dont\ have\ ROPs\ inside}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00017}00017\ \textcolor{preprocessor}{\#undef\ HOSTTRANSCEIVER\_EmptyROPframesAreTransmitted}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00018}00018\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00019}00019\ \textcolor{comment}{//\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00020}00020\ \textcolor{comment}{//\ -\/\ external\ dependencies}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00021}00021\ \textcolor{comment}{//\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00022}00022\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00023}00023\ \textcolor{keyword}{using\ namespace\ }std;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00024}00024\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00025}00025\ \textcolor{preprocessor}{\#include\ <stdint.h>}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00026}00026\ \textcolor{preprocessor}{\#include\ <stdlib.h>}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00027}00027\ \textcolor{preprocessor}{\#include\ <stdio.h>}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00028}00028\ \textcolor{preprocessor}{\#include\ <string.h>}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00029}00029\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00030}00030\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{hostTransceiver_8hpp}{hostTransceiver.hpp}}"{}}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00031}00031\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{tools_2embObjProtoTools_2boardTransceiver_2FeatureInterface_8h}{FeatureInterface.h}}"{}}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00032}00032\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00033}00033\ \textcolor{preprocessor}{\#include\ "{}EOYmutex.h"{}}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00034}00034\ \textcolor{preprocessor}{\#include\ "{}EOYtheSystem.h"{}}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00035}00035\ \textcolor{preprocessor}{\#include\ "{}EOtheErrorManager.h"{}}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00036}00036\ \textcolor{preprocessor}{\#include\ "{}EoCommon.h"{}}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00037}00037\ \textcolor{preprocessor}{\#include\ "{}EOnv.h"{}}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00038}00038\ \textcolor{preprocessor}{\#include\ "{}EOnv\_hid.h"{}}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00039}00039\ \textcolor{preprocessor}{\#include\ "{}EOrop.h"{}}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00040}00040\ \textcolor{preprocessor}{\#include\ "{}EoProtocol.h"{}}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00041}00041\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00042}00042\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{ethManager_8h}{ethManager.h}}"{}}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00043}00043\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{ethParser_8h}{ethParser.h}}"{}}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00044}00044\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00045}00045\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{tools_2embObjProtoTools_2boardTransceiver_2FeatureInterface_8h}{FeatureInterface.h}}"{}}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00046}00046\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00047}00047\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00048}00048\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00049}00049\ \textcolor{preprocessor}{\#include\ "{}EoProtocol.h"{}}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00050}00050\ \textcolor{preprocessor}{\#include\ "{}EoProtocolMN.h"{}}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00051}00051\ \textcolor{preprocessor}{\#include\ "{}EoProtocolMC.h"{}}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00052}00052\ \textcolor{preprocessor}{\#include\ "{}EoProtocolAS.h"{}}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00053}00053\ \textcolor{preprocessor}{\#include\ "{}EoProtocolSK.h"{}}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00054}00054\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00055}00055\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00056}00056\ \textcolor{preprocessor}{\#include\ <yarp/os/LogStream.h>}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00057}00057\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00058}00058\ \textcolor{preprocessor}{\#include\ <yarp/os/Time.h>}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00059}00059\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00060}00060\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceeth}{eth}};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00061}00061\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00062}00062\ \textcolor{keywordtype}{bool}\ HostTransceiver::lock\_transceiver(\textcolor{keywordtype}{bool}\ \mbox{\hyperlink{show__eyes__axes_8m_a58ab1fd68e97078232808206b850161b}{on}})}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00063}00063\ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00064}00064\ \textcolor{preprocessor}{\#if\ !defined(HOSTTRANSCEIVER\_USE\_INTERNAL\_MUTEXES)}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00065}00065\ \ \ \ \ \textcolor{keywordflow}{if}(\mbox{\hyperlink{show__eyes__axes_8m_a58ab1fd68e97078232808206b850161b}{on}})}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00066}00066\ \ \ \ \ \ \ \ \ htmtx.lock();}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00067}00067\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00068}00068\ \ \ \ \ \ \ \ \ htmtx.unlock();}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00069}00069\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00070}00070\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00071}00071\ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00072}00072\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00073}00073\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00074}00074\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00075}00075\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00076}00076\ \textcolor{keywordtype}{bool}\ HostTransceiver::lock\_nvs(\textcolor{keywordtype}{bool}\ \mbox{\hyperlink{show__eyes__axes_8m_a58ab1fd68e97078232808206b850161b}{on}})}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00077}00077\ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00078}00078\ \textcolor{preprocessor}{\#if\ !defined(HOSTTRANSCEIVER\_USE\_INTERNAL\_MUTEXES)}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00079}00079\ \ \ \ \ \textcolor{keywordflow}{if}(\mbox{\hyperlink{show__eyes__axes_8m_a58ab1fd68e97078232808206b850161b}{on}})}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00080}00080\ \ \ \ \ \ \ \ \ nvmtx.lock();}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00081}00081\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00082}00082\ \ \ \ \ \ \ \ \ nvmtx.unlock();}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00083}00083\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00084}00084\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00085}00085\ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00086}00086\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00087}00087\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00088}00088\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00089}\mbox{\hyperlink{group__Library_ga72b02cba0bd97973ca0a83ebf7c9ce88}{00089}}\ \mbox{\hyperlink{group__Library_ga72b02cba0bd97973ca0a83ebf7c9ce88}{HostTransceiver::HostTransceiver}}():delayAfterROPloadingFailure(0.001)\ \textcolor{comment}{//\ 1ms}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00090}00090\ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00091}00091\ \ \ \ \ yTrace();}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00092}00092\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00093}00093\ \textcolor{comment}{//\ \ \ \ delayAfterROPloadingFailure\ =\ TheEthManager::instance()-\/>getEthSender()-\/>getPeriod();}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00094}00094\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00095}00095\ \ \ \ \ ipport\ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ 0;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00096}00096\ \ \ \ \ localipaddr\ \ \ \ \ \ \ \ \ =\ 0;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00097}00097\ \ \ \ \ remoteipaddr\ \ \ \ \ \ \ \ =\ 0;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00098}00098\ \ \ \ \ eo\_common\_ipv4addr\_to\_string(remoteipaddr,\ remoteipstring,\ \textcolor{keyword}{sizeof}(remoteipstring));}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00099}00099\ \ \ \ \ pktsizerx\ \ \ \ \ \ \ \ \ \ \ =\ 0;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00100}00100\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00101}00101\ \ \ \ \ protboardnumber\ \ \ \ \ =\ eo\_prot\_BRDdummy;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00102}00102\ \ \ \ \ p\_RxPkt\ \ \ \ \ \ \ \ \ \ \ \ \ =\ NULL;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00103}00103\ \ \ \ \ hosttxrx\ \ \ \ \ \ \ \ \ \ \ \ =\ NULL;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00104}00104\ \ \ \ \ pc104txrx\ \ \ \ \ \ \ \ \ \ \ =\ NULL;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00105}00105\ \ \ \ \ nvset\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ NULL;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00106}00106\ \ \ \ \ memcpy(\&hosttxrxcfg,\ \&eo\_hosttransceiver\_cfg\_default,\ \textcolor{keyword}{sizeof}(eOhosttransceiver\_cfg\_t));}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00107}00107\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00108}00108\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00109}00109\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00110}00110\ \ \ \ \ capacityofTXpacket\ =\ \mbox{\hyperlink{group__Library_ggaf2992a5b1c2e9f106493754499993db4a36bc421661616e0fdd703ac9843b04fa}{defMaxSizeOfTXpacket}};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00111}00111\ \ \ \ \ maxSizeOfROP\ =\ \mbox{\hyperlink{group__Library_ggaf2992a5b1c2e9f106493754499993db4a3b0541e84a54ce01be0985625fe29821}{defMaxSizeOfROP}};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00112}00112\ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00113}00113\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00114}00114\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00115}\mbox{\hyperlink{group__Library_gac9f90ed789b8a3fbbb320f3b4961da46}{00115}}\ \mbox{\hyperlink{group__Library_gac9f90ed789b8a3fbbb320f3b4961da46}{HostTransceiver::\string~HostTransceiver}}()}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00116}00116\ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00117}00117\ \ \ \ \ \textcolor{keywordflow}{if}(NULL\ !=\ p\_RxPkt)}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00118}00118\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00119}00119\ \ \ \ \ \ \ \ \ eo\_packet\_Delete(p\_RxPkt);}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00120}00120\ \ \ \ \ \ \ \ \ p\_RxPkt\ =\ NULL;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00121}00121\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00122}00122\ \ \ \ \ \textcolor{keywordflow}{if}(NULL\ !=\ hosttxrx)}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00123}00123\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00124}00124\ \ \ \ \ \ \ \ \ eo\_hosttransceiver\_Delete(hosttxrx);}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00125}00125\ \ \ \ \ \ \ \ \ hosttxrx\ =\ NULL;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00126}00126\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00127}00127\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00128}00128\ \ \ \ \ \textcolor{comment}{//\ pointers\ nvset\ and\ pc104txrx\ are\ just\ handles\ retrieved\ (and\ deallocated)\ by\ object\ EOhostTransceiver.}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00129}00129\ \ \ \ \ \textcolor{comment}{//\ thus\ no\ \_Delete()\ method\ is\ required\ for\ them}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00130}00130\ \ \ \ \ nvset\ =\ NULL;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00131}00131\ \ \ \ \ pc104txrx\ =\ NULL;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00132}00132\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00133}00133\ \ \ \ \ yTrace();}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00134}00134\ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00135}00135\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00136}00136\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00137}\mbox{\hyperlink{group__Library_ga6725b13ac3448b4bbf53731c71ad0f9d}{00137}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{group__Library_ga6725b13ac3448b4bbf53731c71ad0f9d}{HostTransceiver::init2}}(\mbox{\hyperlink{classeth_1_1AbstractEthResource}{AbstractEthResource}}\ *owner,\ yarp::os::Searchable\ \&cfgtotal,\ eOipv4addressing\_t\&\ localIPaddressing,\ eOipv4addr\_t\ remoteIP,\ uint16\_t\ rxpktsize)}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00138}00138\ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00139}00139\ \ \ \ \ \textcolor{keywordflow}{if}(NULL\ !=\ hosttxrx)}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00140}00140\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00141}00141\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}HostTransceiver::init():\ called\ but\ ...\ its\ EOhostTransceiver\ is\ already\ created"{}};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00142}00142\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00143}00143\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00144}00144\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00145}00145\ \ \ \ \ \textcolor{keywordflow}{if}(\textcolor{keyword}{nullptr}\ ==\ owner)}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00146}00146\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00147}00147\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}HostTransceiver::init2():\ called\ w/\ nullptr"{}};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00148}00148\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00149}00149\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00150}00150\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00151}00151\ \ \ \ \ \_owner\ =\ owner;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00152}00152\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00153}00153\ \ \ \ \ \textcolor{comment}{//\ ok.\ we\ can\ go\ on.\ assign\ values\ of\ some\ member\ variables}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00154}00154\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00155}00155\ \ \ \ \ uint8\_t\ ip4\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00156}00156\ \ \ \ \ eo\_common\_ipv4addr\_to\_decimal(remoteIP,\ NULL,\ NULL,\ NULL,\ \&ip4);}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00157}00157\ \ \ \ \ protboardnumber\ =\ ip4;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00158}00158\ \ \ \ \ localipaddr\ \ \ \ \ =\ localIPaddressing.addr;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00159}00159\ \ \ \ \ remoteipaddr\ \ \ \ =\ remoteIP;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00160}00160\ \ \ \ \ eo\_common\_ipv4addr\_to\_string(remoteipaddr,\ remoteipstring,\ \textcolor{keyword}{sizeof}(remoteipstring));}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00161}00161\ \ \ \ \ ipport\ \ \ \ \ \ \ \ \ \ =\ localIPaddressing.port;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00162}00162\ \ \ \ \ pktsizerx\ \ \ \ \ \ \ =\ rxpktsize;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00163}00163\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00164}00164\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00165}00165\ \ \ \ \ \textcolor{keywordflow}{if}(\textcolor{keyword}{false}\ ==\ initProtocol())}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00166}00166\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00167}00167\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}HostTransceiver::init()\ -\/>\ HostTransceiver::initProtocol()\ fails"{}};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00168}00168\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00169}00169\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00170}00170\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00171}00171\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00172}00172\ \ \ \ \ \textcolor{keywordflow}{if}(eobool\_false\ ==\ eoprot\_board\_can\_be\_managed(protboardnumber))}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00173}00173\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00174}00174\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}HostTransceiver::init()\ -\/>\ the\ BOARD\ w/\ IP\ "{}}\ <<\ remoteipstring\ <<\ \textcolor{stringliteral}{"{}cannot\ be\ managed\ by\ EOprotocol"{}};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00175}00175\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00176}00176\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00177}00177\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00178}00178\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00179}00179\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00180}00180\ \ \ \ \ \textcolor{keywordflow}{if}(!prepareTransceiverConfig2(cfgtotal))}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00181}00181\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00182}00182\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}HostTransceiver::init()\ -\/>\ HostTransceiver::prepareTransceiverConfig2()\ fails"{}};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00183}00183\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00184}00184\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00185}00185\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00186}00186\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00187}00187\ \ \ \ \ \textcolor{comment}{//\ now\ hosttxrxcfg\ is\ ready,\ thus\ ...}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00188}00188\ \ \ \ \ \textcolor{comment}{//\ initialise\ the\ transceiver:\ it\ creates\ a\ EOhostTransceiver\ and\ its\ EOnvSet}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00189}00189\ \ \ \ \ hosttxrx\ =\ eo\_hosttransceiver\_New(\&hosttxrxcfg);}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00190}00190\ \ \ \ \ \textcolor{keywordflow}{if}(hosttxrx\ ==\ NULL)}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00191}00191\ \ \ \ \ \{\ \ \ \textcolor{comment}{//\ it\ never\ returns\ NULL.\ on\ allocation\ failure\ it\ calls\ its\ error\ manager.\ however\ ...}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00192}00192\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}HostTransceiver::init():\ ....\ eo\_hosttransceiver\_New()\ failed"{}};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00193}00193\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00194}00194\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00195}00195\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00196}00196\ \ \ \ \ \textcolor{comment}{//\ retrieve\ the\ transceiver}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00197}00197\ \ \ \ \ pc104txrx\ =\ eo\_hosttransceiver\_GetTransceiver(hosttxrx);}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00198}00198\ \ \ \ \ \textcolor{keywordflow}{if}(pc104txrx\ ==\ NULL)}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00199}00199\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00200}00200\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00201}00201\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00202}00202\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00203}00203\ \ \ \ \ \textcolor{comment}{//\ retrieve\ the\ nvset}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00204}00204\ \ \ \ \ nvset\ =\ eo\_hosttransceiver\_GetNVset(hosttxrx);}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00205}00205\ \ \ \ \ \textcolor{keywordflow}{if}(NULL\ ==\ nvset)}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00206}00206\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00207}00207\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00208}00208\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00209}00209\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00210}00210\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00211}00211\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00212}00212\ \ \ \ \ \textcolor{comment}{//\ build\ the\ packet\ used\ for\ reception.}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00213}00213\ \ \ \ \ p\_RxPkt\ =\ eo\_packet\_New(rxpktsize);}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00214}00214\ \ \ \ \ \textcolor{keywordflow}{if}(p\_RxPkt\ ==\ NULL)}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00215}00215\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00216}00216\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00217}00217\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00218}00218\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00219}00219\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00220}00220\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00221}00221\ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00222}00222\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00223}\mbox{\hyperlink{group__Library_gaae19dd3f4e0891b50b9452865bff23ac}{00223}}\ eOipv4addr\_t\ \mbox{\hyperlink{group__Library_gaae19dd3f4e0891b50b9452865bff23ac}{HostTransceiver::getIPv4}}()}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00224}00224\ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00225}00225\ \ \ \ \ \textcolor{keywordflow}{return}\ remoteipaddr;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00226}00226\ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00227}00227\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00228}\mbox{\hyperlink{group__Library_gad79e3e38852c7aa64227a70b161d87e4}{00228}}\ \mbox{\hyperlink{classeth_1_1AbstractEthResource}{AbstractEthResource}}\ *\ \mbox{\hyperlink{group__Library_gad79e3e38852c7aa64227a70b161d87e4}{HostTransceiver::getResource}}()}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00229}00229\ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00230}00230\ \ \ \ \ \textcolor{keywordflow}{return}\ \_owner;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00231}00231\ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00232}00232\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00233}00233\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00234}\mbox{\hyperlink{group__Library_ga322b2ae208f998e8917c674e02e63b76}{00234}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{group__Library_ga322b2ae208f998e8917c674e02e63b76}{HostTransceiver::write}}(\textcolor{keyword}{const}\ eOprotID32\_t\ id32,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{void}*\ \mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}},\ \textcolor{keywordtype}{bool}\ forcewriteOfReadOnly)}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00235}00235\ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00236}00236\ \ \ \ \ eOresult\_t\ eores\ =\ eores\_NOK\_generic;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00237}00237\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00238}00238\ \ \ \ \ \textcolor{keywordflow}{if}(eobool\_false\ ==\ eoprot\_id\_isvalid(protboardnumber,\ id32))}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00239}00239\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00240}00240\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ nvinfo[128];}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00241}00241\ \ \ \ \ \ \ \ \ eoprot\_ID2information(id32,\ nvinfo,\ \textcolor{keyword}{sizeof}(nvinfo));}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00242}00242\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}HostTransceiver::write()\ called\ w/\ invalid\ id\ on\ BOARD\ /w\ IP"{}}\ <<\ remoteipstring\ <<}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00243}00243\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}with\ id:\ "{}}\ <<\ nvinfo;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00244}00244\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00245}00245\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00246}00246\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00247}00247\ \ \ \ \ \textcolor{keywordflow}{if}(NULL\ ==\ \mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}})}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00248}00248\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00249}00249\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}HostTransceiver::write()\ called\ w/\ with\ NULL\ data"{}};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00250}00250\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00251}00251\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00252}00252\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00253}00253\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00254}00254\ \ \ \ \ EOnv\ nv;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00255}00255\ \ \ \ \ EOnv*\ nv\_ptr\ =\ NULL;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00256}00256\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00257}00257\ \ \ \ \ nv\_ptr\ =\ getnvhandler(id32,\ \&nv);}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00258}00258\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00259}00259\ \ \ \ \ \textcolor{keywordflow}{if}(NULL\ ==\ nv\_ptr)}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00260}00260\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00261}00261\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}HostTransceiver::write():\ Unable\ to\ get\ pointer\ to\ desired\ NV\ with\ id32"{}}\ <<\ id32;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00262}00262\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00263}00263\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00264}00264\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00265}00265\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00266}00266\ \ \ \ \ lock\_nvs(\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00267}00267\ \ \ \ \ eores\ =\ eo\_nv\_Set(\&nv,\ \mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}},\ forcewriteOfReadOnly,\ eo\_nv\_upd\_dontdo);}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00268}00268\ \ \ \ \ lock\_nvs(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00269}00269\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00270}00270\ \ \ \ \ \textcolor{comment}{//\ marco.accame\ on\ 09\ apr\ 2014:}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00271}00271\ \ \ \ \ \textcolor{comment}{//\ we\ write\ data\ into}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00272}00272\ \ \ \ \ \textcolor{keywordflow}{if}(eores\_OK\ !=\ eores)}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00273}00273\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00274}00274\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ ROvariable\ =\ (eo\_nv\_rwmode\_RO\ ==\ eo\_nv\_GetRWmode(\&nv))\ ?\ \textcolor{keyword}{true}\ :\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00275}00275\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ nvinfo[128];}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00276}00276\ \ \ \ \ \ \ \ \ eoprot\_ID2information(id32,\ nvinfo,\ \textcolor{keyword}{sizeof}(nvinfo));}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00277}00277\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}HostTransceiver::write():\ eo\_nv\_Set()\ has\ failed\ for\ IP"{}}\ <<\ remoteipstring\ <<\ \textcolor{stringliteral}{"{}and"{}}\ <<\ nvinfo\ <<\ \textcolor{stringliteral}{"{}RO\ mode\ =\ "{}}\ <<\ ((ROvariable)\ ?\ \textcolor{stringliteral}{"{}true."{}}\ :\ \textcolor{stringliteral}{"{}false."{}});}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00278}00278\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00279}00279\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}((eobool\_false\ ==\ forcewriteOfReadOnly)\ \&\&\ (\textcolor{keyword}{true}\ ==\ ROvariable))}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00280}00280\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00281}00281\ \ \ \ \ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}HostTransceiver::write():\ called\ with\ forcewriteOfReadOnly\ =\ false\ for\ a\ READ\ ONLY\ variable"{}};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00282}00282\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00283}00283\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00284}00284\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00285}00285\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00286}00286\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00287}00287\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00288}00288\ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00289}00289\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00290}00290\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00291}00291\ \textcolor{comment}{//\ if\ signature\ is\ eo\_rop\_SIGNATUREdummy\ (0xffffffff)\ we\ dont\ send\ the\ signature.\ if\ writelocalcache\ is\ true\ we\ copy\ data\ into\ local\ ram\ of\ the\ EOnv\ }}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00292}00292\ \textcolor{keywordtype}{bool}\ HostTransceiver::addSetROP\_\_(\textcolor{keyword}{const}\ eOprotID32\_t\ id32,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{void}*\ \mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}},\ \textcolor{keyword}{const}\ uint32\_t\ signature,\ \textcolor{keywordtype}{bool}\ writelocalrxcache)}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00293}00293\ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00294}00294\ \ \ \ \ eOresult\_t\ eores\ =\ eores\_NOK\_generic;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00295}00295\ \ \ \ \ int32\_t\ err\ =\ -\/1;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00296}00296\ \ \ \ \ int32\_t\ info0\ =\ -\/1;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00297}00297\ \ \ \ \ int32\_t\ info1\ =\ -\/1;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00298}00298\ \ \ \ \ int32\_t\ info2\ =\ -\/1;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00299}00299\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00300}00300\ \ \ \ \ \textcolor{keywordflow}{if}(eobool\_false\ ==\ eoprot\_id\_isvalid(protboardnumber,\ id32))}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00301}00301\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00302}00302\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ nvinfo[128];}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00303}00303\ \ \ \ \ \ \ \ \ eoprot\_ID2information(id32,\ nvinfo,\ \textcolor{keyword}{sizeof}(nvinfo));}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00304}00304\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}HostTransceiver::addSetROP\_\_()\ called\ w/\ invalid\ id\ on\ BOARD\ /w\ IP"{}}\ <<\ remoteipstring\ <<}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00305}00305\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}with\ id:\ "{}}\ <<\ nvinfo;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00306}00306\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00307}00307\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00308}00308\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00309}00309\ \ \ \ \ \textcolor{keywordflow}{if}(NULL\ ==\ \mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}})}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00310}00310\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00311}00311\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}HostTransceiver::addSetROP\_\_()\ called\ w/\ with\ NULL\ data"{}};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00312}00312\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00313}00313\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00314}00314\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00315}00315\ \ \ \ \ \textcolor{keywordflow}{if}(\textcolor{keyword}{true}\ ==\ writelocalrxcache)}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00316}00316\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00317}00317\ \ \ \ \ \ \ \ \ EOnv\ \ \ \ nv;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00318}00318\ \ \ \ \ \ \ \ \ EOnv*\ \ \ nv\_ptr\ =\ NULL;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00319}00319\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00320}00320\ \ \ \ \ \ \ \ \ nv\_ptr\ =\ getnvhandler(id32,\ \&nv);}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00321}00321\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00322}00322\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(NULL\ ==\ nv\_ptr)}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00323}00323\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00324}00324\ \ \ \ \ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}HostTransceiver::addSetROP\_\_():\ Unable\ to\ get\ pointer\ to\ desired\ NV\ with\ id32"{}}\ <<\ id32;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00325}00325\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00326}00326\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00327}00327\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00328}00328\ \ \ \ \ \ \ \ \ lock\_nvs(\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00329}00329\ \ \ \ \ \ \ \ \ eores\ =\ eo\_nv\_Set(\&nv,\ \mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}},\ eobool\_false,\ eo\_nv\_upd\_dontdo);}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00330}00330\ \ \ \ \ \ \ \ \ lock\_nvs(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00331}00331\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00332}00332\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ marco.accame\ on\ 09\ apr\ 2014:}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00333}00333\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ we\ write\ data\ into\ }}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00334}00334\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(eores\_OK\ !=\ eores)}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00335}00335\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00336}00336\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ the\ nv\ is\ not\ writeable}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00337}00337\ \ \ \ \ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}HostTransceiver::addSetROP\_\_():\ Maybe\ you\ are\ trying\ to\ write\ a\ read-\/only\ variable?\ (eo\_nv\_Set\ failed)"{}};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00338}00338\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00339}00339\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00340}00340\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00341}00341\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00342}00342\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00343}00343\ \ \ \ \ eOropdescriptor\_t\ ropdesc\ =\ \{0\};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00344}00344\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00345}00345\ \ \ \ \ \textcolor{comment}{//\ marco.accame:\ use\ eok\_ropdesc\_basic\ to\ have\ a\ basic\ valid\ descriptor\ which\ is\ modified\ later}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00346}00346\ \ \ \ \ memcpy(\&ropdesc,\ \&eok\_ropdesc\_basic,\ \textcolor{keyword}{sizeof}(eOropdescriptor\_t));}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00347}00347\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00348}00348\ \ \ \ \ ropdesc.control.plustime\ \ \ \ =\ 1;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00349}00349\ \ \ \ \ ropdesc.control.plussign\ \ \ \ =\ (eo\_rop\_SIGNATUREdummy\ ==\ signature)\ ?\ 0\ :\ 1;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00350}00350\ \ \ \ \ ropdesc.ropcode\ \ \ \ \ \ \ \ \ \ \ \ \ =\ eo\_ropcode\_set;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00351}00351\ \ \ \ \ ropdesc.id32\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ id32;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00352}00352\ \ \ \ \ ropdesc.size\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ 0;\ \ \ \ \ \ \ \ \textcolor{comment}{//\ marco.accame:\ the\ size\ is\ internally\ computed\ from\ the\ id32}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00353}00353\ \ \ \ \ ropdesc.data\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \textcolor{keyword}{reinterpret\_cast<}uint8\_t\ *\textcolor{keyword}{>}(\textcolor{keyword}{const\_cast<}\textcolor{keywordtype}{void}*\textcolor{keyword}{>}(\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}));}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00354}00354\ \ \ \ \ ropdesc.signature\ \ \ \ \ \ \ \ \ \ \ =\ signature;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00355}00355\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00356}00356\ \ \ \ \ \textcolor{keywordtype}{bool}\ ret\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00357}00357\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00358}00358\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i=0;\ (\ (i<maxNumberOfROPloadingAttempts)\ \&\&\ (!ret)\ );\ i++)}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00359}00359\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00360}00360\ \ \ \ \ \ \ \ \ lock\_transceiver(\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00361}00361\ \ \ \ \ \ \ \ \ eores\ =\ eo\_transceiver\_OccasionalROP\_Load(pc104txrx,\ \&ropdesc);}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00362}00362\ \ \ \ \ \ \ \ \ lock\_transceiver(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00363}00363\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00364}00364\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(eores\_OK\ !=\ eores)}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00365}00365\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00366}00366\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ nvinfo[128];}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00367}00367\ \ \ \ \ \ \ \ \ \ \ \ \ eoprot\_ID2information(id32,\ nvinfo,\ \textcolor{keyword}{sizeof}(nvinfo));}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00368}00368\ \ \ \ \ \ \ \ \ \ \ \ \ yWarning()\ <<\ \textcolor{stringliteral}{"{}HostTransceiver::addSetROP\_\_():\ eo\_transceiver\_OccasionalROP\_Load()\ for\ BOARD\ /w\ IP"{}}\ <<\ remoteipstring\ <<\ \textcolor{stringliteral}{"{}unsuccessful\ at\ attempt\ num\ "{}}\ <<\ i+1\ <<}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00369}00369\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}with\ id:\ "{}}\ <<\ nvinfo;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00370}00370\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00371}00371\ \ \ \ \ \ \ \ \ \ \ \ \ eo\_transceiver\_lasterror\_tx\_Get(pc104txrx,\ \&err,\ \&info0,\ \&info1,\ \&info2);}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00372}00372\ \ \ \ \ \ \ \ \ \ \ \ \ yWarning()\ <<\ \textcolor{stringliteral}{"{}HostTransceiver::addSetROP\_\_():\ eo\_transceiver\_lasterror\_tx\_Get()\ detected:\ err="{}}\ <<\ err\ <<\ \textcolor{stringliteral}{"{}infos\ =\ "{}}\ <<\ info0\ <<\ info1\ <<\ info2;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00373}00373\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00374}00374\ \ \ \ \ \ \ \ \ \ \ \ \ yarp::os::Time::delay(delayAfterROPloadingFailure);}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00375}00375\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00376}00376\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00377}00377\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00378}00378\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(i!=0)}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00379}00379\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00380}00380\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ nvinfo[128];}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00381}00381\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ eoprot\_ID2information(id32,\ nvinfo,\ \textcolor{keyword}{sizeof}(nvinfo));}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00382}00382\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yDebug()\ <<\ \textcolor{stringliteral}{"{}HostTransceiver::addSetROP\_\_():\ eo\_transceiver\_OccasionalROP\_Load()\ for\ BOARD\ /w\ IP"{}}\ <<\ remoteipstring\ <<\ \textcolor{stringliteral}{"{}successful\ ONLY\ at\ attempt\ num\ "{}}\ <<\ i+1\ <<}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00383}00383\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}with\ id:\ "{}}\ <<\ nvinfo;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00384}00384\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00385}00385\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00386}00386\ \ \ \ \ \ \ \ \ \ \ \ \ ret\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00387}00387\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00388}00388\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00389}00389\ \ \ \ \ \textcolor{keywordflow}{if}(!ret)}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00390}00390\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00391}00391\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ nvinfo[128];}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00392}00392\ \ \ \ \ \ \ \ \ eoprot\_ID2information(id32,\ nvinfo,\ \textcolor{keyword}{sizeof}(nvinfo));}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00393}00393\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}HostTransceiver::addSetROP\_\_():\ ERROR\ in\ eo\_transceiver\_OccasionalROP\_Load()\ for\ BOARD\ w/\ IP"{}}\ <<\ remoteipstring+1\ <<\ \textcolor{stringliteral}{"{}after\ all\ attempts"{}}\ <<}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00394}00394\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}with\ id:\ "{}}\ <<\ nvinfo;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00395}00395\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00396}00396\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00397}00397\ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00398}00398\ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00399}00399\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00400}00400\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00401}00401\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00402}\mbox{\hyperlink{group__Library_ga3b7124d039c60a04341c4e846c56f93c}{00402}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{group__Library_ga3b7124d039c60a04341c4e846c56f93c}{HostTransceiver::addROPset}}(\textcolor{keyword}{const}\ eOprotID32\_t\ id32,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{void}*\ \mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}},\ \textcolor{keyword}{const}\ uint32\_t\ signature)}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00403}00403\ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00404}00404\ \ \ \ \textcolor{keywordflow}{return}(HostTransceiver::addSetROP\_\_(id32,\ \mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}},\ signature,\ \textcolor{keyword}{false}));}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00405}00405\ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00406}00406\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00407}00407\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00408}\mbox{\hyperlink{group__Library_gaa4299457abdf28b2f4f1c48d92a9272c}{00408}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{group__Library_gaa4299457abdf28b2f4f1c48d92a9272c}{HostTransceiver::isID32supported}}(\textcolor{keyword}{const}\ eOprotID32\_t\ id32)}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00409}00409\ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00410}00410\ \ \ \ \ \textcolor{keywordflow}{return}\ (eobool\_false\ ==\ eoprot\_id\_isvalid(protboardnumber,\ id32))\ ?\ false\ :\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00411}00411\ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00412}00412\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00413}\mbox{\hyperlink{group__Library_ga2edcb65e93c38df47ec7e92ac8db6bb7}{00413}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{group__Library_ga2edcb65e93c38df47ec7e92ac8db6bb7}{HostTransceiver::addROPask}}(\textcolor{keyword}{const}\ eOprotID32\_t\ id32,\ \textcolor{keyword}{const}\ uint32\_t\ signature)}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00414}00414\ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00415}00415\ \ \ \ \ eOresult\_t\ eores\ =\ eores\_NOK\_generic;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00416}00416\ \ \ \ \ int32\_t\ err\ =\ -\/1;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00417}00417\ \ \ \ \ int32\_t\ info0\ =\ -\/1;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00418}00418\ \ \ \ \ int32\_t\ info1\ =\ -\/1;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00419}00419\ \ \ \ \ int32\_t\ info2\ =\ -\/1;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00420}00420\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00421}00421\ \ \ \ \ \textcolor{keywordflow}{if}(eobool\_false\ ==\ eoprot\_id\_isvalid(protboardnumber,\ id32))}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00422}00422\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00423}00423\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ nvinfo[128];}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00424}00424\ \ \ \ \ \ \ \ \ eoprot\_ID2information(id32,\ nvinfo,\ \textcolor{keyword}{sizeof}(nvinfo));}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00425}00425\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}HostTransceiver::addROPask()\ called\ w/\ invalid\ protid:\ BOARD\ w/\ IP"{}}\ <<\ remoteipstring\ <<}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00426}00426\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}with\ id:\ "{}}\ <<\ nvinfo;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00427}00427\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00428}00428\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00429}00429\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00430}00430\ \ \ \ \ eOropdescriptor\_t\ ropdesc\ =\ \{0\};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00431}00431\ \ \ \ \ \textcolor{comment}{//\ marco.accame:\ recommend\ to\ use\ eok\_ropdesc\_basic}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00432}00432\ \ \ \ \ memcpy(\&ropdesc,\ \&eok\_ropdesc\_basic,\ \textcolor{keyword}{sizeof}(eOropdescriptor\_t));}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00433}00433\ \ \ \ \ ropdesc.control.plustime\ \ \ \ =\ 1;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00434}00434\ \ \ \ \ ropdesc.control.plussign\ \ \ \ =\ (eo\_rop\_SIGNATUREdummy\ ==\ signature)\ ?\ 0\ :\ 1;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00435}00435\ \ \ \ \ ropdesc.ropcode\ \ \ \ \ \ \ \ \ \ \ \ \ =\ eo\_ropcode\_ask;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00436}00436\ \ \ \ \ ropdesc.id32\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ id32;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00437}00437\ \ \ \ \ ropdesc.size\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ 0;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00438}00438\ \ \ \ \ ropdesc.data\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ NULL;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00439}00439\ \ \ \ \ ropdesc.signature\ \ \ \ \ \ \ \ \ \ \ =\ signature;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00440}00440\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00441}00441\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00442}00442\ \ \ \ \ \textcolor{keywordtype}{bool}\ ret\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00443}00443\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00444}00444\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i=0;\ (\ (i<maxNumberOfROPloadingAttempts)\ \&\&\ (!ret)\ );\ i++)}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00445}00445\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00446}00446\ \ \ \ \ \ \ \ \ lock\_transceiver(\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00447}00447\ \ \ \ \ \ \ \ \ eores\ =\ eo\_transceiver\_OccasionalROP\_Load(pc104txrx,\ \&ropdesc);}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00448}00448\ \ \ \ \ \ \ \ \ lock\_transceiver(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00449}00449\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00450}00450\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(eores\_OK\ !=\ eores)}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00451}00451\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00452}00452\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ nvinfo[128];}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00453}00453\ \ \ \ \ \ \ \ \ \ \ \ \ eoprot\_ID2information(id32,\ nvinfo,\ \textcolor{keyword}{sizeof}(nvinfo));}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00454}00454\ \ \ \ \ \ \ \ \ \ \ \ \ yWarning()\ <<\ \textcolor{stringliteral}{"{}HostTransceiver::addROPask():\ eo\_transceiver\_OccasionalROP\_Load()\ for\ BOARD\ w/\ IP"{}}\ <<\ remoteipstring<<\ \textcolor{stringliteral}{"{}unsuccessfull\ at\ attempt\ num\ "{}}\ <<\ i+1\ <<}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00455}00455\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}with\ id:\ "{}}\ <<\ nvinfo;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00456}00456\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00457}00457\ \ \ \ \ \ \ \ \ \ \ \ \ eo\_transceiver\_lasterror\_tx\_Get(pc104txrx,\ \&err,\ \&info0,\ \&info1,\ \&info2);}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00458}00458\ \ \ \ \ \ \ \ \ \ \ \ \ yWarning()\ <<\ \textcolor{stringliteral}{"{}HostTransceiver::addROPask():\ eo\_transceiver\_lasterror\_tx\_Get()\ detected:\ err="{}}\ <<\ err\ <<\ \textcolor{stringliteral}{"{}infos\ =\ "{}}\ <<\ info0\ <<\ info1\ <<\ info2;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00459}00459\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00460}00460\ \ \ \ \ \ \ \ \ \ \ \ \ yarp::os::Time::delay(delayAfterROPloadingFailure);}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00461}00461\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00462}00462\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00463}00463\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00464}00464\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(i!=0)}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00465}00465\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00466}00466\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ nvinfo[128];}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00467}00467\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ eoprot\_ID2information(id32,\ nvinfo,\ \textcolor{keyword}{sizeof}(nvinfo));}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00468}00468\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yDebug()\ <<\ \textcolor{stringliteral}{"{}HostTransceiver::addROPask():\ eo\_transceiver\_OccasionalROP\_Load()\ for\ BOARD\ /w\ IP"{}}\ <<\ remoteipstring\ <<\ \textcolor{stringliteral}{"{}succesful\ ONLY\ at\ attempt\ num\ "{}}\ <<\ i+1\ <<}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00469}00469\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}with\ id:\ "{}}\ <<\ nvinfo;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00470}00470\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00471}00471\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00472}00472\ \ \ \ \ \ \ \ \ \ \ \ \ ret\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00473}00473\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00474}00474\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00475}00475\ \ \ \ \ \textcolor{keywordflow}{if}(!ret)}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00476}00476\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00477}00477\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ nvinfo[128];}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00478}00478\ \ \ \ \ \ \ \ \ eoprot\_ID2information(id32,\ nvinfo,\ \textcolor{keyword}{sizeof}(nvinfo));}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00479}00479\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}HostTransceiver::addROPask():\ ERROR\ in\ eo\_transceiver\_OccasionalROP\_Load()\ for\ BOARD\ w/\ IP"{}}\ <<\ remoteipstring\ <<\ \textcolor{stringliteral}{"{}after\ all\ attempts\ "{}}\ <<}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00480}00480\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}with\ id:\ "{}}\ <<\ nvinfo;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00481}00481\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00482}00482\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00483}00483\ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00484}00484\ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00485}00485\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00486}00486\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00487}00487\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00488}\mbox{\hyperlink{group__Library_gae6df3b82c6aa94b6c8229f910a58c053}{00488}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{group__Library_gae6df3b82c6aa94b6c8229f910a58c053}{HostTransceiver::read}}(\textcolor{keyword}{const}\ eOprotID32\_t\ id32,\ \textcolor{keywordtype}{void}\ *\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}})}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00489}00489\ \{\ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00490}00490\ \ \ \ \ \textcolor{keywordflow}{if}(eobool\_false\ ==\ eoprot\_id\_isvalid(protboardnumber,\ id32))}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00491}00491\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00492}00492\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ nvinfo[128];}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00493}00493\ \ \ \ \ \ \ \ \ eoprot\_ID2information(id32,\ nvinfo,\ \textcolor{keyword}{sizeof}(nvinfo));}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00494}00494\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}HostTransceiver::read()\ called\ w/\ invalid\ protid:\ BOARD\ w/\ IP"{}}\ <<\ remoteipstring\ <<}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00495}00495\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}with\ id:\ "{}}\ <<\ nvinfo;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00496}00496\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00497}00497\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00498}00498\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00499}00499\ \ \ \ \ \textcolor{keywordflow}{if}(NULL\ ==\ \mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}})}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00500}00500\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00501}00501\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}HostTransceiver:read()\ called\ w/\ NULL\ data"{}};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00502}00502\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00503}00503\ \ \ \ \ \}\ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00504}00504\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00505}00505\ \ \ \ \ EOnv\ nv;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00506}00506\ \ \ \ \ EOnv\ *nv\_ptr\ =\ getnvhandler(id32,\ \&nv);}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00507}00507\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00508}00508\ \ \ \ \ \textcolor{keywordflow}{if}(NULL\ ==\ nv\_ptr)}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00509}00509\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00510}00510\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ nvinfo[128];}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00511}00511\ \ \ \ \ \ \ \ \ eoprot\_ID2information(id32,\ nvinfo,\ \textcolor{keyword}{sizeof}(nvinfo));}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00512}00512\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}HostTransceiver::read()\ Unable\ to\ get\ pointer\ to\ desired\ NV\ with:\ "{}}\ <<\ nvinfo;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00513}00513\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00514}00514\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00515}00515\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00516}00516\ \ \ \ \ uint16\_t\ size\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00517}00517\ \ \ \ \ \textcolor{comment}{//\ marco.accame:\ protection\ is\ inside\ getNVvalue()\ member\ function\ \ }}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00518}00518\ \ \ \ \ \textcolor{keywordtype}{bool}\ ret\ =\ getNVvalue(nv\_ptr,\ \textcolor{keyword}{reinterpret\_cast<}uint8\_t\ *\textcolor{keyword}{>}(\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}),\ \&size);}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00519}00519\ \ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00520}00520\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00521}00521\ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00522}00522\ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00523}00523\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00524}00524\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00525}00525\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00526}00526\ \textcolor{comment}{//\ somebody\ passes\ the\ received\ packet\ -\/\ this\ is\ used\ just\ as\ an\ interface}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00527}\mbox{\hyperlink{group__Library_ga9a23c039d178a0ee8b9ab2ed83c3714d}{00527}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{group__Library_ga9a23c039d178a0ee8b9ab2ed83c3714d}{HostTransceiver::parseUDP}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{void}\ *\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}},\ \textcolor{keyword}{const}\ uint16\_t\ size)}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00528}00528\ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00529}00529\ \ \ \ \ \textcolor{keywordflow}{if}(NULL\ ==\ \mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}})}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00530}00530\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00531}00531\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}eo\ HostTransceiver::parse()\ called\ with\ NULL\ data"{}};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00532}00532\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00533}00533\ \ \ \ \ \}\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00534}00534\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00535}00535\ \ \ \ \ \textcolor{keywordflow}{if}(size\ >\ pktsizerx)}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00536}00536\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00537}00537\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}eo\ HostTransceiver::parse()\ called\ too\ big\ a\ packet:\ max\ size\ is"{}}\ <<\ pktsizerx;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00538}00538\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00539}00539\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00540}00540\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00541}00541\ \ \ \ \ uint16\_t\ numofrops;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00542}00542\ \ \ \ \ uint64\_t\ \mbox{\hyperlink{debugFunctions_8cpp_a161de19cf1711ac455744c500cca37be}{txtime}};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00543}00543\ \ \ \ \ uint16\_t\ capacityrxpkt\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00544}00544\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00545}00545\ \ \ \ \ eo\_packet\_Capacity\_Get(p\_RxPkt,\ \&capacityrxpkt);}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00546}00546\ \ \ \ \ \textcolor{keywordflow}{if}(size\ >\ capacityrxpkt)}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00547}00547\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00548}00548\ \ \ \ \ \ \ \ \ yError\ ()\ <<\ \textcolor{stringliteral}{"{}received\ packet\ has\ size\ "{}}\ <<\ size\ <<\ \textcolor{stringliteral}{"{}which\ is\ higher\ than\ capacity\ of\ rx\ pkt\ =\ "{}}\ <<\ capacityrxpkt\ <<\ \textcolor{stringliteral}{"{}\(\backslash\)n"{}};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00549}00549\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00550}00550\ \ \ \ \ \}\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00551}00551\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00552}00552\ \ \ \ \ eo\_packet\_Payload\_Set(p\_RxPkt,\ \textcolor{keyword}{reinterpret\_cast<}uint8\_t*\textcolor{keyword}{>}(\textcolor{keyword}{const\_cast<}\textcolor{keywordtype}{void}*\textcolor{keyword}{>}(\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}})),\ size);}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00553}00553\ \ \ \ \ eo\_packet\_Addressing\_Set(p\_RxPkt,\ remoteipaddr,\ ipport);}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00554}00554\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00555}00555\ \ \ \ \ \textcolor{comment}{//\ the\ transceiver\ can\ receive\ and\ transmit\ in\ parallel\ because\ reception\ manipulates\ memory\ passed\ externally}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00556}00556\ \ \ \ \ \textcolor{comment}{//\ and\ the\ two\ operations\ do\ not\ use\ internal\ memory\ shared\ between\ the\ two}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00557}00557\ \ \ \ \ \textcolor{comment}{//\ that\ is\ true\ unless\ there\ is\ a\ say<>\ required\ upon\ a\ received\ ask<>.\ in\ such\ a\ case\ the\ receiver\ must\ put\ the\ answer\ inside\ a\ data}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00558}00558\ \ \ \ \ \textcolor{comment}{//\ structure\ read\ by\ the\ transmitter.\ but\ the\ host\ transceiver\ does\ not\ accept\ ask<>,\ thus\ it\ is\ not\ our\ case.}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00559}00559\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00560}00560\ \ \ \ \ \textcolor{comment}{//\ for\ the\ above\ reason,\ we\ could\ avoid\ protection.}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00561}00561\ \ \ \ \ \textcolor{comment}{//\ HOWEVER:\ it\ is\ a\ good\ thing\ to\ protect\ the\ nvs\ as\ the\ receiver\ writes\ them\ and\ someone\ else\ reads\ them\ to\ retrieve\ values\ for\ yarp\ ports}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00562}00562\ \ \ \ \ \textcolor{comment}{//\ for\ this\ reason,\ we\ use\ eo\_trans\_protection\_enabled\ and\ eo\_nvset\_protection\_one\_per\_endpoint\ when\ we\ initialise\ the\ transceiver.}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00563}00563\ \ \ \ \ \textcolor{comment}{//\ that\ solves\ concurrency\ problems\ for\ the\ transceiver}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00564}00564\ \ \ \ \ eo\_transceiver\_Receive(pc104txrx,\ p\_RxPkt,\ \&numofrops,\ \&\mbox{\hyperlink{debugFunctions_8cpp_a161de19cf1711ac455744c500cca37be}{txtime}});}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00565}00565\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00566}00566\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00567}00567\ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00568}00568\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00569}00569\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00570}\mbox{\hyperlink{group__Library_ga5439439fd3aa59ca05883f68403d9b2d}{00570}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{group__Library_ga5439439fd3aa59ca05883f68403d9b2d}{HostTransceiver::isEPsupported}}(\textcolor{keyword}{const}\ eOprot\_endpoint\_t\ ep)}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00571}00571\ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00572}00572\ \ \ \ \ \textcolor{keywordflow}{if}(eobool\_true\ ==\ eoprot\_endpoint\_configured\_is(get\_protBRDnumber(),\ ep))}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00573}00573\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00574}00574\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00575}00575\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00576}00576\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00577}00577\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00578}00578\ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00579}00579\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00580}00580\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00581}\mbox{\hyperlink{group__Library_ga8a91170a8cd47f1e46965a4f3948245d}{00581}}\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{void}\ *\ \mbox{\hyperlink{group__Library_ga8a91170a8cd47f1e46965a4f3948245d}{HostTransceiver::getUDP}}(\textcolor{keywordtype}{size\_t}\ \&size,\ uint16\_t\ \&numofrops)}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00582}00582\ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00583}00583\ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{void}\ *\ udpframe\ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00584}00584\ \ \ \ \ size\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00585}00585\ \ \ \ \ numofrops\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00586}00586\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00587}00587\ \ \ \ \ \textcolor{comment}{//\ marco.accame\ on\ 14oct14:\ as\ long\ as\ this\ function\ is\ called\ by\ one\ thread\ only,\ it\ is\ possible\ to\ limit\ the\ protection\ to}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00588}00588\ \ \ \ \ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ only\ one\ function:\ eo\_transceiver\_outpacket\_Prepare().}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00589}00589\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00590}00590\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00591}00591\ \ \ \ \ EOpacket*\ ptrpkt\ =\ NULL;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00592}00592\ \ \ \ \ uint8\_t\ *\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}\ =\ NULL;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00593}00593\ \ \ \ \ eOresult\_t\ res;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00594}00594\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00595}00595\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00596}00596\ \textcolor{preprocessor}{\#if\ !defined(HOSTTRANSCEIVER\_EmptyROPframesAreTransmitted)}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00597}00597\ \ \ \ \ \textcolor{comment}{//\ marco.accame:\ robotInterface\ uses\ only\ occasionals,\ thus\ we\ dont\ need\ to\ pass\ arguments\ for\ replies\ and\ regulars}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00598}00598\ \ \ \ \ \textcolor{comment}{//\ moreover:\ if\ we\ passed\ those\ pointers\ with\ non-\/NULL\ values,\ \ we\ would\ lock/unlock\ internal\ mutex\ for\ them,\ thus\ we\ would\ spend\ more\ time}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00599}00599\ \ \ \ \ uint16\_t\ numofoccasionals\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00600}00600\ \ \ \ \ lock\_transceiver(\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00601}00601\ \ \ \ \ eo\_transceiver\_NumberofOutROPs(pc104txrx,\ NULL,\ \&numofoccasionals,\ NULL);}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00602}00602\ \ \ \ \ lock\_transceiver(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00603}00603\ \ \ \ \ \textcolor{keywordflow}{if}(0\ ==\ numofoccasionals)}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00604}00604\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00605}00605\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00606}00606\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00607}00607\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00608}00608\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00609}00609\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00610}00610\ \ \ \ \ uint16\_t\ tmpnumofrops\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00611}00611\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00612}00612\ \ \ \ \ \textcolor{comment}{//\ it\ must\ be\ protected\ vs\ concurrent\ use\ of\ other\ threads\ attempting\ to\ put\ rops\ inside\ the\ transceiver.}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00613}00613\ \ \ \ \ lock\_transceiver(\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00614}00614\ \ \ \ \ res\ =\ eo\_transceiver\_outpacket\_Prepare(pc104txrx,\ \&tmpnumofrops,\ NULL);}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00615}00615\ \ \ \ \ lock\_transceiver(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00616}00616\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00617}00617\ \textcolor{preprocessor}{\#if\ defined(HOSTTRANSCEIVER\_EmptyROPframesAreTransmitted)}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00618}00618\ \ \ \ \ \textcolor{keywordflow}{if}((eores\_OK\ !=\ res))}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00619}00619\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00620}00620\ \ \ \ \ \textcolor{keywordflow}{if}((eores\_OK\ !=\ res)\ ||\ (0\ ==\ tmpnumofrops))\ \textcolor{comment}{//\ transmit\ only\ if\ res\ is\ ok\ and\ there\ is\ at\ least\ one\ rop\ to\ send}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00621}00621\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00622}00622\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00623}00623\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00624}00624\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00625}00625\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00626}00626\ \ \ \ \ \textcolor{comment}{//\ this\ function\ does\ not\ use\ data\ used\ by\ concurrent\ threads,\ thus\ it\ can\ be\ left\ un-\/protected.}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00627}00627\ \ \ \ \ res\ =\ eo\_transceiver\_outpacket\_Get(pc104txrx,\ \&ptrpkt);}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00628}00628\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00629}00629\ \ \ \ \ \textcolor{keywordflow}{if}(eores\_OK\ !=\ res)}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00630}00630\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00631}00631\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00632}00632\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00633}00633\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00634}00634\ \ \ \ \ \textcolor{comment}{//\ after\ these\ two\ lines,\ in\ data,\ size\ and\ numofrops\ we\ have\ what\ we\ need}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00635}00635\ \ \ \ \ uint16\_t\ tmpsize\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00636}00636\ \ \ \ \ eo\_packet\_Payload\_Get(ptrpkt,\ \&\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}},\ \&tmpsize);}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00637}00637\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00638}00638\ \ \ \ \ size\ =\ tmpsize;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00639}00639\ \ \ \ \ numofrops\ =\ tmpnumofrops;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00640}00640\ \ \ \ \ udpframe\ =\ (tmpnumofrops\ >\ 0)\ ?\ \mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}\ :\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00641}00641\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00642}00642\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00643}00643\ \ \ \ \ \textcolor{keywordflow}{return}\ udpframe;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00644}00644\ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00645}00645\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00646}00646\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00647}00647\ EOnv*\ HostTransceiver::getnvhandler(eOprotID32\_t\ id32,\ EOnv*\ nv)}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00648}00648\ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00649}00649\ \ \ \ \ eOresult\_t\ \ \ \ res;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00650}00650\ \ \ \ \ res\ =\ eo\_nvset\_NV\_Get(nvset,\ id32,\ nv);}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00651}00651\ \ \ \ \ \textcolor{keywordflow}{if}(eores\_OK\ !=\ res)}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00652}00652\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00653}00653\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ nvinfo[128];}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00654}00654\ \ \ \ \ \ \ \ \ eoprot\_ID2information(id32,\ nvinfo,\ \textcolor{keyword}{sizeof}(nvinfo));}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00655}00655\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}HostTransceiver::getnvhandler()\ called\ w/\ invalid\ protid:\ BOARD\ w/\ IP"{}}\ <<\ remoteipstring\ <<}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00656}00656\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}with\ id:\ "{}}\ <<\ nvinfo;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00657}00657\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ NULL;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00658}00658\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00659}00659\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00660}00660\ \ \ \ \ \textcolor{keywordflow}{return}(nv);}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00661}00661\ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00662}00662\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00663}00663\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00664}00664\ \textcolor{keywordtype}{bool}\ HostTransceiver::getNVvalue(EOnv\ *nv,\ uint8\_t*\ \mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}},\ uint16\_t*\ size)}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00665}00665\ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00666}00666\ \ \ \ \ \textcolor{keywordtype}{bool}\ ret;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00667}00667\ \ \ \ \ \textcolor{keywordflow}{if}\ (NULL\ ==\ nv)}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00668}00668\ \ \ \ \ \{\ \ \ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00669}00669\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}HostTransceiver::getNVvalue()\ called\ w/\ NULL\ nv\ value:\ BOARD\ w/\ IP"{}}\ <<\ remoteipstring;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00670}00670\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00671}00671\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00672}00672\ \ \ \ \ lock\_nvs(\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00673}00673\ \ \ \ \ (eores\_OK\ ==\ eo\_nv\_Get(nv,\ eo\_nv\_strg\_volatile,\ \mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}},\ size))\ ?\ ret\ =\ \textcolor{keyword}{true}\ :\ ret\ =\ false;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00674}00674\ \ \ \ \ lock\_nvs(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00675}00675\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00676}00676\ \ \ \ \ \textcolor{keywordflow}{if}(\textcolor{keyword}{false}\ ==\ ret)}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00677}00677\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00678}00678\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}HostTransceiver::getNVvalue()\ fails\ in\ eo\_nv\_Get():\ BOARD\ w/\ IP"{}}\ <<\ remoteipstring;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00679}00679\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00680}00680\ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00681}00681\ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00682}00682\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00683}00683\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00684}00684\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00685}00685\ eOprotBRD\_t\ HostTransceiver::get\_protBRDnumber(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00686}00686\ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00687}00687\ \ \ \ \ \textcolor{keywordflow}{return}(protboardnumber);}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00688}00688\ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00689}00689\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00690}00690\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00691}00691\ eOipv4addr\_t\ HostTransceiver::get\_remoteIPaddress(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00692}00692\ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00693}00693\ \ \ \ \ \textcolor{keywordflow}{return}(remoteipaddr);}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00694}00694\ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00695}00695\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00696}00696\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00697}00697\ \textcolor{keywordtype}{bool}\ HostTransceiver::initProtocol()}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00698}00698\ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00699}00699\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{bool}\ alreadyinitted\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00700}00700\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00701}00701\ \textcolor{comment}{//\ \ \ \ if(false\ ==\ alreadyinitted)}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00702}00702\ \textcolor{comment}{//\ \ \ \ \{}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00703}00703\ \textcolor{comment}{//\ \ \ \ \ \ \ \ //\ before\ using\ embOBJ\ we\ need\ initialing\ its\ system.\ it\ is\ better\ to\ init\ it\ again\ in\ case\ someone\ did\ not\ do\ it}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00704}00704\ \textcolor{comment}{//\ \ \ \ \ \ \ \ //\ we\ use\ the\ TheEthManager\ function\ ...\ however\ that\ was\ already\ called}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00705}00705\ \textcolor{comment}{//\ \ \ \ \ \ \ \ TheEthManager::instance()-\/>initEOYsystem();}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00706}00706\ \textcolor{comment}{//\ \ \ \ \}}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00707}00707\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00708}00708\ \ \ \ \ \textcolor{comment}{//\ reserve\ resources\ for\ board\ \#\ protboardnumber}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00709}00709\ \ \ \ \ \textcolor{keywordflow}{if}(eores\_OK\ !=\ eoprot\_config\_board\_reserve(protboardnumber))}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00710}00710\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00711}00711\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}HostTransceiver::initProtocol():\ call\ to\ eoprot\_config\_board\_reserve()\ fails."{}};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00712}00712\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00713}00713\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00714}00714\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00715}00715\ \ \ \ \ \textcolor{keywordflow}{if}(\textcolor{keyword}{false}\ ==\ alreadyinitted)}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00716}00716\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00717}00717\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ configure\ all\ the\ callbacks\ of\ all\ endpoints.}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00718}00718\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00719}00719\ \ \ \ \ \ \ \ \ eoprot\_override\_mn();}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00720}00720\ \ \ \ \ \ \ \ \ eoprot\_override\_mc();}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00721}00721\ \ \ \ \ \ \ \ \ eoprot\_override\_as();}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00722}00722\ \ \ \ \ \ \ \ \ eoprot\_override\_sk();}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00723}00723\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00724}00724\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ ok.\ all\ is\ done\ correctly}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00725}00725\ \ \ \ \ \ \ \ \ alreadyinitted\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00726}00726\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00727}00727\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00728}00728\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00729}00729\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00730}00730\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00731}00731\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00732}00732\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00733}00733\ \ \ \ \ \textcolor{keywordflow}{return}(\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00734}00734\ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00735}00735\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00736}00736\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00737}00737\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00738}00738\ \textcolor{keywordtype}{void}\ HostTransceiver::eoprot\_override\_mn(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00739}00739\ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00740}00740\ \ \ \ \ \textcolor{comment}{//\ marco.accame\ on\ 22\ mar\ 2016:}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00741}00741\ \ \ \ \ \textcolor{comment}{//\ i\ want\ to\ keep\ a\ minimum\ of\ callbacks,\ thus\ i\ have\ cleaned\ and\ put\ comments\ about\ what\ is\ needed\ and\ why}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00742}00742\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00743}00743\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keyword}{const}\ eOprot\_callbacks\_endpoint\_descriptor\_t\ mn\_callbacks\_descriptor\_endp\ =}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00744}00744\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00745}00745\ \ \ \ \ \ \ \ \ EO\_INIT(.endpoint)\ \ \ \ \ \ \ \ \ \ eoprot\_endpoint\_management,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00746}00746\ \ \ \ \ \ \ \ \ EO\_INIT(.raminitialise)\ \ \ \ \ NULL}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00747}00747\ \ \ \ \ \};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00748}00748\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00749}00749\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keyword}{const}\ eOprot\_callbacks\_variable\_descriptor\_t\ mn\_callbacks\_descriptors\_vars[]\ =}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00750}00750\ \ \ \ \ \{\ \ \ \textcolor{comment}{//\ management}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00751}00751\ \ \ \ \ \ \ \ \ \{\ \ \ \textcolor{comment}{//\ mn\_info\_status:\ used\ for\ printing\ sig<>\ diagnostics\ ROPs\ which\ have\ strings}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00752}00752\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.endpoint)\ \ \ \ \ \ eoprot\_endpoint\_management,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00753}00753\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.entity)\ \ \ \ \ \ \ \ eoprot\_entity\_mn\_info,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00754}00754\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.tag)\ \ \ \ \ \ \ \ \ \ \ eoprot\_tag\_mn\_info\_status,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00755}00755\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.init)\ \ \ \ \ \ \ \ \ \ NULL,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00756}00756\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.update)\ \ \ \ \ \ \ \ \mbox{\hyperlink{EoProtocolMN__fun__userdef_8c_ad3bc6c444cff15adf79b6be0cc605bd9}{eoprot\_fun\_UPDT\_mn\_info\_status}}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00757}00757\ \ \ \ \ \ \ \ \ \},}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00758}00758\ \ \ \ \ \ \ \ \ \{\ \ \ \textcolor{comment}{//\ mn\_info\_status\_basic:\ used\ for\ printing\ sig<>\ diagnostics\ ROPs\ which\ have\ compact\ form\ (the\ vast\ majority)}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00759}00759\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.endpoint)\ \ \ \ \ \ eoprot\_endpoint\_management,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00760}00760\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.entity)\ \ \ \ \ \ \ \ eoprot\_entity\_mn\_info,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00761}00761\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.tag)\ \ \ \ \ \ \ \ \ \ \ eoprot\_tag\_mn\_info\_status\_basic,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00762}00762\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.init)\ \ \ \ \ \ \ \ \ \ NULL,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00763}00763\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.update)\ \ \ \ \ \ \ \ \mbox{\hyperlink{EoProtocolMN__fun__userdef_8c_aa7029fae7dc1845c24a6393410d2a22a}{eoprot\_fun\_UPDT\_mn\_info\_status\_basic}}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00764}00764\ \ \ \ \ \ \ \ \ \},}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00765}00765\ \ \ \ \ \ \ \ \ \{\ \ \ \textcolor{comment}{//\ mn\_comm\_cmmnds\_command\_replynumof:\ used\ for\ receiving\ reply\ of\ a\ command\ in\ the\ form\ of\ sig<>\ ROP}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00766}00766\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.endpoint)\ \ \ \ \ \ eoprot\_endpoint\_management,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00767}00767\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.entity)\ \ \ \ \ \ \ \ eoprot\_entity\_mn\_comm,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00768}00768\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.tag)\ \ \ \ \ \ \ \ \ \ \ eoprot\_tag\_mn\_comm\_cmmnds\_command\_replynumof,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00769}00769\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.init)\ \ \ \ \ \ \ \ \ \ NULL,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00770}00770\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.update)\ \ \ \ \ \ \ \ \mbox{\hyperlink{EoProtocolMN__fun__userdef_8c_a6bfd1e38b0f56a79f99038f79efc35c1}{eoprot\_fun\_UPDT\_mn\_comm\_cmmnds\_command\_replynumof}}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00771}00771\ \ \ \ \ \ \ \ \ \},}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00772}00772\ \ \ \ \ \ \ \ \ \{\ \ \ \textcolor{comment}{//\ mn\_comm\_cmmnds\_command\_replyarray:\ used\ for\ receiving\ reply\ of\ a\ command\ in\ the\ form\ of\ sig<>\ ROP}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00773}00773\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.endpoint)\ \ \ \ \ \ eoprot\_endpoint\_management,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00774}00774\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.entity)\ \ \ \ \ \ \ \ eoprot\_entity\_mn\_comm,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00775}00775\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.tag)\ \ \ \ \ \ \ \ \ \ \ eoprot\_tag\_mn\_comm\_cmmnds\_command\_replyarray,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00776}00776\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.init)\ \ \ \ \ \ \ \ \ \ NULL,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00777}00777\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.update)\ \ \ \ \ \ \ \ \mbox{\hyperlink{EoProtocolMN__fun__userdef_8c_ab8f032267eac37d879b9edc901cc5e99}{eoprot\_fun\_UPDT\_mn\_comm\_cmmnds\_command\_replyarray}}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00778}00778\ \ \ \ \ \ \ \ \ \},}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00779}00779\ \ \ \ \ \ \ \ \ \{\ \ \ \textcolor{comment}{//\ mn\_service\_status\_commandresult:\ used\ for\ receiving\ reply\ of\ a\ command\ in\ the\ form\ of\ sig<>\ ROP}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00780}00780\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.endpoint)\ \ \ \ \ \ eoprot\_endpoint\_management,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00781}00781\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.entity)\ \ \ \ \ \ \ \ eoprot\_entity\_mn\_service,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00782}00782\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.tag)\ \ \ \ \ \ \ \ \ \ \ eoprot\_tag\_mn\_service\_status\_commandresult,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00783}00783\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.init)\ \ \ \ \ \ \ \ \ \ NULL,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00784}00784\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.update)\ \ \ \ \ \ \ \ \mbox{\hyperlink{EoProtocolMN__fun__userdef_8c_ac13686997404313240fb75c34e0a2e1b}{eoprot\_fun\_UPDT\_mn\_service\_status\_commandresult}}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00785}00785\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00786}00786\ \ \ \ \ \};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00787}00787\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00788}00788\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00789}00789\ \ \ \ \ \textcolor{comment}{//\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00790}00790\ \ \ \ \ \textcolor{comment}{//\ -\/-\/\ initialisation\ of\ onsay()\ function\ common\ in\ MN\ endpoint\ for\ every\ board}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00791}00791\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00792}00792\ \ \ \ \ \textcolor{comment}{//\ function\ eoprot\_fun\_ONSAY\_mn()\ is\ called\ by\ any\ say<>\ ROP\ which\ is\ received\ related\ to\ the\ MN\ endpoint}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00793}00793\ \ \ \ \ \textcolor{comment}{//\ it\ is\ used\ to\ unlock\ a\ waiting\ mutex}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00794}00794\ \ \ \ \ eoprot\_config\_onsay\_endpoint\_set(eoprot\_endpoint\_management,\ \mbox{\hyperlink{EoProtocolMN__fun__userdef_8c_a6925e6a033f0e68a294184a86f0069df}{eoprot\_fun\_ONSAY\_mn}});}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00795}00795\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00796}00796\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00797}00797\ \ \ \ \ \textcolor{comment}{//\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00798}00798\ \ \ \ \ \textcolor{comment}{//\ -\/-\/\ override\ of\ the\ callbacks\ of\ variables\ of\ MN.\ common\ to\ every\ board.\ they\ perform\ an\ action\ or\ reception\ of\ a\ specific\ sig<>\ ROP.}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00799}00799\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00800}00800\ \ \ \ \ \textcolor{keywordtype}{int}\ number\ =\ \textcolor{keyword}{sizeof}(mn\_callbacks\_descriptors\_vars)/\textcolor{keyword}{sizeof}(mn\_callbacks\_descriptors\_vars[0]);}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00801}00801\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i=0;\ i<number;\ i++)}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00802}00802\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00803}00803\ \ \ \ \ \ \ \ \ eoprot\_config\_callbacks\_variable\_set(\&mn\_callbacks\_descriptors\_vars[i]);}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00804}00804\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00805}00805\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00806}00806\ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00807}00807\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00808}00808\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00809}00809\ \textcolor{keywordtype}{void}\ HostTransceiver::eoprot\_override\_mc(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00810}00810\ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00811}00811\ \ \ \ \ \textcolor{comment}{//\ marco.accame\ on\ 22\ mar\ 2016:}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00812}00812\ \ \ \ \ \textcolor{comment}{//\ i\ want\ to\ keep\ a\ minimum\ of\ callbacks,\ thus\ i\ have\ cleaned\ and\ put\ comments\ about\ what\ is\ needed\ and\ why}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00813}00813\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00814}00814\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keyword}{const}\ eOprot\_callbacks\_endpoint\_descriptor\_t\ mc\_callbacks\_descriptor\_endp\ =\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00815}00815\ \ \ \ \ \{\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00816}00816\ \ \ \ \ \ \ \ \ EO\_INIT(.endpoint)\ \ \ \ \ \ \ \ \ \ eoprot\_endpoint\_motioncontrol,\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00817}00817\ \ \ \ \ \ \ \ \ EO\_INIT(.raminitialise)\ \ \ \ \ NULL}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00818}00818\ \ \ \ \ \};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00819}00819\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00820}00820\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keyword}{const}\ eOprot\_callbacks\_variable\_descriptor\_t\ mc\_callbacks\_descriptors\_vars[]\ =\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00821}00821\ \ \ \ \ \{\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00822}00822\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ joint}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00823}00823\ \ \ \ \ \ \ \ \ \{\ \ \ \textcolor{comment}{//\ joint\_status:\ used\ to\ inform\ the\ motioncontrol\ device\ that\ a\ sig<>\ ROP\ about\ joint\ status\ has\ arrived.\ for\ ..\ updating\ timestamps}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00824}00824\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.endpoint)\ \ \ \ \ \ eoprot\_endpoint\_motioncontrol,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00825}00825\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.entity)\ \ \ \ \ \ \ \ eoprot\_entity\_mc\_joint,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00826}00826\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.tag)\ \ \ \ \ \ \ \ \ \ \ eoprot\_tag\_mc\_joint\_status,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00827}00827\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.init)\ \ \ \ \ \ \ \ \ \ NULL,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00828}00828\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.update)\ \ \ \ \ \ \ \ \mbox{\hyperlink{EoProtocolMC__fun__userdef_8c_a9534efe1a4c99195d4ce5c3a17f59d07}{eoprot\_fun\_UPDT\_mc\_joint\_status}}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00829}00829\ \ \ \ \ \ \ \ \ \},}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00830}00830\ \ \ \ \ \ \ \ \ \{\ \ \ \textcolor{comment}{//\ joint\_status\_basic:\ used\ to\ inform\ the\ motioncontrol\ device\ that\ a\ sig<>\ ROP\ about\ joint\ status\ has\ arrived.\ for\ ..\ updating\ the\ same\ timestamps\ as\ above}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00831}00831\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.endpoint)\ \ \ \ \ \ eoprot\_endpoint\_motioncontrol,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00832}00832\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.entity)\ \ \ \ \ \ \ \ eoprot\_entity\_mc\_joint,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00833}00833\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.tag)\ \ \ \ \ \ \ \ \ \ \ eoprot\_tag\_mc\_joint\_status\_core,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00834}00834\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.init)\ \ \ \ \ \ \ \ \ \ NULL,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00835}00835\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.update)\ \ \ \ \ \ \ \ \mbox{\hyperlink{EoProtocolMC__fun__userdef_8c_a907ad5346e684a4fc070900ed6a598bf}{eoprot\_fun\_UPDT\_mc\_joint\_status\_core}}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00836}00836\ \ \ \ \ \ \ \ \ \},}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00837}00837\ \ \ \ \ \ \ \ \ \{\ \ \ \textcolor{comment}{//\ joint\_status\_debug:}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00838}00838\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.endpoint)\ \ \ \ \ \ eoprot\_endpoint\_motioncontrol,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00839}00839\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.entity)\ \ \ \ \ \ \ \ eoprot\_entity\_mc\_joint,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00840}00840\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.tag)\ \ \ \ \ \ \ \ \ \ \ eoprot\_tag\_mc\_joint\_status\_debug,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00841}00841\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.init)\ \ \ \ \ \ \ \ \ \ NULL,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00842}00842\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.update)\ \ \ \ \ \ \ \ \mbox{\hyperlink{EoProtocolMC__fun__userdef_8c_ab7e479699ae88c934a1ea9206b39abe3}{eoprot\_fun\_UPDT\_mc\_joint\_status\_debug}}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00843}00843\ \ \ \ \ \ \ \ \ \},}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00844}00844\ \ \ \ \ \ \ \ \ \{\ \ \ \textcolor{comment}{//\ joint\_status\_basic:\ used\ to\ inform\ the\ motioncontrol\ device\ that\ a\ sig<>\ ROP\ about\ joint\ status\ has\ arrived.\ for\ ..\ updating\ the\ same\ timestamps\ as\ above}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00845}00845\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.endpoint)\ \ \ \ \ \ eoprot\_endpoint\_motioncontrol,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00846}00846\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.entity)\ \ \ \ \ \ \ \ eoprot\_entity\_mc\_joint,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00847}00847\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.tag)\ \ \ \ \ \ \ \ \ \ \ eoprot\_tag\_mc\_joint\_status\_addinfo\_multienc,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00848}00848\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.init)\ \ \ \ \ \ \ \ \ \ NULL,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00849}00849\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.update)\ \ \ \ \ \ \ \ \mbox{\hyperlink{EoProtocolMC__fun__userdef_8c_af08cf6fdcd632d4ab765fc2a4b461cb2}{eoprot\_fun\_UPDT\_mc\_joint\_status\_addinfo\_multienc}}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00850}00850\ \ \ \ \ \ \ \ \ \},}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00851}00851\ \ \ \ \ \ \ \ \ \ \ \ \ \{\ \ \ \textcolor{comment}{//\ joint\_status\_basic:\ used\ to\ inform\ the\ motioncontrol\ device\ that\ a\ sig<>\ ROP\ about\ joint\ status\ has\ arrived.\ for\ ..\ updating\ the\ same\ timestamps\ as\ above}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00852}00852\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.endpoint)\ \ \ \ \ \ eoprot\_endpoint\_motioncontrol,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00853}00853\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.entity)\ \ \ \ \ \ \ \ eoprot\_entity\_mc\_motor,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00854}00854\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.tag)\ \ \ \ \ \ \ \ \ \ \ eoprot\_tag\_mc\_motor\_status,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00855}00855\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.init)\ \ \ \ \ \ \ \ \ \ NULL,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00856}00856\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.update)\ \ \ \ \ \ \ \ \mbox{\hyperlink{EoProtocolMC__fun__userdef_8c_ada21c9e4893352d13ba82d3c5b376a31}{eoprot\_fun\_UPDT\_mc\_motor\_status}}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00857}00857\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00858}00858\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ motor}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00859}00859\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ nothing\ so\ far}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00860}00860\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00861}00861\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ comment:\ the\ functions\ eoprot\_fun\_UPDT\_mc\_joint\_status\_core()\ and\ eoprot\_fun\_UPDT\_mc\_joint\_status()\ update\ the\ same\ \_encodersStamp[]}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00862}00862\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ variables.\ only\ one\ of\ those\ two\ id32\ variables\ are\ regularly\ sig<>-\/led.}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00863}00863\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ on\ the\ other\ hand,\ the\ same\ \_encodersStamp[]\ is\ used\ for\ motor\ encoders\ ...\ thus\ maybe\ we\ miss\ something.}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00864}00864\ \ \ \ \ \};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00865}00865\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00866}00866\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00867}00867\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00868}00868\ \ \ \ \ \textcolor{comment}{//\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00869}00869\ \ \ \ \ \textcolor{comment}{//\ -\/-\/\ initialisation\ of\ onsay()\ function\ common\ in\ MC\ endpoint\ for\ every\ board}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00870}00870\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00871}00871\ \ \ \ \ \textcolor{comment}{//\ function\ eoprot\_fun\_ONSAY\_mc()\ is\ called\ by\ any\ say<>\ ROP\ which\ is\ received\ related\ to\ the\ MC\ endpoint}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00872}00872\ \ \ \ \ \textcolor{comment}{//\ it\ is\ used\ to\ unlock\ a\ waiting\ mutex}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00873}00873\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00874}00874\ \ \ \ \ eoprot\_config\_onsay\_endpoint\_set(eoprot\_endpoint\_motioncontrol,\ \mbox{\hyperlink{EoProtocolMC__fun__userdef_8c_a0c162ad1779bfc39da8ecbea2e346791}{eoprot\_fun\_ONSAY\_mc}});}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00875}00875\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00876}00876\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00877}00877\ \ \ \ \ \textcolor{comment}{//\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00878}00878\ \ \ \ \ \textcolor{comment}{//\ -\/-\/\ override\ of\ the\ callbacks\ of\ variables\ of\ MC.\ common\ to\ every\ board.\ they\ perform\ an\ action\ or\ reception\ of\ a\ specific\ sig<>\ ROP.}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00879}00879\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00880}00880\ \ \ \ \ \textcolor{keywordtype}{int}\ number\ =\ \textcolor{keyword}{sizeof}(mc\_callbacks\_descriptors\_vars)/\textcolor{keyword}{sizeof}(mc\_callbacks\_descriptors\_vars[0]);}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00881}00881\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i=0;\ i<number;\ i++)}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00882}00882\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00883}00883\ \ \ \ \ \ \ \ \ eoprot\_config\_callbacks\_variable\_set(\&mc\_callbacks\_descriptors\_vars[i]);}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00884}00884\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00885}00885\ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00886}00886\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00887}00887\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00888}00888\ \textcolor{keywordtype}{void}\ HostTransceiver::eoprot\_override\_as(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00889}00889\ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00890}00890\ \ \ \ \ \textcolor{comment}{//\ marco.accame\ on\ 22\ mar\ 2016:}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00891}00891\ \ \ \ \ \textcolor{comment}{//\ i\ want\ to\ keep\ a\ minimum\ of\ callbacks,\ thus\ i\ have\ cleaned\ and\ put\ comments\ about\ what\ is\ needed\ and\ why}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00892}00892\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00893}00893\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keyword}{const}\ eOprot\_callbacks\_endpoint\_descriptor\_t\ as\_callbacks\_descriptor\_endp\ =\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00894}00894\ \ \ \ \ \{\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00895}00895\ \ \ \ \ \ \ \ \ EO\_INIT(.endpoint)\ \ \ \ \ \ \ \ \ \ eoprot\_endpoint\_analogsensors,\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00896}00896\ \ \ \ \ \ \ \ \ EO\_INIT(.raminitialise)\ \ \ \ \ NULL}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00897}00897\ \ \ \ \ \};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00898}00898\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00899}00899\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keyword}{const}\ eOprot\_callbacks\_variable\_descriptor\_t\ as\_callbacks\_descriptors\_vars[]\ =\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00900}00900\ \ \ \ \ \{\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00901}00901\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ strain}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00902}00902\ \ \ \ \ \ \ \ \ \{\ \ \ \textcolor{comment}{//\ strain\_status\_calibratedvalues:\ it\ gives\ data\ from\ strain\ to\ the\ device,\ so\ that\ it\ writes\ it\ in\ the\ relevant\ yarp\ port}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00903}00903\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.endpoint)\ \ \ \ \ \ eoprot\_endpoint\_analogsensors,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00904}00904\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.entity)\ \ \ \ \ \ \ \ eoprot\_entity\_as\_strain,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00905}00905\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.tag)\ \ \ \ \ \ \ \ \ \ \ eoprot\_tag\_as\_strain\_status\_calibratedvalues,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00906}00906\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.init)\ \ \ \ \ \ \ \ \ \ NULL,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00907}00907\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.update)\ \ \ \ \ \ \ \ \mbox{\hyperlink{EoProtocolAS__fun__userdef_8c_a11dd638176d022286c8128d77a3f5d62}{eoprot\_fun\_UPDT\_as\_strain\_status\_calibratedvalues}}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00908}00908\ \ \ \ \ \ \ \ \ \},}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00909}00909\ \ \ \ \ \ \ \ \ \{\ \ \ \textcolor{comment}{//\ strain\_status\_uncalibratedvalues:\ it\ gives\ data\ from\ strain\ to\ the\ device,\ so\ that\ it\ writes\ it\ in\ the\ relevant\ yarp\ port}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00910}00910\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.endpoint)\ \ \ \ \ \ eoprot\_endpoint\_analogsensors,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00911}00911\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.entity)\ \ \ \ \ \ \ \ eoprot\_entity\_as\_strain,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00912}00912\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.tag)\ \ \ \ \ \ \ \ \ \ \ eoprot\_tag\_as\_strain\_status\_uncalibratedvalues,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00913}00913\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.init)\ \ \ \ \ \ \ \ \ \ NULL,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00914}00914\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.update)\ \ \ \ \ \ \ \ \mbox{\hyperlink{EoProtocolAS__fun__userdef_8c_a15983c0a3a0c5e88269bdd5119522add}{eoprot\_fun\_UPDT\_as\_strain\_status\_uncalibratedvalues}}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00915}00915\ \ \ \ \ \ \ \ \ \},}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00916}00916\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ mais\ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00917}00917\ \ \ \ \ \ \ \ \ \{\ \ \ \textcolor{comment}{//\ mais\_status\_the15values:\ it\ gives\ data\ from\ mais\ to\ the\ device,\ so\ that\ it\ writes\ it\ in\ the\ relevant\ yarp\ port}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00918}00918\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.endpoint)\ \ \ \ \ \ eoprot\_endpoint\_analogsensors,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00919}00919\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.entity)\ \ \ \ \ \ \ \ eoprot\_entity\_as\_mais,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00920}00920\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.tag)\ \ \ \ \ \ \ \ \ \ \ eoprot\_tag\_as\_mais\_status\_the15values,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00921}00921\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.init)\ \ \ \ \ \ \ \ \ \ NULL,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00922}00922\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.update)\ \ \ \ \ \ \ \ \mbox{\hyperlink{EoProtocolAS__fun__userdef_8c_acd96fd5075c5e917bd502e3ed7c62df3}{eoprot\_fun\_UPDT\_as\_mais\_status\_the15values}}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00923}00923\ \ \ \ \ \ \ \ \ \},}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00924}00924\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ inertial3}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00925}00925\ \ \ \ \ \ \ \ \ \{\ \ \ \textcolor{comment}{//\ eoprot\_tag\_as\_inertial3\_status:\ ...}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00926}00926\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.endpoint)\ \ \ \ \ \ eoprot\_endpoint\_analogsensors,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00927}00927\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.entity)\ \ \ \ \ \ \ \ eoprot\_entity\_as\_inertial3,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00928}00928\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.tag)\ \ \ \ \ \ \ \ \ \ \ eoprot\_tag\_as\_inertial3\_status,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00929}00929\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.init)\ \ \ \ \ \ \ \ \ \ NULL,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00930}00930\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.update)\ \ \ \ \ \ \ \ \mbox{\hyperlink{EoProtocolAS__fun__userdef_8c_a3abd6e374930770da802ef37de6b781d}{eoprot\_fun\_UPDT\_as\_inertial3\_status}}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00931}00931\ \ \ \ \ \ \ \ \ \},}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00932}00932\ \ \ \ \ \ \ \ \ \{\ \ \ \textcolor{comment}{//\ eoprot\_tag\_as\_temperature\_status:\ ...}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00933}00933\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.endpoint)\ \ \ \ \ \ eoprot\_endpoint\_analogsensors,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00934}00934\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.entity)\ \ \ \ \ \ \ \ eoprot\_entity\_as\_temperature,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00935}00935\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.tag)\ \ \ \ \ \ \ \ \ \ \ eoprot\_tag\_as\_temperature\_status,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00936}00936\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.init)\ \ \ \ \ \ \ \ \ \ NULL,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00937}00937\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.update)\ \ \ \ \ \ \ \ \mbox{\hyperlink{EoProtocolAS__fun__userdef_8c_a8306cabcd4b7fcf4f8bc3b0ac36f4651}{eoprot\_fun\_UPDT\_as\_temperature\_status}}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00938}00938\ \ \ \ \ \ \ \ \ \},}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00939}00939\ \ \ \ \ \ \ \ \ \{\ \ \ \textcolor{comment}{//\ eoprot\_tag\_as\_psc\_status:\ ...}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00940}00940\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.endpoint)\ \ \ \ \ \ eoprot\_endpoint\_analogsensors,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00941}00941\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.entity)\ \ \ \ \ \ \ \ eoprot\_entity\_as\_psc,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00942}00942\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.tag)\ \ \ \ \ \ \ \ \ \ \ eoprot\_tag\_as\_psc\_status,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00943}00943\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.init)\ \ \ \ \ \ \ \ \ \ NULL,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00944}00944\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.update)\ \ \ \ \ \ \ \ \mbox{\hyperlink{EoProtocolAS__fun__userdef_8c_a58e335bbd7cdf1f10f4cc1f340423540}{eoprot\_fun\_UPDT\_as\_psc\_status}}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00945}00945\ \ \ \ \ \ \ \ \ \},}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00946}00946\ \ \ \ \ \ \ \ \ \{\ \ \ \textcolor{comment}{//\ eoprot\_tag\_as\_pos\_status:\ ...}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00947}00947\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.endpoint)\ \ \ \ \ \ eoprot\_endpoint\_analogsensors,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00948}00948\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.entity)\ \ \ \ \ \ \ \ eoprot\_entity\_as\_pos,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00949}00949\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.tag)\ \ \ \ \ \ \ \ \ \ \ eoprot\_tag\_as\_pos\_status,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00950}00950\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.init)\ \ \ \ \ \ \ \ \ \ NULL,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00951}00951\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.update)\ \ \ \ \ \ \ \ \mbox{\hyperlink{EoProtocolAS__fun__userdef_8c_a4577c80fc558d94cc4d8770863b394cd}{eoprot\_fun\_UPDT\_as\_pos\_status}}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00952}00952\ \ \ \ \ \ \ \ \ \},}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00953}00953\ \ \ \ \ \ \ \ \ \{\ \ \ \textcolor{comment}{//\ eoprot\_tag\_as\_ft\_status\_timedvalue:\ ...}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00954}00954\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.endpoint)\ \ \ \ \ \ eoprot\_endpoint\_analogsensors,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00955}00955\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.entity)\ \ \ \ \ \ \ \ eoprot\_entity\_as\_ft,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00956}00956\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.tag)\ \ \ \ \ \ \ \ \ \ \ eoprot\_tag\_as\_ft\_status\_timedvalue,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00957}00957\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.init)\ \ \ \ \ \ \ \ \ \ NULL,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00958}00958\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.update)\ \ \ \ \ \ \ \ \mbox{\hyperlink{EoProtocolAS__fun__userdef_8c_a1aef79cb93008887c63831be8e0660da}{eoprot\_fun\_UPDT\_as\_ft\_status\_timedvalue}}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00959}00959\ \ \ \ \ \ \ \ \ \},}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00960}00960\ \ \ \ \ \ \ \ \ \{\ \ \ \textcolor{comment}{//\ eoprot\_tag\_as\_battery\_status\_timedvalue:\ ...}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00961}00961\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.endpoint)\ \ \ \ \ \ eoprot\_endpoint\_analogsensors,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00962}00962\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.entity)\ \ \ \ \ \ \ \ eoprot\_entity\_as\_battery,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00963}00963\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.tag)\ \ \ \ \ \ \ \ \ \ \ eoprot\_tag\_as\_battery\_status\_timedvalue,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00964}00964\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.init)\ \ \ \ \ \ \ \ \ \ NULL,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00965}00965\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.update)\ \ \ \ \ \ \ \ \mbox{\hyperlink{EoProtocolAS__fun__userdef_8c_ae53b080a96fcc982dd9b331e2d3e5aee}{eoprot\_fun\_UPDT\_as\_battery\_status\_timedvalue}}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00966}00966\ \ \ \ \ \ \ \ \ \},\ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00967}00967\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00968}00968\ \textcolor{preprocessor}{\#if\ 0\ \ \ }\textcolor{comment}{//\ marco.accame:\ i\ keep\ the\ code\ just\ for\ the\ debug\ phase.\ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00969}00969\ \ \ \ \ \ \ \ \ ,\{\ \ \ \textcolor{comment}{//\ eoprot\_tag\_as\_inertial\_status\_accelerometer}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00970}00970\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.endpoint)\ \ \ \ \ \ eoprot\_endpoint\_analogsensors,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00971}00971\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.entity)\ \ \ \ \ \ \ \ eoprot\_entity\_as\_inertial,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00972}00972\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.tag)\ \ \ \ \ \ \ \ \ \ \ eoprot\_tag\_as\_inertial\_status\_accelerometer,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00973}00973\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.init)\ \ \ \ \ \ \ \ \ \ NULL,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00974}00974\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.update)\ \ \ \ \ \ \ \ eoprot\_fun\_UPDT\_as\_inertial\_status\_accelerometer}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00975}00975\ \ \ \ \ \ \ \ \ \},}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00976}00976\ \ \ \ \ \ \ \ \ \{\ \ \ \textcolor{comment}{//\ eoprot\_tag\_as\_inertial\_status\_gyroscope}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00977}00977\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.endpoint)\ \ \ \ \ \ eoprot\_endpoint\_analogsensors,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00978}00978\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.entity)\ \ \ \ \ \ \ \ eoprot\_entity\_as\_inertial,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00979}00979\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.tag)\ \ \ \ \ \ \ \ \ \ \ eoprot\_tag\_as\_inertial\_status\_gyroscope,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00980}00980\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.init)\ \ \ \ \ \ \ \ \ \ NULL,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00981}00981\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.update)\ \ \ \ \ \ \ \ eoprot\_fun\_UPDT\_as\_inertial\_status\_gyroscope}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00982}00982\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00983}00983\ \textcolor{preprocessor}{\#endif\ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00984}00984\ \ \ \ \ \};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00985}00985\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00986}00986\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00987}00987\ \ \ \ \ \textcolor{comment}{//\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00988}00988\ \ \ \ \ \textcolor{comment}{//\ -\/-\/\ initialisation\ of\ onsay()\ function\ common\ in\ AS\ endpoint\ for\ every\ board}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00989}00989\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00990}00990\ \ \ \ \ \textcolor{comment}{//\ function\ eoprot\_fun\_ONSAY\_as()\ is\ called\ by\ any\ say<>\ ROP\ which\ is\ received\ related\ to\ the\ AS\ endpoint}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00991}00991\ \ \ \ \ \textcolor{comment}{//\ it\ is\ used\ to\ unlock\ a\ waiting\ mutex}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00992}00992\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00993}00993\ \ \ \ \ eoprot\_config\_onsay\_endpoint\_set(eoprot\_endpoint\_analogsensors,\ \mbox{\hyperlink{EoProtocolAS__fun__userdef_8c_a37478ddad9b27d3130c5a231a471ccbf}{eoprot\_fun\_ONSAY\_as}});}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00994}00994\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00995}00995\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00996}00996\ \ \ \ \ \textcolor{comment}{//\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00997}00997\ \ \ \ \ \textcolor{comment}{//\ -\/-\/\ override\ of\ the\ callbacks\ of\ variables\ of\ AS.\ common\ to\ every\ board.\ they\ perform\ an\ action\ or\ reception\ of\ a\ specific\ sig<>\ ROP.}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00998}00998\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l00999}00999\ \ \ \ \ \textcolor{keywordtype}{int}\ number\ =\ \textcolor{keyword}{sizeof}(as\_callbacks\_descriptors\_vars)/\textcolor{keyword}{sizeof}(as\_callbacks\_descriptors\_vars[0]);}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01000}01000\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i=0;\ i<number;\ i++)}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01001}01001\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01002}01002\ \ \ \ \ \ \ \ \ eoprot\_config\_callbacks\_variable\_set(\&as\_callbacks\_descriptors\_vars[i]);}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01003}01003\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01004}01004\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01005}01005\ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01006}01006\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01007}01007\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01008}01008\ \textcolor{keywordtype}{void}\ HostTransceiver::eoprot\_override\_sk(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01009}01009\ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01010}01010\ \ \ \ \ \textcolor{comment}{//\ marco.accame\ on\ 22\ mar\ 2016:}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01011}01011\ \ \ \ \ \textcolor{comment}{//\ i\ want\ to\ keep\ a\ minimum\ of\ callbacks,\ thus\ i\ have\ cleaned\ and\ put\ comments\ about\ what\ is\ needed\ and\ why}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01012}01012\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01013}01013\ \textcolor{comment}{//\ \ \ \ static\ const\ eOprot\_callbacks\_endpoint\_descriptor\_t\ sk\_callbacks\_descriptor\_endp\ =}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01014}01014\ \textcolor{comment}{//\ \ \ \ \{}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01015}01015\ \textcolor{comment}{//\ \ \ \ \ \ \ \ EO\_INIT(.endpoint)\ \ \ \ \ \ \ \ \ \ eoprot\_endpoint\_skin,}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01016}01016\ \textcolor{comment}{//\ \ \ \ \ \ \ \ EO\_INIT(.raminitialise)\ \ \ \ \ NULL}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01017}01017\ \textcolor{comment}{//\ \ \ \ \};}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01018}01018\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01019}01019\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keyword}{const}\ eOprot\_callbacks\_variable\_descriptor\_t\ sk\_callbacks\_descriptors\_vars[]\ =\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01020}01020\ \ \ \ \ \{\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01021}01021\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ skin}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01022}01022\ \ \ \ \ \ \ \ \ \{\ \ \ \textcolor{comment}{//\ skin\_status\_arrayof10canframes:\ it\ gives\ data\ from\ mtb\ to\ the\ device,\ so\ that\ it\ writes\ it\ in\ the\ relevant\ yarp\ port}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01023}01023\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.endpoint)\ \ \ \ \ \ eoprot\_endpoint\_skin,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01024}01024\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.entity)\ \ \ \ \ \ \ \ eoprot\_entity\_sk\_skin,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01025}01025\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.tag)\ \ \ \ \ \ \ \ \ \ \ eoprot\_tag\_sk\_skin\_status\_arrayofcandata,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01026}01026\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.init)\ \ \ \ \ \ \ \ \ \ NULL,}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01027}01027\ \ \ \ \ \ \ \ \ \ \ \ \ EO\_INIT(.update)\ \ \ \ \ \ \ \ \mbox{\hyperlink{EoProtocolSK__fun__userdef_8c_a9af55af95e7801dd86e44706c564514c}{eoprot\_fun\_UPDT\_sk\_skin\_status\_arrayofcandata}}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01028}01028\ \ \ \ \ \ \ \ \ \}\ \ \ \ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01029}01029\ \ \ \ \ \};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01030}01030\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01031}01031\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01032}01032\ \ \ \ \ \textcolor{comment}{//\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01033}01033\ \ \ \ \ \textcolor{comment}{//\ -\/-\/\ initialisation\ of\ onsay()\ function\ common\ in\ SK\ endpoint\ for\ every\ board}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01034}01034\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01035}01035\ \ \ \ \ \textcolor{comment}{//\ function\ eoprot\_fun\_ONSAY\_mc()\ is\ called\ by\ any\ say<>\ ROP\ which\ is\ received\ related\ to\ the\ SK\ endpoint}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01036}01036\ \ \ \ \ \textcolor{comment}{//\ it\ is\ used\ to\ unlock\ a\ waiting\ mutex}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01037}01037\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01038}01038\ \ \ \ \ eoprot\_config\_onsay\_endpoint\_set(eoprot\_endpoint\_skin,\ \mbox{\hyperlink{EoProtocolSK__fun__userdef_8c_acbc003d54b82c22d0f381e4ebe4cee13}{eoprot\_fun\_ONSAY\_sk}});}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01039}01039\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01040}01040\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01041}01041\ \ \ \ \ \textcolor{comment}{//\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01042}01042\ \ \ \ \ \textcolor{comment}{//\ -\/-\/\ override\ of\ the\ callbacks\ of\ variables\ of\ SK.\ common\ to\ every\ board.\ they\ perform\ an\ action\ or\ reception\ of\ a\ specific\ sig<>\ ROP.}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01043}01043\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01044}01044\ \ \ \ \ \textcolor{keywordtype}{int}\ number\ =\ \textcolor{keyword}{sizeof}(sk\_callbacks\_descriptors\_vars)/\textcolor{keyword}{sizeof}(sk\_callbacks\_descriptors\_vars[0]);}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01045}01045\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i=0;\ i<number;\ i++)}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01046}01046\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01047}01047\ \ \ \ \ \ \ \ \ eoprot\_config\_callbacks\_variable\_set(\&sk\_callbacks\_descriptors\_vars[i]);}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01048}01048\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01049}01049\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01050}01050\ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01051}01051\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01052}01052\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01053}\mbox{\hyperlink{hostTransceiver_8cpp_ad652286bc3934086edfebe9f4bb1d73e}{01053}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{hostTransceiver_8cpp_ad652286bc3934086edfebe9f4bb1d73e}{cpp\_protocol\_callback\_incaseoferror\_in\_sequencenumberReceived}}(EOreceiver\ *r)}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01054}01054\ \{\ \ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01055}01055\ \ \ \ \ \textcolor{keyword}{const}\ eOreceiver\_seqnum\_error\_t\ *\ err\ =\ eo\_receiver\_GetSequenceNumberError(r);}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01056}01056\ \ \ \ \ \textcolor{keywordtype}{char}\ ipv4str[32]\ =\ \{\};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01057}01057\ \ \ \ \ eo\_common\_ipv4addr\_to\_string(err-\/>remipv4addr,\ ipv4str,\ \textcolor{keyword}{sizeof}(ipv4str));}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01058}01058\ \ \ \ \ std::string\ ipv4str\_s(ipv4str);}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01059}01059\ \ \ \ \ \textcolor{keywordtype}{long}\ \textcolor{keywordtype}{long}\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{compute__ekf__sym_8m_afc7c28e2e37e9680fba99ce231839cb2}{exp}}\ =\ err-\/>exp\_seqnum;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01060}01060\ \ \ \ \ \textcolor{keywordtype}{long}\ \textcolor{keywordtype}{long}\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ rec\ =\ err-\/>rec\_seqnum;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01061}01061\ \ \ \ \ \textcolor{keywordtype}{long}\ \textcolor{keywordtype}{long}\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ timeoftxofcurrent\ =\ err-\/>timeoftxofcurrent;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01062}01062\ \ \ \ \ \textcolor{keywordtype}{long}\ \textcolor{keywordtype}{long}\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ timeoftxofprevious\ =\ err-\/>timeoftxofprevious;\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01063}01063\ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}hostTransceiver()::parse()\ detected\ an\ ERROR\ in\ sequence\ number\ from\ IP\ ="{}}\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01064}01064\ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ ipv4str\_s}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01065}01065\ \ \ \ \ \ \ \ \ \ <<\ \textcolor{stringliteral}{"{}Expected:"{}}\ <<\ \mbox{\hyperlink{compute__ekf__sym_8m_afc7c28e2e37e9680fba99ce231839cb2}{exp}}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01066}01066\ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ \textcolor{stringliteral}{"{}-\/\ Received:"{}}\ <<\ rec}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01067}01067\ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ \textcolor{stringliteral}{"{}-\/\ Missing:"{}}\ <<\ (rec\ -\/\ \mbox{\hyperlink{compute__ekf__sym_8m_afc7c28e2e37e9680fba99ce231839cb2}{exp}})}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01068}01068\ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ \textcolor{stringliteral}{"{}-\/\ Prev\ Frame\ TX\ at"{}}\ <<\ timeoftxofprevious\ <<\ \textcolor{stringliteral}{"{}us"{}}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01069}01069\ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ \textcolor{stringliteral}{"{}-\/\ This\ Frame\ TX\ at"{}}\ <<\ timeoftxofcurrent\ <<\ \textcolor{stringliteral}{"{}us"{}};\ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01070}01070\ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01071}01071\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01072}01072\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01073}\mbox{\hyperlink{structtmpStructROPframeHeader__t}{01073}}\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01074}01074\ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01075}\mbox{\hyperlink{structtmpStructROPframeHeader__t_adc657665d935e984841755c5a1822916}{01075}}\ \ \ \ \ uint32\_t\ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structtmpStructROPframeHeader__t_adc657665d935e984841755c5a1822916}{startofframe}};\ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01076}\mbox{\hyperlink{structtmpStructROPframeHeader__t_a2e85ee64fffd9b3eacba70aef42f2e21}{01076}}\ \ \ \ \ uint16\_t\ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structtmpStructROPframeHeader__t_a2e85ee64fffd9b3eacba70aef42f2e21}{ropssizeof}};\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01077}\mbox{\hyperlink{structtmpStructROPframeHeader__t_a78c2d6e1694fd0b02543909e64723d9d}{01077}}\ \ \ \ \ uint16\_t\ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structtmpStructROPframeHeader__t_a78c2d6e1694fd0b02543909e64723d9d}{ropsnumberof}};\ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01078}\mbox{\hyperlink{structtmpStructROPframeHeader__t_afa8f6a8d9c66f32c7da272cc42c1fb9d}{01078}}\ \ \ \ \ uint64\_t\ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structtmpStructROPframeHeader__t_afa8f6a8d9c66f32c7da272cc42c1fb9d}{ageofframe}};\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01079}\mbox{\hyperlink{structtmpStructROPframeHeader__t_ab31f07dd53d1edaeaf006a439d381756}{01079}}\ \ \ \ \ uint64\_t\ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structtmpStructROPframeHeader__t_ab31f07dd53d1edaeaf006a439d381756}{sequencenumber}};\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01080}01080\ \}\ \mbox{\hyperlink{structtmpStructROPframeHeader__t}{tmpStructROPframeHeader\_t}};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01081}01081\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01082}01082\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01083}\mbox{\hyperlink{hostTransceiver_8cpp_a62e6786a603224872d529626b48fdacd}{01083}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{hostTransceiver_8cpp_a62e6786a603224872d529626b48fdacd}{cpp\_protocol\_callback\_incaseoferror\_invalidFrame}}(EOreceiver\ *r)}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01084}01084\ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01085}01085\ \ \ \ \ \textcolor{keyword}{const}\ eOreceiver\_invalidframe\_error\_t\ *\ err\ =\ eo\_receiver\_GetInvalidFrameError(r);}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01086}01086\ \ \ \ \ \textcolor{keywordtype}{char}\ errmsg[256]\ =\ \{0\};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01087}01087\ \ \ \ \ \textcolor{keywordtype}{char}\ ipv4str[32]\ =\ \{\};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01088}01088\ \ \ \ \ eo\_common\_ipv4addr\_to\_string(err-\/>remipv4addr,\ ipv4str,\ \textcolor{keyword}{sizeof}(ipv4str));}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01089}01089\ \ \ \ \ std::string\ ipv4str\_s(ipv4str);}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01090}01090\ \ \ \ \ \mbox{\hyperlink{structtmpStructROPframeHeader__t}{tmpStructROPframeHeader\_t}}\ *header\ =\ (\mbox{\hyperlink{structtmpStructROPframeHeader__t}{tmpStructROPframeHeader\_t}}*)err-\/>ropframe;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01091}01091\ \ \ \ \ \textcolor{keywordtype}{long}\ \textcolor{keywordtype}{long}\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ ageofframe\ =\ header-\/>\mbox{\hyperlink{structtmpStructROPframeHeader__t_afa8f6a8d9c66f32c7da272cc42c1fb9d}{ageofframe}};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01092}01092\ \ \ \ \ \textcolor{keywordtype}{long}\ \textcolor{keywordtype}{long}\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ sequencenumber\ =\ header-\/>\mbox{\hyperlink{structtmpStructROPframeHeader__t_ab31f07dd53d1edaeaf006a439d381756}{sequencenumber}};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01093}01093\ \ \ \ \ uint16\_t\ ropframesize\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01094}01094\ \ \ \ \ eo\_ropframe\_Size\_Get(err-\/>ropframe,\ \&ropframesize);}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01095}01095\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01096}01096\ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}hostTransceiver()::parse()\ detected\ an\ ERROR\ of\ type\ INVALID\ FRAME\ from\ IP\ ="{}}\ <<\ ipv4str\_s;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01097}01097\ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}hostTransceiver()::parse()\ detected:"{}}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01098}01098\ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ \textcolor{stringliteral}{"{}ropframesize\ ="{}}\ \ \ <<\ ropframesize}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01099}01099\ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ \textcolor{stringliteral}{"{}ropsizeof\ ="{}}\ \ \ \ \ \ <<\ \textcolor{keyword}{static\_cast<}\textcolor{keywordtype}{int}\textcolor{keyword}{>}(header-\/>\mbox{\hyperlink{structtmpStructROPframeHeader__t_a2e85ee64fffd9b3eacba70aef42f2e21}{ropssizeof}})}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01100}01100\ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ \textcolor{stringliteral}{"{}ropnumberof\ ="{}}\ \ \ \ <<\ \textcolor{keyword}{static\_cast<}\textcolor{keywordtype}{int}\textcolor{keyword}{>}(header-\/>\mbox{\hyperlink{structtmpStructROPframeHeader__t_a78c2d6e1694fd0b02543909e64723d9d}{ropsnumberof}})}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01101}01101\ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ \textcolor{stringliteral}{"{}ageofframe\ ="{}}\ \ \ \ \ <<\ ageofframe}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01102}01102\ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ \textcolor{stringliteral}{"{}sequencenumber\ ="{}}\ <<\ sequencenumber;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01103}01103\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01104}01104\ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01105}01105\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01106}01106\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01107}01107\ \textcolor{keywordtype}{bool}\ HostTransceiver::prepareTransceiverConfig2(yarp::os::Searchable\ \&cfgtotal)}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01108}01108\ \{}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01109}01109\ \ \ \ \ memcpy(\&hosttxrxcfg,\ \&eo\_hosttransceiver\_cfg\_default,\ \textcolor{keyword}{sizeof}(eOhosttransceiver\_cfg\_t));}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01110}01110\ \ \ \ \ hosttxrxcfg.remoteboardipv4addr\ \ \ \ \ =\ remoteipaddr;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01111}01111\ \ \ \ \ hosttxrxcfg.remoteboardipv4port\ \ \ \ \ =\ ipport;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01112}01112\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01113}01113\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01114}01114\ \ \ \ \ \mbox{\hyperlink{structeth_1_1parser_1_1pc104Data}{eth::parser::pc104Data}}\ pc104data;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01115}01115\ \ \ \ \ \mbox{\hyperlink{namespaceeth_1_1parser_a8ec58da625146082584ad1a365bdd0e5}{eth::parser::read}}(cfgtotal,\ pc104data);}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01116}01116\ \textcolor{comment}{//\ \ \ \ eth::parser::print(pc104data);}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01117}01117\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01118}01118\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01119}01119\ \ \ \ \ \mbox{\hyperlink{structeth_1_1parser_1_1boardData}{eth::parser::boardData}}\ brddata;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01120}01120\ \ \ \ \ \mbox{\hyperlink{namespaceeth_1_1parser_a8ec58da625146082584ad1a365bdd0e5}{eth::parser::read}}(cfgtotal,\ brddata);}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01121}01121\ \textcolor{comment}{//\ \ \ \ eth::parser::print(brddata);}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01122}01122\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01123}01123\ \ \ \ \ capacityofTXpacket\ =\ brddata.\mbox{\hyperlink{structeth_1_1parser_1_1boardData_a7c0f599fede48871f957dade0d4ddbc1}{properties}}.\mbox{\hyperlink{structeth_1_1parser_1_1boardProperties_a20bddc9b1bf385bd1bd2ee9291785d3d}{maxSizeRXpacket}};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01124}01124\ \ \ \ \ maxSizeOfROP\ =\ brddata.\mbox{\hyperlink{structeth_1_1parser_1_1boardData_a7c0f599fede48871f957dade0d4ddbc1}{properties}}.\mbox{\hyperlink{structeth_1_1parser_1_1boardProperties_ac623d3d099709fb4d648d12d4d56397f}{maxSizeROP}};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01125}01125\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01126}01126\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01127}01127\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01128}01128\ \ \ \ \ \textcolor{comment}{//\ we\ build\ the\ hosttransceiver\ so\ that:}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01129}01129\ \ \ \ \ \textcolor{comment}{//\ 1.\ it\ can\ send\ a\ packet\ which\ can\ always\ be\ received\ by\ the\ board\ (max\ tx\ size\ =\ max\ rx\ size\ of\ remote\ board)}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01130}01130\ \ \ \ \ \textcolor{comment}{//\ 2.\ it\ has\ the\ same\ maxsize\ of\ rop\ as\ remote\ board}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01131}01131\ \ \ \ \ \textcolor{comment}{//\ 3.\ it\ has\ no\ regulars,\ no\ space\ for\ replies,\ and\ maximum\ space\ for\ occasionals.}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01132}01132\ \ \ \ \ \textcolor{comment}{//\ the\ properties\ of\ remote\ board\ are\ inside\ remoteTransceiverProperties\ and\ are\ taken\ from\ the\ xml\ file.}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01133}01133\ \ \ \ \ \textcolor{comment}{//\ after\ the\ transceiver\ is\ built\ and\ communication\ can\ happen,\ we\ shall\ verify\ if\ remoteTransceiverProperties\ has\ the\ same\ values}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01134}01134\ \ \ \ \ \textcolor{comment}{//\ of\ what\ is\ read\ from\ remote\ board.\ see\ funtion\ ethResources::verifyBoardTransceiver().}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01135}01135\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01136}01136\ \ \ \ \ hosttxrxcfg.sizes.capacityoftxpacket\ \ \ \ \ \ \ \ \ \ \ \ =\ capacityofTXpacket;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01137}01137\ \ \ \ \ hosttxrxcfg.sizes.capacityofrop\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ maxSizeOfROP;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01138}01138\ \ \ \ \ hosttxrxcfg.sizes.capacityofropframeregulars\ \ \ \ =\ eo\_ropframe\_sizeforZEROrops;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01139}01139\ \ \ \ \ hosttxrxcfg.sizes.capacityofropframereplies\ \ \ \ \ =\ eo\_ropframe\_sizeforZEROrops;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01140}01140\ \ \ \ \ hosttxrxcfg.sizes.capacityofropframeoccasionals\ =\ (hosttxrxcfg.sizes.capacityoftxpacket\ -\/\ eo\_ropframe\_sizeforZEROrops)\ -\/\ hosttxrxcfg.sizes.capacityofropframeregulars\ -\/\ hosttxrxcfg.sizes.capacityofropframereplies;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01141}01141\ \ \ \ \ hosttxrxcfg.sizes.maxnumberofregularrops\ \ \ \ \ \ \ \ =\ 0;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01142}01142\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01143}01143\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01144}01144\ \ \ \ \ \textcolor{comment}{//\ ok,\ now\ the\ nvset\ ...\ we\ use\ maximum\ capabilities\ so\ that\ we\ can\ manage\ communication\ of\ up\ to\ 12\ jomos}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01145}01145\ \ \ \ \ \textcolor{keyword}{const}\ eOnvset\_BRDcfg\_t*\ brdcf2use\ =\ \&eonvset\_BRDcfgMax;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01146}01146\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01147}01147\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01148}01148\ \ \ \ \ memcpy(\&nvsetbrdconfig,\ brdcf2use,\ \textcolor{keyword}{sizeof}(eOnvset\_BRDcfg\_t));}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01149}01149\ \ \ \ \ nvsetbrdconfig.boardnum\ =\ get\_protBRDnumber();}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01150}01150\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01151}01151\ \ \ \ \ hosttxrxcfg.nvsetbrdcfg\ =\ \&nvsetbrdconfig;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01152}01152\ \ \ \ \ hosttxrxcfg.extfn.onerrorseqnumber\ =\ \mbox{\hyperlink{hostTransceiver_8cpp_ad652286bc3934086edfebe9f4bb1d73e}{cpp\_protocol\_callback\_incaseoferror\_in\_sequencenumberReceived}};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01153}01153\ \ \ \ \ hosttxrxcfg.extfn.onerrorinvalidframe\ =\ \mbox{\hyperlink{hostTransceiver_8cpp_a62e6786a603224872d529626b48fdacd}{cpp\_protocol\_callback\_incaseoferror\_invalidFrame}};}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01154}01154\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01155}01155\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01156}01156\ \textcolor{preprocessor}{\#if\ !defined(HOSTTRANSCEIVER\_USE\_INTERNAL\_MUTEXES)}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01157}01157\ \ \ \ \ hosttxrxcfg.mutex\_fn\_new\ =\ NULL;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01158}01158\ \ \ \ \ hosttxrxcfg.transprotection\ =\ eo\_trans\_protection\_none;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01159}01159\ \ \ \ \ hosttxrxcfg.nvsetprotection\ =\ eo\_nvset\_protection\_none;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01160}01160\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01161}01161\ \ \ \ \ \textcolor{comment}{//\ mutex\ protection\ inside\ transceiver}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01162}01162\ \ \ \ \ hosttxrxcfg.mutex\_fn\_new\ =\ (eov\_mutex\_fn\_mutexderived\_new)\ eoy\_mutex\_New;}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01163}01163\ \ \ \ \ hosttxrxcfg.transprotection\ =\ eo\_trans\_protection\_enabled;\ \textcolor{comment}{//\ eo\_trans\_protection\_none}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01164}01164\ \ \ \ \ hosttxrxcfg.nvsetprotection\ =\ eo\_nvset\_protection\_one\_per\_endpoint;\ \textcolor{comment}{//\ eo\_nvset\_protection\_one\_per\_object\ //\ eo\_nvset\_protection\_none}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01165}01165\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01166}01166\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01167}01167\ \ \ \ \ \textcolor{keywordflow}{return}(\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01168}01168\ \}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01169}01169\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01170}01170\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01171}01171\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01172}01172\ \textcolor{comment}{//\ eof}}
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01173}01173\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01174}01174\ }
+\DoxyCodeLine{\Hypertarget{hostTransceiver_8cpp_source_l01175}01175\ }
+
+\end{DoxyCode}

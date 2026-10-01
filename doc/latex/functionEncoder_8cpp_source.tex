@@ -1,0 +1,245 @@
+\doxysection{function\+Encoder.\+cpp}
+\hypertarget{functionEncoder_8cpp_source}{}\label{functionEncoder_8cpp_source}\index{icub-\/main/src/libraries/ctrlLib/src/functionEncoder.cpp@{icub-\/main/src/libraries/ctrlLib/src/functionEncoder.cpp}}
+\mbox{\hyperlink{functionEncoder_8cpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00001}00001\ \textcolor{comment}{/*\ }}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00002}00002\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010\ RobotCub\ Consortium,\ European\ Commission\ FP6\ Project\ IST-\/004370}}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00003}00003\ \textcolor{comment}{\ *\ Author:\ Ugo\ Pattacini}}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00004}00004\ \textcolor{comment}{\ *\ email:\ \ ugo.pattacini@iit.it}}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00005}00005\ \textcolor{comment}{\ *\ website:\ www.robotcub.org}}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00006}00006\ \textcolor{comment}{\ *\ Permission\ is\ granted\ to\ copy,\ distribute,\ and/or\ modify\ this\ program}}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00007}00007\ \textcolor{comment}{\ *\ under\ the\ terms\ of\ the\ GNU\ General\ Public\ License,\ version\ 2\ or\ any}}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00008}00008\ \textcolor{comment}{\ *\ later\ version\ published\ by\ the\ Free\ Software\ Foundation.}}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00009}00009\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00010}00010\ \textcolor{comment}{\ *\ A\ copy\ of\ the\ license\ can\ be\ found\ at}}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00011}00011\ \textcolor{comment}{\ *\ http://www.robotcub.org/icub/license/gpl.txt}}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00012}00012\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00013}00013\ \textcolor{comment}{\ *\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but}}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00014}00014\ \textcolor{comment}{\ *\ WITHOUT\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of}}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00015}00015\ \textcolor{comment}{\ *\ MERCHANTABILITY\ or\ FITNESS\ FOR\ A\ PARTICULAR\ PURPOSE.\ See\ the\ GNU\ General}}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00016}00016\ \textcolor{comment}{\ *\ Public\ License\ for\ more\ details}}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00017}00017\ \textcolor{comment}{*/}}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00018}00018\ }
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00019}00019\ \textcolor{preprocessor}{\#include\ <algorithm>}}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00020}00020\ }
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00021}00021\ \textcolor{preprocessor}{\#include\ <gsl/gsl\_integration.h>}}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00022}00022\ }
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00023}00023\ \textcolor{preprocessor}{\#include\ <yarp/math/Math.h>}}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00024}00024\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{functionEncoder_8h}{iCub/ctrl/functionEncoder.h}}>}}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00025}00025\ }
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00026}\mbox{\hyperlink{functionEncoder_8cpp_a3e37bdfb2f20f535ef82197c5053d300}{00026}}\ \textcolor{preprocessor}{\#define\ CAST\_GSLFUNC(x)\ \ \ \ \ (static\_cast<gsl\_function*>(x))}}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00027}\mbox{\hyperlink{functionEncoder_8cpp_a3af9adc279a3afa4f4bd302e85bd68f5}{00027}}\ \textcolor{preprocessor}{\#define\ CAST\_GSLWS(x)\ \ \ \ \ \ \ (static\_cast<gsl\_integration\_workspace*>(x))}}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00028}\mbox{\hyperlink{functionEncoder_8cpp_a65c115fcacd0f22316103ef1c8166b0c}{00028}}\ \textcolor{preprocessor}{\#define\ WAVELET\_LUP\_SIZE\ \ \ \ 57}}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00029}00029\ }
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00030}00030\ \textcolor{keyword}{using\ namespace\ }yarp::os;}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00031}00031\ \textcolor{keyword}{using\ namespace\ }yarp::sig;}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00032}00032\ \textcolor{keyword}{using\ namespace\ }yarp::math;}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00033}00033\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceiCub_1_1ctrl}{iCub::ctrl}};}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00034}00034\ }
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00035}00035\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespaceiCub}{iCub}}}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00036}00036\ \{}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00037}00037\ }
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00038}00038\ \textcolor{keyword}{namespace\ }ctrl}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00039}00039\ \{}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00040}\mbox{\hyperlink{namespaceiCub_1_1ctrl_a5fb0ace6995de00f2fa87eb8bf083824}{00040}}\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{namespaceiCub_1_1ctrl_a5fb0ace6995de00f2fa87eb8bf083824}{waveLUP}}[\mbox{\hyperlink{functionEncoder_8cpp_a65c115fcacd0f22316103ef1c8166b0c}{WAVELET\_LUP\_SIZE}}][2]=\{\ \{\ 0.000,\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 0.0\ \},}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00041}00041\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 0.125,\ \ \ \ 0.0345833411415645\ \},}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00042}00042\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 0.250,\ \ \ \ \ 0.107309738113335\ \},}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00043}00043\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 0.375,\ \ \ \ \ 0.202014885729746\ \},\ }
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00044}00044\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 0.500,\ \ \ \ \ 0.328773960240219\ \},\ }
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00045}00045\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 0.625,\ \ \ \ \ 0.467801596736295\ \},}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00046}00046\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 0.750,\ \ \ \ \ 0.618433317340402\ \},}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00047}00047\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 0.875,\ \ \ \ \ 0.799799587363102\ \},}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00048}00048\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 1.000,\ \ \ \ \ \ 1.00839956631986\ \},}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00049}00049\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 1.125,\ \ \ \ \ \ 1.11213550554368\ \},}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00050}00050\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 1.250,\ \ \ \ \ \ 1.10075377628576\ \},}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00051}00051\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 1.375,\ \ \ \ \ \ 1.03456741914056\ \},}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00052}00052\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 1.500,\ \ \ \ \ 0.876691003658645\ \},}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00053}00053\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 1.625,\ \ \ \ \ 0.708936729237485\ \},}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00054}00054\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 1.750,\ \ \ \ \ 0.535149009932799\ \},}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00055}00055\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 1.875,\ \ \ \ \ 0.281586312944196\ \},}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00056}00056\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 2.000,\ \ \ -\/0.0358782406601501\ \},}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00057}00057\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 2.125,\ \ \ \ -\/0.233040642106083\ \},}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00058}00058\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 2.250,\ \ \ \ -\/0.302412553008806\ \},}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00059}00059\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 2.375,\ \ \ \ -\/0.321628766530846\ \},}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00060}00060\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 2.500,\ \ \ \ -\/0.241966742214465\ \},}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00061}00061\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 2.625,\ \ \ \ -\/0.190865137334676\ \},}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00062}00062\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 2.750,\ \ \ \ -\/0.175103704342541\ \},}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00063}00063\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 2.875,\ \ \ -\/0.0890678401406110\ \},}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00064}00064\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 3.000,\ \ \ \ 0.0407115008395991\ \},}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00065}00065\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 3.125,\ \ \ \ \ 0.108682072349430\ \},}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00066}00066\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 3.250,\ \ \ \ \ 0.118185639560005\ \},}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00067}00067\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 3.375,\ \ \ \ \ 0.101870197888310\ \},}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00068}00068\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 3.500,\ \ \ \ 0.0341494900045930\ \},}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00069}00069\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 3.625,\ \ \ 0.00431657421191742\ \},}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00070}00070\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 3.750,\ \ \ \ 0.0162890023018952\ \},}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00071}00071\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 3.875,\ \ \ 0.00436750867994683\ \},}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00072}00072\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 4.000,\ \ \ -\/0.0120853649259263\ \},}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00073}00073\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 4.125,\ \ \ -\/0.0194095628614931\ \},}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00074}00074\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 4.250,\ \ \ -\/0.0234198437934784\ \},}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00075}00075\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 4.375,\ \ \ -\/0.0169172631594144\ \},}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00076}00076\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 4.500,\ \ \ 0.00224836903406590\ \},}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00077}00077\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 4.625,\ \ \ 0.00948830118465152\ \},}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00078}00078\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 4.750,\ \ \ 0.00525142022644811\ \},}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00079}00079\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 4.875,\ \ \ 0.00340625270534754\ \},}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00080}00080\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 5.000,\ \ -\/0.00116770339087780\ \},}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00081}00081\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 5.125,\ \ -\/0.00296115923392665\ \},}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00082}00082\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 5.250,\ -\/0.000413390931405029\ \},}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00083}00083\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 5.375,\ \ 9.35269316433299e-\/05\ \},}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00084}00084\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 5.500,\ \ 0.000103919276941685\ \},}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00085}00085\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 5.625,\ \ 0.000321935964326630\ \},}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00086}00086\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 5.750,\ -\/1.90454590045895e-\/05\ \},}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00087}00087\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 5.875,\ -\/9.18215519817765e-\/05\ \},}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00088}00088\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 6.000,\ \ 2.02418174948211e-\/05\ \},}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00089}00089\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 6.125,\ \ 1.04451668231589e-\/05\ \},}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00090}00090\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 6.250,\ -\/3.36622541321180e-\/06\ \},}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00091}00091\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 6.375,\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 0.0\ \},}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00092}00092\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 6.500,\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 0.0\ \},}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00093}00093\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 6.625,\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 0.0\ \},}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00094}00094\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 6.750,\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 0.0\ \},}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00095}00095\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 6.875,\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 0.0\ \},}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00096}00096\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ 7.000,\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 0.0\ \}\ \};}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00097}00097\ }
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00098}00098\ \textcolor{comment}{\ \ \ \ /************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00099}\mbox{\hyperlink{classiCub_1_1ctrl_1_1WaveletEncoder_a25d7ca39ab7c66db15e46cab91926b19}{00099}}\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{namespaceiCub_1_1ctrl_a8b02a07fe903eef605790a49a23c8149}{waveletIntegrand}}(\textcolor{keywordtype}{double}\ \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}},\ \textcolor{keywordtype}{void}\ *params)}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00100}00100\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00101}00101\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1WaveletEncoder}{WaveletEncoder}}\ *pWavEnc=(\mbox{\hyperlink{classiCub_1_1ctrl_1_1WaveletEncoder}{WaveletEncoder}}*)params;}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00102}00102\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Vector\ \&values=*pWavEnc-\/>\mbox{\hyperlink{classiCub_1_1ctrl_1_1WaveletEncoder_a06afd9592c6c852a691947eed94bd419}{pVal}};}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00103}00103\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}=pWavEnc-\/>\mbox{\hyperlink{classiCub_1_1ctrl_1_1WaveletEncoder_a3a3673be42a35ddc3e09abe9f8c7cbb4}{iCoeff}};}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00104}00104\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ R=pWavEnc-\/>\mbox{\hyperlink{classiCub_1_1ctrl_1_1WaveletEncoder_a0b7680d57004e1b533c15f176aad56e2}{resolution}};}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00105}00105\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (pWavEnc-\/>\mbox{\hyperlink{classiCub_1_1ctrl_1_1WaveletEncoder_aec82662e07dbe5bd8cb938919ded391f}{interpFunction}}(values,\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}})-\/values[0])\ *\ (R*pWavEnc-\/>\mbox{\hyperlink{classiCub_1_1ctrl_1_1WaveletEncoder_aed1297f8bf085a507890fb11138f4044}{interpWavelet}}(R*\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}-\/\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}));}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00106}00106\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00107}00107\ \}}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00108}00108\ }
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00109}00109\ \}}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00110}00110\ }
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00111}00111\ }
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00112}00112\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00113}\mbox{\hyperlink{classiCub_1_1ctrl_1_1WaveletEncoder_a185197e32e0b737bee3dde7979b7047b}{00113}}\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1WaveletEncoder_a185197e32e0b737bee3dde7979b7047b}{WaveletEncoder::WaveletEncoder}}()}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00114}00114\ \{}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00115}00115\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1WaveletEncoder_a0b7680d57004e1b533c15f176aad56e2}{resolution}}=(\mbox{\hyperlink{functionEncoder_8cpp_a65c115fcacd0f22316103ef1c8166b0c}{WAVELET\_LUP\_SIZE}}-\/1)/2.0;}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00116}00116\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1WaveletEncoder_aa08b08f936c18f4d338fd32f90587279}{w}}=gsl\_integration\_workspace\_alloc(1000);}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00117}00117\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1WaveletEncoder_af0a9d9f62cee03728ea4fc7808ddbe8e}{F}}=\textcolor{keyword}{new}\ gsl\_function;}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00118}00118\ }
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00119}00119\ \ \ \ \ \mbox{\hyperlink{functionEncoder_8cpp_a3e37bdfb2f20f535ef82197c5053d300}{CAST\_GSLFUNC}}(\mbox{\hyperlink{classiCub_1_1ctrl_1_1WaveletEncoder_af0a9d9f62cee03728ea4fc7808ddbe8e}{F}})-\/>function=\&\mbox{\hyperlink{classiCub_1_1ctrl_1_1WaveletEncoder_a25d7ca39ab7c66db15e46cab91926b19}{waveletIntegrand}};}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00120}00120\ \ \ \ \ \mbox{\hyperlink{functionEncoder_8cpp_a3e37bdfb2f20f535ef82197c5053d300}{CAST\_GSLFUNC}}(\mbox{\hyperlink{classiCub_1_1ctrl_1_1WaveletEncoder_af0a9d9f62cee03728ea4fc7808ddbe8e}{F}})-\/>params=(\textcolor{keywordtype}{void}*)\textcolor{keyword}{this};}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00121}00121\ \}}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00122}00122\ }
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00123}00123\ }
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00124}00124\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00125}\mbox{\hyperlink{classiCub_1_1ctrl_1_1WaveletEncoder_aed1297f8bf085a507890fb11138f4044}{00125}}\ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1WaveletEncoder_aed1297f8bf085a507890fb11138f4044}{WaveletEncoder::interpWavelet}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}})}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00126}00126\ \{}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00127}00127\ \ \ \ \ \textcolor{keywordflow}{if}\ ((\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}<=\mbox{\hyperlink{namespaceiCub_1_1ctrl_a5fb0ace6995de00f2fa87eb8bf083824}{waveLUP}}[0][0])\ ||\ (\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}>=\mbox{\hyperlink{namespaceiCub_1_1ctrl_a5fb0ace6995de00f2fa87eb8bf083824}{waveLUP}}[\mbox{\hyperlink{functionEncoder_8cpp_a65c115fcacd0f22316103ef1c8166b0c}{WAVELET\_LUP\_SIZE}}-\/1][0]))}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00128}00128\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ 0.0;}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00129}00129\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00130}00130\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00131}00131\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ i=(\textcolor{keywordtype}{unsigned}\ int)(\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}*(\textcolor{keywordtype}{double})(\mbox{\hyperlink{functionEncoder_8cpp_a65c115fcacd0f22316103ef1c8166b0c}{WAVELET\_LUP\_SIZE}}-\/1)/\mbox{\hyperlink{namespaceiCub_1_1ctrl_a5fb0ace6995de00f2fa87eb8bf083824}{waveLUP}}[\mbox{\hyperlink{functionEncoder_8cpp_a65c115fcacd0f22316103ef1c8166b0c}{WAVELET\_LUP\_SIZE}}-\/1][0]);}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00132}00132\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ x0=\mbox{\hyperlink{namespaceiCub_1_1ctrl_a5fb0ace6995de00f2fa87eb8bf083824}{waveLUP}}[i][0];}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00133}00133\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ y0=\mbox{\hyperlink{namespaceiCub_1_1ctrl_a5fb0ace6995de00f2fa87eb8bf083824}{waveLUP}}[i][1];}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00134}00134\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{compute__ekf__sym_8m_ac39b33361203e68d7820336db48d45e6}{x1}}=\mbox{\hyperlink{namespaceiCub_1_1ctrl_a5fb0ace6995de00f2fa87eb8bf083824}{waveLUP}}[i+1][0];}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00135}00135\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ y1=\mbox{\hyperlink{namespaceiCub_1_1ctrl_a5fb0ace6995de00f2fa87eb8bf083824}{waveLUP}}[i+1][1];}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00136}00136\ }
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00137}00137\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ ((\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}-\/x0)/(\mbox{\hyperlink{compute__ekf__sym_8m_ac39b33361203e68d7820336db48d45e6}{x1}}-\/x0))*(y1-\/y0)+y0;}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00138}00138\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00139}00139\ \}}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00140}00140\ }
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00141}00141\ }
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00142}00142\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00143}\mbox{\hyperlink{classiCub_1_1ctrl_1_1WaveletEncoder_aec82662e07dbe5bd8cb938919ded391f}{00143}}\ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1WaveletEncoder_aec82662e07dbe5bd8cb938919ded391f}{WaveletEncoder::interpFunction}}(\textcolor{keyword}{const}\ Vector\ \&values,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}})}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00144}00144\ \{}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00145}00145\ \ \ \ \ \textcolor{comment}{//\ x\ shall\ be\ in\ [0,1]}}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00146}00146\ \ \ \ \ \textcolor{keywordtype}{double}\ L=(double)values.size()-\/1.0;}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00147}00147\ }
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00148}00148\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}<=0.0)}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00149}00149\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ values[0];}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00150}00150\ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}>=1.0)}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00151}00151\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ values[(size\_t)L];}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00152}00152\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00153}00153\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00154}00154\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{size\_t}\ i=(size\_t)(\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}*L);}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00155}00155\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ x0=((double)i)/L;}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00156}00156\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ y0=values[i];}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00157}00157\ }
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00158}00158\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (++i>L)}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00159}00159\ \ \ \ \ \ \ \ \ \ \ \ \ i=(size\_t)L;}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00160}00160\ }
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00161}00161\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{compute__ekf__sym_8m_ac39b33361203e68d7820336db48d45e6}{x1}}=((double)i)/L;}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00162}00162\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ y1=values[i];}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00163}00163\ }
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00164}00164\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ ((\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}-\/x0)/(\mbox{\hyperlink{compute__ekf__sym_8m_ac39b33361203e68d7820336db48d45e6}{x1}}-\/x0))*(y1-\/y0)+y0;}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00165}00165\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00166}00166\ \}}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00167}00167\ }
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00168}00168\ }
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00169}00169\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00170}\mbox{\hyperlink{classiCub_1_1ctrl_1_1WaveletEncoder_ae373678add09bd57be59bffee935e88f}{00170}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1WaveletEncoder_ae373678add09bd57be59bffee935e88f}{WaveletEncoder::setEncoderOptions}}(\textcolor{keyword}{const}\ Property\ \&options)}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00171}00171\ \{}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00172}00172\ \ \ \ \ \textcolor{keywordflow}{if}\ (options.check(\textcolor{stringliteral}{"{}resolution"{}}))}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00173}00173\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00174}00174\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ R=options.find(\textcolor{stringliteral}{"{}resolution"{}}).asFloat64();}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00175}00175\ }
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00176}00176\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ apply\ saturation}}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00177}00177\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1WaveletEncoder_a0b7680d57004e1b533c15f176aad56e2}{resolution}}=std::max(0.0,std::min(R,\textcolor{keywordtype}{double}(\mbox{\hyperlink{functionEncoder_8cpp_a65c115fcacd0f22316103ef1c8166b0c}{WAVELET\_LUP\_SIZE}}-\/1)));}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00178}00178\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00179}00179\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00180}00180\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00181}00181\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00182}00182\ \}}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00183}00183\ }
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00184}00184\ }
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00185}00185\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00186}\mbox{\hyperlink{classiCub_1_1ctrl_1_1WaveletEncoder_a9bb4c5bfc5fe6bdf737d8cbc0bb0dd4a}{00186}}\ Property\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1WaveletEncoder_a9bb4c5bfc5fe6bdf737d8cbc0bb0dd4a}{WaveletEncoder::getEncoderOptions}}()}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00187}00187\ \{}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00188}00188\ \ \ \ \ Property\ options;}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00189}00189\ \ \ \ \ options.put(\textcolor{stringliteral}{"{}resolution"{}},\mbox{\hyperlink{classiCub_1_1ctrl_1_1WaveletEncoder_a0b7680d57004e1b533c15f176aad56e2}{resolution}});}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00190}00190\ \ \ \ \ \textcolor{keywordflow}{return}\ options;}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00191}00191\ \}}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00192}00192\ }
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00193}00193\ }
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00194}00194\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00195}\mbox{\hyperlink{classiCub_1_1ctrl_1_1WaveletEncoder_ac4a98855c948025a09200bfbb30fa416}{00195}}\ \mbox{\hyperlink{structiCub_1_1ctrl_1_1Code}{Code}}\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1WaveletEncoder_ac4a98855c948025a09200bfbb30fa416}{WaveletEncoder::encode}}(\textcolor{keyword}{const}\ Vector\ \&values)}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00196}00196\ \{}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00197}00197\ \ \ \ \ \mbox{\hyperlink{structiCub_1_1ctrl_1_1Code}{Code}}\ code;}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00198}00198\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1WaveletEncoder_a06afd9592c6c852a691947eed94bd419}{pVal}}=\&values;}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00199}00199\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ N=(\textcolor{keywordtype}{unsigned}\ int)\mbox{\hyperlink{classiCub_1_1ctrl_1_1WaveletEncoder_a0b7680d57004e1b533c15f176aad56e2}{resolution}}+1;\ \ \ \ }
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00200}00200\ \ \ \ \ code.\mbox{\hyperlink{structiCub_1_1ctrl_1_1Code_a3cae77207aca059c9e0c5d3534e10bdf}{coefficients}}.resize(N+1);}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00201}00201\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{debugFunctions_8cpp_a7a3172cc98e93d8eadfb9ab30373799e}{error}};}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00202}00202\ }
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00203}00203\ \ \ \ \ code.\mbox{\hyperlink{structiCub_1_1ctrl_1_1Code_a3cae77207aca059c9e0c5d3534e10bdf}{coefficients}}[0]=values[0];}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00204}00204\ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{classiCub_1_1ctrl_1_1WaveletEncoder_a3a3673be42a35ddc3e09abe9f8c7cbb4}{iCoeff}}=0;\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1WaveletEncoder_a3a3673be42a35ddc3e09abe9f8c7cbb4}{iCoeff}}<N;\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1WaveletEncoder_a3a3673be42a35ddc3e09abe9f8c7cbb4}{iCoeff}}++)}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00205}00205\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00206}00206\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ tau1=(\mbox{\hyperlink{namespaceiCub_1_1ctrl_a5fb0ace6995de00f2fa87eb8bf083824}{waveLUP}}[0][0]+\mbox{\hyperlink{classiCub_1_1ctrl_1_1WaveletEncoder_a3a3673be42a35ddc3e09abe9f8c7cbb4}{iCoeff}})/\mbox{\hyperlink{classiCub_1_1ctrl_1_1WaveletEncoder_a0b7680d57004e1b533c15f176aad56e2}{resolution}};}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00207}00207\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ tau2=(\mbox{\hyperlink{namespaceiCub_1_1ctrl_a5fb0ace6995de00f2fa87eb8bf083824}{waveLUP}}[\mbox{\hyperlink{functionEncoder_8cpp_a65c115fcacd0f22316103ef1c8166b0c}{WAVELET\_LUP\_SIZE}}-\/1][0]+\mbox{\hyperlink{classiCub_1_1ctrl_1_1WaveletEncoder_a3a3673be42a35ddc3e09abe9f8c7cbb4}{iCoeff}})/\mbox{\hyperlink{classiCub_1_1ctrl_1_1WaveletEncoder_a0b7680d57004e1b533c15f176aad56e2}{resolution}};}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00208}00208\ }
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00209}00209\ \ \ \ \ \ \ \ \ gsl\_integration\_qag(\mbox{\hyperlink{functionEncoder_8cpp_a3e37bdfb2f20f535ef82197c5053d300}{CAST\_GSLFUNC}}(\mbox{\hyperlink{classiCub_1_1ctrl_1_1WaveletEncoder_af0a9d9f62cee03728ea4fc7808ddbe8e}{F}}),tau1,tau2,1\mbox{\hyperlink{compute__ekf__fast_8m_a08a4415e9d594ff960030b921d42b91e}{e}}-\/3,1\mbox{\hyperlink{compute__ekf__fast_8m_a08a4415e9d594ff960030b921d42b91e}{e}}-\/2,1000,GSL\_INTEG\_GAUSS61,\mbox{\hyperlink{functionEncoder_8cpp_a3af9adc279a3afa4f4bd302e85bd68f5}{CAST\_GSLWS}}(\mbox{\hyperlink{classiCub_1_1ctrl_1_1WaveletEncoder_aa08b08f936c18f4d338fd32f90587279}{w}}),}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00210}00210\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \&code.\mbox{\hyperlink{structiCub_1_1ctrl_1_1Code_a3cae77207aca059c9e0c5d3534e10bdf}{coefficients}}[\mbox{\hyperlink{classiCub_1_1ctrl_1_1WaveletEncoder_a3a3673be42a35ddc3e09abe9f8c7cbb4}{iCoeff}}+1],\&\mbox{\hyperlink{debugFunctions_8cpp_a7a3172cc98e93d8eadfb9ab30373799e}{error}});}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00211}00211\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00212}00212\ }
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00213}00213\ \ \ \ \ \textcolor{keywordflow}{return}\ code;}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00214}00214\ \}}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00215}00215\ }
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00216}00216\ }
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00217}00217\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00218}\mbox{\hyperlink{classiCub_1_1ctrl_1_1WaveletEncoder_a631f0e438f2c03f5643ea24c987902fd}{00218}}\ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1WaveletEncoder_a631f0e438f2c03f5643ea24c987902fd}{WaveletEncoder::decode}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{structiCub_1_1ctrl_1_1Code}{Code}}\ \&code,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}})}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00219}00219\ \{}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00220}00220\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ N=(\textcolor{keywordtype}{unsigned}\ int)\mbox{\hyperlink{classiCub_1_1ctrl_1_1WaveletEncoder_a0b7680d57004e1b533c15f176aad56e2}{resolution}}+1;}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00221}00221\ \ \ \ \ \textcolor{keywordtype}{double}\ decodedVal=code.\mbox{\hyperlink{structiCub_1_1ctrl_1_1Code_a3cae77207aca059c9e0c5d3534e10bdf}{coefficients}}[0];}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00222}00222\ }
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00223}00223\ \ \ \ \ \textcolor{comment}{//\ compute\ the\ linear\ combination\ of\ wavelets}}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00224}00224\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}=0;\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}<N;\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}++)}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00225}00225\ \ \ \ \ \ \ \ \ decodedVal+=code.\mbox{\hyperlink{structiCub_1_1ctrl_1_1Code_a3cae77207aca059c9e0c5d3534e10bdf}{coefficients}}[\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}+1]*\mbox{\hyperlink{classiCub_1_1ctrl_1_1WaveletEncoder_aed1297f8bf085a507890fb11138f4044}{interpWavelet}}(\mbox{\hyperlink{classiCub_1_1ctrl_1_1WaveletEncoder_a0b7680d57004e1b533c15f176aad56e2}{resolution}}*\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}-\/\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}});}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00226}00226\ }
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00227}00227\ \ \ \ \ \textcolor{keywordflow}{return}\ decodedVal;}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00228}00228\ \}}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00229}00229\ }
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00230}00230\ }
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00231}00231\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00232}\mbox{\hyperlink{classiCub_1_1ctrl_1_1WaveletEncoder_a8e6027a88d67019a7b6dd4502ed8ef42}{00232}}\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1WaveletEncoder_a8e6027a88d67019a7b6dd4502ed8ef42}{WaveletEncoder::\string~WaveletEncoder}}()}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00233}00233\ \{}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00234}00234\ \ \ \ \ gsl\_integration\_workspace\_free(\mbox{\hyperlink{functionEncoder_8cpp_a3af9adc279a3afa4f4bd302e85bd68f5}{CAST\_GSLWS}}(\mbox{\hyperlink{classiCub_1_1ctrl_1_1WaveletEncoder_aa08b08f936c18f4d338fd32f90587279}{w}}));}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00235}00235\ \ \ \ \ \textcolor{keyword}{delete}\ \mbox{\hyperlink{functionEncoder_8cpp_a3e37bdfb2f20f535ef82197c5053d300}{CAST\_GSLFUNC}}(\mbox{\hyperlink{classiCub_1_1ctrl_1_1WaveletEncoder_af0a9d9f62cee03728ea4fc7808ddbe8e}{F}});}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00236}00236\ \}}
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00237}00237\ }
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00238}00238\ }
+\DoxyCodeLine{\Hypertarget{functionEncoder_8cpp_source_l00239}00239\ }
+
+\end{DoxyCode}

@@ -1,0 +1,1312 @@
+\doxysection{Eth\+Updater.\+cpp}
+\hypertarget{EthUpdater_8cpp_source}{}\label{EthUpdater_8cpp_source}\index{icub-\/main/src/tools/ethLoader/ethLoaderLib/EthUpdater.cpp@{icub-\/main/src/tools/ethLoader/ethLoaderLib/EthUpdater.cpp}}
+\mbox{\hyperlink{EthUpdater_8cpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00001}00001\ \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00002}00002\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2012\ RobotCub\ Consortium}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00003}00003\ \textcolor{comment}{\ *\ Author:\ Alessandro\ Scalzo\ alessandro.scalzo@iit.it,\ Marco\ Accame\ marco.accame@iit.it}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00004}00004\ \textcolor{comment}{\ *\ CopyPolicy:\ Released\ under\ the\ terms\ of\ the\ GNU\ GPL\ v2.0.}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00005}00005\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00006}00006\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00007}00007\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00008}00008\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{EthUpdater_8h}{EthUpdater.h}}"{}}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00009}00009\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00010}00010\ \textcolor{preprocessor}{\#include\ <ace/ACE.h>}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00011}00011\ \textcolor{preprocessor}{\#include\ <yarp/os/Time.h>}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00012}00012\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00013}00013\ \textcolor{preprocessor}{\#include\ <yarp/os/Log.h>}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00014}00014\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00015}00015\ \textcolor{keyword}{using\ namespace\ }yarp::os;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00016}00016\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00017}00017\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{classEthUpdater_a82cf9631cbb689ffc1833daf166be7e8}{EthUpdater::partition\_APPLICATION}}\ =\ uprot\_partitionAPPLICATION;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00018}00018\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{classEthUpdater_a143c95b01523edcfc66995ec88d3c433}{EthUpdater::partition\_LOADER}}\ =\ uprot\_partitionLOADER;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00019}00019\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{classEthUpdater_ac8989e208e05e49a831b55bec9bcb51e}{EthUpdater::partition\_UPDATER}}\ =\ uprot\_partitionUPDATER;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00020}00020\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00021}00021\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00022}\mbox{\hyperlink{EthUpdater_8cpp_ac40603456d117d118b69bc25bb9344f1}{00022}}\ \textcolor{preprocessor}{\#define\ PRINT\_DEBUG\_INFO\_ON\_TERMINAL}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00023}00023\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00024}00024\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00025}00025\ \textcolor{comment}{//\ TODO:\ check\ here\ if\ it\ is\ called\ and\ when\ (it\ seems\ that\ it's\ never\ called)}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00026}\mbox{\hyperlink{classEthUpdater_a0b5ff7be6cfacb2df2e665398910dc34}{00026}}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{classEthUpdater_a0b5ff7be6cfacb2df2e665398910dc34}{EthUpdater::cmdDiscover}}()}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00027}00027\ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00028}00028\ \ \ \ \ \mbox{\hyperlink{classEthUpdater_abbf067f511ae7810cf841e8e14cc1ef7}{mBoardList}}.\mbox{\hyperlink{classBoardList_a15956e7ace28aee93a5d5f7c62f1e46a}{empty}}();}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00029}00029\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00030}00030\ \ \ \ \ eOuprot\_cmd\_DISCOVER\_t\ *\ \mbox{\hyperlink{dataTypes_8h_a4d43e8212bdc9dbee866506f04effcea}{cmd}}\ =\ (eOuprot\_cmd\_DISCOVER\_t*)\ \mbox{\hyperlink{classEthUpdater_a82b318e27ce3c179ccf1f7d460e68721}{mTxBuffer}};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00031}00031\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00032}00032\ \ \ \ \ memset(\mbox{\hyperlink{dataTypes_8h_a4d43e8212bdc9dbee866506f04effcea}{cmd}},\ EOUPROT\_VALUE\_OF\_UNUSED\_BYTE,\ \textcolor{keyword}{sizeof}(eOuprot\_cmd\_DISCOVER\_t));}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00033}00033\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00034}00034\ \ \ \ \ \mbox{\hyperlink{dataTypes_8h_a4d43e8212bdc9dbee866506f04effcea}{cmd}}-\/>opc\ =\ uprot\_OPC\_LEGACY\_SCAN;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00035}00035\ \ \ \ \ \mbox{\hyperlink{dataTypes_8h_a4d43e8212bdc9dbee866506f04effcea}{cmd}}-\/>opc2\ =\ uprot\_OPC\_DISCOVER;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00036}00036\ \ \ \ \ \mbox{\hyperlink{dataTypes_8h_a4d43e8212bdc9dbee866506f04effcea}{cmd}}-\/>jump2updater\ =\ 1;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00037}00037\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00038}00038\ \ \ \ \ \textcolor{keywordtype}{int}\ numberOfDiscovered\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00039}00039\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00040}00040\ \ \ \ \ \mbox{\hyperlink{classEthUpdater_a6a7a14a8a676b55c630bdb2d3e7e9391}{mSocket}}.\mbox{\hyperlink{classDSocket_a9cf9865268e0a89ef2190a4e954ca8fb}{SendBroad}}(\mbox{\hyperlink{dataTypes_8h_a4d43e8212bdc9dbee866506f04effcea}{cmd}},\ \textcolor{keyword}{sizeof}(eOuprot\_cmd\_DISCOVER\_t),\ \mbox{\hyperlink{classEthUpdater_a8effca58cc51dad2b2f91d4f8c508636}{mPort}});}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00041}00041\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00042}00042\ \ \ \ \ ACE\_UINT16\ rxPort;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00043}00043\ \ \ \ \ ACE\_UINT32\ rxAddress\ =\ \mbox{\hyperlink{classEthUpdater_ad11a89897d1818fa5859aeaeb51cf960}{mMyAddress}};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00044}00044\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00045}00045\ \ \ \ \ \textcolor{keywordflow}{while}\ (\mbox{\hyperlink{classEthUpdater_a6a7a14a8a676b55c630bdb2d3e7e9391}{mSocket}}.\mbox{\hyperlink{classDSocket_aa5cab9efcdda8ead2468271c945f3410}{ReceiveFrom}}(\mbox{\hyperlink{classEthUpdater_a46d680ba801a509701aa81e34b1ac42e}{mRxBuffer}},\ \textcolor{keyword}{sizeof}(\mbox{\hyperlink{classEthUpdater_a46d680ba801a509701aa81e34b1ac42e}{mRxBuffer}}),\ rxAddress,\ rxPort,\ 1000)>0)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00046}00046\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00047}00047\ \ \ \ \ \ \ \ \ eOuprot\_cmd\_DISCOVER\_REPLY\_t\ *\ disc\ =\ (eOuprot\_cmd\_DISCOVER\_REPLY\_t*)\ \mbox{\hyperlink{classEthUpdater_a46d680ba801a509701aa81e34b1ac42e}{mRxBuffer}};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00048}00048\ \ \ \ \ \ \ \ \ eOuprot\_cmd\_LEGACY\_SCAN\_REPLY\_t\ *\ scan\ =\ (eOuprot\_cmd\_LEGACY\_SCAN\_REPLY\_t*)\ \mbox{\hyperlink{classEthUpdater_a46d680ba801a509701aa81e34b1ac42e}{mRxBuffer}};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00049}00049\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ ipaddr[20];}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00050}00050\ \ \ \ \ \ \ \ \ snprintf(ipaddr,\ \textcolor{keyword}{sizeof}(ipaddr),\ \textcolor{stringliteral}{"{}\%d.\%d.\%d.\%d"{}},(rxAddress>>24)\&0xFF,\ (rxAddress>>16)\&0xFF,\ (rxAddress>>8)\&0xFF,\ rxAddress\&0xFF);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00051}00051\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00052}00052\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ if\ I\ received\ the\ extended\ reply\ I'll\ pass\ throughout\ it}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00053}00053\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00054}00054\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00055}00055\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ otherwise\ process\ it\ as\ usual}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00056}00056\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(uprot\_OPC\_DISCOVER\ ==\ disc-\/>reply.opc)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00057}00057\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00058}00058\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ the\ board\ has\ replied\ with\ the\ new\ protocol.}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00059}00059\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (rxAddress\ !=\ \mbox{\hyperlink{classEthUpdater_ad11a89897d1818fa5859aeaeb51cf960}{mMyAddress}})}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00060}00060\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00061}00061\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structboardInfo__t}{boardInfo\_t}}\ binfo\ =\ \{0\};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00062}00062\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00063}00063\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ the\ protococol\ version\ and\ capabilities\ are\ properties\ of\ the\ running\ process.}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00064}00064\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ binfo.\mbox{\hyperlink{structboardInfo__t_a3e5d2e1e3c1cceec5ac815783140734f}{protversion}}\ =\ disc-\/>reply.protversion;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00065}00065\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ binfo.\mbox{\hyperlink{structboardInfo__t_a8b562dcc47c2bce3b22e6ad128690ada}{capabilities}}\ =\ disc-\/>capabilities;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00066}00066\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00067}00067\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ memcpy(\&binfo.\mbox{\hyperlink{structboardInfo__t_a3c019c9a2610fcc5dd2917c66496e0e4}{macaddress}},\ disc-\/>mac48,\ 6);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00068}00068\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ binfo.\mbox{\hyperlink{structboardInfo__t_a0caa0cd978c836a7c4a3c9fb96977618}{boardtype}}\ =\ disc-\/>boardtype;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00069}00069\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00070}00070\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ memcpy(\&binfo.\mbox{\hyperlink{structboardInfo__t_ab3165317853e89b4cd43b2fdeaca2007}{processes}},\ \&disc-\/>processes,\ \textcolor{keyword}{sizeof}(eOuprot\_proctable\_t));}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00071}00071\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ memcpy(binfo.\mbox{\hyperlink{structboardInfo__t_ae79fddbbcf5ee3484156d87fa6579e84}{boardinfo32}},\ disc-\/>boardinfo32,\ \textcolor{keyword}{sizeof}(binfo.\mbox{\hyperlink{structboardInfo__t_ae79fddbbcf5ee3484156d87fa6579e84}{boardinfo32}}));}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00072}00072\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00073}00073\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classBoardInfo}{BoardInfo}}\ *pBoard\ =\ \textcolor{keyword}{new}\ \mbox{\hyperlink{classBoardInfo}{BoardInfo}}(rxAddress,\ binfo);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00074}00074\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00075}00075\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEthUpdater_abbf067f511ae7810cf841e8e14cc1ef7}{mBoardList}}.\mbox{\hyperlink{classBoardList_a202ca258402acdffd90e130fa6f0ba76}{addBoard}}(pBoard);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00076}00076\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00077}00077\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ numberOfDiscovered++;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00078}00078\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00079}00079\ \textcolor{preprocessor}{\#if\ defined(PRINT\_DEBUG\_INFO\_ON\_TERMINAL)}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00080}00080\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ uint8\_t\ index\ =\ eouprot\_process2index((eOuprot\_process\_t)disc-\/>processes.runningnow);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00081}00081\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}Discovered\ a\ board\ @\ \%s:\ \%s\ w/\ \%s\ v\ \%d.\%d\ running\ protocol\ v\ \%d\ w/\ capabilities\ =\ 0x\%x.\(\backslash\)n"{}},}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00082}00082\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ipaddr,}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00083}00083\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ eoboards\_type2string2((eObrd\_type\_t)disc-\/>boardtype,\ eobool\_true),}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00084}00084\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ eouprot\_process2string((eOuprot\_process\_t)disc-\/>processes.runningnow),}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00085}00085\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ disc-\/>processes.info[index].version.major,}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00086}00086\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ disc-\/>processes.info[index].version.minor,}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00087}00087\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ disc-\/>reply.protversion,}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00088}00088\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ disc-\/>capabilities);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00089}00089\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ fflush(stdout);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00090}00090\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00091}00091\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00092}00092\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00093}00093\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00094}00094\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (uprot\_OPC\_LEGACY\_SCAN\ ==\ scan-\/>opc)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00095}00095\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00096}00096\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ we\ have\ an\ old\ board\ ...\ by\ definition\ it\ has\ protocol\ version\ 0.}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00097}00097\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00098}00098\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (rxAddress!=\mbox{\hyperlink{classEthUpdater_ad11a89897d1818fa5859aeaeb51cf960}{mMyAddress}})}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00099}00099\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00100}00100\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00101}00101\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ the\ protococol\ version\ and\ capabilities\ are\ properties\ of\ the\ running\ process.}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00102}00102\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ from\ the\ legacy\ answer\ uprot\_OPC\_LEGACY\_SCAN\ i\ know\ that\ we\ have\ protocol\ version\ 0.}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00103}00103\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ however\ ...\ which\ process\ is\ it\ replying?\ the\ most\ probable\ is\ eUpdater,\ the\ second\ most\ probable\ is}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00104}00104\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ eApplication.\ It\ is\ unlikely\ that\ it\ is\ a\ legacy\ eMaintainer\ because\ we\ should\ not\ use\ it.}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00105}00105\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ i\ decide\ the\ following:}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00106}00106\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ i\ give\ the\ permissions\ of\ legacy\ updater\ which\ contains\ those\ of\ legacy\ application.}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00107}00107\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ because\ even\ if\ it\ was\ the\ application\ which\ replied\ then,\ surely\ now\ it\ is\ the\ updater\ running.}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00108}00108\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ACE\_UINT8\ protocol\_version\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00109}00109\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ i\ dont\ have\ such\ a\ mas,\ hence\ i\ use\ the\ default\ for\ protocol\ 0,\ thinking\ that\ ....}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00110}00110\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ACE\_UINT32\ protocol\_capabilities\ =\ eouprot\_get\_capabilities(eUpdater,\ protocol\_version);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00111}00111\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00112}00112\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ACE\_UINT8\ procmajor\ =\ scan-\/>version.major;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00113}00113\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ACE\_UINT8\ procminor\ =\ scan-\/>version.minor;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00114}00114\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00115}00115\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00116}00116\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ACE\_UINT32\ mask=*(ACE\_UINT32*)(scan-\/>ipmask);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00117}00117\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ACE\_UINT64\ mac=0;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00118}00118\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00119}00119\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i=7;\ i>=0;\ -\/-\/i)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00120}00120\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00121}00121\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ mac=(mac<<8)|scan-\/>mac48[i];}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00122}00122\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00123}00123\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00124}00124\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classBoardInfo}{BoardInfo}}\ *pBoard\ =\ \textcolor{keyword}{new}\ \mbox{\hyperlink{classBoardInfo}{BoardInfo}}(rxAddress,\ mask,\ mac,\ procmajor,\ procminor,\ protocol\_version,\ protocol\_capabilities);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00125}00125\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00126}00126\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEthUpdater_abbf067f511ae7810cf841e8e14cc1ef7}{mBoardList}}.\mbox{\hyperlink{classBoardList_a202ca258402acdffd90e130fa6f0ba76}{addBoard}}(pBoard);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00127}00127\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00128}00128\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ numberOfDiscovered++;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00129}00129\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00130}00130\ \textcolor{preprocessor}{\#if\ defined(PRINT\_DEBUG\_INFO\_ON\_TERMINAL)}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00131}00131\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}Discovered\ a\ board\ @\ \%s:\ the\ running\ process\ is\ v\ \%d.\%d,\ uses\ legacy\ protocol,\ i\ assume\ protocol\ capabilities\ =\ 0x\%x.\(\backslash\)n"{}},}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00132}00132\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ipaddr,\ procmajor,\ procminor,\ protocol\_capabilities);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00133}00133\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ fflush(stdout);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00134}00134\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00135}00135\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00136}00136\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00137}00137\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00138}00138\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00139}00139\ \ \ \ \ \textcolor{keywordflow}{return}\ numberOfDiscovered;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00140}00140\ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00141}00141\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00142}00142\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00143}\mbox{\hyperlink{classEthUpdater_a7b46366b734be3ee7c9558dd68c087a4}{00143}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classEthUpdater_a7b46366b734be3ee7c9558dd68c087a4}{EthUpdater::isCmdSupported}}(eOuprot\_proc\_capabilities\_t\ capability,\ ACE\_UINT32\ address)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00144}00144\ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00145}00145\ \ \ \ \ \textcolor{comment}{//\ search\ for\ the\ BoardInfo\ with\ a\ given\ address\ ...\ if\ we\ have\ a\ double\ address\ then\ we\ return\ a\ vector}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00146}00146\ \ \ \ \ \textcolor{comment}{//\ we\ also\ may\ return\ a\ vector\ if\ address\ is\ 0\ because\ we\ search\ for\ the\ selected.}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00147}00147\ \ \ \ \ vector<BoardInfo\ *>\ boards\ =\ \mbox{\hyperlink{classEthUpdater_abbf067f511ae7810cf841e8e14cc1ef7}{mBoardList}}.\mbox{\hyperlink{classBoardList_ad850e4cf424a6cce0ba061f0ddaa12b8}{getBoards}}(address);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00148}00148\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00149}00149\ \ \ \ \ \textcolor{keywordflow}{if}(0\ ==\ boards.size())}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00150}00150\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00151}00151\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00152}00152\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00153}00153\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00154}00154\ \ \ \ \ \textcolor{comment}{//\ i\ assume\ it\ is\ true.\ i\ return\ true\ only\ if\ all\ the\ boards\ support\ it.}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00155}00155\ \ \ \ \ \textcolor{keywordtype}{bool}\ ret\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00156}00156\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i=0;\ i<boards.size();\ i++)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00157}00157\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00158}00158\ \ \ \ \ \ \ \ \ uint32\_t\ mask\ =\ boards[i]-\/>mProtocolCapabilities;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00159}00159\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ r\ =\ ((mask\ \&\ capability)\ ==\ capability)\ ?\ true\ :\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00160}00160\ \ \ \ \ \ \ \ \ ret\ =\ ret\ \&\&\ r;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00161}00161\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00162}00162\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00163}00163\ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00164}00164\ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00165}00165\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00166}00166\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00167}\mbox{\hyperlink{classEthUpdater_ad67ad89f72da01981ecb4a8847a28d1a}{00167}}\ std::string\ \mbox{\hyperlink{classEthUpdater_ad67ad89f72da01981ecb4a8847a28d1a}{EthUpdater::cmdGetMoreInfo}}(\textcolor{keywordtype}{bool}\ refreshInfo,\ ACE\_UINT32\ address)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00168}00168\ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00169}00169\ \ \ \ \ eOuprot\_cmd\_MOREINFO\_t\ command;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00170}00170\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00171}00171\ \ \ \ \ command.opc\ =\ uprot\_OPC\_LEGACY\_PROCS;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00172}00172\ \ \ \ \ command.opc2\ =\ uprot\_OPC\_MOREINFO;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00173}00173\ \ \ \ \ command.plusdescription\ =\ 1;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00174}00174\ \ \ \ \ command.jump2updater\ =\ 1;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00175}00175\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00176}00176\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00177}00177\ \ \ \ \ \textcolor{keywordflow}{if}(0\ ==\ address)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00178}00178\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00179}00179\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEthUpdater_a032b45a179b372ddbf1a6669128bf2de}{sendCommandSelected}}(\&command,\ \textcolor{keyword}{sizeof}(command));}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00180}00180\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00181}00181\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00182}00182\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00183}00183\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEthUpdater_a6a7a14a8a676b55c630bdb2d3e7e9391}{mSocket}}.\mbox{\hyperlink{classDSocket_a138e63dbb1a445c4557c5a0a81525219}{SendTo}}(\&command,\ \textcolor{keyword}{sizeof}(command),\ \mbox{\hyperlink{classEthUpdater_a8effca58cc51dad2b2f91d4f8c508636}{mPort}},\ address);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00184}00184\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00185}00185\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00186}00186\ \ \ \ \ ACE\_UINT16\ rxPort;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00187}00187\ \ \ \ \ ACE\_UINT32\ rxAddress;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00188}00188\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00189}00189\ \ \ \ \ std::string\ info;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00190}00190\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00191}00191\ \ \ \ \ \textcolor{keywordflow}{while}\ (\mbox{\hyperlink{classEthUpdater_a6a7a14a8a676b55c630bdb2d3e7e9391}{mSocket}}.\mbox{\hyperlink{classDSocket_aa5cab9efcdda8ead2468271c945f3410}{ReceiveFrom}}(\mbox{\hyperlink{classEthUpdater_a46d680ba801a509701aa81e34b1ac42e}{mRxBuffer}},\ \textcolor{keyword}{sizeof}(\mbox{\hyperlink{classEthUpdater_a46d680ba801a509701aa81e34b1ac42e}{mRxBuffer}}),\ rxAddress,\ rxPort,\ 500)>0)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00192}00192\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00193}00193\ \ \ \ \ \ \ \ \ eOuprot\_cmd\_MOREINFO\_REPLY\_t\ *moreinfo\ =\ (eOuprot\_cmd\_MOREINFO\_REPLY\_t*)\ \mbox{\hyperlink{classEthUpdater_a46d680ba801a509701aa81e34b1ac42e}{mRxBuffer}};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00194}00194\ \ \ \ \ \ \ \ \ eOuprot\_cmd\_LEGACY\_PROCS\_REPLY\_t\ *procs\ =\ (eOuprot\_cmd\_LEGACY\_PROCS\_REPLY\_t*)\ \mbox{\hyperlink{classEthUpdater_a46d680ba801a509701aa81e34b1ac42e}{mRxBuffer}};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00195}00195\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00196}00196\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ ipaddr[20];}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00197}00197\ \ \ \ \ \ \ \ \ snprintf(ipaddr,\ \textcolor{keyword}{sizeof}(ipaddr),\ \textcolor{stringliteral}{"{}\%d.\%d.\%d.\%d"{}},(rxAddress>>24)\&0xFF,\ (rxAddress>>16)\&0xFF,\ (rxAddress>>8)\&0xFF,\ rxAddress\&0xFF);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00198}00198\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00199}00199\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(uprot\_OPC\_LEGACY\_PROCS\ ==\ procs-\/>opc)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00200}00200\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00201}00201\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ old\ boards\ reply\ with\ uprot\_OPC\_LEGACY\_PROCS}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00202}00202\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00203}00203\ \textcolor{preprocessor}{\#if\ defined(PRINT\_DEBUG\_INFO\_ON\_TERMINAL)}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00204}00204\ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\(\backslash\)n\ received\ a\ uprot\_OPC\_LEGACY\_PROCS\ from\ IP\ \%s\ \(\backslash\)n"{}},\ ipaddr);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00205}00205\ \ \ \ \ \ \ \ \ \ \ \ \ fflush(stdout);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00206}00206\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00207}00207\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (rxAddress\ !=\ \mbox{\hyperlink{classEthUpdater_ad11a89897d1818fa5859aeaeb51cf960}{mMyAddress}})}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00208}00208\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00209}00209\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ info+=\textcolor{stringliteral}{"{}-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\(\backslash\)r\(\backslash\)n"{}};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00210}00210\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ info+=std::string(\textcolor{stringliteral}{"{}Board\(\backslash\)t"{}})+std::string(ipaddr);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00211}00211\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ info+=\textcolor{stringliteral}{"{}\(\backslash\)r\(\backslash\)n\(\backslash\)r\(\backslash\)n"{}};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00212}00212\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ info+=std::string((\textcolor{keywordtype}{char}*)procs-\/>description);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00213}00213\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00214}00214\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00215}00215\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}(uprot\_OPC\_MOREINFO\ ==\ moreinfo-\/>discover.reply.opc)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00216}00216\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00217}00217\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ a\ new\ board\ has\ replied}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00218}00218\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00219}00219\ \textcolor{preprocessor}{\#if\ defined(PRINT\_DEBUG\_INFO\_ON\_TERMINAL)}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00220}00220\ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\(\backslash\)n\ received\ a\ uprot\_OPC\_MOREINFO\ with\ prot\ version\ \%d\ from\ IP\ \%s\(\backslash\)n"{}},\ moreinfo-\/>discover.reply.protversion,\ ipaddr);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00221}00221\ \ \ \ \ \ \ \ \ \ \ \ \ fflush(stdout);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00222}00222\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00223}00223\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00224}00224\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (rxAddress\ !=\ \mbox{\hyperlink{classEthUpdater_ad11a89897d1818fa5859aeaeb51cf960}{mMyAddress}})}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00225}00225\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00226}00226\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ eOuprot\_cmd\_DISCOVER\_REPLY\_t\ *\ disc\ =\ \&moreinfo-\/>discover;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00227}00227\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00228}00228\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structboardInfo__t}{boardInfo\_t}}\ binfo\ =\ \{0\};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00229}00229\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00230}00230\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ binfo.\mbox{\hyperlink{structboardInfo__t_a3e5d2e1e3c1cceec5ac815783140734f}{protversion}}\ =\ disc-\/>reply.protversion;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00231}00231\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ binfo.\mbox{\hyperlink{structboardInfo__t_a8b562dcc47c2bce3b22e6ad128690ada}{capabilities}}\ =\ disc-\/>capabilities;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00232}00232\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ memcpy(\&binfo.\mbox{\hyperlink{structboardInfo__t_a3c019c9a2610fcc5dd2917c66496e0e4}{macaddress}},\ disc-\/>mac48,\ 6);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00233}00233\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ binfo.\mbox{\hyperlink{structboardInfo__t_a0caa0cd978c836a7c4a3c9fb96977618}{boardtype}}\ =\ disc-\/>boardtype;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00234}00234\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ memcpy(\&binfo.\mbox{\hyperlink{structboardInfo__t_ab3165317853e89b4cd43b2fdeaca2007}{processes}},\ \&disc-\/>processes,\ \textcolor{keyword}{sizeof}(eOuprot\_proctable\_t));}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00235}00235\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ memcpy(binfo.\mbox{\hyperlink{structboardInfo__t_ae79fddbbcf5ee3484156d87fa6579e84}{boardinfo32}},\ disc-\/>boardinfo32,\ \textcolor{keyword}{sizeof}(binfo.\mbox{\hyperlink{structboardInfo__t_ae79fddbbcf5ee3484156d87fa6579e84}{boardinfo32}}));}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00236}00236\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00237}00237\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(refreshInfo)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00238}00238\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00239}00239\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classBoardInfo}{BoardInfo}}\ *pBoard\ =\ \textcolor{keyword}{new}\ \mbox{\hyperlink{classBoardInfo}{BoardInfo}}(rxAddress,\ binfo);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00240}00240\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEthUpdater_abbf067f511ae7810cf841e8e14cc1ef7}{mBoardList}}.\mbox{\hyperlink{classBoardList_a5a94d09268375f0371c3b388a268156b}{replaceBoard}}(pBoard);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00241}00241\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00242}00242\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00243}00243\ \textcolor{preprocessor}{\#if\ defined(PRINT\_DEBUG\_INFO\_ON\_TERMINAL)}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00244}00244\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00245}00245\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ print\ binfo.}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00246}00246\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ it\ would\ be\ much\ bettwer,\ however,\ store\ it\ somewhere\ and\ made\ it\ available}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00247}00247\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ through\ some\ method}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00248}00248\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00249}00249\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00250}00250\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\(\backslash\)nBOARD\ at\ address\ \%s:"{}},\ ipaddr);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00251}00251\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\(\backslash\)n\ prot\ =\ \%d,\ boardtype\ =\ \%s,\ startup\ proc\ =\ \%s,\ def2run\ proc\ =\ \%s.\ it\ has\ \%d\ processes:"{}},}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00252}00252\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ binfo.\mbox{\hyperlink{structboardInfo__t_a3e5d2e1e3c1cceec5ac815783140734f}{protversion}},}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00253}00253\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ eoboards\_type2string2((eObrd\_type\_t)binfo.\mbox{\hyperlink{structboardInfo__t_a0caa0cd978c836a7c4a3c9fb96977618}{boardtype}},\ eobool\_true),}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00254}00254\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ eouprot\_process2string((eOuprot\_process\_t)binfo.\mbox{\hyperlink{structboardInfo__t_ab3165317853e89b4cd43b2fdeaca2007}{processes}}.startup),}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00255}00255\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ eouprot\_process2string((eOuprot\_process\_t)binfo.\mbox{\hyperlink{structboardInfo__t_ab3165317853e89b4cd43b2fdeaca2007}{processes}}.def2run),}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00256}00256\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ binfo.\mbox{\hyperlink{structboardInfo__t_ab3165317853e89b4cd43b2fdeaca2007}{processes}}.numberofthem}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00257}00257\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ );}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00258}00258\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}=0;\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}<binfo.\mbox{\hyperlink{structboardInfo__t_ab3165317853e89b4cd43b2fdeaca2007}{processes}}.numberofthem;\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}++)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00259}00259\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00260}00260\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ strdate[24]\ =\ \{0\};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00261}00261\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ builton[24]\ =\ \{0\};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00262}00262\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ eo\_common\_date\_to\_string(binfo.\mbox{\hyperlink{structboardInfo__t_ab3165317853e89b4cd43b2fdeaca2007}{processes}}.info[\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}].date,\ strdate,\ \textcolor{keyword}{sizeof}(strdate));}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00263}00263\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ eo\_common\_date\_to\_string(binfo.\mbox{\hyperlink{structboardInfo__t_ab3165317853e89b4cd43b2fdeaca2007}{processes}}.info[\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}].compilationdate,\ builton,\ \textcolor{keyword}{sizeof}(builton));}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00264}00264\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\(\backslash\)n\ proc-\/\%d:\ type\ \%s\ w/\ appl\ version\ =\ (\%d,\ \%d),\ dated\ \%s,\ built\ on\ \%s,\ rom\ =\ [\%d,\ \%d)\ kb"{}},}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00265}00265\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00266}00266\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ eouprot\_process2string((eOuprot\_process\_t)binfo.\mbox{\hyperlink{structboardInfo__t_ab3165317853e89b4cd43b2fdeaca2007}{processes}}.info[\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}].type),}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00267}00267\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ binfo.\mbox{\hyperlink{structboardInfo__t_ab3165317853e89b4cd43b2fdeaca2007}{processes}}.info[\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}].version.major,\ binfo.\mbox{\hyperlink{structboardInfo__t_ab3165317853e89b4cd43b2fdeaca2007}{processes}}.info[\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}].version.minor,}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00268}00268\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ strdate,}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00269}00269\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ builton,}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00270}00270\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ binfo.\mbox{\hyperlink{structboardInfo__t_ab3165317853e89b4cd43b2fdeaca2007}{processes}}.info[\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}].rom\_addr\_kb,\ binfo.\mbox{\hyperlink{structboardInfo__t_ab3165317853e89b4cd43b2fdeaca2007}{processes}}.info[\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}].rom\_addr\_kb\ +\ binfo.\mbox{\hyperlink{structboardInfo__t_ab3165317853e89b4cd43b2fdeaca2007}{processes}}.info[\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}].rom\_size\_kb}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00271}00271\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ );}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00272}00272\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00273}00273\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00274}00274\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00275}00275\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\(\backslash\)n\ now\ process\ \%s\ is\ running"{}},\ eouprot\_process2string((eOuprot\_process\_t)binfo.\mbox{\hyperlink{structboardInfo__t_ab3165317853e89b4cd43b2fdeaca2007}{processes}}.runningnow));}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00276}00276\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00277}00277\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(0xff\ ==\ binfo.\mbox{\hyperlink{structboardInfo__t_ae79fddbbcf5ee3484156d87fa6579e84}{boardinfo32}}[0])}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00278}00278\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00279}00279\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\(\backslash\)n\ stored\ info32\ is\ ..\ "{}});}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00280}00280\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ m=0;\ m<32;\ m++)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00281}00281\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00282}00282\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}0x\%x\ "{}},\ binfo.\mbox{\hyperlink{structboardInfo__t_ae79fddbbcf5ee3484156d87fa6579e84}{boardinfo32}}[m]);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00283}00283\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00284}00284\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00285}00285\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00286}00286\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00287}00287\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00288}00288\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\(\backslash\)n\ stored\ info32\ is\ ..\ "{}});}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00289}00289\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}l\ =\ \%d,\ string\ =\ \%s\ \(\backslash\)n"{}},\ binfo.\mbox{\hyperlink{structboardInfo__t_ae79fddbbcf5ee3484156d87fa6579e84}{boardinfo32}}[0],\ \&binfo.\mbox{\hyperlink{structboardInfo__t_ae79fddbbcf5ee3484156d87fa6579e84}{boardinfo32}}[1]);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00290}00290\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00291}00291\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00292}00292\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\(\backslash\)n\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00293}00293\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00294}00294\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00295}00295\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ now\ we\ put\ into\ info\ all\ what\ is\ needed}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00296}00296\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00297}00297\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ info+=\textcolor{stringliteral}{"{}-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\(\backslash\)r\(\backslash\)n"{}};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00298}00298\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ info+=std::string(\textcolor{stringliteral}{"{}Board\(\backslash\)t"{}})+std::string(ipaddr);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00299}00299\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ info+=\textcolor{stringliteral}{"{}\(\backslash\)r\(\backslash\)n\(\backslash\)r\(\backslash\)n"{}};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00300}00300\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(1\ ==\ moreinfo-\/>hasdescription)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00301}00301\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00302}00302\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ info+=std::string((\textcolor{keywordtype}{char}*)moreinfo-\/>description);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00303}00303\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00304}00304\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00305}00305\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00306}00306\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ info+=std::string(\textcolor{stringliteral}{"{}the\ message\ does\ not\ have\ a\ textual\ description"{}});}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00307}00307\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00308}00308\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00309}00309\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00310}00310\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00311}00311\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00312}00312\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00313}00313\ \ \ \ \ \textcolor{keywordflow}{return}\ info;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00314}00314\ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00315}00315\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00316}00316\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00317}\mbox{\hyperlink{classEthUpdater_af90da21a49c8464e6ca8018f54d5f8a4}{00317}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classEthUpdater_af90da21a49c8464e6ca8018f54d5f8a4}{EthUpdater::cmdInfo32Clear}}(ACE\_UINT32\ address)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00318}00318\ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00319}00319\ \ \ \ \ \textcolor{keywordtype}{bool}\ ret\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00320}00320\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00321}00321\ \ \ \ \ eOuprot\_cmd\_PAGE\_CLR\_t\ command\ =\ \{EOUPROT\_VALUE\_OF\_UNUSED\_BYTE\};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00322}00322\ \ \ \ \ command.opc\ =\ uprot\_OPC\_PAGE\_CLR;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00323}00323\ \ \ \ \ command.pagesize\ =\ 32;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00324}00324\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00325}00325\ \ \ \ \ \textcolor{keywordflow}{if}(0\ ==\ address)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00326}00326\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00327}00327\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEthUpdater_a032b45a179b372ddbf1a6669128bf2de}{sendCommandSelected}}(\&command,\ \textcolor{keyword}{sizeof}(command));}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00328}00328\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00329}00329\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00330}00330\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00331}00331\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEthUpdater_a6a7a14a8a676b55c630bdb2d3e7e9391}{mSocket}}.\mbox{\hyperlink{classDSocket_a138e63dbb1a445c4557c5a0a81525219}{SendTo}}(\&command,\ \textcolor{keyword}{sizeof}(command),\ \mbox{\hyperlink{classEthUpdater_a8effca58cc51dad2b2f91d4f8c508636}{mPort}},\ address);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00332}00332\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00333}00333\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00334}00334\ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00335}00335\ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00336}00336\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00337}\mbox{\hyperlink{classEthUpdater_ad16eee18c1e8b9e1319a381f0f1105ec}{00337}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classEthUpdater_ad16eee18c1e8b9e1319a381f0f1105ec}{EthUpdater::cmdInfo32Set}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{string}\ \&info32,\ ACE\_UINT32\ address)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00338}00338\ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00339}00339\ \ \ \ \ \textcolor{keywordtype}{bool}\ ret\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00340}00340\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00341}00341\ \ \ \ \ eOuprot\_cmd\_PAGE\_SET\_t\ *\mbox{\hyperlink{dataTypes_8h_a4d43e8212bdc9dbee866506f04effcea}{cmd}}\ =\ (eOuprot\_cmd\_PAGE\_SET\_t*)\ \mbox{\hyperlink{classEthUpdater_a82b318e27ce3c179ccf1f7d460e68721}{mTxBuffer}};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00342}00342\ \ \ \ \ uint16\_t\ sizeofcmd\ =\ \textcolor{keyword}{sizeof}(eOuprot\_cmd\_PAGE\_SET\_t)\ -\/\ uprot\_pagemaxsize\ +\ 32;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00343}00343\ \ \ \ \ \textcolor{comment}{//\ think\ of\ the\ best\ way\ to\ specify\ the\ length\ of\ themessage\ in\ a\ proper\ way}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00344}00344\ \ \ \ \ \textcolor{comment}{//\ we\ could\ decide\ to\ send\ always\ a\ length\ of\ sizeof(eOuprot\_cmd\_PAGE\_SET\_t)\ which\ is\ 132,\ or\ ...}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00345}00345\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00346}00346\ \ \ \ \ memset(\mbox{\hyperlink{dataTypes_8h_a4d43e8212bdc9dbee866506f04effcea}{cmd}},\ EOUPROT\_VALUE\_OF\_UNUSED\_BYTE,\ sizeofcmd);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00347}00347\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00348}00348\ \ \ \ \ \mbox{\hyperlink{dataTypes_8h_a4d43e8212bdc9dbee866506f04effcea}{cmd}}-\/>opc\ =\ uprot\_OPC\_PAGE\_SET;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00349}00349\ \ \ \ \ \mbox{\hyperlink{dataTypes_8h_a4d43e8212bdc9dbee866506f04effcea}{cmd}}-\/>pagesize\ =\ 32;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00350}00350\ \ \ \ \ memset(\mbox{\hyperlink{dataTypes_8h_a4d43e8212bdc9dbee866506f04effcea}{cmd}}-\/>page,\ 0,\ 32);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00351}00351\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00352}00352\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00353}00353\ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *\ str32\ =\ info32.c\_str();}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00354}00354\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00355}00355\ \ \ \ \ \textcolor{keywordtype}{int}\ len\ =\ strlen(str32);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00356}00356\ \ \ \ \ \textcolor{keywordflow}{if}(len>30)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00357}00357\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00358}00358\ \ \ \ \ \ \ \ \ len\ =\ 30;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00359}00359\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00360}00360\ \ \ \ \ \mbox{\hyperlink{dataTypes_8h_a4d43e8212bdc9dbee866506f04effcea}{cmd}}-\/>page[0]\ =\ len;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00361}00361\ \ \ \ \ memcpy(\&\mbox{\hyperlink{dataTypes_8h_a4d43e8212bdc9dbee866506f04effcea}{cmd}}-\/>page[1],\ str32,\ len);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00362}00362\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00363}00363\ \ \ \ \ \textcolor{keywordflow}{if}(0\ ==\ address)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00364}00364\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00365}00365\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEthUpdater_a032b45a179b372ddbf1a6669128bf2de}{sendCommandSelected}}(\mbox{\hyperlink{dataTypes_8h_a4d43e8212bdc9dbee866506f04effcea}{cmd}},\ sizeofcmd);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00366}00366\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00367}00367\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00368}00368\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00369}00369\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEthUpdater_a6a7a14a8a676b55c630bdb2d3e7e9391}{mSocket}}.\mbox{\hyperlink{classDSocket_a138e63dbb1a445c4557c5a0a81525219}{SendTo}}(\mbox{\hyperlink{dataTypes_8h_a4d43e8212bdc9dbee866506f04effcea}{cmd}},\ sizeofcmd,\ \mbox{\hyperlink{classEthUpdater_a8effca58cc51dad2b2f91d4f8c508636}{mPort}},\ address);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00370}00370\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00371}00371\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00372}00372\ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00373}00373\ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00374}00374\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00375}00375\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00376}\mbox{\hyperlink{classEthUpdater_a7cbdbb3612d8d28ccccd66c614e6ffdd}{00376}}\ vector<string>\ \mbox{\hyperlink{classEthUpdater_a7cbdbb3612d8d28ccccd66c614e6ffdd}{EthUpdater::cmdInfo32Get}}(ACE\_UINT32\ address)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00377}00377\ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00378}00378\ \ \ \ \ vector<string>\ thestrings(0);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00379}00379\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00380}00380\ \ \ \ \ eOuprot\_cmd\_PAGE\_GET\_t\ command\ =\ \{EOUPROT\_VALUE\_OF\_UNUSED\_BYTE\};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00381}00381\ \ \ \ \ command.opc\ =\ uprot\_OPC\_PAGE\_GET;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00382}00382\ \ \ \ \ command.pagesize\ =\ 32;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00383}00383\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00384}00384\ \ \ \ \ \textcolor{keywordflow}{if}(0\ ==\ address)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00385}00385\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00386}00386\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEthUpdater_a032b45a179b372ddbf1a6669128bf2de}{sendCommandSelected}}(\&command,\ \textcolor{keyword}{sizeof}(command));}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00387}00387\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00388}00388\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00389}00389\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00390}00390\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEthUpdater_a6a7a14a8a676b55c630bdb2d3e7e9391}{mSocket}}.\mbox{\hyperlink{classDSocket_a138e63dbb1a445c4557c5a0a81525219}{SendTo}}(\&command,\ \textcolor{keyword}{sizeof}(command),\ \mbox{\hyperlink{classEthUpdater_a8effca58cc51dad2b2f91d4f8c508636}{mPort}},\ address);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00391}00391\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00392}00392\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00393}00393\ \ \ \ \ ACE\_UINT16\ rxPort;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00394}00394\ \ \ \ \ ACE\_UINT32\ rxAddress;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00395}00395\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00396}00396\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00397}00397\ \ \ \ \ \textcolor{keywordflow}{while}(\mbox{\hyperlink{classEthUpdater_a6a7a14a8a676b55c630bdb2d3e7e9391}{mSocket}}.\mbox{\hyperlink{classDSocket_aa5cab9efcdda8ead2468271c945f3410}{ReceiveFrom}}(\mbox{\hyperlink{classEthUpdater_a46d680ba801a509701aa81e34b1ac42e}{mRxBuffer}},\ \textcolor{keyword}{sizeof}(\mbox{\hyperlink{classEthUpdater_a46d680ba801a509701aa81e34b1ac42e}{mRxBuffer}}),\ rxAddress,\ rxPort,\ 500)>0)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00398}00398\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00399}00399\ \ \ \ \ \ \ \ \ eOuprot\_cmd\_PAGE\_GET\_REPLY\_t\ *\ pageget\ =\ (eOuprot\_cmd\_PAGE\_GET\_REPLY\_t*)\ \mbox{\hyperlink{classEthUpdater_a46d680ba801a509701aa81e34b1ac42e}{mRxBuffer}};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00400}00400\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00401}00401\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(uprot\_OPC\_PAGE\_GET\ ==\ pageget-\/>reply.opc)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00402}00402\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00403}00403\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{string}\ readstring;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00404}00404\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00405}00405\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}((rxAddress\ !=\ \mbox{\hyperlink{classEthUpdater_ad11a89897d1818fa5859aeaeb51cf960}{mMyAddress}})\ \&\&\ (uprot\_RES\_OK\ ==\ pageget-\/>reply.res)\ \&\&\ (32\ ==\ pageget-\/>pagesize)\ \&\&\ (0xff\ !=\ pageget-\/>page[0]))}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00406}00406\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00407}00407\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ readstring\ =\ string((\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*)\&pageget-\/>page[1]);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00408}00408\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ thestrings.push\_back(readstring);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00409}00409\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00410}00410\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00411}00411\ \textcolor{preprocessor}{\#if\ defined(PRINT\_DEBUG\_INFO\_ON\_TERMINAL)}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00412}00412\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00413}00413\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ ip32[20];}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00414}00414\ \ \ \ \ \ \ \ \ \ \ \ \ snprintf(ip32,\ \textcolor{keyword}{sizeof}(ip32),\ \textcolor{stringliteral}{"{}\%d.\%d.\%d.\%d"{}},(rxAddress>>24)\&0xFF,\ (rxAddress>>16)\&0xFF,\ (rxAddress>>8)\&0xFF,\ rxAddress\&0xFF);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00415}00415\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00416}00416\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(uprot\_RES\_OK\ !=\ pageget-\/>reply.res)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00417}00417\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00418}00418\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\(\backslash\)n\ received\ a\ eOuprot\_cmd\_PAGE\_GET\_REPLY\_t\ from\ IP\ \%s\ with\ a\ failure\ result\ \%d\ for\ size\ \%d"{}},\ ip32,\ pageget-\/>reply.res,\ pageget-\/>pagesize);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00419}00419\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00420}00420\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}(rxAddress\ !=\ \mbox{\hyperlink{classEthUpdater_ad11a89897d1818fa5859aeaeb51cf960}{mMyAddress}})}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00421}00421\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00422}00422\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\(\backslash\)n\ received\ a\ eOuprot\_cmd\_PAGE\_GET\_REPLY\_t\ from\ IP\ \%s\ with\ size\ \%d:\ "{}},\ ip32,\ pageget-\/>pagesize);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00423}00423\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00424}00424\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(32\ ==\ pageget-\/>pagesize)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00425}00425\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ \ \ \textcolor{comment}{//\ the\ page\ is\ formatted\ so\ that\ in\ position\ 0\ there\ is\ 0xff\ if\ erased\ and\ never\ programmed\ or\ strlen(\&page[1])}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00426}00426\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00427}00427\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ uint8\_t\ info32[32]\ =\ \{0\};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00428}00428\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ memcpy(info32,\ pageget-\/>page,\ 32);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00429}00429\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00430}00430\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(0xff\ ==\ info32[0])}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00431}00431\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00432}00432\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\(\backslash\)n\ stored\ info32\ is\ ..\ "{}});}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00433}00433\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ m=0;\ m<32;\ m++)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00434}00434\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00435}00435\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}0x\%x\ "{}},\ info32[m]);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00436}00436\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00437}00437\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00438}00438\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00439}00439\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00440}00440\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00441}00441\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}l\ =\ \%d,\ string\ =\ \%s\ \(\backslash\)n"{}},\ info32[0],\ \&info32[1]);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00442}00442\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00443}00443\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00444}00444\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00445}00445\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00446}00446\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ fflush(stdout);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00447}00447\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00448}00448\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00449}00449\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00450}00450\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00451}00451\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00452}00452\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00453}00453\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00454}00454\ \ \ \ \ \textcolor{keywordflow}{return}\ thestrings;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00455}00455\ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00456}00456\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00457}00457\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00458}\mbox{\hyperlink{classEthUpdater_a05bbf6539717ae5ceb6395b576675511}{00458}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classEthUpdater_a05bbf6539717ae5ceb6395b576675511}{EthUpdater::cmdRestart}}(ACE\_UINT32\ address)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00459}00459\ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00460}00460\ \ \ \ \ \textcolor{keywordtype}{bool}\ ret\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00461}00461\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00462}00462\ \ \ \ \ eOuprot\_cmd\_RESTART\_t\ command\ =\ \{EOUPROT\_VALUE\_OF\_UNUSED\_BYTE\};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00463}00463\ \ \ \ \ command.opc\ =\ uprot\_OPC\_RESTART;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00464}00464\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00465}00465\ \ \ \ \ \textcolor{keywordflow}{if}(0\ !=\ address)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00466}00466\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00467}00467\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEthUpdater_a6a7a14a8a676b55c630bdb2d3e7e9391}{mSocket}}.\mbox{\hyperlink{classDSocket_a138e63dbb1a445c4557c5a0a81525219}{SendTo}}(\&command,\ \textcolor{keyword}{sizeof}(command),\ \mbox{\hyperlink{classEthUpdater_a8effca58cc51dad2b2f91d4f8c508636}{mPort}},\ address);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00468}00468\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00469}00469\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00470}00470\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00471}00471\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEthUpdater_a032b45a179b372ddbf1a6669128bf2de}{sendCommandSelected}}(\&command,\ \textcolor{keyword}{sizeof}(command));}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00472}00472\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00473}00473\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00474}00474\ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00475}00475\ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00476}00476\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00477}00477\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00478}\mbox{\hyperlink{classEthUpdater_a4b8376f90be5f3af5b84bec649dd85d6}{00478}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classEthUpdater_a4b8376f90be5f3af5b84bec649dd85d6}{EthUpdater::cmdSetDEF2RUN}}(eOuprot\_process\_t\ process,\ ACE\_UINT32\ address)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00479}00479\ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00480}00480\ \ \ \ \ \textcolor{keywordtype}{bool}\ ret\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00481}00481\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00482}00482\ \ \ \ \ eOuprot\_cmd\_DEF2RUN\_t\ command\ =\ \{EOUPROT\_VALUE\_OF\_UNUSED\_BYTE\};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00483}00483\ \ \ \ \ command.opc\ =\ uprot\_OPC\_DEF2RUN;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00484}00484\ \ \ \ \ command.proc\ =\ process;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00485}00485\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00486}00486\ \ \ \ \ \textcolor{keywordflow}{if}(0\ !=\ address)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00487}00487\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00488}00488\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00489}00489\ \textcolor{preprocessor}{\#if\ defined(PRINT\_DEBUG\_INFO\_ON\_TERMINAL)}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00490}00490\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ ipaddr[20];}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00491}00491\ \ \ \ \ \ \ \ \ snprintf(ipaddr,\ \textcolor{keyword}{sizeof}(ipaddr),\ \textcolor{stringliteral}{"{}\%d.\%d.\%d.\%d"{}},(address>>24)\&0xFF,\ (address>>16)\&0xFF,\ (address>>8)\&0xFF,\ address\&0xFF);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00492}00492\ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}send\ command\ uprot\_OPC\_DEF2RUN\ w/\ process\ =\ \%s\ to\ \%s\(\backslash\)n"{}},\ eouprot\_process2string(process),\ ipaddr);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00493}00493\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00494}00494\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00495}00495\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEthUpdater_a6a7a14a8a676b55c630bdb2d3e7e9391}{mSocket}}.\mbox{\hyperlink{classDSocket_a138e63dbb1a445c4557c5a0a81525219}{SendTo}}(\&command,\ \textcolor{keyword}{sizeof}(command),\ \mbox{\hyperlink{classEthUpdater_a8effca58cc51dad2b2f91d4f8c508636}{mPort}},\ address);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00496}00496\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00497}00497\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00498}00498\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00499}00499\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i=0;\ i<\mbox{\hyperlink{classEthUpdater_abbf067f511ae7810cf841e8e14cc1ef7}{mBoardList}}.\mbox{\hyperlink{classBoardList_ae680c7d660a2c2dc9629459223fd6eed}{size}}();\ ++i)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00500}00500\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00501}00501\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(\mbox{\hyperlink{classEthUpdater_abbf067f511ae7810cf841e8e14cc1ef7}{mBoardList}}[i].mSelected)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00502}00502\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00503}00503\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ address\ =\ \mbox{\hyperlink{classEthUpdater_abbf067f511ae7810cf841e8e14cc1ef7}{mBoardList}}[i].mAddress;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00504}00504\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00505}00505\ \textcolor{preprocessor}{\#if\ defined(PRINT\_DEBUG\_INFO\_ON\_TERMINAL)}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00506}00506\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ ipaddr[20];}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00507}00507\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ snprintf(ipaddr,\ \textcolor{keyword}{sizeof}(ipaddr),\ \textcolor{stringliteral}{"{}\%d.\%d.\%d.\%d"{}},(address>>24)\&0xFF,\ (address>>16)\&0xFF,\ (address>>8)\&0xFF,\ address\&0xFF);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00508}00508\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}send\ command\ uprot\_OPC\_DEF2RUN\ w/\ process\ =\ \%s\ to\ \%s\(\backslash\)n"{}},\ eouprot\_process2string(process),\ ipaddr);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00509}00509\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00510}00510\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00511}00511\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEthUpdater_a6a7a14a8a676b55c630bdb2d3e7e9391}{mSocket}}.\mbox{\hyperlink{classDSocket_a138e63dbb1a445c4557c5a0a81525219}{SendTo}}(\&command,\ \textcolor{keyword}{sizeof}(command),\ \mbox{\hyperlink{classEthUpdater_a8effca58cc51dad2b2f91d4f8c508636}{mPort}},\ address);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00512}00512\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00513}00513\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00514}00514\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00515}00515\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00516}00516\ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00517}00517\ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00518}00518\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00519}00519\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00520}\mbox{\hyperlink{classEthUpdater_a7e58c8cd1452ba8ef5ee2f5061c87be3}{00520}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classEthUpdater_a7e58c8cd1452ba8ef5ee2f5061c87be3}{EthUpdater::cmdJumpUpd}}(ACE\_UINT32\ address)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00521}00521\ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00522}00522\ \ \ \ \ \textcolor{keywordtype}{bool}\ ret\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00523}00523\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00524}00524\ \ \ \ \ eOuprot\_cmd\_JUMP2UPDATER\_t\ command\ =\ \{EOUPROT\_VALUE\_OF\_UNUSED\_BYTE\};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00525}00525\ \ \ \ \ command.opc\ =\ uprot\_OPC\_JUMP2UPDATER;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00526}00526\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00527}00527\ \ \ \ \ \textcolor{keywordflow}{if}(0\ !=\ address)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00528}00528\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00529}00529\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEthUpdater_a6a7a14a8a676b55c630bdb2d3e7e9391}{mSocket}}.\mbox{\hyperlink{classDSocket_a138e63dbb1a445c4557c5a0a81525219}{SendTo}}(\&command,\ \textcolor{keyword}{sizeof}(command),\ \mbox{\hyperlink{classEthUpdater_a8effca58cc51dad2b2f91d4f8c508636}{mPort}},\ address);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00530}00530\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00531}00531\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00532}00532\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00533}00533\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEthUpdater_a032b45a179b372ddbf1a6669128bf2de}{sendCommandSelected}}(\&command,\ \textcolor{keyword}{sizeof}(command));}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00534}00534\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00535}00535\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00536}00536\ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00537}00537\ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00538}00538\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00539}00539\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00540}\mbox{\hyperlink{classEthUpdater_a80373eaaecb96de1df1147540e162a51}{00540}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classEthUpdater_a80373eaaecb96de1df1147540e162a51}{EthUpdater::cmdJump2ROMaddress}}(uint32\_t\ romaddress,\ ACE\_UINT32\ address)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00541}00541\ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00542}00542\ \ \ \ \ \textcolor{keywordtype}{bool}\ ret\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00543}00543\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00544}00544\ \ \ \ \ eOuprot\_cmd\_JUMP2ADDRESS\_t\ command\ =\ \{EOUPROT\_VALUE\_OF\_UNUSED\_BYTE\};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00545}00545\ \ \ \ \ command.opc\ =\ uprot\_OPC\_JUMP2ADDRESS;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00546}00546\ \ \ \ \ command.address\ =\ romaddress;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00547}00547\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00548}00548\ \ \ \ \ \textcolor{keywordflow}{if}(0\ !=\ address)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00549}00549\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00550}00550\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEthUpdater_a6a7a14a8a676b55c630bdb2d3e7e9391}{mSocket}}.\mbox{\hyperlink{classDSocket_a138e63dbb1a445c4557c5a0a81525219}{SendTo}}(\&command,\ \textcolor{keyword}{sizeof}(command),\ \mbox{\hyperlink{classEthUpdater_a8effca58cc51dad2b2f91d4f8c508636}{mPort}},\ address);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00551}00551\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00552}00552\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00553}00553\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00554}00554\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEthUpdater_a032b45a179b372ddbf1a6669128bf2de}{sendCommandSelected}}(\&command,\ \textcolor{keyword}{sizeof}(command));}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00555}00555\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00556}00556\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00557}00557\ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00558}00558\ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00559}00559\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00560}00560\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00561}\mbox{\hyperlink{classEthUpdater_a599079bc7debb062fd1db661137b7aa0}{00561}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classEthUpdater_a599079bc7debb062fd1db661137b7aa0}{EthUpdater::cmdBlink}}(ACE\_UINT32\ address)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00562}00562\ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00563}00563\ \ \ \ \ \textcolor{keywordtype}{bool}\ ret\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00564}00564\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00565}00565\ \ \ \ \ eOuprot\_cmd\_BLINK\_t\ command\ =\ \{EOUPROT\_VALUE\_OF\_UNUSED\_BYTE\};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00566}00566\ \ \ \ \ command.opc\ =\ uprot\_OPC\_BLINK;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00567}00567\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00568}00568\ \ \ \ \ \textcolor{keywordflow}{if}(0\ !=\ address)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00569}00569\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00570}00570\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEthUpdater_a6a7a14a8a676b55c630bdb2d3e7e9391}{mSocket}}.\mbox{\hyperlink{classDSocket_a138e63dbb1a445c4557c5a0a81525219}{SendTo}}(\&command,\ \textcolor{keyword}{sizeof}(command),\ \mbox{\hyperlink{classEthUpdater_a8effca58cc51dad2b2f91d4f8c508636}{mPort}},\ address);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00571}00571\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00572}00572\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00573}00573\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00574}00574\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEthUpdater_a032b45a179b372ddbf1a6669128bf2de}{sendCommandSelected}}(\&command,\ \textcolor{keyword}{sizeof}(command));}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00575}00575\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00576}00576\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00577}00577\ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00578}00578\ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00579}00579\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00580}00580\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00581}\mbox{\hyperlink{classEthUpdater_af52a4d0b6901ab9c9d38b201aafcbc3a}{00581}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classEthUpdater_af52a4d0b6901ab9c9d38b201aafcbc3a}{EthUpdater::cmdEraseEEPROM}}(ACE\_UINT32\ address)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00582}00582\ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00583}00583\ \ \ \ \ \textcolor{keywordtype}{bool}\ ret\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00584}00584\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00585}00585\ \ \ \ \ eOuprot\_cmd\_EEPROM\_ERASE\_t\ command\ =\ \{EOUPROT\_VALUE\_OF\_UNUSED\_BYTE\};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00586}00586\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00587}00587\ \ \ \ \ command.opc\ =\ uprot\_OPC\_LEGACY\_EEPROM\_ERASE;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00588}00588\ \ \ \ \ command.opc2\ =\ uprot\_OPC\_EEPROM\_ERASE;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00589}00589\ \ \ \ \ command.sysrestart\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00590}00590\ \ \ \ \ command.address\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00591}00591\ \ \ \ \ command.size\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00592}00592\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00593}00593\ \ \ \ \ \textcolor{keywordflow}{if}(0\ !=\ address)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00594}00594\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00595}00595\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEthUpdater_a6a7a14a8a676b55c630bdb2d3e7e9391}{mSocket}}.\mbox{\hyperlink{classDSocket_a138e63dbb1a445c4557c5a0a81525219}{SendTo}}(\&command,\ \textcolor{keyword}{sizeof}(command),\ \mbox{\hyperlink{classEthUpdater_a8effca58cc51dad2b2f91d4f8c508636}{mPort}},\ address);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00596}00596\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00597}00597\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00598}00598\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00599}00599\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEthUpdater_a032b45a179b372ddbf1a6669128bf2de}{sendCommandSelected}}(\&command,\ \textcolor{keyword}{sizeof}(command));}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00600}00600\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00601}00601\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00602}00602\ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00603}00603\ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00604}00604\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00605}00605\ \textcolor{comment}{//\ TODO:\ at\ date\ 22\ jun\ 16:\ yet\ to\ be\ tested}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00606}\mbox{\hyperlink{classEthUpdater_a14124abc408cab6c54fa9184c48c8351}{00606}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classEthUpdater_a14124abc408cab6c54fa9184c48c8351}{EthUpdater::cmdReadEEPROM}}(uint16\_t\ from,\ uint16\_t\ size,\ ACE\_UINT32\ address,\ uint8\_t\ **value)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00607}00607\ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00608}00608\ \ \ \ \ \textcolor{keywordtype}{bool}\ ret\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00609}00609\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00610}00610\ \ \ \ \ \textcolor{keywordflow}{if}(NULL\ ==\ value)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00611}00611\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00612}00612\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00613}00613\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00614}00614\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00615}00615\ \ \ \ \ \textcolor{keywordflow}{if}(0\ ==\ address)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00616}00616\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00617}00617\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00618}00618\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00619}00619\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00620}00620\ \ \ \ \ \textcolor{keywordflow}{if}((0\ ==\ size)\ ||\ (size\ >\ uprot\_EEPROMmaxsize))}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00621}00621\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00622}00622\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00623}00623\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00624}00624\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00625}00625\ \ \ \ \ eOuprot\_cmd\_EEPROM\_READ\_t\ command\ =\ \{EOUPROT\_VALUE\_OF\_UNUSED\_BYTE\};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00626}00626\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00627}00627\ \ \ \ \ command.opc\ =\ uprot\_OPC\_EEPROM\_READ;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00628}00628\ \ \ \ \ command.address\ =\ from;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00629}00629\ \ \ \ \ command.size\ =\ size;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00630}00630\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00631}00631\ \ \ \ \ \mbox{\hyperlink{classEthUpdater_a6a7a14a8a676b55c630bdb2d3e7e9391}{mSocket}}.\mbox{\hyperlink{classDSocket_a138e63dbb1a445c4557c5a0a81525219}{SendTo}}(\&command,\ \textcolor{keyword}{sizeof}(command),\ \mbox{\hyperlink{classEthUpdater_a8effca58cc51dad2b2f91d4f8c508636}{mPort}},\ address);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00632}00632\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00633}00633\ \ \ \ \ \textcolor{comment}{//\ now\ we\ wait\ for\ teh\ reply\ ...}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00634}00634\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00635}00635\ \ \ \ \ ACE\_UINT16\ rxPort;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00636}00636\ \ \ \ \ ACE\_UINT32\ rxAddress\ =\ \mbox{\hyperlink{classEthUpdater_ad11a89897d1818fa5859aeaeb51cf960}{mMyAddress}};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00637}00637\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00638}00638\ \ \ \ \ \textcolor{keywordflow}{while}\ (\mbox{\hyperlink{classEthUpdater_a6a7a14a8a676b55c630bdb2d3e7e9391}{mSocket}}.\mbox{\hyperlink{classDSocket_aa5cab9efcdda8ead2468271c945f3410}{ReceiveFrom}}(\mbox{\hyperlink{classEthUpdater_a46d680ba801a509701aa81e34b1ac42e}{mRxBuffer}},\ \textcolor{keyword}{sizeof}(\mbox{\hyperlink{classEthUpdater_a46d680ba801a509701aa81e34b1ac42e}{mRxBuffer}}),\ rxAddress,\ rxPort,\ 1000)>0)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00639}00639\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00640}00640\ \ \ \ \ \ \ \ \ eOuprot\_cmd\_EEPROM\_READ\_REPLY\_t\ *\ eepromread\ =\ (eOuprot\_cmd\_EEPROM\_READ\_REPLY\_t*)\ \mbox{\hyperlink{classEthUpdater_a46d680ba801a509701aa81e34b1ac42e}{mRxBuffer}};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00641}00641\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00642}00642\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ ipaddr[20];}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00643}00643\ \ \ \ \ \ \ \ \ snprintf(ipaddr,\ \textcolor{keyword}{sizeof}(ipaddr),\ \textcolor{stringliteral}{"{}\%d.\%d.\%d.\%d"{}},(rxAddress>>24)\&0xFF,\ (rxAddress>>16)\&0xFF,\ (rxAddress>>8)\&0xFF,\ rxAddress\&0xFF);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00644}00644\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00645}00645\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(uprot\_OPC\_EEPROM\_READ\ ==\ eepromread-\/>reply.opc)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00646}00646\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00647}00647\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ the\ board\ has\ replied.}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00648}00648\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (rxAddress\ ==\ address)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00649}00649\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00650}00650\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ret\ =\ (uprot\_RES\_OK\ ==\ eepromread-\/>reply.res)\ ?\ \textcolor{keyword}{true}\ :\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00651}00651\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00652}00652\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(ret)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00653}00653\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00654}00654\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *value\ =\ eepromread-\/>eeprom;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00655}00655\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00656}00656\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00657}00657\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00658}00658\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00659}00659\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00660}00660\ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00661}00661\ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00662}00662\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00663}\mbox{\hyperlink{classEthUpdater_a9cdf6dc210c859da1995d86ba8097000}{00663}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classEthUpdater_a9cdf6dc210c859da1995d86ba8097000}{EthUpdater::cmdChangeAddress}}(ACE\_UINT32\ newaddress,\ ACE\_UINT32\ address)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00664}00664\ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00665}00665\ \ \ \ \ \textcolor{keywordtype}{bool}\ ret\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00666}00666\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00667}00667\ \ \ \ \ eOuprot\_cmd\_IP\_ADDR\_SET\_t\ command\ =\ \{EOUPROT\_VALUE\_OF\_UNUSED\_BYTE\};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00668}00668\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00669}00669\ \ \ \ \ command.opc\ =\ uprot\_OPC\_LEGACY\_IP\_ADDR\_SET;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00670}00670\ \ \ \ \ command.opc2\ =\ uprot\_OPC\_IP\_ADDR\_SET;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00671}00671\ \ \ \ \ command.sysrestart\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00672}00672\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00673}00673\ \ \ \ \ command.address[0]\ =\ (newaddress>>24)\ \&\ 0xFF;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00674}00674\ \ \ \ \ command.address[1]\ =\ (newaddress>>16)\ \&\ 0xFF;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00675}00675\ \ \ \ \ command.address[2]\ =\ (newaddress>>8\ )\ \&\ 0xFF;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00676}00676\ \ \ \ \ command.address[3]\ =\ (newaddress\ \ \ \ )\ \&\ 0xFF;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00677}00677\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00678}00678\ \textcolor{preprocessor}{\#if\ defined(PRINT\_DEBUG\_INFO\_ON\_TERMINAL)}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00679}00679\ \ \ \ \ \textcolor{keywordtype}{char}\ ipaddr[20];}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00680}00680\ \ \ \ \ snprintf(ipaddr,\ \textcolor{keyword}{sizeof}(ipaddr),\ \textcolor{stringliteral}{"{}\%d.\%d.\%d.\%d"{}},(address>>24)\&0xFF,\ (address>>16)\&0xFF,\ (address>>8)\&0xFF,\ address\&0xFF);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00681}00681\ \ \ \ \ \textcolor{keywordtype}{char}\ newipaddr[20];}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00682}00682\ \ \ \ \ snprintf(newipaddr,\ \textcolor{keyword}{sizeof}(ipaddr),\textcolor{stringliteral}{"{}\%d.\%d.\%d.\%d"{}},(newaddress>>24)\&0xFF,\ (newaddress>>16)\&0xFF,\ (newaddress>>8)\&0xFF,\ newaddress\&0xFF);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00683}00683\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00684}00684\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00685}00685\ \ \ \ \ \textcolor{keywordtype}{bool}\ stopit\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00686}00686\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00687}00687\ \ \ \ \ \textcolor{keywordflow}{if}(0\ ==\ address)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00688}00688\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00689}00689\ \ \ \ \ \ \ \ \ stopit\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00690}00690\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00691}00691\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00692}00692\ \ \ \ \ \textcolor{comment}{//\ we\ must\ have\ 10.0.1.x,\ where\ x\ is\ not\ 0\ or\ 255}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00693}00693\ \ \ \ \ \textcolor{keywordflow}{if}((10\ !=\ command.address[0])\ ||\ (0\ !=\ command.address[1])\ ||\ (1\ !=\ command.address[2]))}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00694}00694\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00695}00695\ \ \ \ \ \ \ \ \ stopit\ =\ \ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00696}00696\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00697}00697\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00698}00698\ \ \ \ \ \textcolor{keywordflow}{if}((0\ ==\ command.address[3])\ ||\ (255\ ==\ command.address[3]))}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00699}00699\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00700}00700\ \ \ \ \ \ \ \ \ stopit\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00701}00701\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00702}00702\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00703}00703\ \ \ \ \ \textcolor{keywordflow}{if}(\textcolor{keyword}{true}\ ==\ stopit)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00704}00704\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00705}00705\ \textcolor{preprocessor}{\#if\ defined(PRINT\_DEBUG\_INFO\_ON\_TERMINAL)}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00706}00706\ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}cannot\ send\ command\ uprot\_OPC\_IP\_ADDR\_SET\ to\ \%s\ with\ new\ address\ \%s\ because\ either\ one\ or\ both\ are\ not\ valid\(\backslash\)n"{}},\ ipaddr,\ newipaddr);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00707}00707\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00708}00708\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00709}00709\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00710}00710\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00711}00711\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00712}00712\ \textcolor{preprocessor}{\#if\ defined(PRINT\_DEBUG\_INFO\_ON\_TERMINAL)}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00713}00713\ \ \ \ \ printf(\textcolor{stringliteral}{"{}sent\ command\ uprot\_OPC\_IP\_ADDR\_SET\ to\ \%s,\ new\ address\ is\ \%s.\ w/\%s\ sysrestart\(\backslash\)n"{}},\ ipaddr,\ newipaddr,\ (0\ ==\ command.sysrestart)\ ?\ \textcolor{stringliteral}{"{}out"{}}\ :\ \textcolor{stringliteral}{"{}"{}});}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00714}00714\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00715}00715\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00716}00716\ \ \ \ \ \mbox{\hyperlink{classEthUpdater_a6a7a14a8a676b55c630bdb2d3e7e9391}{mSocket}}.\mbox{\hyperlink{classDSocket_a138e63dbb1a445c4557c5a0a81525219}{SendTo}}(\&command,\ \textcolor{keyword}{sizeof}(command),\ \mbox{\hyperlink{classEthUpdater_a8effca58cc51dad2b2f91d4f8c508636}{mPort}},\ address);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00717}00717\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00718}00718\ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00719}00719\ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00720}00720\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00721}00721\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00722}00722\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00723}00723\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00724}\mbox{\hyperlink{classEthUpdater_a21e970f87ad0781761bbbcccdfc5e8ab}{00724}}\ std::string\ \mbox{\hyperlink{classEthUpdater_a21e970f87ad0781761bbbcccdfc5e8ab}{EthUpdater::cmdProgram}}(FILE\ *programFile,\ \textcolor{keywordtype}{int}\ partition,\ \textcolor{keywordtype}{void}\ (*updateProgressBar)(\textcolor{keywordtype}{float}),\ ACE\_UINT32\ address)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00725}00725\ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00726}00726\ \ \ \ \ updateProgressBar(0.0f);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00727}00727\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00728}00728\ \ \ \ \ eOuprot\_cmd\_PROG\_START\_t\ *\ cmdStart\ =\ (eOuprot\_cmd\_PROG\_START\_t*)\ \mbox{\hyperlink{classEthUpdater_a82b318e27ce3c179ccf1f7d460e68721}{mTxBuffer}};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00729}00729\ \ \ \ \ eOuprot\_cmd\_PROG\_DATA\_t\ *\ \ cmdData\ \ =\ (eOuprot\_cmd\_PROG\_DATA\_t*)\ \ \mbox{\hyperlink{classEthUpdater_a82b318e27ce3c179ccf1f7d460e68721}{mTxBuffer}};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00730}00730\ \ \ \ \ eOuprot\_cmd\_PROG\_END\_t\ *\ \ \ cmdEnd\ \ \ =\ (eOuprot\_cmd\_PROG\_END\_t*)\ \ \ \mbox{\hyperlink{classEthUpdater_a82b318e27ce3c179ccf1f7d460e68721}{mTxBuffer}};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00731}00731\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00732}00732\ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ sizeStart\ =\ \textcolor{keyword}{sizeof}(eOuprot\_cmd\_PROG\_START\_t);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00733}00733\ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ sizeEnd\ =\ \textcolor{keyword}{sizeof}(eOuprot\_cmd\_PROG\_END\_t);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00734}00734\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00735}00735\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00736}00736\ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ HEAD\_SIZE\ =\ 7;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00737}00737\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00738}00738\ \ \ \ \ fseek(programFile,0,SEEK\_END);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00739}00739\ \ \ \ \ \textcolor{keywordtype}{float}\ fileSize=(float)(ftell(programFile)/3);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00740}00740\ \ \ \ \ fseek(programFile,0,SEEK\_SET);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00741}00741\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00742}00742\ \ \ \ \ memset(cmdStart,\ EOUPROT\_VALUE\_OF\_UNUSED\_BYTE,\ \textcolor{keyword}{sizeof}(eOuprot\_cmd\_PROG\_START\_t));}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00743}00743\ \ \ \ \ cmdStart-\/>opc\ =\ uprot\_OPC\_PROG\_START;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00744}00744\ \ \ \ \ cmdStart-\/>partition\ =\ partition;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00745}00745\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00746}00746\ \ \ \ \ \textcolor{keywordtype}{string}\ partname(\textcolor{stringliteral}{"{}UNK"{}});}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00747}00747\ \ \ \ \ eOuprot\_proc\_capabilities\_t\ capability\ =\ uprot\_canDO\_nothing;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00748}00748\ \ \ \ \ \textcolor{keywordflow}{if}(uprot\_partitionLOADER\ ==\ partition)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00749}00749\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00750}00750\ \ \ \ \ \ \ \ \ partname\ =\ string(\textcolor{stringliteral}{"{}LDR"{}});}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00751}00751\ \ \ \ \ \ \ \ \ capability\ =\ uprot\_canDO\_PROG\_loader;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00752}00752\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00753}00753\ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}(uprot\_partitionUPDATER\ ==\ partition)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00754}00754\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00755}00755\ \ \ \ \ \ \ \ \ partname\ =\ string(\textcolor{stringliteral}{"{}UPD"{}});}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00756}00756\ \ \ \ \ \ \ \ \ capability\ =\ uprot\_canDO\_PROG\_updater;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00757}00757\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00758}00758\ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}(uprot\_partitionAPPLICATION\ ==\ partition)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00759}00759\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00760}00760\ \ \ \ \ \ \ \ \ partname\ =\ string(\textcolor{stringliteral}{"{}APP"{}});}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00761}00761\ \ \ \ \ \ \ \ \ capability\ =\ uprot\_canDO\_PROG\_application;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00762}00762\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00763}00763\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00764}00764\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00765}00765\ \ \ \ \ \textcolor{comment}{//\ sending\ the\ start\ and\ preparing\ the\ list\ of\ boards\ to\ program}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00766}00766\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00767}00767\ \ \ \ \ \mbox{\hyperlink{classEthUpdater_a472e88f36c000573653b4a352ce20f11}{mN2Prog}}\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00768}00768\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00769}00769\ \ \ \ \ \textcolor{keywordflow}{if}(0\ ==\ address)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00770}00770\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00771}00771\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ we\ use\ the\ selected}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00772}00772\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00773}00773\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i=0;\ i<\mbox{\hyperlink{classEthUpdater_abbf067f511ae7810cf841e8e14cc1ef7}{mBoardList}}.\mbox{\hyperlink{classBoardList_ae680c7d660a2c2dc9629459223fd6eed}{size}}();\ ++i)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00774}00774\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00775}00775\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classEthUpdater_abbf067f511ae7810cf841e8e14cc1ef7}{mBoardList}}[i].mSelected)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00776}00776\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00777}00777\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEthUpdater_a9343209d308b2b19cc24306e22151b24}{mBoard2Prog}}[\mbox{\hyperlink{classEthUpdater_a472e88f36c000573653b4a352ce20f11}{mN2Prog}}++]=\&\mbox{\hyperlink{classEthUpdater_abbf067f511ae7810cf841e8e14cc1ef7}{mBoardList}}[i];}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00778}00778\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEthUpdater_abbf067f511ae7810cf841e8e14cc1ef7}{mBoardList}}[i].mSuccess=0;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00779}00779\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEthUpdater_a6a7a14a8a676b55c630bdb2d3e7e9391}{mSocket}}.\mbox{\hyperlink{classDSocket_a138e63dbb1a445c4557c5a0a81525219}{SendTo}}(cmdStart,\ sizeStart,\ \mbox{\hyperlink{classEthUpdater_a8effca58cc51dad2b2f91d4f8c508636}{mPort}},\ \mbox{\hyperlink{classEthUpdater_abbf067f511ae7810cf841e8e14cc1ef7}{mBoardList}}[i].mAddress);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00780}00780\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yarp::os::Time::delay(0.01);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00781}00781\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00782}00782\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00783}00783\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00784}00784\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00785}00785\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00786}00786\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00787}00787\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ we\ use\ address}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00788}00788\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00789}00789\ \ \ \ \ \ \ \ \ vector<BoardInfo\ *>\ boards\ =\ \mbox{\hyperlink{classEthUpdater_abbf067f511ae7810cf841e8e14cc1ef7}{mBoardList}}.\mbox{\hyperlink{classBoardList_ad850e4cf424a6cce0ba061f0ddaa12b8}{getBoards}}(address);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00790}00790\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00791}00791\ \ \ \ \ \ \ \ \ std::string\ errorstring;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00792}00792\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ addr[20];}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00793}00793\ \ \ \ \ \ \ \ \ snprintf(addr,\ \textcolor{keyword}{sizeof}(addr),\ \textcolor{stringliteral}{"{}\%d.\%d.\%d.\%d:\ "{}},(address>>24)\&0xFF,(address>>16)\&0xFF,(address>>8)\&0xFF,address\&0xFF);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00794}00794\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00795}00795\ \ \ \ \ \ \ \ \ errorstring\ +=\ addr;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00796}00796\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00797}00797\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(0\ ==\ boards.size())}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00798}00798\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00799}00799\ \ \ \ \ \ \ \ \ \ \ \ \ errorstring\ +=\ \textcolor{stringliteral}{"{}CANT\ find\ it\(\backslash\)r\(\backslash\)n"{}};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00800}00800\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ errorstring;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00801}00801\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00802}00802\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}(boards.size()\ >\ 1)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00803}00803\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00804}00804\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ printf("{}error:\ size\ =\ \%d\(\backslash\)n"{},\ boards.size());}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00805}00805\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ fflush(stdout);}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00806}00806\ \ \ \ \ \ \ \ \ \ \ \ \ errorstring\ +=\ \textcolor{stringliteral}{"{}CANT\ prog\ more\ than\ one"{}};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00807}00807\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ errorstring;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00808}00808\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00809}00809\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00810}00810\ \ \ \ \ \ \ \ \ boards[0]-\/>mSuccess\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00811}00811\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEthUpdater_a9343209d308b2b19cc24306e22151b24}{mBoard2Prog}}[\mbox{\hyperlink{classEthUpdater_a472e88f36c000573653b4a352ce20f11}{mN2Prog}}++]\ =\ boards[0];}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00812}00812\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEthUpdater_a6a7a14a8a676b55c630bdb2d3e7e9391}{mSocket}}.\mbox{\hyperlink{classDSocket_a138e63dbb1a445c4557c5a0a81525219}{SendTo}}(cmdStart,\ sizeStart,\ \mbox{\hyperlink{classEthUpdater_a8effca58cc51dad2b2f91d4f8c508636}{mPort}},\ address);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00813}00813\ \ \ \ \ \ \ \ \ yarp::os::Time::delay(0.01);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00814}00814\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00815}00815\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00816}00816\ \textcolor{preprocessor}{\#if\ defined(PRINT\_DEBUG\_INFO\_ON\_TERMINAL)}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00817}00817\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00818}00818\ \ \ \ \ printf(\textcolor{stringliteral}{"{}EthUpdater::cmdProgram()\ is\ about\ to\ program\ the\ \%s\ partition\ of\ \%d\ boards:"{}},\ partname.c\_str(),\ \mbox{\hyperlink{classEthUpdater_a472e88f36c000573653b4a352ce20f11}{mN2Prog}});}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00819}00819\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ j=0;\ j<\ \mbox{\hyperlink{classEthUpdater_a472e88f36c000573653b4a352ce20f11}{mN2Prog}};\ j++)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00820}00820\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00821}00821\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ ipv4str[20];}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00822}00822\ \ \ \ \ \ \ \ \ ACE\_UINT32\ ipv4\ =\ \mbox{\hyperlink{classEthUpdater_a9343209d308b2b19cc24306e22151b24}{mBoard2Prog}}[j]-\/>\mbox{\hyperlink{classBoardInfo_a74f07eb24f541854cb4feb219e96452c}{mAddress}};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00823}00823\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}}\ =\ \mbox{\hyperlink{classEthUpdater_a7b46366b734be3ee7c9558dd68c087a4}{isCmdSupported}}(capability,\ ipv4);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00824}00824\ \ \ \ \ \ \ \ \ snprintf(ipv4str,\ \textcolor{keyword}{sizeof}(ipv4str),\ \textcolor{stringliteral}{"{}\%d.\%d.\%d.\%d"{}},(ipv4>>24)\&0xFF,(ipv4>>16)\&0xFF,(ipv4>>8)\&0xFF,ipv4\&0xFF);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00825}00825\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00826}00826\ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\ \%s\ (\%s)"{}},\ ipv4str,\ \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}}\ ?\ (\textcolor{stringliteral}{"{}candoit"{}})\ :\ (\textcolor{stringliteral}{"{}CANTdoit"{}}));}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00827}00827\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00828}00828\ \ \ \ \ printf(\textcolor{stringliteral}{"{}\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00829}00829\ \ \ \ \ fflush(stdout);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00830}00830\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00831}00831\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00832}00832\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00833}00833\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00834}00834\ \ \ \ \ \textcolor{comment}{//\ now\ we\ start}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00835}00835\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00836}00836\ \ \ \ \ \mbox{\hyperlink{classEthUpdater_ab0c6cad20225109078879c49b68d5ae7}{mNProgSteps}}\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00837}00837\ \ \ \ \ \mbox{\hyperlink{classEthUpdater_a30f9c5f24f0fd12e150f9e7c5385c8da}{mNChunks}}\ =\ 1;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00838}00838\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00839}00839\ \ \ \ \ ACE\_UINT16\ rxPort;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00840}00840\ \ \ \ \ ACE\_UINT32\ rxAddress;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00841}00841\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00842}00842\ \ \ \ \ ++\mbox{\hyperlink{classEthUpdater_ab0c6cad20225109078879c49b68d5ae7}{mNProgSteps}};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00843}00843\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00844}00844\ \ \ \ \ \textcolor{keywordtype}{int}\ success=0;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00845}00845\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00846}00846\ \ \ \ \ \textcolor{keywordtype}{int}\ numberOfOKreplies\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00847}00847\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00848}00848\ \ \ \ \ \textcolor{comment}{//\ waiting\ for\ reply\ of\ start}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00849}00849\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}=0;\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}<1000;\ ++\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}})}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00850}00850\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00851}00851\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (\mbox{\hyperlink{classEthUpdater_a6a7a14a8a676b55c630bdb2d3e7e9391}{mSocket}}.\mbox{\hyperlink{classDSocket_aa5cab9efcdda8ead2468271c945f3410}{ReceiveFrom}}(\mbox{\hyperlink{classEthUpdater_a46d680ba801a509701aa81e34b1ac42e}{mRxBuffer}},\ \textcolor{keyword}{sizeof}(\mbox{\hyperlink{classEthUpdater_a46d680ba801a509701aa81e34b1ac42e}{mRxBuffer}}),\ rxAddress,\ rxPort,\ 10)>0)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00852}00852\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00853}00853\ \ \ \ \ \ \ \ \ \ \ \ \ eOuprot\_cmdREPLY\_t\ *\ reply\ =\ (eOuprot\_cmdREPLY\_t*)\ \mbox{\hyperlink{classEthUpdater_a46d680ba801a509701aa81e34b1ac42e}{mRxBuffer}};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00854}00854\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00855}00855\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (uprot\_OPC\_PROG\_START\ ==\ reply-\/>opc)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00856}00856\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00857}00857\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (rxAddress!=\mbox{\hyperlink{classEthUpdater_ad11a89897d1818fa5859aeaeb51cf960}{mMyAddress}})}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00858}00858\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00859}00859\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i=0;\ i<\mbox{\hyperlink{classEthUpdater_a472e88f36c000573653b4a352ce20f11}{mN2Prog}};\ ++i)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00860}00860\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00861}00861\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (rxAddress\ ==\ \mbox{\hyperlink{classEthUpdater_a9343209d308b2b19cc24306e22151b24}{mBoard2Prog}}[i]-\/>mAddress)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00862}00862\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00863}00863\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(uprot\_RES\_OK\ ==\ reply-\/>res)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00864}00864\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00865}00865\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ++(\mbox{\hyperlink{classEthUpdater_a9343209d308b2b19cc24306e22151b24}{mBoard2Prog}}[i]-\/>\mbox{\hyperlink{classBoardInfo_ad8232cc07316e6dedea663f8f5bebdef}{mSuccess}});}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00866}00866\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ numberOfOKreplies++;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00867}00867\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00868}00868\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00869}00869\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00870}00870\ \textcolor{preprocessor}{\#if\ defined(PRINT\_DEBUG\_INFO\_ON\_TERMINAL)}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00871}00871\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ print\ that\ we\ the\ board\ tells\ that\ we\ cannot\ program\ that\ partition}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00872}00872\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ ipv4str[20];}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00873}00873\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ACE\_UINT32\ ipv4\ =\ \mbox{\hyperlink{classEthUpdater_a9343209d308b2b19cc24306e22151b24}{mBoard2Prog}}[i]-\/>\mbox{\hyperlink{classBoardInfo_a74f07eb24f541854cb4feb219e96452c}{mAddress}};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00874}00874\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//bool\ ok\ =\ isCmdSupported(capability,\ ipv4);}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00875}00875\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ snprintf(ipv4str,\ \textcolor{keyword}{sizeof}(ipv4str),\ \textcolor{stringliteral}{"{}\%d.\%d.\%d.\%d"{}},(ipv4>>24)\&0xFF,(ipv4>>16)\&0xFF,(ipv4>>8)\&0xFF,ipv4\&0xFF);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00876}00876\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00877}00877\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}board\ \%s\ tells\ that\ we\ cannot\ program\ the\ \%s\ partition\(\backslash\)n"{}},\ ipv4str,\ partname.c\_str());}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00878}00878\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ fflush(stdout);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00879}00879\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00880}00880\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00881}00881\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00882}00882\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00883}00883\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (++success>=\mbox{\hyperlink{classEthUpdater_a472e88f36c000573653b4a352ce20f11}{mN2Prog}})\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}=1000;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00884}00884\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00885}00885\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00886}00886\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00887}00887\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00888}00888\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00889}00889\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00890}00890\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00891}00891\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00892}00892\ \ \ \ \ \textcolor{keywordflow}{if}(0\ ==\ numberOfOKreplies)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00893}00893\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00894}00894\ \ \ \ \ \ \ \ \ std::string\ earlyexit;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00895}00895\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ addr[20];}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00896}00896\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00897}00897\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i=0;\ i<\mbox{\hyperlink{classEthUpdater_a472e88f36c000573653b4a352ce20f11}{mN2Prog}};\ ++i)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00898}00898\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00899}00899\ \ \ \ \ \ \ \ \ \ \ \ \ ACE\_UINT32\ ip=\mbox{\hyperlink{classEthUpdater_a9343209d308b2b19cc24306e22151b24}{mBoard2Prog}}[i]-\/>\mbox{\hyperlink{classBoardInfo_a74f07eb24f541854cb4feb219e96452c}{mAddress}};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00900}00900\ \ \ \ \ \ \ \ \ \ \ \ \ snprintf(addr,\ \textcolor{keyword}{sizeof}(addr),\ \textcolor{stringliteral}{"{}\%d.\%d.\%d.\%d:\ "{}},(ip>>24)\&0xFF,(ip>>16)\&0xFF,(ip>>8)\&0xFF,ip\&0xFF);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00901}00901\ \ \ \ \ \ \ \ \ \ \ \ \ earlyexit+=addr;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00902}00902\ \ \ \ \ \ \ \ \ \ \ \ \ earlyexit+=partname;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00903}00903\ \ \ \ \ \ \ \ \ \ \ \ \ earlyexit+=(\mbox{\hyperlink{classEthUpdater_a9343209d308b2b19cc24306e22151b24}{mBoard2Prog}}[i]-\/>\mbox{\hyperlink{classBoardInfo_ad8232cc07316e6dedea663f8f5bebdef}{mSuccess}}==\mbox{\hyperlink{classEthUpdater_ab0c6cad20225109078879c49b68d5ae7}{mNProgSteps}})?\textcolor{stringliteral}{"{}\ OK\(\backslash\)r\(\backslash\)n"{}}:\textcolor{stringliteral}{"{}\ CANT\(\backslash\)r\(\backslash\)n"{}};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00904}00904\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00905}00905\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00906}00906\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ earlyexit;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00907}00907\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00908}00908\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00909}00909\ \ \ \ \ \textcolor{keywordtype}{int}\ addrH=0;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00910}00910\ \ \ \ \ \textcolor{keywordtype}{int}\ baseAddress=0;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00911}00911\ \ \ \ \ \textcolor{keywordtype}{int}\ bytesToWrite=0;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00912}00912\ \ \ \ \ \textcolor{keywordtype}{int}\ bytesWritten=0;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00913}00913\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00914}00914\ \ \ \ \ \textcolor{keywordtype}{char}\ buffer[1024];}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00915}00915\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00916}00916\ \ \ \ \ \textcolor{keywordtype}{bool}\ beof=\textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00917}00917\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00918}00918\ \ \ \ \ \textcolor{comment}{//\ sending\ data}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00919}00919\ \ \ \ \ \textcolor{keywordflow}{while}\ (!beof\ \&\&\ fgets(buffer,1024,programFile))}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00920}00920\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00921}00921\ \ \ \ \ \ \ \ \ std::string\ line(buffer);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00922}00922\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00923}00923\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{dataTypes_8h_a4d43e8212bdc9dbee866506f04effcea}{cmd}}=strtol(line.substr(7,2).c\_str(),NULL,16);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00924}00924\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00925}00925\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{switch}\ (\mbox{\hyperlink{dataTypes_8h_a4d43e8212bdc9dbee866506f04effcea}{cmd}})}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00926}00926\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00927}00927\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 0:\ \textcolor{comment}{//standard\ data\ record}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00928}00928\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00929}00929\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ size\ =strtol(line.substr(1,2).c\_str(),NULL,16);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00930}00930\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ addrL=strtol(line.substr(3,4).c\_str(),NULL,16);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00931}00931\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00932}00932\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ address=addrH<<16|addrL;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00933}00933\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00934}00934\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!baseAddress)\ baseAddress=address;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00935}00935\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00936}00936\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (bytesToWrite+size>uprot\_PROGmaxsize\ ||\ address!=baseAddress+bytesToWrite)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00937}00937\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00938}00938\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (bytesToWrite)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00939}00939\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00940}00940\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ cmdData-\/>size[0]=\ bytesToWrite\ \ \ \ \&0xFF;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00941}00941\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ cmdData-\/>size[1]=(bytesToWrite>>8)\&0xFF;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00942}00942\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEthUpdater_a233a6862bb472aeb78da9f9025136c6f}{sendPROG}}(uprot\_OPC\_PROG\_DATA,\ cmdData,\ HEAD\_SIZE+bytesToWrite,\ \mbox{\hyperlink{classEthUpdater_a472e88f36c000573653b4a352ce20f11}{mN2Prog}},1000);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00943}00943\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ updateProgressBar(\textcolor{keywordtype}{float}(bytesWritten+=bytesToWrite)/fileSize);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00944}00944\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ bytesToWrite=0;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00945}00945\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00946}00946\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00947}00947\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00948}00948\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!bytesToWrite)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00949}00949\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00950}00950\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ baseAddress=address;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00951}00951\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ cmdData-\/>opc\ =\ uprot\_OPC\_PROG\_DATA;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00952}00952\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ cmdData-\/>address[0]\ =\ addrL\&0xFF;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00953}00953\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ cmdData-\/>address[1]\ =\ (addrL>>8)\&0xFF;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00954}00954\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ cmdData-\/>address[2]\ =\ addrH\&0xFF;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00955}00955\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ cmdData-\/>address[3]\ =\ (addrH>>8)\&0xFF;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00956}00956\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00957}00957\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00958}00958\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i=0;\ i<size;\ ++i)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00959}00959\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00960}00960\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ cmdData-\/>data[bytesToWrite+i]=(\textcolor{keywordtype}{unsigned}\ char)strtol(line.substr(i*2+9,2).c\_str(),NULL,16);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00961}00961\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00962}00962\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00963}00963\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ bytesToWrite+=size;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00964}00964\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00965}00965\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00966}00966\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00967}00967\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 1:\ \textcolor{comment}{//end\ of\ file}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00968}00968\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (bytesToWrite)\ \textcolor{comment}{//\ force\ write}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00969}00969\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00970}00970\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ beof=\textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00971}00971\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ cmdData-\/>size[0]\ =\ \ bytesToWrite\ \ \ \ \&0xFF;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00972}00972\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ cmdData-\/>size[1]\ =\ (bytesToWrite>>8)\&0xFF;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00973}00973\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEthUpdater_a233a6862bb472aeb78da9f9025136c6f}{sendPROG}}(uprot\_OPC\_PROG\_DATA,\ cmdData,\ HEAD\_SIZE+bytesToWrite,\ \mbox{\hyperlink{classEthUpdater_a472e88f36c000573653b4a352ce20f11}{mN2Prog}},\ 1000);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00974}00974\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ updateProgressBar(1.0f);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00975}00975\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ bytesToWrite=0;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00976}00976\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00977}00977\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00978}00978\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 2:}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00979}00979\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 3:}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00980}00980\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//AfxMessageBox("{}Unsupported\ hex\ commad"{});}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00981}00981\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00982}00982\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 4:\ \textcolor{comment}{//extended\ linear\ address\ record}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00983}00983\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00984}00984\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (bytesToWrite)\ \textcolor{comment}{//\ force\ write}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00985}00985\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00986}00986\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ cmdData-\/>size[0]\ =\ \ bytesToWrite\ \ \ \ \&0xFF;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00987}00987\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ cmdData-\/>size[1]\ =\ (bytesToWrite>>8)\&0xFF;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00988}00988\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEthUpdater_a233a6862bb472aeb78da9f9025136c6f}{sendPROG}}(uprot\_OPC\_PROG\_DATA,\ cmdData,\ HEAD\_SIZE+bytesToWrite,\ \mbox{\hyperlink{classEthUpdater_a472e88f36c000573653b4a352ce20f11}{mN2Prog}},\ 1000);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00989}00989\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ updateProgressBar(\textcolor{keywordtype}{float}(bytesWritten+=bytesToWrite)/fileSize);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00990}00990\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ bytesToWrite=0;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00991}00991\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00992}00992\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00993}00993\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ addrH=strtol(line.substr(9,4).c\_str(),NULL,16);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00994}00994\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00995}00995\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00996}00996\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00997}00997\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 5:\ \textcolor{comment}{//\ jump}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00998}00998\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (bytesToWrite)\ \textcolor{comment}{//\ force\ write}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l00999}00999\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01000}01000\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ cmdData-\/>size[0]=\ \ bytesToWrite\ \ \ \ \&0xFF;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01001}01001\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ cmdData-\/>size[1]=\ (bytesToWrite>>8)\&0xFF;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01002}01002\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEthUpdater_a233a6862bb472aeb78da9f9025136c6f}{sendPROG}}(uprot\_OPC\_PROG\_DATA,\ cmdData,\ HEAD\_SIZE+bytesToWrite,\ \mbox{\hyperlink{classEthUpdater_a472e88f36c000573653b4a352ce20f11}{mN2Prog}},1000);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01003}01003\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ updateProgressBar(\textcolor{keywordtype}{float}(bytesWritten+=bytesToWrite)/fileSize);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01004}01004\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ bytesToWrite=0;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01005}01005\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01006}01006\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01007}01007\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01008}01008\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01009}01009\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01010}01010\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01011}01011\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01012}01012\ \ \ \ \ \textcolor{comment}{//\ now\ we\ send\ the\ end}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01013}01013\ \ \ \ \ memset(cmdEnd,\ EOUPROT\_VALUE\_OF\_UNUSED\_BYTE,\ \textcolor{keyword}{sizeof}(eOuprot\_cmd\_PROG\_END\_t));}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01014}01014\ \ \ \ \ cmdEnd-\/>opc\ =\ uprot\_OPC\_PROG\_END;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01015}01015\ \ \ \ \ cmdEnd-\/>numberofpkts[0]\ =\ \mbox{\hyperlink{classEthUpdater_a30f9c5f24f0fd12e150f9e7c5385c8da}{mNChunks}}\ \&\ 0xFF;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01016}01016\ \ \ \ \ cmdEnd-\/>numberofpkts[1]\ =\ (\mbox{\hyperlink{classEthUpdater_a30f9c5f24f0fd12e150f9e7c5385c8da}{mNChunks}}>>8)\ \&\ 0xFF;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01017}01017\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01018}01018\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01019}01019\ \ \ \ \ \mbox{\hyperlink{classEthUpdater_a233a6862bb472aeb78da9f9025136c6f}{sendPROG}}(uprot\_OPC\_PROG\_END,\ cmdEnd,\ sizeEnd,\ \mbox{\hyperlink{classEthUpdater_a472e88f36c000573653b4a352ce20f11}{mN2Prog}},\ 1000);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01020}01020\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01021}01021\ \ \ \ \ updateProgressBar(1.0f);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01022}01022\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01023}01023\ \ \ \ \ std::string\ sOutput;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01024}01024\ \ \ \ \ \textcolor{keywordtype}{char}\ addr[20];}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01025}01025\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01026}01026\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i=0;\ i<\mbox{\hyperlink{classEthUpdater_a472e88f36c000573653b4a352ce20f11}{mN2Prog}};\ ++i)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01027}01027\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01028}01028\ \ \ \ \ \ \ \ \ ACE\_UINT32\ ip=\mbox{\hyperlink{classEthUpdater_a9343209d308b2b19cc24306e22151b24}{mBoard2Prog}}[i]-\/>\mbox{\hyperlink{classBoardInfo_a74f07eb24f541854cb4feb219e96452c}{mAddress}};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01029}01029\ \ \ \ \ \ \ \ \ snprintf(addr,\ \textcolor{keyword}{sizeof}(addr),\ \textcolor{stringliteral}{"{}\%d.\%d.\%d.\%d:\ "{}},(ip>>24)\&0xFF,(ip>>16)\&0xFF,(ip>>8)\&0xFF,ip\&0xFF);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01030}01030\ \ \ \ \ \ \ \ \ sOutput+=addr;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01031}01031\ \ \ \ \ \ \ \ \ sOutput+=partname;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01032}01032\ \ \ \ \ \ \ \ \ sOutput+=(\mbox{\hyperlink{classEthUpdater_a9343209d308b2b19cc24306e22151b24}{mBoard2Prog}}[i]-\/>\mbox{\hyperlink{classBoardInfo_ad8232cc07316e6dedea663f8f5bebdef}{mSuccess}}==\mbox{\hyperlink{classEthUpdater_ab0c6cad20225109078879c49b68d5ae7}{mNProgSteps}})?\textcolor{stringliteral}{"{}\ OK\(\backslash\)r\(\backslash\)n"{}}:\textcolor{stringliteral}{"{}\ NOK\(\backslash\)r\(\backslash\)n"{}};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01033}01033\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01034}01034\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01035}01035\ \ \ \ \ \textcolor{keywordflow}{return}\ sOutput;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01036}01036\ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01037}01037\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01038}01038\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01039}01039\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01040}\mbox{\hyperlink{classEthUpdater_a032b45a179b372ddbf1a6669128bf2de}{01040}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classEthUpdater_a032b45a179b372ddbf1a6669128bf2de}{EthUpdater::sendCommandSelected}}(\textcolor{keywordtype}{void}\ *\ \mbox{\hyperlink{dataTypes_8h_a4d43e8212bdc9dbee866506f04effcea}{cmd}},\ uint16\_t\ len)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01041}01041\ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01042}01042\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i=0;\ i<\mbox{\hyperlink{classEthUpdater_abbf067f511ae7810cf841e8e14cc1ef7}{mBoardList}}.\mbox{\hyperlink{classBoardList_ae680c7d660a2c2dc9629459223fd6eed}{size}}();\ ++i)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01043}01043\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01044}01044\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classEthUpdater_abbf067f511ae7810cf841e8e14cc1ef7}{mBoardList}}[i].mSelected)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01045}01045\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01046}01046\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEthUpdater_a6a7a14a8a676b55c630bdb2d3e7e9391}{mSocket}}.\mbox{\hyperlink{classDSocket_a138e63dbb1a445c4557c5a0a81525219}{SendTo}}(\mbox{\hyperlink{dataTypes_8h_a4d43e8212bdc9dbee866506f04effcea}{cmd}},\ len,\ \mbox{\hyperlink{classEthUpdater_a8effca58cc51dad2b2f91d4f8c508636}{mPort}},\ \mbox{\hyperlink{classEthUpdater_abbf067f511ae7810cf841e8e14cc1ef7}{mBoardList}}[i].mAddress);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01047}01047\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01048}01048\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01049}01049\ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01050}01050\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01051}01051\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01052}01052\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01053}\mbox{\hyperlink{classEthUpdater_a233a6862bb472aeb78da9f9025136c6f}{01053}}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{classEthUpdater_a233a6862bb472aeb78da9f9025136c6f}{EthUpdater::sendPROG}}(\textcolor{keyword}{const}\ uint8\_t\ opc,\ \textcolor{keywordtype}{void}\ *\ \mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}},\ \textcolor{keywordtype}{int}\ size,\ \textcolor{keywordtype}{int}\ answers,\ \textcolor{keywordtype}{int}\ retry)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01054}01054\ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01055}01055\ \ \ \ \ \textcolor{comment}{//\ data\ can\ be\ either\ a\ eOuprot\_cmd\_PROG\_DATA\_t*\ or\ a\ eOuprot\_cmd\_PROG\_END\_t*}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01056}01056\ \ \ \ \ \textcolor{comment}{//\ both\ have\ the\ same\ layout\ of\ the\ opc\ in\ first\ position}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01057}01057\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01058}01058\ \ \ \ \ \textcolor{comment}{//\ use\ unicast\ to\ all\ selected\ boards}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01059}01059\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ k=0;k<\mbox{\hyperlink{classEthUpdater_a472e88f36c000573653b4a352ce20f11}{mN2Prog}};\ k++)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01060}01060\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01061}01061\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEthUpdater_a6a7a14a8a676b55c630bdb2d3e7e9391}{mSocket}}.\mbox{\hyperlink{classDSocket_a138e63dbb1a445c4557c5a0a81525219}{SendTo}}(\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}},\ size,\ \mbox{\hyperlink{classEthUpdater_a8effca58cc51dad2b2f91d4f8c508636}{mPort}},\ \mbox{\hyperlink{classEthUpdater_a9343209d308b2b19cc24306e22151b24}{mBoard2Prog}}[k]-\/>mAddress);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01062}01062\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01063}01063\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01064}01064\ \ \ \ \ ACE\_UINT16\ rxPort;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01065}01065\ \ \ \ \ ACE\_UINT32\ rxAddress;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01066}01066\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01067}01067\ \ \ \ \ ++\mbox{\hyperlink{classEthUpdater_a30f9c5f24f0fd12e150f9e7c5385c8da}{mNChunks}};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01068}01068\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01069}01069\ \ \ \ \ \textcolor{keywordflow}{if}\ (answers)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01070}01070\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01071}01071\ \ \ \ \ \ \ \ \ ++\mbox{\hyperlink{classEthUpdater_ab0c6cad20225109078879c49b68d5ae7}{mNProgSteps}};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01072}01072\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01073}01073\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ r=0;\ r<retry;\ ++r)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01074}01074\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01075}01075\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ a=0;\ a<answers;\ ++a)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01076}01076\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01077}01077\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classEthUpdater_a6a7a14a8a676b55c630bdb2d3e7e9391}{mSocket}}.\mbox{\hyperlink{classDSocket_aa5cab9efcdda8ead2468271c945f3410}{ReceiveFrom}}(\mbox{\hyperlink{classEthUpdater_a46d680ba801a509701aa81e34b1ac42e}{mRxBuffer}},\ \textcolor{keyword}{sizeof}(\mbox{\hyperlink{classEthUpdater_a46d680ba801a509701aa81e34b1ac42e}{mRxBuffer}}),\ rxAddress,\ rxPort,\ 10)>0)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01078}01078\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01079}01079\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ eOuprot\_cmdREPLY\_t\ *\ reply\ =\ (eOuprot\_cmdREPLY\_t*)\ \mbox{\hyperlink{classEthUpdater_a46d680ba801a509701aa81e34b1ac42e}{mRxBuffer}};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01080}01080\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01081}01081\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (opc\ ==\ reply-\/>opc)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01082}01082\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01083}01083\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (rxAddress!=\mbox{\hyperlink{classEthUpdater_ad11a89897d1818fa5859aeaeb51cf960}{mMyAddress}})}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01084}01084\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01085}01085\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i=0;\ i<\mbox{\hyperlink{classEthUpdater_a472e88f36c000573653b4a352ce20f11}{mN2Prog}};\ ++i)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01086}01086\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01087}01087\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (rxAddress==\mbox{\hyperlink{classEthUpdater_a9343209d308b2b19cc24306e22151b24}{mBoard2Prog}}[i]-\/>mAddress)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01088}01088\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01089}01089\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (uprot\_RES\_OK\ ==\ reply-\/>res)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01090}01090\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01091}01091\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ++(\mbox{\hyperlink{classEthUpdater_a9343209d308b2b19cc24306e22151b24}{mBoard2Prog}}[i]-\/>\mbox{\hyperlink{classBoardInfo_ad8232cc07316e6dedea663f8f5bebdef}{mSuccess}});}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01092}01092\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01093}01093\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01094}01094\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01095}01095\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01096}01096\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01097}01097\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!-\/-\/answers)\ \textcolor{keywordflow}{return}\ 0;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01098}01098\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01099}01099\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01100}01100\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01101}01101\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01102}01102\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01103}01103\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01104}01104\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01105}01105\ \ \ \ \ \textcolor{keywordflow}{return}\ answers;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01106}01106\ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01107}01107\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01108}01108\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01109}01109\ \textcolor{keywordtype}{bool}\ EthUpdater::cmdChangeMask(ACE\_UINT32\ newMask,\ ACE\_UINT32\ address)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01110}01110\ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01111}01111\ \ \ \ \ \textcolor{keywordtype}{bool}\ ret\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01112}01112\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01113}01113\ \ \ \ \ eOuprot\_cmd\_LEGACY\_IP\_MASK\_SET\_t\ command\ =\ \{EOUPROT\_VALUE\_OF\_UNUSED\_BYTE\};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01114}01114\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01115}01115\ \ \ \ \ command.opc\ =\ uprot\_OPC\_LEGACY\_IP\_MASK\_SET;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01116}01116\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01117}01117\ \ \ \ \ command.mask[0]\ =\ (newMask>>24)\&0xFF;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01118}01118\ \ \ \ \ command.mask[1]\ =\ (newMask>>16)\&0xFF;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01119}01119\ \ \ \ \ command.mask[2]\ =\ (newMask>>8)\ \&0xFF;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01120}01120\ \ \ \ \ command.mask[3]\ =\ \ newMask\ \ \ \ \ \&0xFF;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01121}01121\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01122}01122\ \textcolor{preprocessor}{\#if\ defined(PRINT\_DEBUG\_INFO\_ON\_TERMINAL)}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01123}01123\ \ \ \ \ \textcolor{keywordtype}{char}\ ipaddr[20];}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01124}01124\ \ \ \ \ snprintf(ipaddr,\ \textcolor{keyword}{sizeof}(ipaddr),\ \textcolor{stringliteral}{"{}\%d.\%d.\%d.\%d"{}},(address>>24)\&0xFF,\ (address>>16)\&0xFF,\ (address>>8)\&0xFF,\ address\&0xFF);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01125}01125\ \ \ \ \ \textcolor{keywordtype}{char}\ newm[20];}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01126}01126\ \ \ \ \ snprintf(newm,\ \textcolor{keyword}{sizeof}(newm),\ \textcolor{stringliteral}{"{}\%d.\%d.\%d.\%d"{}},(newMask>>24)\&0xFF,\ (newMask>>16)\&0xFF,\ (newMask>>8)\&0xFF,\ newMask\&0xFF);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01127}01127\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01128}01128\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01129}01129\ \ \ \ \ \textcolor{keywordtype}{bool}\ stopit\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01130}01130\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01131}01131\ \ \ \ \ \textcolor{keywordflow}{if}(0\ ==\ address)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01132}01132\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01133}01133\ \ \ \ \ \ \ \ \ stopit\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01134}01134\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01135}01135\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01136}01136\ \ \ \ \ \textcolor{keywordflow}{if}(\textcolor{keyword}{true}\ ==\ stopit)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01137}01137\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01138}01138\ \textcolor{preprocessor}{\#if\ defined(PRINT\_DEBUG\_INFO\_ON\_TERMINAL)}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01139}01139\ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}cannot\ send\ command\ uprot\_OPC\_LEGACY\_IP\_MASK\_SET\ to\ \%s\ with\ new\ mask\ \%s\ because\ either\ one\ or\ both\ are\ not\ valid\(\backslash\)n"{}},\ ipaddr,\ newm);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01140}01140\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01141}01141\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01142}01142\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01143}01143\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01144}01144\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01145}01145\ \textcolor{preprocessor}{\#if\ defined(PRINT\_DEBUG\_INFO\_ON\_TERMINAL)}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01146}01146\ \ \ \ \ printf(\textcolor{stringliteral}{"{}send\ command\ eOuprot\_cmd\_LEGACY\_IP\_MASK\_SET\_t\ to\ \%s,\ new\ mask\ is\ \%s\(\backslash\)n"{}},\ ipaddr,\ newm);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01147}01147\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01148}01148\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01149}01149\ \ \ \ \ \mbox{\hyperlink{classEthUpdater_a6a7a14a8a676b55c630bdb2d3e7e9391}{mSocket}}.\mbox{\hyperlink{classDSocket_a138e63dbb1a445c4557c5a0a81525219}{SendTo}}(\&command,\ \textcolor{keyword}{sizeof}(command),\ \mbox{\hyperlink{classEthUpdater_a8effca58cc51dad2b2f91d4f8c508636}{mPort}},\ address);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01150}01150\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01151}01151\ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01152}01152\ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01153}01153\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01154}01154\ \textcolor{comment}{//\ TODO:\ at\ date\ 22\ jun\ 16:\ yet\ to\ be\ tested}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01155}01155\ \textcolor{keywordtype}{bool}\ EthUpdater::cmdChangeMAC(uint64\_t\ newMAC48,\ ACE\_UINT32\ address)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01156}01156\ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01157}01157\ \ \ \ \ \textcolor{keywordtype}{bool}\ ret\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01158}01158\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01159}01159\ \ \ \ \ eOuprot\_cmd\_LEGACY\_MAC\_SET\_t\ command\ =\ \{EOUPROT\_VALUE\_OF\_UNUSED\_BYTE\};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01160}01160\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01161}01161\ \ \ \ \ command.opc\ =\ uprot\_OPC\_LEGACY\_MAC\_SET;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01162}01162\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01163}01163\ \ \ \ \ command.mac48[0]\ =\ (newMAC48>>40)\ \&\ 0xFF;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01164}01164\ \ \ \ \ command.mac48[1]\ =\ (newMAC48>>32)\ \&\ 0xFF;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01165}01165\ \ \ \ \ command.mac48[2]\ =\ (newMAC48>>24)\ \&\ 0xFF;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01166}01166\ \ \ \ \ command.mac48[3]\ =\ (newMAC48>>16)\ \&\ 0xFF;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01167}01167\ \ \ \ \ command.mac48[4]\ =\ (newMAC48>>8\ )\ \&\ 0xFF;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01168}01168\ \ \ \ \ command.mac48[5]\ =\ (newMAC48\ \ \ \ )\ \&\ 0xFF;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01169}01169\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01170}01170\ \textcolor{preprocessor}{\#if\ defined(PRINT\_DEBUG\_INFO\_ON\_TERMINAL)}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01171}01171\ \ \ \ \ \textcolor{keywordtype}{char}\ ipaddr[20];}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01172}01172\ \ \ \ \ snprintf(ipaddr,\ \textcolor{keyword}{sizeof}(ipaddr),\ \textcolor{stringliteral}{"{}\%d.\%d.\%d.\%d"{}},(address>>24)\&0xFF,\ (address>>16)\&0xFF,\ (address>>8)\&0xFF,\ address\&0xFF);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01173}01173\ \ \ \ \ \textcolor{keywordtype}{char}\ newmac[32];}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01174}01174\ \ \ \ \ snprintf(newmac,\ \textcolor{keyword}{sizeof}(newmac),\ \textcolor{stringliteral}{"{}\%x:\%x:\%x:\%x:\%x:\%x"{}},\ command.mac48[0],\ command.mac48[1],\ command.mac48[2],\ command.mac48[3],\ command.mac48[4],\ command.mac48[5]);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01175}01175\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01176}01176\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01177}01177\ \ \ \ \ \textcolor{keywordtype}{bool}\ stopit\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01178}01178\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01179}01179\ \ \ \ \ \textcolor{keywordflow}{if}(0\ ==\ address)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01180}01180\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01181}01181\ \ \ \ \ \ \ \ \ stopit\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01182}01182\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01183}01183\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01184}01184\ \ \ \ \ \textcolor{keywordflow}{if}(0\ ==\ newMAC48)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01185}01185\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01186}01186\ \ \ \ \ \ \ \ \ stopit\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01187}01187\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01188}01188\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01189}01189\ \ \ \ \ \textcolor{keywordflow}{if}(\textcolor{keyword}{true}\ ==\ stopit)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01190}01190\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01191}01191\ \textcolor{preprocessor}{\#if\ defined(PRINT\_DEBUG\_INFO\_ON\_TERMINAL)}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01192}01192\ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}cannot\ send\ command\ uprot\_OPC\_LEGACY\_MAC\_SET\ to\ \%s\ with\ new\ mac\ \%s\ because\ either\ one\ or\ both\ are\ not\ valid\(\backslash\)n"{}},\ ipaddr,\ newmac);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01193}01193\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01194}01194\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01195}01195\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01196}01196\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01197}01197\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01198}01198\ \textcolor{preprocessor}{\#if\ defined(PRINT\_DEBUG\_INFO\_ON\_TERMINAL)}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01199}01199\ \ \ \ \ printf(\textcolor{stringliteral}{"{}send\ command\ uprot\_OPC\_LEGACY\_MAC\_SET\ to\ \%s,\ new\ mac\ is\ \%s\(\backslash\)n"{}},\ ipaddr,\ newmac);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01200}01200\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01201}01201\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01202}01202\ \ \ \ \ \mbox{\hyperlink{classEthUpdater_a6a7a14a8a676b55c630bdb2d3e7e9391}{mSocket}}.\mbox{\hyperlink{classDSocket_a138e63dbb1a445c4557c5a0a81525219}{SendTo}}(\&command,\ \textcolor{keyword}{sizeof}(command),\ \mbox{\hyperlink{classEthUpdater_a8effca58cc51dad2b2f91d4f8c508636}{mPort}},\ address);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01203}01203\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01204}01204\ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01205}01205\ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01206}01206\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01207}01207\ \textcolor{comment}{//\ TODO:\ at\ date\ 22\ jun\ 16:\ yet\ to\ be\ tested}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01208}01208\ \textcolor{keywordtype}{bool}\ EthUpdater::cmdPageClr(eOuprot\_pagesize\_t\ pagesize,\ ACE\_UINT32\ address)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01209}01209\ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01210}01210\ \ \ \ \ eOuprot\_cmd\_PAGE\_CLR\_t\ command\ =\ \{EOUPROT\_VALUE\_OF\_UNUSED\_BYTE\};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01211}01211\ \ \ \ \ command.opc\ =\ uprot\_OPC\_PAGE\_CLR;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01212}01212\ \ \ \ \ command.pagesize\ =\ pagesize;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01213}01213\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01214}01214\ \ \ \ \ \textcolor{keywordflow}{if}(0\ ==\ address)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01215}01215\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01216}01216\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEthUpdater_a032b45a179b372ddbf1a6669128bf2de}{sendCommandSelected}}(\&command,\ \textcolor{keyword}{sizeof}(command));}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01217}01217\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01218}01218\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01219}01219\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01220}01220\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEthUpdater_a6a7a14a8a676b55c630bdb2d3e7e9391}{mSocket}}.\mbox{\hyperlink{classDSocket_a138e63dbb1a445c4557c5a0a81525219}{SendTo}}(\&command,\ \textcolor{keyword}{sizeof}(command),\ \mbox{\hyperlink{classEthUpdater_a8effca58cc51dad2b2f91d4f8c508636}{mPort}},\ address);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01221}01221\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01222}01222\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01223}01223\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01224}01224\ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01225}01225\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01226}01226\ \textcolor{comment}{//\ TODO:\ at\ date\ 22\ jun\ 16:\ yet\ to\ be\ tested}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01227}01227\ \textcolor{keywordtype}{bool}\ EthUpdater::cmdPageSet(eOuprot\_pagesize\_t\ pagesize,\ uint8\_t\ *\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}},\ ACE\_UINT32\ address)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01228}01228\ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01229}01229\ \ \ \ \ \textcolor{keywordflow}{if}(NULL\ ==\ \mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}})}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01230}01230\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01231}01231\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01232}01232\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01233}01233\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01234}01234\ \ \ \ \ eOuprot\_cmd\_PAGE\_SET\_t\ *\mbox{\hyperlink{dataTypes_8h_a4d43e8212bdc9dbee866506f04effcea}{cmd}}\ =\ (eOuprot\_cmd\_PAGE\_SET\_t*)\ \mbox{\hyperlink{classEthUpdater_a82b318e27ce3c179ccf1f7d460e68721}{mTxBuffer}};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01235}01235\ \ \ \ \ uint16\_t\ sizeofcmd\ =\ \textcolor{keyword}{sizeof}(eOuprot\_cmd\_PAGE\_SET\_t)\ -\/\ uprot\_pagemaxsize\ +\ pagesize;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01236}01236\ \ \ \ \ \textcolor{comment}{//\ think\ of\ the\ best\ way\ to\ specify\ the\ length\ of\ themessage\ in\ a\ proper\ way}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01237}01237\ \ \ \ \ \textcolor{comment}{//\ we\ could\ decide\ to\ send\ always\ a\ length\ of\ sizeof(eOuprot\_cmd\_PAGE\_SET\_t)\ which\ is\ 132,\ or\ ...}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01238}01238\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01239}01239\ \ \ \ \ memset(\mbox{\hyperlink{dataTypes_8h_a4d43e8212bdc9dbee866506f04effcea}{cmd}},\ EOUPROT\_VALUE\_OF\_UNUSED\_BYTE,\ sizeofcmd);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01240}01240\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01241}01241\ \ \ \ \ \mbox{\hyperlink{dataTypes_8h_a4d43e8212bdc9dbee866506f04effcea}{cmd}}-\/>opc\ =\ uprot\_OPC\_PAGE\_SET;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01242}01242\ \ \ \ \ \mbox{\hyperlink{dataTypes_8h_a4d43e8212bdc9dbee866506f04effcea}{cmd}}-\/>pagesize\ =\ pagesize;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01243}01243\ \ \ \ \ memcpy(\&\mbox{\hyperlink{dataTypes_8h_a4d43e8212bdc9dbee866506f04effcea}{cmd}}-\/>page[0],\ \mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}},\ pagesize);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01244}01244\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01245}01245\ \ \ \ \ \textcolor{keywordflow}{if}(0\ ==\ address)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01246}01246\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01247}01247\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEthUpdater_a032b45a179b372ddbf1a6669128bf2de}{sendCommandSelected}}(\mbox{\hyperlink{dataTypes_8h_a4d43e8212bdc9dbee866506f04effcea}{cmd}},\ sizeofcmd);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01248}01248\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01249}01249\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01250}01250\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01251}01251\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classEthUpdater_a6a7a14a8a676b55c630bdb2d3e7e9391}{mSocket}}.\mbox{\hyperlink{classDSocket_a138e63dbb1a445c4557c5a0a81525219}{SendTo}}(\mbox{\hyperlink{dataTypes_8h_a4d43e8212bdc9dbee866506f04effcea}{cmd}},\ sizeofcmd,\ \mbox{\hyperlink{classEthUpdater_a8effca58cc51dad2b2f91d4f8c508636}{mPort}},\ address);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01252}01252\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01253}01253\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01254}01254\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01255}01255\ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01256}01256\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01257}01257\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01258}01258\ \textcolor{comment}{//\ TODO:\ at\ date\ 22\ jun\ 16:\ yet\ to\ be\ tested}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01259}01259\ \textcolor{keywordtype}{bool}\ EthUpdater::cmdPageGet(eOuprot\_pagesize\_t\ pagesize,\ uint8\_t\ **\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}},\ ACE\_UINT32\ address)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01260}01260\ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01261}01261\ \ \ \ \ \textcolor{keywordflow}{if}(NULL\ ==\ \mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}})}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01262}01262\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01263}01263\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01264}01264\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01265}01265\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01266}01266\ \ \ \ \ \textcolor{keywordflow}{if}(0\ ==\ address)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01267}01267\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01268}01268\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01269}01269\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01270}01270\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01271}01271\ \ \ \ \ eOuprot\_cmd\_PAGE\_GET\_t\ command\ =\ \{EOUPROT\_VALUE\_OF\_UNUSED\_BYTE\};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01272}01272\ \ \ \ \ command.opc\ =\ uprot\_OPC\_PAGE\_GET;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01273}01273\ \ \ \ \ command.pagesize\ =\ pagesize;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01274}01274\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01275}01275\ \ \ \ \ \mbox{\hyperlink{classEthUpdater_a6a7a14a8a676b55c630bdb2d3e7e9391}{mSocket}}.\mbox{\hyperlink{classDSocket_a138e63dbb1a445c4557c5a0a81525219}{SendTo}}(\&command,\ \textcolor{keyword}{sizeof}(command),\ \mbox{\hyperlink{classEthUpdater_a8effca58cc51dad2b2f91d4f8c508636}{mPort}},\ address);}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01276}01276\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01277}01277\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01278}01278\ \ \ \ \ ACE\_UINT16\ rxPort;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01279}01279\ \ \ \ \ ACE\_UINT32\ rxAddress;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01280}01280\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01281}01281\ \ \ \ \ \textcolor{keywordtype}{bool}\ ret\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01282}01282\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01283}01283\ \ \ \ \ \textcolor{keywordflow}{while}(\mbox{\hyperlink{classEthUpdater_a6a7a14a8a676b55c630bdb2d3e7e9391}{mSocket}}.\mbox{\hyperlink{classDSocket_aa5cab9efcdda8ead2468271c945f3410}{ReceiveFrom}}(\mbox{\hyperlink{classEthUpdater_a46d680ba801a509701aa81e34b1ac42e}{mRxBuffer}},\ \textcolor{keyword}{sizeof}(\mbox{\hyperlink{classEthUpdater_a46d680ba801a509701aa81e34b1ac42e}{mRxBuffer}}),\ rxAddress,\ rxPort,\ 500)>0)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01284}01284\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01285}01285\ \ \ \ \ \ \ \ \ eOuprot\_cmd\_PAGE\_GET\_REPLY\_t\ *\ pageget\ =\ (eOuprot\_cmd\_PAGE\_GET\_REPLY\_t*)\ \mbox{\hyperlink{classEthUpdater_a46d680ba801a509701aa81e34b1ac42e}{mRxBuffer}};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01286}01286\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01287}01287\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(uprot\_OPC\_PAGE\_GET\ ==\ pageget-\/>reply.opc)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01288}01288\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01289}01289\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(address\ ==\ rxAddress)}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01290}01290\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01291}01291\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}((uprot\_RES\_OK\ ==\ pageget-\/>reply.res)\ \&\&\ (pagesize\ ==\ pageget-\/>pagesize))}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01292}01292\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01293}01293\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}}\ =\ pageget-\/>page;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01294}01294\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ret\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01295}01295\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01296}01296\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01297}01297\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01298}01298\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01299}01299\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01300}01300\ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01301}01301\ \}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01302}01302\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01303}01303\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01304}01304\ \textcolor{comment}{//\ eof}}
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01305}01305\ }
+\DoxyCodeLine{\Hypertarget{EthUpdater_8cpp_source_l01306}01306\ }
+
+\end{DoxyCode}

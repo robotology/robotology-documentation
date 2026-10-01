@@ -1,0 +1,452 @@
+\doxysection{Motor\+Thread.\+h}
+\hypertarget{MotorThread_8h_source}{}\label{MotorThread_8h_source}\index{icub-\/main/src/modules/actionsRenderingEngine/include/iCub/MotorThread.h@{icub-\/main/src/modules/actionsRenderingEngine/include/iCub/MotorThread.h}}
+\mbox{\hyperlink{MotorThread_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00001}00001\ \textcolor{comment}{/*\ }}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00002}00002\ \textcolor{comment}{*\ Copyright\ (C)\ 2010\ RobotCub\ Consortium,\ European\ Commission\ FP6\ Project\ IST-\/004370}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00003}00003\ \textcolor{comment}{*\ Author:\ Carlo\ Ciliberto,\ Vadim\ Tikhanoff}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00004}00004\ \textcolor{comment}{*\ email:\ \ \ carlo.ciliberto@iit.it\ vadim.tikhanoff@iit.it}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00005}00005\ \textcolor{comment}{*\ website:\ www.robotcub.org}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00006}00006\ \textcolor{comment}{*\ Permission\ is\ granted\ to\ copy,\ distribute,\ and/or\ modify\ this\ program}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00007}00007\ \textcolor{comment}{*\ under\ the\ terms\ of\ the\ GNU\ General\ Public\ License,\ version\ 2\ or\ any}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00008}00008\ \textcolor{comment}{*\ later\ version\ published\ by\ the\ Free\ Software\ Foundation.}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00009}00009\ \textcolor{comment}{*}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00010}00010\ \textcolor{comment}{*\ A\ copy\ of\ the\ license\ can\ be\ found\ at}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00011}00011\ \textcolor{comment}{*\ http://www.robotcub.org/icub/license/gpl.txt}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00012}00012\ \textcolor{comment}{*}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00013}00013\ \textcolor{comment}{*\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00014}00014\ \textcolor{comment}{*\ WITHOUT\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00015}00015\ \textcolor{comment}{*\ MERCHANTABILITY\ or\ FITNESS\ FOR\ A\ PARTICULAR\ PURPOSE.\ See\ the\ GNU\ General}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00016}00016\ \textcolor{comment}{*\ Public\ License\ for\ more\ details}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00017}00017\ \textcolor{comment}{*/}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00018}00018\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00019}00019\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00020}00020\ \textcolor{preprocessor}{\#ifndef\ \_\_MOTOR\_THREAD\_\_}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00021}00021\ \textcolor{preprocessor}{\#define\ \_\_MOTOR\_THREAD\_\_}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00022}00022\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00023}00023\ \textcolor{preprocessor}{\#include\ <yarp/os/all.h>}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00024}00024\ \textcolor{preprocessor}{\#include\ <yarp/dev/all.h>}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00025}00025\ \textcolor{preprocessor}{\#include\ <yarp/sig/all.h>}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00026}00026\ \textcolor{preprocessor}{\#include\ <yarp/math/SVD.h>}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00027}00027\ \textcolor{preprocessor}{\#include\ <yarp/math/Math.h>}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00028}00028\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{math_8h}{iCub/ctrl/math.h}}>}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00029}00029\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{pids_8h}{iCub/ctrl/pids.h}}>}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00030}00030\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{ctrlLib_2include_2iCub_2ctrl_2neuralNetworks_8h}{iCub/ctrl/neuralNetworks.h}}>}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00031}00031\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{actionPrimitives_8h}{iCub/action/actionPrimitives.h}}>}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00032}00032\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00033}00033\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00034}00034\ \textcolor{preprocessor}{\#include\ <vector>}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00035}00035\ \textcolor{preprocessor}{\#include\ <limits>}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00036}00036\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00037}00037\ \textcolor{preprocessor}{\#include\ <iCub/utils.h>}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00038}00038\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00039}\mbox{\hyperlink{MotorThread_8h_a38ab010bd99b102ce9bad8ab2950986e}{00039}}\ \textcolor{preprocessor}{\#define\ HEAD\_MODE\_IDLE\ \ \ \ \ \ \ \ \ \ \ \ \ \ 0}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00040}\mbox{\hyperlink{MotorThread_8h_a8b49388e91b9095dabc6d39062067ca2}{00040}}\ \textcolor{preprocessor}{\#define\ HEAD\_MODE\_GO\_HOME\ \ \ \ \ \ \ \ \ \ \ 1}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00041}\mbox{\hyperlink{MotorThread_8h_a57e126e25b0b65282c7b0fa5c39d5e77}{00041}}\ \textcolor{preprocessor}{\#define\ HEAD\_MODE\_TRACK\_HAND\ \ \ \ \ \ \ \ 2}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00042}\mbox{\hyperlink{MotorThread_8h_a0abd0fd54c90f50cad341dfa6f9355b3}{00042}}\ \textcolor{preprocessor}{\#define\ HEAD\_MODE\_TRACK\_TEMP\ \ \ \ \ \ \ \ 3}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00043}\mbox{\hyperlink{MotorThread_8h_a82f435a30e69af95c6548e09d2155a49}{00043}}\ \textcolor{preprocessor}{\#define\ HEAD\_MODE\_TRACK\_CART\ \ \ \ \ \ \ \ 4}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00044}\mbox{\hyperlink{MotorThread_8h_af8a63a94cebe3beed335c11c074582a2}{00044}}\ \textcolor{preprocessor}{\#define\ HEAD\_MODE\_TRACK\_FIX\ \ \ \ \ \ \ \ \ 5}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00045}00045\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00046}\mbox{\hyperlink{MotorThread_8h_ae09c32f024272b875a5e4e14e28e2061}{00046}}\ \textcolor{preprocessor}{\#define\ ARM\_MODE\_IDLE\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 0}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00047}\mbox{\hyperlink{MotorThread_8h_a5404dda3504fa3f5a4ff8e46acfa14a2}{00047}}\ \textcolor{preprocessor}{\#define\ ARM\_MODE\_LEARN\_ACTION\ \ \ \ \ \ \ 1}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00048}\mbox{\hyperlink{MotorThread_8h_ab16fa148e70304b7c8e83b8d3ed38bd9}{00048}}\ \textcolor{preprocessor}{\#define\ ARM\_MODE\_LEARN\_KINOFF\ \ \ \ \ \ \ 2}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00049}\mbox{\hyperlink{MotorThread_8h_ad361e4ab949bd3e34fef846a9364046b}{00049}}\ \textcolor{preprocessor}{\#define\ ARM\_MODE\_FINE\_REACHING\ \ \ \ \ \ 3}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00050}00050\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00051}\mbox{\hyperlink{MotorThread_8h_a422d4e27c4f703ac021a0f5e7177f2be}{00051}}\ \textcolor{preprocessor}{\#define\ GRASP\_STATE\_IDLE\ \ \ \ \ \ \ \ \ \ \ \ 0}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00052}\mbox{\hyperlink{MotorThread_8h_a2d871ca9bb2fb42010caf542660c478c}{00052}}\ \textcolor{preprocessor}{\#define\ GRASP\_STATE\_ABOVE\ \ \ \ \ \ \ \ \ \ \ 1}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00053}\mbox{\hyperlink{MotorThread_8h_af6e838566a8f0845b9f0a615b8a4d8d0}{00053}}\ \textcolor{preprocessor}{\#define\ GRASP\_STATE\_SIDE\ \ \ \ \ \ \ \ \ \ \ \ 2}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00054}00054\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00055}\mbox{\hyperlink{MotorThread_8h_a511a6a1f13a0e1638e841c89aa3e1247}{00055}}\ \textcolor{preprocessor}{\#define\ ARM\_HOMING\_PERIOD\ \ \ \ \ \ \ \ \ \ \ 1.5\ \ \ \ \ }\textcolor{comment}{//[s]}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00056}00056\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00057}00057\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00058}\mbox{\hyperlink{MotorThread_8h_a129d95b7cb950d14dbb256cce0ef0437}{00058}}\ \textcolor{preprocessor}{\#define\ S2C\_HOMOGRAPHY\ \ \ \ \ \ \ \ \ \ \ \ \ \ yarp::os::createVocab32('h','o','m','o')}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00059}\mbox{\hyperlink{MotorThread_8h_aaa09b357c97f1646c8a9aae461188544}{00059}}\ \textcolor{preprocessor}{\#define\ S2C\_DISPARITY\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yarp::os::createVocab32('d','i','s','p')}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00060}\mbox{\hyperlink{MotorThread_8h_ac863a60d775dd6cf6e47883e81196cfd}{00060}}\ \textcolor{preprocessor}{\#define\ S2C\_NETWORK\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yarp::os::createVocab32('n','e','t','w')}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00061}00061\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00062}00062\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00063}00063\ \textcolor{keyword}{using\ namespace\ }std;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00064}00064\ \textcolor{keyword}{using\ namespace\ }yarp::os;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00065}00065\ \textcolor{keyword}{using\ namespace\ }yarp::sig;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00066}00066\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceyarp_1_1dev}{yarp::dev}};}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00067}00067\ \textcolor{keyword}{using\ namespace\ }yarp::math;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00068}00068\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceiCub_1_1ctrl}{iCub::ctrl}};}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00069}00069\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceiCub_1_1action}{iCub::action}};}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00070}00070\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceiCub_1_1perception}{iCub::perception}};}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00071}00071\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00072}00072\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00073}\mbox{\hyperlink{structDragger}{00073}}\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structDragger}{Dragger}}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00074}00074\ \{}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00075}\mbox{\hyperlink{structDragger_aaccb44090e70a324788c72c578f0bd95}{00075}}\ \ \ \ \ ICartesianControl\ \ \ \ \ \ \ \ \ \ \ *\mbox{\hyperlink{structDragger_aaccb44090e70a324788c72c578f0bd95}{ctrl}};}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00076}00076\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00077}\mbox{\hyperlink{structDragger_afffc6f4b03473e0f413ced99e203ffba}{00077}}\ \ \ \ \ \textcolor{keywordtype}{double}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structDragger_afffc6f4b03473e0f413ced99e203ffba}{extForceThresh}};}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00078}\mbox{\hyperlink{structDragger_acbff95fdfc850cfa7cacd4df20a2b8cc}{00078}}\ \ \ \ \ \textcolor{keywordtype}{double}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structDragger_acbff95fdfc850cfa7cacd4df20a2b8cc}{t0}};}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00079}\mbox{\hyperlink{structDragger_adb95fddca33d8e0b6d6ab032ab461d8f}{00079}}\ \ \ \ \ \textcolor{keywordtype}{double}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structDragger_adb95fddca33d8e0b6d6ab032ab461d8f}{samplingRate}};}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00080}\mbox{\hyperlink{structDragger_a38335d3e7381869bc5da17634f5aa12e}{00080}}\ \ \ \ \ Vector\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structDragger_a38335d3e7381869bc5da17634f5aa12e}{x0}};}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00081}\mbox{\hyperlink{structDragger_a6479d7262991f95003ffb6c3bf4abf0c}{00081}}\ \ \ \ \ \textcolor{keywordtype}{int}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structDragger_a6479d7262991f95003ffb6c3bf4abf0c}{arm}};}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00082}\mbox{\hyperlink{structDragger_a472b77fac6e67245640d9dbf0f45fdc5}{00082}}\ \ \ \ \ Bottle\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structDragger_a472b77fac6e67245640d9dbf0f45fdc5}{actions}};}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00083}\mbox{\hyperlink{structDragger_a3ad42a640ac5eaec1094e8676e48a4ef}{00083}}\ \ \ \ \ \textcolor{keywordtype}{string}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structDragger_a3ad42a640ac5eaec1094e8676e48a4ef}{actionName}};}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00084}\mbox{\hyperlink{structDragger_a95ada35dedc86c8512b3cd54b77c9b7e}{00084}}\ \ \ \ \ \textcolor{keywordtype}{double}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structDragger_a95ada35dedc86c8512b3cd54b77c9b7e}{min}};}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00085}\mbox{\hyperlink{structDragger_acd67a89a2961140c1c3a4b48ea4bf964}{00085}}\ \ \ \ \ \textcolor{keywordtype}{double}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structDragger_acd67a89a2961140c1c3a4b48ea4bf964}{max}};}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00086}00086\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00087}\mbox{\hyperlink{structDragger_a2fd1713c793f1e2082cb979603cbade3}{00087}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structDragger_a2fd1713c793f1e2082cb979603cbade3}{using\_impedance}};}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00088}00088\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00089}\mbox{\hyperlink{structDragger_a4bb2a73b3b59610d738161a9942ce487}{00089}}\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1Integrator}{iCub::ctrl::Integrator}}\ \ \ \ \ \ *\mbox{\hyperlink{structDragger_a4bb2a73b3b59610d738161a9942ce487}{I}};}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00090}\mbox{\hyperlink{structDragger_af36fb587826decadc3526022cc8502c7}{00090}}\ \ \ \ \ \textcolor{keywordtype}{double}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structDragger_af36fb587826decadc3526022cc8502c7}{damping}};}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00091}\mbox{\hyperlink{structDragger_a7058a0f88b9134c3b673b98a069b56d1}{00091}}\ \ \ \ \ \textcolor{keywordtype}{double}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structDragger_a7058a0f88b9134c3b673b98a069b56d1}{inertia}};}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00092}00092\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00093}\mbox{\hyperlink{structDragger_a67662ca974ceaa2d8c678c05a0674011}{00093}}\ \ \ \ \ \mbox{\hyperlink{structDragger_a67662ca974ceaa2d8c678c05a0674011}{Dragger}}()}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00094}00094\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00095}00095\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structDragger_a4bb2a73b3b59610d738161a9942ce487}{I}}=NULL;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00096}00096\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00097}00097\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00098}\mbox{\hyperlink{structDragger_a8a513c42b60ad5a3ed1f26818bfbed91}{00098}}\ \ \ \ \ \mbox{\hyperlink{structDragger_a8a513c42b60ad5a3ed1f26818bfbed91}{\string~Dragger}}()}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00099}00099\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00100}00100\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(\mbox{\hyperlink{structDragger_a4bb2a73b3b59610d738161a9942ce487}{I}}!=NULL)}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00101}00101\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{delete}\ \mbox{\hyperlink{structDragger_a4bb2a73b3b59610d738161a9942ce487}{I}};}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00102}00102\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00103}00103\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00104}00104\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{structDragger_aeb8dc18d6060a926ecf55893d8857b06}{init}}(Bottle\ \&initializer,\ \textcolor{keywordtype}{double}\ thread\_rate);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00105}00105\ \};}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00106}00106\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00107}00107\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00108}00108\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00109}\mbox{\hyperlink{classMotorThread}{00109}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classMotorThread}{MotorThread}}:\ \textcolor{keyword}{public}\ PeriodicThread}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00110}00110\ \{}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00111}00111\ \textcolor{keyword}{private}:}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00112}00112\ \ \ \ \ ResourceFinder\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \&rf;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00113}00113\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00114}00114\ \ \ \ \ \mbox{\hyperlink{classStereoTarget}{StereoTarget}}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \&stereo\_target;\ \ \ \ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00115}00115\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00116}00116\ \ \ \ \ \mbox{\hyperlink{classObjectPropertiesCollectorPort}{ObjectPropertiesCollectorPort}}\ \ \ \ \ \ \ \&opcPort;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00117}00117\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00118}00118\ \ \ \ \ PolyDriver\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *drv\_head;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00119}00119\ \ \ \ \ PolyDriver\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *drv\_torso;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00120}00120\ \ \ \ \ PolyDriver\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *drv\_ctrl\_gaze;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00121}00121\ \ \ \ \ PolyDriver\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *drv\_arm[2];}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00122}00122\ \ \ \ \ PolyDriver\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *drv\_car\_arm[2];}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00123}00123\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00124}00124\ \ \ \ \ IEncoders\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *enc\_arm[2];}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00125}00125\ \ \ \ \ IEncoders\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *enc\_head;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00126}00126\ \ \ \ \ IEncoders\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *enc\_torso;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00127}00127\ \ \ \ \ IGazeControl\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *ctrl\_gaze;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00128}00128\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00129}00129\ \ \ \ \ IPositionControl\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *pos\_torso;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00130}00130\ \ \ \ \ IVelocityControl\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *vel\_torso;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00131}00131\ \ \ \ \ IControlMode\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *ctrl\_mode\_torso;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00132}00132\ \ \ \ \ IInteractionMode\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *int\_mode\_torso;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00133}00133\ \ \ \ \ IImpedanceControl\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *ctrl\_impedance\_torso;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00134}00134\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00135}00135\ \ \ \ \ IControlMode\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *ctrl\_mode\_arm[2];}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00136}00136\ \ \ \ \ IPositionControl\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *pos\_arm[2];}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00137}00137\ \ \ \ \ IInteractionMode\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *int\_mode\_arm[2];}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00138}00138\ \ \ \ \ IImpedanceControl\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *ctrl\_impedance\_arm[2];}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00139}00139\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00140}00140\ \ \ \ \ \textcolor{keywordtype}{int}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ gaze\_context;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00141}00141\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00142}00142\ \ \ \ \ \textcolor{keywordtype}{bool}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ gazeUnderControl;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00143}00143\ \ \ \ \ \textcolor{keywordtype}{bool}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ status\_impedance\_on;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00144}00144\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00145}00145\ \ \ \ \ \textcolor{keywordtype}{bool}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ stereo\_track;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00146}00146\ \ \ \ \ \textcolor{keywordtype}{int}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ dominant\_eye;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00147}00147\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00148}00148\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1ff2LayNN__tansig__purelin}{ff2LayNN\_tansig\_purelin}}\ \ \ \ \ \ \ \ \ \ \ \ \ net;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00149}00149\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00150}00150\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1action_1_1ActionPrimitives}{ActionPrimitives}}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *action[2];}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00151}00151\ \ \ \ \ \textcolor{keywordtype}{int}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ action\_context[2];}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00152}00152\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00153}00153\ \ \ \ \ \textcolor{keywordtype}{bool}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ homeFixCartType;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00154}00154\ \ \ \ \ Vector\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ homeFix;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00155}00155\ \ \ \ \ Vector\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ reachAboveDisp;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00156}00156\ \ \ \ \ Vector\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ graspAboveRelief;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00157}00157\ \ \ \ \ Vector\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pushAboveRelief;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00158}00158\ \ \ \ \ \textcolor{keywordtype}{double}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ extForceThresh[2];}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00159}00159\ \ \ \ \ \textcolor{keywordtype}{double}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ default\_exec\_time;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00160}00160\ \ \ \ \ \textcolor{keywordtype}{double}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ reachingTimeout;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00161}00161\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00162}00162\ \ \ \ \ \textcolor{comment}{//tool}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00163}00163\ \ \ \ \ Vector\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ takeToolPos[2];}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00164}00164\ \ \ \ \ Vector\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ takeToolOrient[2];}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00165}00165\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00166}00166\ \ \ \ \ Vector\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ homePos[2];}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00167}00167\ \ \ \ \ Vector\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ homeOrient[2];}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00168}00168\ \ \ \ \ Vector\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ reachSideDisp[2];}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00169}00169\ \ \ \ \ Vector\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ reachAboveOrient[2];}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00170}00170\ \ \ \ \ Vector\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ reachAboveCata[2];}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00171}00171\ \ \ \ \ Vector\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ reachSideOrient[2];}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00172}00172\ \ \ \ \ Vector\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ deployPos[2];}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00173}00173\ \ \ \ \ Vector\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ deployOrient[2];}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00174}00174\ \ \ \ \ Vector\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ drawNearPos[2];}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00175}00175\ \ \ \ \ Vector\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ drawNearOrient[2];}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00176}00176\ \ \ \ \ Vector\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ shiftPos[2];}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00177}00177\ \ \ \ \ Vector\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ expectPos[2];}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00178}00178\ \ \ \ \ Vector\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ expectOrient[2];}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00179}00179\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00180}00180\ \ \ \ \ \textcolor{comment}{//tactile\ perception}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00181}00181\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Model}{iCub::perception::Model}}\ \ \ \ \ \ \ \ \ \ \ \ \ *graspModel[2];}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00182}00182\ \ \ \ \ \textcolor{keywordtype}{string}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ graspFile[2];}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00183}00183\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00184}00184\ \ \ \ \ \textcolor{comment}{//stereo\ 2\ cartesian\ mode}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00185}00185\ \ \ \ \ \textcolor{keywordtype}{int}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ modeS2C;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00186}00186\ \ \ \ \ \textcolor{keywordtype}{bool}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ neuralNetworkAvailable;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00187}00187\ \ \ \ \ RpcClient\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ disparityPort;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00188}00188\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00189}00189\ \ \ \ \ vector<Vector>\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pos\_torsoes;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00190}00190\ \ \ \ \ vector<Vector>\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ handPoses;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00191}00191\ \ \ \ \ vector<Vector>\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ headPoses;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00192}00192\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00193}00193\ \ \ \ \ Bottle\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ bKinOffsets;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00194}00194\ \ \ \ \ \textcolor{keywordtype}{string}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ kinematics\_file;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00195}00195\ \ \ \ \ Vector\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ defaultKinematicOffset[2];}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00196}00196\ \ \ \ \ Vector\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ currentKinematicOffset[2];}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00197}00197\ \ \ \ \ Vector\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ table;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00198}00198\ \ \ \ \ \textcolor{keywordtype}{double}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ go\_up\_distance;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00199}00199\ \ \ \ \ \textcolor{keywordtype}{double}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ table\_height;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00200}00200\ \ \ \ \ \textcolor{keywordtype}{double}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ table\_height\_tolerance;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00201}00201\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00202}00202\ \ \ \ \ \textcolor{keywordtype}{int}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ armInUse;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00203}00203\ \ \ \ \ \textcolor{keywordtype}{int}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ head\_mode;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00204}00204\ \ \ \ \ \textcolor{keywordtype}{int}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ arm\_mode;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00205}00205\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00206}00206\ \ \ \ \ \textcolor{keywordtype}{int}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ grasp\_state;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00207}00207\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00208}00208\ \ \ \ \ \textcolor{keywordtype}{bool}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ waveing;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00209}00209\ \ \ \ \ \textcolor{keywordtype}{bool}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ avoid\_table;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00210}00210\ \ \ \ \ \textcolor{keywordtype}{bool}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ closed;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00211}00211\ \ \ \ \ \textcolor{keywordtype}{bool}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ interrupted;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00212}00212\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00213}00213\ \ \ \ \ RpcClient\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ wbdPort;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00214}00214\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00215}00215\ \ \ \ \ \textcolor{comment}{//drag\ stuff}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00216}00216\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1perception_1_1Port}{Port}}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ wrenchPort[2];}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00217}00217\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00218}00218\ \ \ \ \ \textcolor{keywordtype}{string}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ actions\_path;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00219}00219\ \ \ \ \ \mbox{\hyperlink{structDragger}{Dragger}}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ dragger;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00220}00220\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00221}00221\ \ \ \ \ Vector\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ track\_cartesian\_target;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00222}00222\ \ \ \ \ \textcolor{keywordtype}{double}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ avoid\_table\_height[2];}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00223}00223\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00224}00224\ \ \ \ \ \textcolor{keywordtype}{double}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ random\_pos\_y;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00225}00225\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00226}00226\ \ \ \ \ \textcolor{keywordtype}{bool}\ storeContext(\textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ arm);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00227}00227\ \ \ \ \ \textcolor{keywordtype}{bool}\ restoreContext(\textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ arm);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00228}00228\ \ \ \ \ \textcolor{keywordtype}{bool}\ deleteContext(\textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ arm);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00229}00229\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00230}00230\ \ \ \ \ \textcolor{keywordtype}{bool}\ storeContext(\mbox{\hyperlink{classiCub_1_1action_1_1ActionPrimitives}{ActionPrimitives}}\ *action);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00231}00231\ \ \ \ \ \textcolor{keywordtype}{bool}\ restoreContext(\mbox{\hyperlink{classiCub_1_1action_1_1ActionPrimitives}{ActionPrimitives}}\ *action);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00232}00232\ \ \ \ \ \textcolor{keywordtype}{bool}\ deleteContext(\mbox{\hyperlink{classiCub_1_1action_1_1ActionPrimitives}{ActionPrimitives}}\ *action);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00233}00233\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00234}00234\ \ \ \ \ \textcolor{keywordtype}{bool}\ loadExplorationPoses(\textcolor{keyword}{const}\ \textcolor{keywordtype}{string}\ \&file\_name);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00235}00235\ \ \ \ \ \textcolor{keywordtype}{int}\ checkArm(\textcolor{keywordtype}{int}\ arm);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00236}00236\ \ \ \ \ \textcolor{keywordtype}{int}\ checkArm(\textcolor{keywordtype}{int}\ arm,\ Vector\ \&xd,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{bool}\ applyOffset=\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00237}00237\ \ \ \ \ \textcolor{keywordtype}{bool}\ checkOptions(\textcolor{keyword}{const}\ Bottle\ \&options,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{string}\ \&parameter);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00238}00238\ \ \ \ \ Vector\ eye2root(\textcolor{keyword}{const}\ Vector\ \&\mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}},\textcolor{keywordtype}{bool}\ forehead);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00239}00239\ \ \ \ \ \textcolor{keywordtype}{bool}\ stereoToCartesianHomography(\textcolor{keyword}{const}\ Vector\ \&stereo,\ Vector\ \&xd);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00240}00240\ \ \ \ \ \textcolor{keywordtype}{bool}\ stereoToCartesianDisparity(\textcolor{keyword}{const}\ Vector\ \&stereo,\ Vector\ \&xd);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00241}00241\ \ \ \ \ \textcolor{keywordtype}{bool}\ stereoToCartesianNetwork(\textcolor{keyword}{const}\ Vector\ \&stereo,\ Vector\ \&xd);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00242}00242\ \ \ \ \ Vector\ randomDeployOffset();}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00243}00243\ \ \ \ \ \textcolor{keywordtype}{bool}\ getGeneralOptions(Bottle\ \&b);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00244}00244\ \ \ \ \ \textcolor{keywordtype}{bool}\ loadKinematicOffsets();}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00245}00245\ \ \ \ \ \textcolor{keywordtype}{bool}\ saveKinematicOffsets();}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00246}00246\ \ \ \ \ \textcolor{keywordtype}{bool}\ getArmOptions(Bottle\ \&b,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ \&arm);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00247}00247\ \ \ \ \ \textcolor{keywordtype}{void}\ goWithTorsoUpright(\mbox{\hyperlink{classiCub_1_1action_1_1ActionPrimitives}{ActionPrimitives}}\ *action,\ \textcolor{keyword}{const}\ Vector\ \&xin,\ \textcolor{keyword}{const}\ Vector\ \&oin);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00248}00248\ \ \ \ \ \textcolor{keywordtype}{bool}\ avoidTable(\textcolor{keywordtype}{bool}\ avoid);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00249}00249\ \ \ \ \ \textcolor{keywordtype}{void}\ close();}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00250}00250\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00251}00251\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00252}\mbox{\hyperlink{classMotorThread_a9236dfd34ce8fdf5ac4b3c69484f6806}{00252}}\ \ \ \ \ \mbox{\hyperlink{classMotorThread_a9236dfd34ce8fdf5ac4b3c69484f6806}{MotorThread}}(ResourceFinder\ \&\_rf,\ \mbox{\hyperlink{classInitializer}{Initializer}}\ *initializer)}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00253}00253\ \ \ \ \ \ \ \ \ :PeriodicThread(0.02),rf(\_rf),stereo\_target(initializer-\/>stereo\_target),opcPort(initializer-\/>port\_opc),}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00254}00254\ \ \ \ \ \ \ \ \ \ track\_cartesian\_target(3,0.0)}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00255}00255\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00256}00256\ \ \ \ \ \ \ \ \ ctrl\_gaze=NULL;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00257}00257\ \ \ \ \ \ \ \ \ ctrl\_mode\_torso=NULL;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00258}00258\ \ \ \ \ \ \ \ \ int\_mode\_torso=NULL;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00259}00259\ \ \ \ \ \ \ \ \ drv\_head=drv\_torso=drv\_ctrl\_gaze=NULL;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00260}00260\ \ \ \ \ \ \ \ \ drv\_arm[\mbox{\hyperlink{modules_2actionsRenderingEngine_2include_2iCub_2utils_8h_a437ef08681e7210d6678427030446a54}{LEFT}}]=drv\_arm[\mbox{\hyperlink{modules_2actionsRenderingEngine_2include_2iCub_2utils_8h_a80fb826a684cf3f0d306b22aa100ddac}{RIGHT}}]=NULL;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00261}00261\ \ \ \ \ \ \ \ \ drv\_car\_arm[\mbox{\hyperlink{modules_2actionsRenderingEngine_2include_2iCub_2utils_8h_a437ef08681e7210d6678427030446a54}{LEFT}}]=drv\_car\_arm[\mbox{\hyperlink{modules_2actionsRenderingEngine_2include_2iCub_2utils_8h_a80fb826a684cf3f0d306b22aa100ddac}{RIGHT}}]=NULL;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00262}00262\ \ \ \ \ \ \ \ \ ctrl\_mode\_arm[\mbox{\hyperlink{modules_2actionsRenderingEngine_2include_2iCub_2utils_8h_a437ef08681e7210d6678427030446a54}{LEFT}}]=ctrl\_mode\_arm[\mbox{\hyperlink{modules_2actionsRenderingEngine_2include_2iCub_2utils_8h_a80fb826a684cf3f0d306b22aa100ddac}{RIGHT}}]=NULL;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00263}00263\ \ \ \ \ \ \ \ \ int\_mode\_arm[\mbox{\hyperlink{modules_2actionsRenderingEngine_2include_2iCub_2utils_8h_a437ef08681e7210d6678427030446a54}{LEFT}}]=int\_mode\_arm[\mbox{\hyperlink{modules_2actionsRenderingEngine_2include_2iCub_2utils_8h_a80fb826a684cf3f0d306b22aa100ddac}{RIGHT}}]=NULL;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00264}00264\ \ \ \ \ \ \ \ \ action[\mbox{\hyperlink{modules_2actionsRenderingEngine_2include_2iCub_2utils_8h_a437ef08681e7210d6678427030446a54}{LEFT}}]=action[\mbox{\hyperlink{modules_2actionsRenderingEngine_2include_2iCub_2utils_8h_a80fb826a684cf3f0d306b22aa100ddac}{RIGHT}}]=NULL;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00265}00265\ \ \ \ \ \ \ \ \ closed=\textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00266}00266\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00267}00267\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00268}00268\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classMotorThread_a20580321ce52616570cc6795dd9a602d}{threadInit}}();}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00269}00269\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classMotorThread_aa84732efa78a1149e07c1c3061c2b672}{run}}();}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00270}00270\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classMotorThread_aa40ad71c5d467697d9df421fb42e2fd2}{threadRelease}}();}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00271}00271\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classMotorThread_a668430d44df4b90d3b66c0223d220503}{onStop}}();}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00272}00272\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00273}\mbox{\hyperlink{classMotorThread_abcb559fac9a33c9b20382eaf476f812d}{00273}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classMotorThread_abcb559fac9a33c9b20382eaf476f812d}{wbdRecalibration}}()}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00274}00274\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00275}00275\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (wbdPort.getOutputCount()>0)}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00276}00276\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00277}00277\ \ \ \ \ \ \ \ \ \ \ \ \ Bottle\ \mbox{\hyperlink{dataTypes_8h_a4d43e8212bdc9dbee866506f04effcea}{cmd}},reply;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00278}00278\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{dataTypes_8h_a4d43e8212bdc9dbee866506f04effcea}{cmd}}.addString(\textcolor{stringliteral}{"{}calib"{}});}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00279}00279\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{dataTypes_8h_a4d43e8212bdc9dbee866506f04effcea}{cmd}}.addString(\textcolor{stringliteral}{"{}all"{}});}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00280}00280\ \ \ \ \ \ \ \ \ \ \ \ \ wbdPort.write(\mbox{\hyperlink{dataTypes_8h_a4d43e8212bdc9dbee866506f04effcea}{cmd}},reply);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00281}00281\ \ \ \ \ \ \ \ \ \ \ \ \ Time::delay(0.3);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00282}00282\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00283}00283\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00284}00284\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00285}00285\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00286}00286\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00287}00287\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00288}\mbox{\hyperlink{classMotorThread_a3501233d5689d0606d3e22d437ef289f}{00288}}\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classMotorThread_a3501233d5689d0606d3e22d437ef289f}{track}}(Bottle\ \&options)}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00289}00289\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00290}00290\ \ \ \ \ \ \ \ \ Bottle\ *bTarget=options.find(\textcolor{stringliteral}{"{}target"{}}).asList();}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00291}00291\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!gazeUnderControl)}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00292}00292\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00293}00293\ \ \ \ \ \ \ \ \ \ \ \ \ ctrl\_gaze-\/>stopControl();}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00294}00294\ \ \ \ \ \ \ \ \ \ \ \ \ ctrl\_gaze-\/>restoreContext(gaze\_context);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00295}00295\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00296}00296\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (checkOptions(options,\textcolor{stringliteral}{"{}no\_sacc"{}}))}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00297}00297\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ctrl\_gaze-\/>setSaccadesMode(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00298}00298\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00299}00299\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (bTarget!=NULL)}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00300}00300\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ head\_mode=(bTarget-\/>check(\textcolor{stringliteral}{"{}cartesian"{}})?\mbox{\hyperlink{MotorThread_8h_a82f435a30e69af95c6548e09d2155a49}{HEAD\_MODE\_TRACK\_CART}}:\mbox{\hyperlink{MotorThread_8h_a0abd0fd54c90f50cad341dfa6f9355b3}{HEAD\_MODE\_TRACK\_TEMP}});}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00301}00301\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00302}00302\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ head\_mode=\mbox{\hyperlink{MotorThread_8h_a0abd0fd54c90f50cad341dfa6f9355b3}{HEAD\_MODE\_TRACK\_TEMP}};}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00303}00303\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00304}00304\ \ \ \ \ \ \ \ \ \ \ \ \ gazeUnderControl=\textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00305}00305\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00306}00306\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00307}00307\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (bTarget!=NULL)}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00308}00308\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (Bottle\ *bCartesian=bTarget-\/>find(\textcolor{stringliteral}{"{}cartesian"{}}).asList())}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00309}00309\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ ((\textcolor{keywordtype}{size\_t})bCartesian-\/>size()==track\_cartesian\_target.length())}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00310}00310\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<track\_cartesian\_target.length();\ i++)}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00311}00311\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ track\_cartesian\_target[i]=bCartesian-\/>get(i).asFloat64();}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00312}00312\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00313}00313\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00314}00314\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00315}\mbox{\hyperlink{classMotorThread_a82ac2bfca3c8b9583092f1b4660b6aa6}{00315}}\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classMotorThread_a82ac2bfca3c8b9583092f1b4660b6aa6}{lookAtHand}}(Bottle\ \&options)}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00316}00316\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00317}00317\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(checkOptions(options,\textcolor{stringliteral}{"{}no\_sacc"{}}))}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00318}00318\ \ \ \ \ \ \ \ \ \ \ \ \ ctrl\_gaze-\/>setSaccadesMode(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00319}00319\ \ \ \ \ \ \ \ \ head\_mode=\mbox{\hyperlink{MotorThread_8h_a57e126e25b0b65282c7b0fa5c39d5e77}{HEAD\_MODE\_TRACK\_HAND}};}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00320}00320\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00321}00321\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00322}\mbox{\hyperlink{classMotorThread_a196ed1453d4be4f656995a5f1b908bea}{00322}}\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classMotorThread_a196ed1453d4be4f656995a5f1b908bea}{keepFixation}}(Bottle\ \&options)}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00323}00323\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00324}00324\ \ \ \ \ \ \ \ \ gazeUnderControl=\textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00325}00325\ \ \ \ \ \ \ \ \ ctrl\_gaze-\/>setTrackingMode(\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00326}00326\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(checkOptions(options,\textcolor{stringliteral}{"{}no\_sacc"{}}))}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00327}00327\ \ \ \ \ \ \ \ \ \ \ \ \ ctrl\_gaze-\/>setSaccadesMode(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00328}00328\ \ \ \ \ \ \ \ \ head\_mode=\mbox{\hyperlink{MotorThread_8h_af8a63a94cebe3beed335c11c074582a2}{HEAD\_MODE\_TRACK\_FIX}};}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00329}00329\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00330}00330\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00331}\mbox{\hyperlink{classMotorThread_a7874f026bc6b44edd17f64d61fa5a5ce}{00331}}\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classMotorThread_a7874f026bc6b44edd17f64d61fa5a5ce}{setGazeIdle}}()}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00332}00332\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00333}00333\ \ \ \ \ \ \ \ \ head\_mode=\mbox{\hyperlink{MotorThread_8h_a38ab010bd99b102ce9bad8ab2950986e}{HEAD\_MODE\_IDLE}};}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00334}00334\ \ \ \ \ \ \ \ \ ctrl\_gaze-\/>stopControl();}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00335}00335\ \ \ \ \ \ \ \ \ gazeUnderControl=\textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00336}00336\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00337}00337\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00338}\mbox{\hyperlink{classMotorThread_a150f2720b1bcd4dd7f899a794b55303c}{00338}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classMotorThread_a150f2720b1bcd4dd7f899a794b55303c}{setArmInUse}}(\textcolor{keywordtype}{int}\ arm)}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00339}00339\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00340}00340\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(action[arm]==NULL)}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00341}00341\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00342}00342\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00343}00343\ \ \ \ \ \ \ \ \ armInUse=arm;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00344}00344\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00345}00345\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00346}00346\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00347}\mbox{\hyperlink{classMotorThread_adcddf97ddac0be33fb87e3795c11caba}{00347}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classMotorThread_adcddf97ddac0be33fb87e3795c11caba}{setWaveing}}(\textcolor{keywordtype}{bool}\ \_waveing)}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00348}00348\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00349}00349\ \ \ \ \ \ \ \ \ waveing=\_waveing;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00350}00350\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00351}00351\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(waveing)}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00352}00352\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00353}00353\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(action[\mbox{\hyperlink{modules_2actionsRenderingEngine_2include_2iCub_2utils_8h_a80fb826a684cf3f0d306b22aa100ddac}{RIGHT}}]!=NULL)}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00354}00354\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ action[\mbox{\hyperlink{modules_2actionsRenderingEngine_2include_2iCub_2utils_8h_a80fb826a684cf3f0d306b22aa100ddac}{RIGHT}}]-\/>\mbox{\hyperlink{classiCub_1_1action_1_1ActionPrimitives_ae1aeefc9b8d2a319e60bcffce39ff55b}{enableArmWaving}}(homePos[\mbox{\hyperlink{modules_2actionsRenderingEngine_2include_2iCub_2utils_8h_a80fb826a684cf3f0d306b22aa100ddac}{RIGHT}}]);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00355}00355\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00356}00356\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(action[\mbox{\hyperlink{modules_2actionsRenderingEngine_2include_2iCub_2utils_8h_a437ef08681e7210d6678427030446a54}{LEFT}}]!=NULL)}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00357}00357\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ action[\mbox{\hyperlink{modules_2actionsRenderingEngine_2include_2iCub_2utils_8h_a437ef08681e7210d6678427030446a54}{LEFT}}]-\/>\mbox{\hyperlink{classiCub_1_1action_1_1ActionPrimitives_ae1aeefc9b8d2a319e60bcffce39ff55b}{enableArmWaving}}(homePos[\mbox{\hyperlink{modules_2actionsRenderingEngine_2include_2iCub_2utils_8h_a437ef08681e7210d6678427030446a54}{LEFT}}]);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00358}00358\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00359}00359\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00360}00360\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00361}00361\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(action[\mbox{\hyperlink{modules_2actionsRenderingEngine_2include_2iCub_2utils_8h_a80fb826a684cf3f0d306b22aa100ddac}{RIGHT}}]!=NULL)}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00362}00362\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ action[\mbox{\hyperlink{modules_2actionsRenderingEngine_2include_2iCub_2utils_8h_a80fb826a684cf3f0d306b22aa100ddac}{RIGHT}}]-\/>\mbox{\hyperlink{classiCub_1_1action_1_1ActionPrimitives_a3d89eee8186d4ee9fd32d11dec354e86}{disableArmWaving}}();}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00363}00363\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(action[\mbox{\hyperlink{modules_2actionsRenderingEngine_2include_2iCub_2utils_8h_a437ef08681e7210d6678427030446a54}{LEFT}}]!=NULL)}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00364}00364\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ action[\mbox{\hyperlink{modules_2actionsRenderingEngine_2include_2iCub_2utils_8h_a437ef08681e7210d6678427030446a54}{LEFT}}]-\/>\mbox{\hyperlink{classiCub_1_1action_1_1ActionPrimitives_a3d89eee8186d4ee9fd32d11dec354e86}{disableArmWaving}}();}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00365}00365\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00366}00366\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00367}00367\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00368}00368\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00369}00369\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classMotorThread_a726075ba31525881c28c44c7533695ae}{update}}();}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00370}00370\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classMotorThread_a4cc3a50a6e95a3539eb1b9b39c379bde}{interrupt}}();}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00371}00371\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classMotorThread_ac1c06cb79f0e63b7321fc42363e6dce6}{reinstate}}();}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00372}00372\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00373}00373\ \ \ \ \ \textcolor{comment}{//get\ the\ table\ height}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00374}\mbox{\hyperlink{classMotorThread_a464964f7b1a461f146cc517181da96c7}{00374}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classMotorThread_a464964f7b1a461f146cc517181da96c7}{getTableHeight}}(\textcolor{keywordtype}{double}\ *\_table\_height)}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00375}00375\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00376}00376\ \ \ \ \ \ \ \ \ *\_table\_height=table\_height-\/table\_height\_tolerance;}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00377}00377\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00378}00378\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00379}00379\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00380}00380\ \ \ \ \ \textcolor{comment}{//transforms\ stereo\ coordinates\ to\ cartesian\ space}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00381}00381\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classMotorThread_a3b4cfd6f811b2b47282025e46535ca57}{stereoToCartesian}}(\textcolor{keyword}{const}\ Vector\ \&stereo,\ Vector\ \&xd);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00382}00382\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classMotorThread_a01aced9a698097708645d0845df4cbee}{targetToCartesian}}(Bottle\ *target,\ Vector\ \&xd);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00383}00383\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00384}00384\ \ \ \ \ \textcolor{comment}{//\ basic\ commands}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00385}00385\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classMotorThread_af971405122ef24ca46d5f3963a28cef0}{goUp}}(Bottle\ \&options,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{compute__ekf__sym_8m_a5e36941b3d856737e81516acd45edc50}{h}}=std::numeric\_limits<double>::quiet\_NaN());}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00386}00386\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classMotorThread_af18e1252db9664d62c34277b0c9f7ff6}{goHome}}(Bottle\ \&options);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00387}00387\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classMotorThread_a24ad37d5430c48aa7431879aaca49de7}{reach}}(Bottle\ \&options);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00388}00388\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classMotorThread_a16eb4248a20e79dcedcc953a006603f5}{powerGrasp}}(Bottle\ \&options);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00389}00389\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classMotorThread_a01778ace3439222eea84588b5cbbfe29}{push}}(Bottle\ \&options);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00390}00390\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classMotorThread_a48220701c538ba329ebdf658719fe5d8}{point}}(Bottle\ \&options);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00391}00391\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classMotorThread_a86d7f9f5a921b9321388ac0208793219}{point\_far}}(Bottle\ \&options);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00392}00392\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classMotorThread_aa4da3021db72fb3432fb867cff3b1405}{look}}(Bottle\ \&options);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00393}00393\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classMotorThread_a56f278bf14e5a03759db2a711b0f745d}{hand}}(\textcolor{keyword}{const}\ Bottle\ \&options,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{string}\ \&type=\textcolor{stringliteral}{"{}"{}},\ \textcolor{keywordtype}{bool}\ *holding=NULL);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00394}00394\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classMotorThread_a25c0addde998e9f40878a03a4d431abf}{grasp}}(\textcolor{keyword}{const}\ Bottle\ \&options);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00395}00395\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classMotorThread_ad7c92158b454332894fe16ab2d0241bb}{release}}(\textcolor{keyword}{const}\ Bottle\ \&options);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00396}00396\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classMotorThread_aa7389889f5885bd020899cbfbb1dcb99}{deploy}}(Bottle\ \&options);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00397}00397\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classMotorThread_a2b46eaf5a3c5087bd6d57c2350bea7a8}{drawNear}}(Bottle\ \&options);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00398}00398\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classMotorThread_ae1f81b32a8ae3bff77773771906cffa2}{shiftAndGrasp}}(Bottle\ \&options);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00399}00399\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classMotorThread_afa911f1665626be094329ee85c0c49ca}{expect}}(Bottle\ \&options);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00400}00400\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classMotorThread_a5b7699f331c6b05bf5f8c52b9a26cc77}{give}}(Bottle\ \&options);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00401}00401\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00402}00402\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classMotorThread_a458cfdbdf612e5a72f237fd877dfb335}{clearIt}}(Bottle\ \&options);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00403}00403\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00404}00404\ \ \ \ \ \textcolor{comment}{//\ explore}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00405}00405\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classMotorThread_ab47b6638540c81dcc4a12878e69fc2c8}{exploreTorso}}(Bottle\ \&options);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00406}00406\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classMotorThread_aa06eddc103240d24cfa8efe55f6793f1}{exploreHand}}(Bottle\ \&options);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00407}00407\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00408}00408\ \ \ \ \ \textcolor{comment}{//tool\ functions}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00409}00409\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classMotorThread_adb859bc803d753b65669331587c07b14}{takeTool}}(Bottle\ \&options);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00410}00410\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00411}00411\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classMotorThread_aed6139aaa5734513a3330c04b60cb27f}{getHandImagePosition}}(Bottle\ \&hand\_image\_pos);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00412}00412\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classMotorThread_a321ae90ecbc3aafec6fa959a9a5d7d49}{isHolding}}(\textcolor{keyword}{const}\ Bottle\ \&options);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00413}00413\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classMotorThread_a0d310b97d2988337c8ad9f3d62cf026a}{calibTable}}(Bottle\ \&options);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00414}00414\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classMotorThread_adc8120f4e3f17e5afe9c16fdcd53e3f1}{calibFingers}}(Bottle\ \&options);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00415}00415\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00416}00416\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classMotorThread_a1ef8935ebb1b345ccb981f3c3db3878f}{startLearningModeAction}}(Bottle\ \&options);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00417}00417\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classMotorThread_abab95bda3073dd0f3a9c97ce9c754373}{suspendLearningModeAction}}(Bottle\ \&options);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00418}00418\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classMotorThread_a95b252c00fd57275d1e0dcd44a0c6254}{imitateAction}}(Bottle\ \&options);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00419}00419\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00420}00420\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classMotorThread_a530f09c739630a2289b744164a520625}{startLearningModeKinOffset}}(Bottle\ \&options);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00421}00421\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classMotorThread_aade395af26b8d453a1375cf4623600c1}{suspendLearningModeKinOffset}}(Bottle\ \&options);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00422}00422\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00423}00423\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classMotorThread_ab49b4bde04f101a3a53167248b2a8140}{changeElbowHeight}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ arm,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ height,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ weight);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00424}00424\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classMotorThread_acff6bdc93a094a7842628c96cdc8a249}{changeExecTime}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ arm,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ execTime);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00425}00425\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00426}00426\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classMotorThread_aca4bca28ddff8d961b707b33ab4e83d3}{setImpedance}}(\textcolor{keywordtype}{bool}\ turn\_on);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00427}00427\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classMotorThread_ac2a98cde066a08e60b762d21ebc12da9}{setTorque}}(\textcolor{keywordtype}{bool}\ turn\_on,\ \textcolor{keywordtype}{int}\ arm=\mbox{\hyperlink{modules_2actionsRenderingEngine_2include_2iCub_2utils_8h_a7f0c5d64118f44ec6263938cf81243eb}{ARM\_IN\_USE}});}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00428}00428\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00429}00429\ \ \ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{classMotorThread_af7542cd8511e9c31008edd4ac6e5ca87}{setStereoToCartesianMode}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ mode,\ Bottle\ \&reply);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00430}00430\ \ \ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{classMotorThread_af7542cd8511e9c31008edd4ac6e5ca87}{setStereoToCartesianMode}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ mode);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00431}00431\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00432}\mbox{\hyperlink{classMotorThread_add8a521713c1039de07004a1cb5f0a03}{00432}}\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classMotorThread_add8a521713c1039de07004a1cb5f0a03}{setGraspState}}(\textcolor{keywordtype}{bool}\ side)}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00433}00433\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00434}00434\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(side)}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00435}00435\ \ \ \ \ \ \ \ \ \ \ \ \ grasp\_state=\mbox{\hyperlink{MotorThread_8h_af6e838566a8f0845b9f0a615b8a4d8d0}{GRASP\_STATE\_SIDE}};}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00436}00436\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00437}00437\ \ \ \ \ \ \ \ \ \ \ \ \ grasp\_state=\mbox{\hyperlink{MotorThread_8h_a2d871ca9bb2fb42010caf542660c478c}{GRASP\_STATE\_ABOVE}};}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00438}00438\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00439}00439\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00440}00440\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classMotorThread_a46b555532f1f0446d8394d771de8f7e3}{getStatus}}(Bottle\ \&status);}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00441}00441\ \};}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00442}00442\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00443}00443\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00444}00444\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00445}00445\ }
+\DoxyCodeLine{\Hypertarget{MotorThread_8h_source_l00446}00446\ }
+
+\end{DoxyCode}

@@ -1,0 +1,715 @@
+\doxysection{main.\+cpp}
+\hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source}{}\label{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source}\index{icub-\/main/src/tools/fingersTuner/main.cpp@{icub-\/main/src/tools/fingersTuner/main.cpp}}
+\mbox{\hyperlink{icub-main_2src_2tools_2fingersTuner_2main_8cpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00001}00001\ \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00002}00002\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2013\ iCub\ Facility\ -\/\ Istituto\ Italiano\ di\ Tecnologia}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00003}00003\ \textcolor{comment}{\ *\ Author:\ Ugo\ Pattacini}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00004}00004\ \textcolor{comment}{\ *\ email:\ \ ugo.pattacini@iit.it}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00005}00005\ \textcolor{comment}{\ *\ Permission\ is\ granted\ to\ copy,\ distribute,\ and/or\ modify\ this\ program}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00006}00006\ \textcolor{comment}{\ *\ under\ the\ terms\ of\ the\ GNU\ General\ Public\ License,\ version\ 2\ or\ any}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00007}00007\ \textcolor{comment}{\ *\ later\ version\ published\ by\ the\ Free\ Software\ Foundation.}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00008}00008\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00009}00009\ \textcolor{comment}{\ *\ A\ copy\ of\ the\ license\ can\ be\ found\ at}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00010}00010\ \textcolor{comment}{\ *\ http://www.robotcub.org/icub/license/gpl.txt}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00011}00011\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00012}00012\ \textcolor{comment}{\ *\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00013}00013\ \textcolor{comment}{\ *\ WITHOUT\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00014}00014\ \textcolor{comment}{\ *\ MERCHANTABILITY\ or\ FITNESS\ FOR\ A\ PARTICULAR\ PURPOSE.\ See\ the\ GNU\ General}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00015}00015\ \textcolor{comment}{\ *\ Public\ License\ for\ more\ details}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00016}00016\ \textcolor{comment}{*/}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00017}00017\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00088}00088\ \textcolor{preprocessor}{\#include\ <cmath>}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00089}00089\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00090}00090\ \textcolor{preprocessor}{\#include\ <sstream>}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00091}00091\ \textcolor{preprocessor}{\#include\ <fstream>}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00092}00092\ \textcolor{preprocessor}{\#include\ <vector>}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00093}00093\ \textcolor{preprocessor}{\#include\ <map>}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00094}00094\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00095}00095\ \textcolor{preprocessor}{\#include\ <yarp/os/all.h>}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00096}00096\ \textcolor{preprocessor}{\#include\ <yarp/dev/all.h>}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00097}00097\ \textcolor{preprocessor}{\#include\ <yarp/sig/Vector.h>}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00098}00098\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{tuning_8h}{iCub/ctrl/tuning.h}}>}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00099}00099\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00100}00100\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{fingersTuner__IDL_8h}{fingersTuner\_IDL.h}}"{}}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00101}00101\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00102}00102\ \textcolor{keyword}{using\ namespace\ }std;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00103}00103\ \textcolor{keyword}{using\ namespace\ }yarp::os;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00104}00104\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceyarp_1_1dev}{yarp::dev}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00105}00105\ \textcolor{keyword}{using\ namespace\ }yarp::sig;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00106}00106\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceiCub_1_1ctrl}{iCub::ctrl}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00107}00107\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00108}00108\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00109}00109\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00110}\mbox{\hyperlink{classTuner}{00110}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classTuner}{Tuner}}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00111}00111\ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00112}00112\ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00113}\mbox{\hyperlink{classTuner_a0bcad7e41375d6a9de354db362b97e79ab5db058505eb9240b7b0d041a7350260}{00113}}\ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{enum}\ \{\ \mbox{\hyperlink{classTuner_a0bcad7e41375d6a9de354db362b97e79ab5db058505eb9240b7b0d041a7350260}{download}},\ \mbox{\hyperlink{classTuner_a0bcad7e41375d6a9de354db362b97e79ab43df6e0de614c23070891846ff6501f}{upload}},\ \mbox{\hyperlink{classTuner_a0bcad7e41375d6a9de354db362b97e79af70e9720e6684405c3624cd393ef47fa}{synced}}\ \}\ \mbox{\hyperlink{classTuner_a0bcad7e41375d6a9de354db362b97e79}{pidStatus}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00114}\mbox{\hyperlink{structTuner_1_1PidData}{00114}}\ \ \ \ \ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structTuner_1_1PidData}{PidData}}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00115}00115\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00116}\mbox{\hyperlink{structTuner_1_1PidData_a9d7887841cbf0a7b8f494436a5245d81}{00116}}\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{structTuner_1_1PidData_a9d7887841cbf0a7b8f494436a5245d81}{Kp}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00117}\mbox{\hyperlink{structTuner_1_1PidData_a02c55c6005f28d47d21ed9b1e27d3c3e}{00117}}\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{structTuner_1_1PidData_a02c55c6005f28d47d21ed9b1e27d3c3e}{Ki}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00118}\mbox{\hyperlink{structTuner_1_1PidData_a7cf95a9334af9367b8dbc0638289cc42}{00118}}\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{structTuner_1_1PidData_a7cf95a9334af9367b8dbc0638289cc42}{Kd}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00119}\mbox{\hyperlink{structTuner_1_1PidData_a83c4aa2ab3399264cc234b88f757430e}{00119}}\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{structTuner_1_1PidData_a83c4aa2ab3399264cc234b88f757430e}{scale}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00120}\mbox{\hyperlink{structTuner_1_1PidData_ae31f08a5e4282fc62e761327e10423d9}{00120}}\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{structTuner_1_1PidData_ae31f08a5e4282fc62e761327e10423d9}{st\_up}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00121}\mbox{\hyperlink{structTuner_1_1PidData_addc46e1f08286579b13d11b51df2bacb}{00121}}\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{structTuner_1_1PidData_addc46e1f08286579b13d11b51df2bacb}{st\_down}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00122}\mbox{\hyperlink{structTuner_1_1PidData_a989a75ad350b95931287318798e1b6c4}{00122}}\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{structTuner_1_1PidData_a989a75ad350b95931287318798e1b6c4}{encs\_ratio}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00123}\mbox{\hyperlink{structTuner_1_1PidData_a37a9ed7a34018748f80ca9c091266766}{00123}}\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classTuner_a0bcad7e41375d6a9de354db362b97e79}{pidStatus}}\ \mbox{\hyperlink{structTuner_1_1PidData_a37a9ed7a34018748f80ca9c091266766}{status}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00124}\mbox{\hyperlink{structTuner_1_1PidData_a538837f4a0ab245ee174a257fd609de1}{00124}}\ \ \ \ \ \ \ \ \ vector<int>\ \mbox{\hyperlink{structTuner_1_1PidData_a538837f4a0ab245ee174a257fd609de1}{idling\_joints}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00125}\mbox{\hyperlink{structTuner_1_1PidData_a6c3bc14b01fe012286d875d85aaf2d99}{00125}}\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structTuner_1_1PidData_a6c3bc14b01fe012286d875d85aaf2d99}{PidData}}()\ :\ \mbox{\hyperlink{structTuner_1_1PidData_a9d7887841cbf0a7b8f494436a5245d81}{Kp}}(0.0),\ \mbox{\hyperlink{structTuner_1_1PidData_a02c55c6005f28d47d21ed9b1e27d3c3e}{Ki}}(0.0),\ \mbox{\hyperlink{structTuner_1_1PidData_a7cf95a9334af9367b8dbc0638289cc42}{Kd}}(0.0),\ \mbox{\hyperlink{structTuner_1_1PidData_a83c4aa2ab3399264cc234b88f757430e}{scale}}(0.0),}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00126}00126\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structTuner_1_1PidData_ae31f08a5e4282fc62e761327e10423d9}{st\_up}}(0.0),\ \mbox{\hyperlink{structTuner_1_1PidData_addc46e1f08286579b13d11b51df2bacb}{st\_down}}(0.0),\ \mbox{\hyperlink{structTuner_1_1PidData_a989a75ad350b95931287318798e1b6c4}{encs\_ratio}}(1.0),}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00127}00127\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structTuner_1_1PidData_a37a9ed7a34018748f80ca9c091266766}{status}}(\mbox{\hyperlink{classTuner_a0bcad7e41375d6a9de354db362b97e79ab5db058505eb9240b7b0d041a7350260}{download}})\ \{\ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00128}\mbox{\hyperlink{structTuner_1_1PidData_a2d0b796571228ecf988e2fc92b79a158}{00128}}\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{structTuner_1_1PidData_a2d0b796571228ecf988e2fc92b79a158}{toRobot}}(Pid\ \&pid)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00129}00129\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00130}00130\ \ \ \ \ \ \ \ \ \ \ \ \ pid.kp=\mbox{\hyperlink{structTuner_1_1PidData_a9d7887841cbf0a7b8f494436a5245d81}{Kp}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00131}00131\ \ \ \ \ \ \ \ \ \ \ \ \ pid.ki=\mbox{\hyperlink{structTuner_1_1PidData_a02c55c6005f28d47d21ed9b1e27d3c3e}{Ki}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00132}00132\ \ \ \ \ \ \ \ \ \ \ \ \ pid.kd=\mbox{\hyperlink{structTuner_1_1PidData_a7cf95a9334af9367b8dbc0638289cc42}{Kd}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00133}00133\ \ \ \ \ \ \ \ \ \ \ \ \ pid.scale=\mbox{\hyperlink{structTuner_1_1PidData_a83c4aa2ab3399264cc234b88f757430e}{scale}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00134}00134\ \ \ \ \ \ \ \ \ \ \ \ \ pid.stiction\_up\_val=\mbox{\hyperlink{structTuner_1_1PidData_ae31f08a5e4282fc62e761327e10423d9}{st\_up}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00135}00135\ \ \ \ \ \ \ \ \ \ \ \ \ pid.stiction\_down\_val=\mbox{\hyperlink{structTuner_1_1PidData_addc46e1f08286579b13d11b51df2bacb}{st\_down}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00136}00136\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00137}\mbox{\hyperlink{structTuner_1_1PidData_a07df8af451c40f180816040065a567c5}{00137}}\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{structTuner_1_1PidData_a07df8af451c40f180816040065a567c5}{fromRobot}}(\textcolor{keyword}{const}\ Pid\ \&pid)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00138}00138\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00139}00139\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structTuner_1_1PidData_a9d7887841cbf0a7b8f494436a5245d81}{Kp}}=pid.kp;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00140}00140\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structTuner_1_1PidData_a02c55c6005f28d47d21ed9b1e27d3c3e}{Ki}}=pid.ki;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00141}00141\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structTuner_1_1PidData_a7cf95a9334af9367b8dbc0638289cc42}{Kd}}=pid.kd;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00142}00142\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structTuner_1_1PidData_a83c4aa2ab3399264cc234b88f757430e}{scale}}=pid.scale;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00143}00143\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structTuner_1_1PidData_ae31f08a5e4282fc62e761327e10423d9}{st\_up}}=pid.stiction\_up\_val;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00144}00144\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structTuner_1_1PidData_addc46e1f08286579b13d11b51df2bacb}{st\_down}}=pid.stiction\_down\_val;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00145}00145\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00146}00146\ \ \ \ \ \};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00147}00147\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00148}\mbox{\hyperlink{classTuner_af7e0533ecdfda8064358af60ecc8d6c5}{00148}}\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{classTuner_af7e0533ecdfda8064358af60ecc8d6c5}{instances}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00149}\mbox{\hyperlink{classTuner_ad4dd3e1a2d41fcc861ff288527782c60}{00149}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classTuner_ad4dd3e1a2d41fcc861ff288527782c60}{interrupting}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00150}\mbox{\hyperlink{classTuner_ad5d7d35a503fea761357c68e50d2dfe7}{00150}}\ \ \ \ \ \textcolor{keywordtype}{string}\ \mbox{\hyperlink{classTuner_a168f3d63e63c4a4aed24c4f3113a65f6}{name}},\mbox{\hyperlink{classTuner_a1ea4297aa7c4fb802b3f305a7db05786}{robot}},\mbox{\hyperlink{classTuner_a72f168472ea35caaec69639f6ebe4658}{part}},\mbox{\hyperlink{classTuner_ad5d7d35a503fea761357c68e50d2dfe7}{device}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00151}\mbox{\hyperlink{classTuner_a8587c3d8dd8c5fd00b552bc56f061491}{00151}}\ \ \ \ \ PolyDriver\ *\mbox{\hyperlink{classTuner_a8587c3d8dd8c5fd00b552bc56f061491}{driver}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00152}00152\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00153}\mbox{\hyperlink{classTuner_aa853cda86f0902a84528573c7e41ad1d}{00153}}\ \ \ \ \ Bottle\ \mbox{\hyperlink{classTuner_aa853cda86f0902a84528573c7e41ad1d}{rJoints}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00154}\mbox{\hyperlink{classTuner_ab5bbc7af3a6a487d56b65a50daece3c4}{00154}}\ \ \ \ \ map<int,PidData>\ \mbox{\hyperlink{classTuner_ab5bbc7af3a6a487d56b65a50daece3c4}{pids}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00155}\mbox{\hyperlink{classTuner_a5c6a771eb03f30eb45b3aada9efd6835}{00155}}\ \ \ \ \ map<string,Bottle>\ \mbox{\hyperlink{classTuner_a5c6a771eb03f30eb45b3aada9efd6835}{alias}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00156}00156\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00157}00157\ \textcolor{comment}{\ \ \ \ /************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00158}\mbox{\hyperlink{classTuner_a1840a47c7c9650b3c22d2e164da4a9a3}{00158}}\ \ \ \ \ PolyDriver\ *\mbox{\hyperlink{classTuner_a1840a47c7c9650b3c22d2e164da4a9a3}{waitPart}}(\textcolor{keyword}{const}\ Property\ \&partOpt,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ ping\_robot\_tmo)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00159}00159\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00160}00160\ \ \ \ \ \ \ \ \ PolyDriver\ *pDrv=NULL;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00161}00161\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00162}00162\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ t0=Time::now();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00163}00163\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (Time::now()-\/t0<ping\_robot\_tmo)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00164}00164\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00165}00165\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (pDrv!=NULL)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00166}00166\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{delete}\ pDrv;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00167}00167\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00168}00168\ \ \ \ \ \ \ \ \ \ \ \ \ pDrv=\textcolor{keyword}{new}\ PolyDriver(\textcolor{keyword}{const\_cast<}Property\&\textcolor{keyword}{>}(partOpt));}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00169}00169\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}}=pDrv-\/>isValid();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00170}00170\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00171}00171\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}})}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00172}00172\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00173}00173\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}Checking\ if\ \%s\ is\ active\ ...\ yes"{}},\mbox{\hyperlink{classTuner_ad5d7d35a503fea761357c68e50d2dfe7}{device}}.c\_str());}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00174}00174\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ pDrv;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00175}00175\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00176}00176\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00177}00177\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00178}00178\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ dt=ping\_robot\_tmo-\/(Time::now()-\/t0);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00179}00179\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}Checking\ if\ \%s\ is\ active\ ...\ not\ yet:\ still\ \%.1f\ [s]\ to\ timeout\ expiry"{}},}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00180}00180\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classTuner_ad5d7d35a503fea761357c68e50d2dfe7}{device}}.c\_str(),dt>0.0?dt:0.0);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00181}00181\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00182}00182\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ t1=Time::now();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00183}00183\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (Time::now()-\/t1<1.0)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00184}00184\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Time::delay(0.1);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00185}00185\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00186}00186\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00187}00187\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classTuner_ad4dd3e1a2d41fcc861ff288527782c60}{interrupting}})}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00188}00188\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00189}00189\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00190}00190\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00191}00191\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ pDrv;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00192}00192\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00193}00193\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00194}00194\ \textcolor{comment}{\ \ \ \ /************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00195}\mbox{\hyperlink{classTuner_a6cf510f825ce1c22ea034f01c6d09d25}{00195}}\ \ \ \ \ \mbox{\hyperlink{structTuner_1_1PidData}{PidData}}\ \mbox{\hyperlink{classTuner_a6cf510f825ce1c22ea034f01c6d09d25}{getPidData}}(Bottle\ \&bGroup,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ i)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00196}00196\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00197}00197\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structTuner_1_1PidData}{PidData}}\ pid;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00198}00198\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00199}00199\ \ \ \ \ \ \ \ \ ostringstream\ joint;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00200}00200\ \ \ \ \ \ \ \ \ joint<<\textcolor{stringliteral}{"{}joint\_"{}}<<i;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00201}00201\ \ \ \ \ \ \ \ \ Bottle\ \&bJoint=bGroup.findGroup(joint.str());}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00202}00202\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00203}00203\ \ \ \ \ \ \ \ \ pid.\mbox{\hyperlink{structTuner_1_1PidData_a9d7887841cbf0a7b8f494436a5245d81}{Kp}}=bJoint.check(\textcolor{stringliteral}{"{}Kp"{}},Value(0.0)).asFloat64();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00204}00204\ \ \ \ \ \ \ \ \ pid.\mbox{\hyperlink{structTuner_1_1PidData_a02c55c6005f28d47d21ed9b1e27d3c3e}{Ki}}=bJoint.check(\textcolor{stringliteral}{"{}Ki"{}},Value(0.0)).asFloat64();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00205}00205\ \ \ \ \ \ \ \ \ pid.\mbox{\hyperlink{structTuner_1_1PidData_a7cf95a9334af9367b8dbc0638289cc42}{Kd}}=bJoint.check(\textcolor{stringliteral}{"{}Kd"{}},Value(0.0)).asFloat64();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00206}00206\ \ \ \ \ \ \ \ \ pid.\mbox{\hyperlink{structTuner_1_1PidData_a83c4aa2ab3399264cc234b88f757430e}{scale}}=bJoint.check(\textcolor{stringliteral}{"{}scale"{}},Value(0.0)).asFloat64();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00207}00207\ \ \ \ \ \ \ \ \ pid.\mbox{\hyperlink{structTuner_1_1PidData_ae31f08a5e4282fc62e761327e10423d9}{st\_up}}=bJoint.check(\textcolor{stringliteral}{"{}st\_up"{}},Value(0.0)).asFloat64();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00208}00208\ \ \ \ \ \ \ \ \ pid.\mbox{\hyperlink{structTuner_1_1PidData_addc46e1f08286579b13d11b51df2bacb}{st\_down}}=bJoint.check(\textcolor{stringliteral}{"{}st\_down"{}},Value(0.0)).asFloat64();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00209}00209\ \ \ \ \ \ \ \ \ pid.\mbox{\hyperlink{structTuner_1_1PidData_a989a75ad350b95931287318798e1b6c4}{encs\_ratio}}=bJoint.check(\textcolor{stringliteral}{"{}encs\_ratio"{}},Value(1.0)).asFloat64();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00210}00210\ \ \ \ \ \ \ \ \ pid.\mbox{\hyperlink{structTuner_1_1PidData_a37a9ed7a34018748f80ca9c091266766}{status}}=(bJoint.check(\textcolor{stringliteral}{"{}status"{}},Value(\textcolor{stringliteral}{"{}download"{}})).asString()==\textcolor{stringliteral}{"{}download"{}}?\mbox{\hyperlink{classTuner_a0bcad7e41375d6a9de354db362b97e79ab5db058505eb9240b7b0d041a7350260}{download}}:\mbox{\hyperlink{classTuner_a0bcad7e41375d6a9de354db362b97e79ab43df6e0de614c23070891846ff6501f}{upload}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00211}00211\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (bJoint.check(\textcolor{stringliteral}{"{}idling"{}}))}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00212}00212\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00213}00213\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (Bottle\ *bIdlingJoints=bJoint.find(\textcolor{stringliteral}{"{}idling"{}}).asList())}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00214}00214\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00215}00215\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pid.\mbox{\hyperlink{structTuner_1_1PidData_a538837f4a0ab245ee174a257fd609de1}{idling\_joints}}.clear();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00216}00216\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ j=0;\ j<bIdlingJoints-\/>size();\ j++)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00217}00217\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00218}00218\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ k=bIdlingJoints-\/>get(j).asInt32();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00219}00219\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00220}00220\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ l;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00221}00221\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (l=0;\ l<\mbox{\hyperlink{classTuner_aa853cda86f0902a84528573c7e41ad1d}{rJoints}}.size();\ l++)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00222}00222\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00223}00223\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classTuner_aa853cda86f0902a84528573c7e41ad1d}{rJoints}}.get(l).asInt32()==k)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00224}00224\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00225}00225\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pid.\mbox{\hyperlink{structTuner_1_1PidData_a538837f4a0ab245ee174a257fd609de1}{idling\_joints}}.push\_back(k);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00226}00226\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00227}00227\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00228}00228\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00229}00229\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00230}00230\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (l>=\mbox{\hyperlink{classTuner_aa853cda86f0902a84528573c7e41ad1d}{rJoints}}.size())}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00231}00231\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}unrecognized\ joint\ \%d\ to\ put\ in\ idle"{}},k);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00232}00232\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00233}00233\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00234}00234\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00235}00235\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00236}00236\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ pid;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00237}00237\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00238}00238\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00239}00239\ \textcolor{comment}{\ \ \ \ /************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00240}\mbox{\hyperlink{classTuner_a9af76292763aaaef89ce56c8b94ee7c8}{00240}}\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classTuner_a9af76292763aaaef89ce56c8b94ee7c8}{idlingCoupledJoints}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ i,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{bool}\ sw)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00241}00241\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00242}00242\ \ \ \ \ \ \ \ \ IControlMode\ *imod;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00243}00243\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classTuner_a8587c3d8dd8c5fd00b552bc56f061491}{driver}}-\/>view(imod);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00244}00244\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00245}00245\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structTuner_1_1PidData}{PidData}}\ \&pid=\mbox{\hyperlink{classTuner_ab5bbc7af3a6a487d56b65a50daece3c4}{pids}}[i];}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00246}00246\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ j=0;\ j<pid.\mbox{\hyperlink{structTuner_1_1PidData_a538837f4a0ab245ee174a257fd609de1}{idling\_joints}}.size();\ j++)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00247}00247\ \ \ \ \ \ \ \ \ \ \ \ \ imod-\/>setControlMode(pid.\mbox{\hyperlink{structTuner_1_1PidData_a538837f4a0ab245ee174a257fd609de1}{idling\_joints}}[j],}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00248}00248\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sw?VOCAB\_CM\_IDLE:VOCAB\_CM\_POSITION);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00249}00249\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00250}00250\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00251}00251\ \textcolor{comment}{\ \ \ \ /************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00252}\mbox{\hyperlink{classTuner_acc5e73fa96c55bdc624e468e997cec61}{00252}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classTuner_acc5e73fa96c55bdc624e468e997cec61}{tune}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ i)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00253}00253\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00254}00254\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structTuner_1_1PidData}{PidData}}\ \&pid=\mbox{\hyperlink{classTuner_ab5bbc7af3a6a487d56b65a50daece3c4}{pids}}[i];}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00255}00255\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00256}00256\ \ \ \ \ \ \ \ \ Property\ pGeneral;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00257}00257\ \ \ \ \ \ \ \ \ pGeneral.put(\textcolor{stringliteral}{"{}joint"{}},i);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00258}00258\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{string}\ sGeneral=\textcolor{stringliteral}{"{}(general\ "{}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00259}00259\ \ \ \ \ \ \ \ \ sGeneral+=pGeneral.toString();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00260}00260\ \ \ \ \ \ \ \ \ sGeneral+=\textcolor{charliteral}{')'};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00261}00261\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00262}00262\ \ \ \ \ \ \ \ \ Bottle\ bGeneral,bPlantEstimation,bStictionEstimation;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00263}00263\ \ \ \ \ \ \ \ \ bGeneral.fromString(sGeneral);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00264}00264\ \ \ \ \ \ \ \ \ bPlantEstimation.fromString(\textcolor{stringliteral}{"{}(plant\_estimation\ (Ts\ 0.01)\ (Q\ 1.0)\ (R\ 1.0)\ (P0\ 100000.0)\ (tau\ 1.0)\ (K\ 1.0)\ (max\_pwm\ 800.0))"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00265}00265\ \ \ \ \ \ \ \ \ bStictionEstimation.fromString(\textcolor{stringliteral}{"{}(stiction\_estimation\ (Ts\ 0.01)\ (T\ 2.0)\ (vel\_thres\ 5.0)\ (e\_thres\ 1.0)\ (gamma\ (10.0\ 10.0))\ (stiction\ (0.0\ 0.0)))"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00266}00266\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00267}00267\ \ \ \ \ \ \ \ \ Bottle\ bConf=bGeneral;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00268}00268\ \ \ \ \ \ \ \ \ bConf.append(bPlantEstimation);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00269}00269\ \ \ \ \ \ \ \ \ bConf.append(bStictionEstimation);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00270}00270\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00271}00271\ \ \ \ \ \ \ \ \ Property\ pOptions(bConf.toString().c\_str());}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00272}00272\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1ctrl_1_1OnlineCompensatorDesign}{OnlineCompensatorDesign}}\ designer;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00273}00273\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!designer.\mbox{\hyperlink{classiCub_1_1ctrl_1_1OnlineCompensatorDesign_ad0da1c04ac57ac081a90c757cf098642}{configure}}(*\mbox{\hyperlink{classTuner_a8587c3d8dd8c5fd00b552bc56f061491}{driver}},pOptions))}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00274}00274\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00275}00275\ \ \ \ \ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}designer\ configuration\ failed!"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00276}00276\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00277}00277\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00278}00278\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00279}00279\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classTuner_a9af76292763aaaef89ce56c8b94ee7c8}{idlingCoupledJoints}}(i,\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00280}00280\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00281}00281\ \ \ \ \ \ \ \ \ Property\ pPlantEstimation;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00282}00282\ \ \ \ \ \ \ \ \ pPlantEstimation.put(\textcolor{stringliteral}{"{}max\_time"{}},20.0);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00283}00283\ \ \ \ \ \ \ \ \ pPlantEstimation.put(\textcolor{stringliteral}{"{}switch\_timeout"{}},2.0);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00284}00284\ \ \ \ \ \ \ \ \ designer.\mbox{\hyperlink{classiCub_1_1ctrl_1_1OnlineCompensatorDesign_a7c4409456aa01888ba140ab2c53b53d1}{startPlantEstimation}}(pPlantEstimation);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00285}00285\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00286}00286\ \ \ \ \ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}Estimating\ plant\ for\ joint\ \%d:\ max\ duration\ =\ \%g\ seconds"{}},}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00287}00287\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ i,pPlantEstimation.find(\textcolor{stringliteral}{"{}max\_time"{}}).asFloat64());}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00288}00288\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00289}00289\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ t0=Time::now();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00290}00290\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (!designer.\mbox{\hyperlink{classiCub_1_1ctrl_1_1OnlineCompensatorDesign_a01553535e4a12b68664f2d04129db671}{isDone}}())}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00291}00291\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00292}00292\ \ \ \ \ \ \ \ \ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}elapsed\ \%d\ [s]"{}},(\textcolor{keywordtype}{int})(Time::now()-\/t0));}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00293}00293\ \ \ \ \ \ \ \ \ \ \ \ \ Time::delay(1.0);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00294}00294\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classTuner_ad4dd3e1a2d41fcc861ff288527782c60}{interrupting}})}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00295}00295\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00296}00296\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classTuner_a9af76292763aaaef89ce56c8b94ee7c8}{idlingCoupledJoints}}(i,\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00297}00297\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00298}00298\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00299}00299\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00300}00300\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00301}00301\ \ \ \ \ \ \ \ \ Property\ pResults;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00302}00302\ \ \ \ \ \ \ \ \ designer.\mbox{\hyperlink{classiCub_1_1ctrl_1_1OnlineCompensatorDesign_aaa442aeb507e3dd7de8d1e200ed8690b}{getResults}}(pResults);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00303}00303\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ tau=pResults.find(\textcolor{stringliteral}{"{}tau\_mean"{}}).asFloat64();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00304}00304\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ K=pResults.find(\textcolor{stringliteral}{"{}K\_mean"{}}).asFloat64();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00305}00305\ \ \ \ \ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}plant\ =\ \%g/s\ *\ 1/(1+s*\%g)"{}},K,tau);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00306}00306\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00307}00307\ \ \ \ \ \ \ \ \ Property\ pControllerRequirements,pController;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00308}00308\ \ \ \ \ \ \ \ \ pControllerRequirements.put(\textcolor{stringliteral}{"{}tau"{}},tau);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00309}00309\ \ \ \ \ \ \ \ \ pControllerRequirements.put(\textcolor{stringliteral}{"{}K"{}},K);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00310}00310\ \ \ \ \ \ \ \ \ pControllerRequirements.put(\textcolor{stringliteral}{"{}f\_c"{}},0.75);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00311}00311\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00312}00312\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (i!=15)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00313}00313\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00314}00314\ \ \ \ \ \ \ \ \ \ \ \ \ pControllerRequirements.put(\textcolor{stringliteral}{"{}T\_dr"{}},1.0);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00315}00315\ \ \ \ \ \ \ \ \ \ \ \ \ pControllerRequirements.put(\textcolor{stringliteral}{"{}type"{}},\textcolor{stringliteral}{"{}PI"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00316}00316\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00317}00317\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00318}00318\ \ \ \ \ \ \ \ \ \ \ \ \ pControllerRequirements.put(\textcolor{stringliteral}{"{}type"{}},\textcolor{stringliteral}{"{}P"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00319}00319\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00320}00320\ \ \ \ \ \ \ \ \ designer.\mbox{\hyperlink{classiCub_1_1ctrl_1_1OnlineCompensatorDesign_a20050c4e3ad771748f64d9a25941938f}{tuneController}}(pControllerRequirements,pController);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00321}00321\ \ \ \ \ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}tuning\ results:\ \%s"{}},pController.toString().c\_str());}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00322}00322\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ Kp=pController.find(\textcolor{stringliteral}{"{}Kp"{}}).asFloat64();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00323}00323\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ Ki=pController.find(\textcolor{stringliteral}{"{}Ki"{}}).asFloat64();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00324}00324\ \ \ \ \ \ \ \ \ pid.\mbox{\hyperlink{structTuner_1_1PidData_a83c4aa2ab3399264cc234b88f757430e}{scale}}=4.0;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00325}00325\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ scale=(int)pid.\mbox{\hyperlink{structTuner_1_1PidData_a83c4aa2ab3399264cc234b88f757430e}{scale}};\ \textcolor{keywordtype}{int}\ shift=1<<scale;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00326}00326\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ fwKp=floor(Kp*pid.\mbox{\hyperlink{structTuner_1_1PidData_a989a75ad350b95931287318798e1b6c4}{encs\_ratio}}*shift);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00327}00327\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ fwKi=floor(Ki*pid.\mbox{\hyperlink{structTuner_1_1PidData_a989a75ad350b95931287318798e1b6c4}{encs\_ratio}}*shift/1000.0);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00328}00328\ \ \ \ \ \ \ \ \ pid.\mbox{\hyperlink{structTuner_1_1PidData_a9d7887841cbf0a7b8f494436a5245d81}{Kp}}=yarp::math::sign(pid.\mbox{\hyperlink{structTuner_1_1PidData_a9d7887841cbf0a7b8f494436a5245d81}{Kp}}*fwKp)>0.0?fwKp:-\/fwKp;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00329}00329\ \ \ \ \ \ \ \ \ pid.\mbox{\hyperlink{structTuner_1_1PidData_a02c55c6005f28d47d21ed9b1e27d3c3e}{Ki}}=yarp::math::sign(pid.\mbox{\hyperlink{structTuner_1_1PidData_a02c55c6005f28d47d21ed9b1e27d3c3e}{Ki}}*fwKi)>0.0?fwKi:-\/fwKi;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00330}00330\ \ \ \ \ \ \ \ \ pid.\mbox{\hyperlink{structTuner_1_1PidData_a7cf95a9334af9367b8dbc0638289cc42}{Kd}}=0.0;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00331}00331\ \ \ \ \ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}Kp\ (FW)\ =\ \%g;\ Ki\ (FW)\ =\ \%g;\ Kd\ (FW)\ =\ \%g;\ shift\ factor\ =\ \%d"{}},pid.\mbox{\hyperlink{structTuner_1_1PidData_a9d7887841cbf0a7b8f494436a5245d81}{Kp}},pid.\mbox{\hyperlink{structTuner_1_1PidData_a02c55c6005f28d47d21ed9b1e27d3c3e}{Ki}},pid.\mbox{\hyperlink{structTuner_1_1PidData_a7cf95a9334af9367b8dbc0638289cc42}{Kd}},scale);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00332}00332\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00333}00333\ \ \ \ \ \ \ \ \ Property\ pStictionEstimation;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00334}00334\ \ \ \ \ \ \ \ \ pStictionEstimation.put(\textcolor{stringliteral}{"{}max\_time"{}},60.0);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00335}00335\ \ \ \ \ \ \ \ \ pStictionEstimation.put(\textcolor{stringliteral}{"{}Kp"{}},Kp);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00336}00336\ \ \ \ \ \ \ \ \ pStictionEstimation.put(\textcolor{stringliteral}{"{}Ki"{}},0.0);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00337}00337\ \ \ \ \ \ \ \ \ pStictionEstimation.put(\textcolor{stringliteral}{"{}Kd"{}},0.0);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00338}00338\ \ \ \ \ \ \ \ \ designer.\mbox{\hyperlink{classiCub_1_1ctrl_1_1OnlineCompensatorDesign_a32ef400a537d8081076ae48781ccc2d2}{startStictionEstimation}}(pStictionEstimation);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00339}00339\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00340}00340\ \ \ \ \ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}Estimating\ stiction\ for\ joint\ \%d:\ max\ duration\ =\ \%g\ seconds"{}},}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00341}00341\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ i,pStictionEstimation.find(\textcolor{stringliteral}{"{}max\_time"{}}).asFloat64());}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00342}00342\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00343}00343\ \ \ \ \ \ \ \ \ t0=Time::now();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00344}00344\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (!designer.\mbox{\hyperlink{classiCub_1_1ctrl_1_1OnlineCompensatorDesign_a01553535e4a12b68664f2d04129db671}{isDone}}())}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00345}00345\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00346}00346\ \ \ \ \ \ \ \ \ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}elapsed\ \%d\ [s]"{}},(\textcolor{keywordtype}{int})(Time::now()-\/t0));}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00347}00347\ \ \ \ \ \ \ \ \ \ \ \ \ Time::delay(1.0);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00348}00348\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classTuner_ad4dd3e1a2d41fcc861ff288527782c60}{interrupting}})}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00349}00349\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00350}00350\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classTuner_a9af76292763aaaef89ce56c8b94ee7c8}{idlingCoupledJoints}}(i,\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00351}00351\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00352}00352\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00353}00353\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00354}00354\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00355}00355\ \ \ \ \ \ \ \ \ designer.\mbox{\hyperlink{classiCub_1_1ctrl_1_1OnlineCompensatorDesign_aaa442aeb507e3dd7de8d1e200ed8690b}{getResults}}(pResults);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00356}00356\ \ \ \ \ \ \ \ \ pid.\mbox{\hyperlink{structTuner_1_1PidData_ae31f08a5e4282fc62e761327e10423d9}{st\_up}}=floor(pResults.find(\textcolor{stringliteral}{"{}stiction"{}}).asList()-\/>get(0).asFloat64());}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00357}00357\ \ \ \ \ \ \ \ \ pid.\mbox{\hyperlink{structTuner_1_1PidData_addc46e1f08286579b13d11b51df2bacb}{st\_down}}=floor(pResults.find(\textcolor{stringliteral}{"{}stiction"{}}).asList()-\/>get(1).asFloat64());}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00358}00358\ \ \ \ \ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}Stiction\ values:\ up\ =\ \%g;\ down\ =\ \%g"{}},pid.\mbox{\hyperlink{structTuner_1_1PidData_ae31f08a5e4282fc62e761327e10423d9}{st\_up}},pid.\mbox{\hyperlink{structTuner_1_1PidData_addc46e1f08286579b13d11b51df2bacb}{st\_down}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00359}00359\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00360}00360\ \ \ \ \ \ \ \ \ IControlMode\ *imod;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00361}00361\ \ \ \ \ \ \ \ \ IPositionControl\ *ipos;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00362}00362\ \ \ \ \ \ \ \ \ IEncoders\ *ienc;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00363}00363\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classTuner_a8587c3d8dd8c5fd00b552bc56f061491}{driver}}-\/>view(imod);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00364}00364\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classTuner_a8587c3d8dd8c5fd00b552bc56f061491}{driver}}-\/>view(ipos);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00365}00365\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classTuner_a8587c3d8dd8c5fd00b552bc56f061491}{driver}}-\/>view(ienc);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00366}00366\ \ \ \ \ \ \ \ \ imod-\/>setControlMode(i,VOCAB\_CM\_POSITION);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00367}00367\ \ \ \ \ \ \ \ \ ipos-\/>setRefSpeed(i,50.0);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00368}00368\ \ \ \ \ \ \ \ \ ipos-\/>positionMove(i,0.0);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00369}00369\ \ \ \ \ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}Driving\ the\ joint\ back\ to\ rest...\ "{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00370}00370\ \ \ \ \ \ \ \ \ t0=Time::now();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00371}00371\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (Time::now()-\/t0<5.0)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00372}00372\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00373}00373\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ enc;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00374}00374\ \ \ \ \ \ \ \ \ \ \ \ \ ienc-\/>getEncoder(i,\&enc);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00375}00375\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (fabs(enc)<1.0)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00376}00376\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00377}00377\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00378}00378\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classTuner_ad4dd3e1a2d41fcc861ff288527782c60}{interrupting}})}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00379}00379\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00380}00380\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classTuner_a9af76292763aaaef89ce56c8b94ee7c8}{idlingCoupledJoints}}(i,\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00381}00381\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00382}00382\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00383}00383\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00384}00384\ \ \ \ \ \ \ \ \ \ \ \ \ Time::delay(0.2);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00385}00385\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00386}00386\ \ \ \ \ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}done!"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00387}00387\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00388}00388\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classTuner_a9af76292763aaaef89ce56c8b94ee7c8}{idlingCoupledJoints}}(i,\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00389}00389\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00390}00390\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00391}00391\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00392}00392\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00393}00393\ \textcolor{comment}{\ \ \ \ /************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00394}\mbox{\hyperlink{classTuner_a5e1f77893d0e3f5ed2cf3a14fdbc321c}{00394}}\ \ \ \ \ \mbox{\hyperlink{classTuner_a5e1f77893d0e3f5ed2cf3a14fdbc321c}{Tuner}}()\ :\ \mbox{\hyperlink{classTuner_ad4dd3e1a2d41fcc861ff288527782c60}{interrupting}}(false),\ \mbox{\hyperlink{classTuner_a8587c3d8dd8c5fd00b552bc56f061491}{driver}}(NULL)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00395}00395\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00396}00396\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classTuner_af7e0533ecdfda8064358af60ecc8d6c5}{instances}}++;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00397}00397\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00398}00398\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00399}00399\ \textcolor{comment}{\ \ \ \ /************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00400}\mbox{\hyperlink{classTuner_a1875029cfef24185ad0f029a874d92da}{00400}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classTuner_a1875029cfef24185ad0f029a874d92da}{configure}}(ResourceFinder\ \&rf,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{string}\ \&\mbox{\hyperlink{classTuner_a72f168472ea35caaec69639f6ebe4658}{part}})}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00401}00401\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00402}00402\ \ \ \ \ \ \ \ \ this-\/>part=\mbox{\hyperlink{classTuner_a72f168472ea35caaec69639f6ebe4658}{part}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00403}00403\ \ \ \ \ \ \ \ \ Bottle\ \&bGeneral=rf.findGroup(\textcolor{stringliteral}{"{}general"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00404}00404\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (bGeneral.isNull())}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00405}00405\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00406}00406\ \ \ \ \ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}group\ [general]\ is\ missing!"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00407}00407\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00408}00408\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00409}00409\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00410}00410\ \ \ \ \ \ \ \ \ Bottle\ \&bPart=rf.findGroup(\mbox{\hyperlink{classTuner_a72f168472ea35caaec69639f6ebe4658}{part}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00411}00411\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (bPart.isNull())}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00412}00412\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00413}00413\ \ \ \ \ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}group\ [\%s]\ is\ missing!"{}},\mbox{\hyperlink{classTuner_a72f168472ea35caaec69639f6ebe4658}{part}}.c\_str());}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00414}00414\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00415}00415\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00416}00416\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00417}00417\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!bPart.check(\textcolor{stringliteral}{"{}device"{}}))}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00418}00418\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00419}00419\ \ \ \ \ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}\(\backslash\)"{}device\(\backslash\)"{}\ option\ is\ missing!"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00420}00420\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00421}00421\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00422}00422\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00423}00423\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classTuner_a168f3d63e63c4a4aed24c4f3113a65f6}{name}}=bGeneral.check(\textcolor{stringliteral}{"{}name"{}},Value(\textcolor{stringliteral}{"{}fingersTuner"{}})).asString();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00424}00424\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classTuner_a1ea4297aa7c4fb802b3f305a7db05786}{robot}}=bGeneral.check(\textcolor{stringliteral}{"{}robot"{}},Value(\textcolor{stringliteral}{"{}icub"{}})).asString();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00425}00425\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ ping\_robot\_tmo=bGeneral.check(\textcolor{stringliteral}{"{}ping\_robot\_tmo"{}},Value(0.0)).asFloat64();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00426}00426\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classTuner_ad5d7d35a503fea761357c68e50d2dfe7}{device}}=bPart.find(\textcolor{stringliteral}{"{}device"{}}).asString();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00427}00427\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00428}00428\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (Bottle\ *rj=bGeneral.find(\textcolor{stringliteral}{"{}relevantJoints"{}}).asList())}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00429}00429\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classTuner_aa853cda86f0902a84528573c7e41ad1d}{rJoints}}=*rj;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00430}00430\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00431}00431\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00432}00432\ \ \ \ \ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}\(\backslash\)"{}relevantJoints\(\backslash\)"{}\ option\ is\ missing!"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00433}00433\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00434}00434\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00435}00435\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00436}00436\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ numAlias=bGeneral.check(\textcolor{stringliteral}{"{}numAlias"{}},Value(0)).asInt32();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00437}00437\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i=0;\ i<numAlias;\ i++)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00438}00438\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00439}00439\ \ \ \ \ \ \ \ \ \ \ \ \ ostringstream\ item;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00440}00440\ \ \ \ \ \ \ \ \ \ \ \ \ item<<\textcolor{stringliteral}{"{}alias\_"{}}<<i;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00441}00441\ \ \ \ \ \ \ \ \ \ \ \ \ Bottle\ \&bAlias=bGeneral.findGroup(item.str());}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00442}00442\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (Bottle\ *joints=bAlias.find(\textcolor{stringliteral}{"{}joints"{}}).asList())}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00443}00443\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classTuner_a5c6a771eb03f30eb45b3aada9efd6835}{alias}}[bAlias.find(\textcolor{stringliteral}{"{}tag"{}}).asString()]=*joints;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00444}00444\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00445}00445\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00446}00446\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ special\ wildcard\ to\ point\ to\ all\ the\ joints}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00447}00447\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classTuner_a5c6a771eb03f30eb45b3aada9efd6835}{alias}}[\textcolor{stringliteral}{"{}*"{}}]=\mbox{\hyperlink{classTuner_aa853cda86f0902a84528573c7e41ad1d}{rJoints}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00448}00448\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00449}00449\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i=0;\ i<\mbox{\hyperlink{classTuner_aa853cda86f0902a84528573c7e41ad1d}{rJoints}}.size();\ i++)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00450}00450\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00451}00451\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ j=\mbox{\hyperlink{classTuner_aa853cda86f0902a84528573c7e41ad1d}{rJoints}}.get(i).asInt32();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00452}00452\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classTuner_ab5bbc7af3a6a487d56b65a50daece3c4}{pids}}[j]=\mbox{\hyperlink{classTuner_a6cf510f825ce1c22ea034f01c6d09d25}{getPidData}}(bPart,j);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00453}00453\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00454}00454\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00455}00455\ \ \ \ \ \ \ \ \ ostringstream\ portsSuffix;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00456}00456\ \ \ \ \ \ \ \ \ portsSuffix<<\mbox{\hyperlink{classTuner_af7e0533ecdfda8064358af60ecc8d6c5}{instances}}<<\textcolor{stringliteral}{"{}/"{}}<<\mbox{\hyperlink{classTuner_ad5d7d35a503fea761357c68e50d2dfe7}{device}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00457}00457\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00458}00458\ \ \ \ \ \ \ \ \ Property\ option(\textcolor{stringliteral}{"{}(device\ remote\_controlboard)"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00459}00459\ \ \ \ \ \ \ \ \ option.put(\textcolor{stringliteral}{"{}remote"{}},\textcolor{stringliteral}{"{}/"{}}+\mbox{\hyperlink{classTuner_a1ea4297aa7c4fb802b3f305a7db05786}{robot}}+\textcolor{stringliteral}{"{}/"{}}+\mbox{\hyperlink{classTuner_ad5d7d35a503fea761357c68e50d2dfe7}{device}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00460}00460\ \ \ \ \ \ \ \ \ option.put(\textcolor{stringliteral}{"{}local"{}},\textcolor{stringliteral}{"{}/"{}}+\mbox{\hyperlink{classTuner_a168f3d63e63c4a4aed24c4f3113a65f6}{name}}+\textcolor{stringliteral}{"{}/"{}}+portsSuffix.str());}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00461}00461\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00462}00462\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (ping\_robot\_tmo>0.0)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00463}00463\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classTuner_a8587c3d8dd8c5fd00b552bc56f061491}{driver}}=\mbox{\hyperlink{classTuner_a1840a47c7c9650b3c22d2e164da4a9a3}{waitPart}}(option,ping\_robot\_tmo);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00464}00464\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00465}00465\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classTuner_a8587c3d8dd8c5fd00b552bc56f061491}{driver}}=\textcolor{keyword}{new}\ PolyDriver(option);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00466}00466\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00467}00467\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!\mbox{\hyperlink{classTuner_a8587c3d8dd8c5fd00b552bc56f061491}{driver}}-\/>isValid())}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00468}00468\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00469}00469\ \ \ \ \ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}\%s\ device\ driver\ not\ available!"{}},\mbox{\hyperlink{classTuner_ad5d7d35a503fea761357c68e50d2dfe7}{device}}.c\_str());}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00470}00470\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00471}00471\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00472}00472\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00473}00473\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00474}00474\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00475}00475\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00476}00476\ \textcolor{comment}{\ \ \ \ /************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00477}\mbox{\hyperlink{classTuner_a406601fed00f2877f296f30c33aa9841}{00477}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classTuner_a406601fed00f2877f296f30c33aa9841}{sync}}(\textcolor{keyword}{const}\ Value\ \&sel)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00478}00478\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00479}00479\ \ \ \ \ \ \ \ \ Bottle\ joints;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00480}00480\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (sel.isInt32())}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00481}00481\ \ \ \ \ \ \ \ \ \ \ \ \ joints.addInt32(sel.asInt32());}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00482}00482\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (sel.isString())}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00483}00483\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00484}00484\ \ \ \ \ \ \ \ \ \ \ \ \ map<string,Bottle>::iterator\ it=\mbox{\hyperlink{classTuner_a5c6a771eb03f30eb45b3aada9efd6835}{alias}}.find(sel.asString());}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00485}00485\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (it!=\mbox{\hyperlink{classTuner_a5c6a771eb03f30eb45b3aada9efd6835}{alias}}.end())}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00486}00486\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ joints=it-\/>second;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00487}00487\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00488}00488\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00489}00489\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00490}00490\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00491}00491\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00492}00492\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00493}00493\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i=0;\ i<joints.size();\ i++)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00494}00494\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00495}00495\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ j=\mbox{\hyperlink{classTuner_aa853cda86f0902a84528573c7e41ad1d}{rJoints}}.get(i).asInt32();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00496}00496\ \ \ \ \ \ \ \ \ \ \ \ \ map<int,PidData>::iterator\ it=\mbox{\hyperlink{classTuner_ab5bbc7af3a6a487d56b65a50daece3c4}{pids}}.find(j);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00497}00497\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (it==\mbox{\hyperlink{classTuner_ab5bbc7af3a6a487d56b65a50daece3c4}{pids}}.end())}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00498}00498\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00499}00499\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00500}00500\ \ \ \ \ \ \ \ \ \ \ \ \ IPidControl\ *ipid;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00501}00501\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classTuner_a8587c3d8dd8c5fd00b552bc56f061491}{driver}}-\/>view(ipid);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00502}00502\ \ \ \ \ \ \ \ \ \ \ \ \ Pid\ \_pid;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00503}00503\ \ \ \ \ \ \ \ \ \ \ \ \ ipid-\/>getPid(VOCAB\_PIDTYPE\_POSITION,j,\&\_pid);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00504}00504\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00505}00505\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structTuner_1_1PidData}{PidData}}\ \&pid=it-\/>second;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00506}00506\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (pid.\mbox{\hyperlink{structTuner_1_1PidData_a37a9ed7a34018748f80ca9c091266766}{status}}==\mbox{\hyperlink{classTuner_a0bcad7e41375d6a9de354db362b97e79ab5db058505eb9240b7b0d041a7350260}{download}})}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00507}00507\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pid.\mbox{\hyperlink{structTuner_1_1PidData_a07df8af451c40f180816040065a567c5}{fromRobot}}(\_pid);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00508}00508\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00509}00509\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00510}00510\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pid.\mbox{\hyperlink{structTuner_1_1PidData_a2d0b796571228ecf988e2fc92b79a158}{toRobot}}(\_pid);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00511}00511\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ipid-\/>setPid(VOCAB\_PIDTYPE\_POSITION,j,\_pid);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00512}00512\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00513}00513\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00514}00514\ \ \ \ \ \ \ \ \ \ \ \ \ pid.\mbox{\hyperlink{structTuner_1_1PidData_a37a9ed7a34018748f80ca9c091266766}{status}}=\mbox{\hyperlink{classTuner_a0bcad7e41375d6a9de354db362b97e79af70e9720e6684405c3624cd393ef47fa}{synced}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00515}00515\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00516}00516\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00517}00517\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00518}00518\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00519}00519\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00520}00520\ \textcolor{comment}{\ \ \ \ /************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00521}\mbox{\hyperlink{classTuner_a2ee861fba99422f66dde6dd9d7c20d4e}{00521}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classTuner_a2ee861fba99422f66dde6dd9d7c20d4e}{tune}}(\textcolor{keyword}{const}\ Value\ \&sel)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00522}00522\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00523}00523\ \ \ \ \ \ \ \ \ Bottle\ joints;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00524}00524\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (sel.isInt32())}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00525}00525\ \ \ \ \ \ \ \ \ \ \ \ \ joints.addInt32(sel.asInt32());}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00526}00526\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (sel.isString())}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00527}00527\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00528}00528\ \ \ \ \ \ \ \ \ \ \ \ \ map<string,Bottle>::iterator\ it=\mbox{\hyperlink{classTuner_a5c6a771eb03f30eb45b3aada9efd6835}{alias}}.find(sel.asString());}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00529}00529\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (it!=\mbox{\hyperlink{classTuner_a5c6a771eb03f30eb45b3aada9efd6835}{alias}}.end())}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00530}00530\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ joints=it-\/>second;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00531}00531\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00532}00532\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00533}00533\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00534}00534\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00535}00535\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00536}00536\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00537}00537\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i=0;\ i<joints.size();\ i++)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00538}00538\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00539}00539\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ j=joints.get(i).asInt32();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00540}00540\ \ \ \ \ \ \ \ \ \ \ \ \ map<int,PidData>::iterator\ it=\mbox{\hyperlink{classTuner_ab5bbc7af3a6a487d56b65a50daece3c4}{pids}}.find(j);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00541}00541\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (it==\mbox{\hyperlink{classTuner_ab5bbc7af3a6a487d56b65a50daece3c4}{pids}}.end())}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00542}00542\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00543}00543\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00544}00544\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classTuner_acc5e73fa96c55bdc624e468e997cec61}{tune}}(j))}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00545}00545\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00546}00546\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ IPidControl\ *ipid;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00547}00547\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classTuner_a8587c3d8dd8c5fd00b552bc56f061491}{driver}}-\/>view(ipid);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00548}00548\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Pid\ \_pid;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00549}00549\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ipid-\/>getPid(VOCAB\_PIDTYPE\_POSITION,j,\&\_pid);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00550}00550\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00551}00551\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structTuner_1_1PidData}{PidData}}\ \&pid=it-\/>second;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00552}00552\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pid.\mbox{\hyperlink{structTuner_1_1PidData_a2d0b796571228ecf988e2fc92b79a158}{toRobot}}(\_pid);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00553}00553\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ipid-\/>setPid(VOCAB\_PIDTYPE\_POSITION,j,\_pid);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00554}00554\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pid.\mbox{\hyperlink{structTuner_1_1PidData_a37a9ed7a34018748f80ca9c091266766}{status}}=\mbox{\hyperlink{classTuner_a0bcad7e41375d6a9de354db362b97e79af70e9720e6684405c3624cd393ef47fa}{synced}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00555}00555\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00556}00556\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00557}00557\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classTuner_ad4dd3e1a2d41fcc861ff288527782c60}{interrupting}})}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00558}00558\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00559}00559\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00560}00560\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00561}00561\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00562}00562\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00563}00563\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00564}00564\ \textcolor{comment}{\ \ \ \ /************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00565}\mbox{\hyperlink{classTuner_acb0c9901768ebdb400c65461437b7b78}{00565}}\ \ \ \ \ \textcolor{keywordtype}{string}\ \mbox{\hyperlink{classTuner_acb0c9901768ebdb400c65461437b7b78}{toString}}()}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00566}00566\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00567}00567\ \ \ \ \ \ \ \ \ ostringstream\ stream;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00568}00568\ \ \ \ \ \ \ \ \ stream<<\textcolor{stringliteral}{"{}["{}}<<\mbox{\hyperlink{classTuner_a72f168472ea35caaec69639f6ebe4658}{part}}<<\textcolor{stringliteral}{"{}]"{}}<<endl;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00569}00569\ \ \ \ \ \ \ \ \ stream<<\textcolor{stringliteral}{"{}device\ \ \ "{}}<<\mbox{\hyperlink{classTuner_ad5d7d35a503fea761357c68e50d2dfe7}{device}}<<endl;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00570}00570\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00571}00571\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i=0;\ i<\mbox{\hyperlink{classTuner_aa853cda86f0902a84528573c7e41ad1d}{rJoints}}.size();\ i++)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00572}00572\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00573}00573\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ j=\mbox{\hyperlink{classTuner_aa853cda86f0902a84528573c7e41ad1d}{rJoints}}.get(i).asInt32();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00574}00574\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structTuner_1_1PidData}{PidData}}\ \&pid=\mbox{\hyperlink{classTuner_ab5bbc7af3a6a487d56b65a50daece3c4}{pids}}[j];}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00575}00575\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00576}00576\ \ \ \ \ \ \ \ \ \ \ \ \ Property\ prop;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00577}00577\ \ \ \ \ \ \ \ \ \ \ \ \ prop.put(\textcolor{stringliteral}{"{}Kp"{}},pid.\mbox{\hyperlink{structTuner_1_1PidData_a9d7887841cbf0a7b8f494436a5245d81}{Kp}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00578}00578\ \ \ \ \ \ \ \ \ \ \ \ \ prop.put(\textcolor{stringliteral}{"{}Ki"{}},pid.\mbox{\hyperlink{structTuner_1_1PidData_a02c55c6005f28d47d21ed9b1e27d3c3e}{Ki}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00579}00579\ \ \ \ \ \ \ \ \ \ \ \ \ prop.put(\textcolor{stringliteral}{"{}Kd"{}},pid.\mbox{\hyperlink{structTuner_1_1PidData_a7cf95a9334af9367b8dbc0638289cc42}{Kd}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00580}00580\ \ \ \ \ \ \ \ \ \ \ \ \ prop.put(\textcolor{stringliteral}{"{}scale"{}},pid.\mbox{\hyperlink{structTuner_1_1PidData_a83c4aa2ab3399264cc234b88f757430e}{scale}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00581}00581\ \ \ \ \ \ \ \ \ \ \ \ \ prop.put(\textcolor{stringliteral}{"{}st\_up"{}},pid.\mbox{\hyperlink{structTuner_1_1PidData_ae31f08a5e4282fc62e761327e10423d9}{st\_up}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00582}00582\ \ \ \ \ \ \ \ \ \ \ \ \ prop.put(\textcolor{stringliteral}{"{}st\_down"{}},pid.\mbox{\hyperlink{structTuner_1_1PidData_addc46e1f08286579b13d11b51df2bacb}{st\_down}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00583}00583\ \ \ \ \ \ \ \ \ \ \ \ \ prop.put(\textcolor{stringliteral}{"{}encs\_ratio"{}},pid.\mbox{\hyperlink{structTuner_1_1PidData_a989a75ad350b95931287318798e1b6c4}{encs\_ratio}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00584}00584\ \ \ \ \ \ \ \ \ \ \ \ \ prop.put(\textcolor{stringliteral}{"{}status"{}},pid.\mbox{\hyperlink{structTuner_1_1PidData_a37a9ed7a34018748f80ca9c091266766}{status}}==\mbox{\hyperlink{classTuner_a0bcad7e41375d6a9de354db362b97e79ab5db058505eb9240b7b0d041a7350260}{download}}?\textcolor{stringliteral}{"{}download"{}}:\textcolor{stringliteral}{"{}upload"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00585}00585\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00586}00586\ \ \ \ \ \ \ \ \ \ \ \ \ stream<<\textcolor{stringliteral}{"{}joint\_"{}}<<j<<\textcolor{stringliteral}{"{}\ \ \ "{}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00587}00587\ \ \ \ \ \ \ \ \ \ \ \ \ stream<<prop.toString()<<endl;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00588}00588\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00589}00589\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00590}00590\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ stream.str();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00591}00591\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00592}00592\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00593}00593\ \textcolor{comment}{\ \ \ \ /************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00594}\mbox{\hyperlink{classTuner_aa7fc2995cf25ea0b645f8333ea4ebbb2}{00594}}\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classTuner_aa7fc2995cf25ea0b645f8333ea4ebbb2}{interrupt}}()}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00595}00595\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00596}00596\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classTuner_ad4dd3e1a2d41fcc861ff288527782c60}{interrupting}}=\textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00597}00597\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00598}00598\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00599}00599\ \textcolor{comment}{\ \ \ \ /************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00600}\mbox{\hyperlink{classTuner_a887bbbbdb19e91c31d921554e81f6a30}{00600}}\ \ \ \ \ \mbox{\hyperlink{classTuner_a887bbbbdb19e91c31d921554e81f6a30}{\string~Tuner}}()}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00601}00601\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00602}00602\ \ \ \ \ \ \ \ \ \textcolor{keyword}{delete}\ \mbox{\hyperlink{classTuner_a8587c3d8dd8c5fd00b552bc56f061491}{driver}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00603}00603\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00604}00604\ \};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00605}00605\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00606}00606\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00607}00607\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{classTuner_af7e0533ecdfda8064358af60ecc8d6c5}{Tuner::instances}}=0;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00608}00608\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00609}\mbox{\hyperlink{classTunerModule}{00609}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classTunerModule}{TunerModule}}:\ \textcolor{keyword}{public}\ RFModule,\ \textcolor{keyword}{public}\ \mbox{\hyperlink{classfingersTuner__IDL}{fingersTuner\_IDL}}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00610}00610\ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00611}00611\ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00612}\mbox{\hyperlink{classTunerModule_a364bdaee84d8f11e2c43752c34c620ec}{00612}}\ \ \ \ \ ResourceFinder\ *\mbox{\hyperlink{classTunerModule_a364bdaee84d8f11e2c43752c34c620ec}{rf}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00613}\mbox{\hyperlink{classTunerModule_a50bf444ccf9b870e05d86ede4b42c1d7}{00613}}\ \ \ \ \ map<string,Tuner*>\ \mbox{\hyperlink{classTunerModule_a50bf444ccf9b870e05d86ede4b42c1d7}{tuners}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00614}\mbox{\hyperlink{classTunerModule_a638cde6dbf7596471806d350f4f5f35c}{00614}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classTunerModule_a638cde6dbf7596471806d350f4f5f35c}{interrupting}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00615}\mbox{\hyperlink{classTunerModule_acff0145616f7a7a697d9adda5bc68c6a}{00615}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classTunerModule_acff0145616f7a7a697d9adda5bc68c6a}{closing}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00616}\mbox{\hyperlink{classTunerModule_a1b0a958c8a9c041576afa57561643663}{00616}}\ \ \ \ \ RpcServer\ \mbox{\hyperlink{classTunerModule_a1b0a958c8a9c041576afa57561643663}{rpcPort}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00617}00617\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00618}00618\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00619}00619\ \textcolor{comment}{\ \ \ \ /************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00620}\mbox{\hyperlink{classTunerModule_a23b2b0ad6c9bdc4f1af42fe104aa760d}{00620}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classTunerModule_a23b2b0ad6c9bdc4f1af42fe104aa760d}{configure}}(ResourceFinder\ \&\mbox{\hyperlink{classTunerModule_a364bdaee84d8f11e2c43752c34c620ec}{rf}})}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00621}00621\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00622}00622\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classTunerModule_a638cde6dbf7596471806d350f4f5f35c}{interrupting}}=\textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00623}00623\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classTunerModule_acff0145616f7a7a697d9adda5bc68c6a}{closing}}=\textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00624}00624\ \ \ \ \ \ \ \ \ this-\/>rf=\&\mbox{\hyperlink{classTunerModule_a364bdaee84d8f11e2c43752c34c620ec}{rf}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00625}00625\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00626}00626\ \ \ \ \ \ \ \ \ Bottle\ \&bGeneral=\mbox{\hyperlink{classTunerModule_a364bdaee84d8f11e2c43752c34c620ec}{rf}}.findGroup(\textcolor{stringliteral}{"{}general"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00627}00627\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (bGeneral.isNull())}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00628}00628\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00629}00629\ \ \ \ \ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}group\ [general]\ is\ missing!"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00630}00630\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00631}00631\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00632}00632\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00633}00633\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{string}\ name=bGeneral.check(\textcolor{stringliteral}{"{}name"{}},Value(\textcolor{stringliteral}{"{}fingersTuner"{}})).asString();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00634}00634\ \ \ \ \ \ \ \ \ setName(name.c\_str());}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00635}00635\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00636}00636\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (Bottle\ *bParts=bGeneral.find(\textcolor{stringliteral}{"{}relevantParts"{}}).asList())}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00637}00637\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00638}00638\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i=0;\ (i<bParts-\/>size())\ \&\&\ !\mbox{\hyperlink{classTunerModule_a638cde6dbf7596471806d350f4f5f35c}{interrupting}};\ i++)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00639}00639\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00640}00640\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{string}\ part=bParts-\/>get(i).asString();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00641}00641\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classTunerModule_a50bf444ccf9b870e05d86ede4b42c1d7}{tuners}}[part]=\textcolor{keyword}{new}\ \mbox{\hyperlink{classTuner}{Tuner}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00642}00642\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classTuner}{Tuner}}\ *tuner=\mbox{\hyperlink{classTunerModule_a50bf444ccf9b870e05d86ede4b42c1d7}{tuners}}[part];}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00643}00643\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00644}00644\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!tuner-\/>\mbox{\hyperlink{classTuner_a1875029cfef24185ad0f029a874d92da}{configure}}(\mbox{\hyperlink{classTunerModule_a364bdaee84d8f11e2c43752c34c620ec}{rf}},part))}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00645}00645\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00646}00646\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classTunerModule_a1693cd76cfbdbefeaa1da6de6289814a}{dispose}}();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00647}00647\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00648}00648\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00649}00649\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00650}00650\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ tuner-\/>\mbox{\hyperlink{classTuner_a406601fed00f2877f296f30c33aa9841}{sync}}(Value(\textcolor{stringliteral}{"{}*"{}}));}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00651}00651\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00652}00652\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00653}00653\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00654}00654\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00655}00655\ \ \ \ \ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}\(\backslash\)"{}relevantParts\(\backslash\)"{}\ option\ is\ missing!"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00656}00656\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00657}00657\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00658}00658\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00659}00659\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classTunerModule_a1b0a958c8a9c041576afa57561643663}{rpcPort}}.open(\textcolor{stringliteral}{"{}/"{}}+name+\textcolor{stringliteral}{"{}/rpc"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00660}00660\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classTunerModule_a24b7787607459387e2617ec02bfd0ce4}{attach}}(\mbox{\hyperlink{classTunerModule_a1b0a958c8a9c041576afa57561643663}{rpcPort}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00661}00661\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00662}00662\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00663}00663\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00664}00664\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00665}00665\ \textcolor{comment}{\ \ \ \ /************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00666}\mbox{\hyperlink{classTunerModule_a24b7787607459387e2617ec02bfd0ce4}{00666}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classTunerModule_a24b7787607459387e2617ec02bfd0ce4}{attach}}(RpcServer\ \&source)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00667}00667\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00668}00668\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ this-\/>\mbox{\hyperlink{namespaceyarp}{yarp}}().attachAsServer(source);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00669}00669\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00670}00670\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00671}00671\ \textcolor{comment}{\ \ \ \ /************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00672}\mbox{\hyperlink{classTunerModule_a82c0a0bca18e01a0fb31440ad955e7d3}{00672}}\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{classTunerModule_a82c0a0bca18e01a0fb31440ad955e7d3}{getPeriod}}()}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00673}00673\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00674}00674\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ 1.0;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00675}00675\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00676}00676\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00677}00677\ \textcolor{comment}{\ \ \ \ /************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00678}\mbox{\hyperlink{classTunerModule_a1f4cb8764503609afef0438fd4d5f4bd}{00678}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classTunerModule_a1f4cb8764503609afef0438fd4d5f4bd}{updateModule}}()}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00679}00679\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00680}00680\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ !\mbox{\hyperlink{classTunerModule_acff0145616f7a7a697d9adda5bc68c6a}{closing}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00681}00681\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00682}00682\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00683}00683\ \textcolor{comment}{\ \ \ \ /************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00684}\mbox{\hyperlink{classTunerModule_a42926dc094afec2194d066819998a88b}{00684}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classTunerModule_a42926dc094afec2194d066819998a88b}{interruptModule}}()}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00685}00685\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00686}00686\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classTunerModule_a638cde6dbf7596471806d350f4f5f35c}{interrupting}}=\textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00687}00687\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (map<string,Tuner*>::iterator\ it=\mbox{\hyperlink{classTunerModule_a50bf444ccf9b870e05d86ede4b42c1d7}{tuners}}.begin();\ it!=\mbox{\hyperlink{classTunerModule_a50bf444ccf9b870e05d86ede4b42c1d7}{tuners}}.end();\ ++it)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00688}00688\ \ \ \ \ \ \ \ \ \ \ \ \ it-\/>second-\/>interrupt();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00689}00689\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00690}00690\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00691}00691\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00692}00692\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00693}00693\ \textcolor{comment}{\ \ \ \ /************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00694}\mbox{\hyperlink{classTunerModule_a1693cd76cfbdbefeaa1da6de6289814a}{00694}}\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classTunerModule_a1693cd76cfbdbefeaa1da6de6289814a}{dispose}}()}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00695}00695\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00696}00696\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (map<string,Tuner*>::iterator\ it=\mbox{\hyperlink{classTunerModule_a50bf444ccf9b870e05d86ede4b42c1d7}{tuners}}.begin();\ it!=\mbox{\hyperlink{classTunerModule_a50bf444ccf9b870e05d86ede4b42c1d7}{tuners}}.end();\ ++it)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00697}00697\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{delete}\ it-\/>second;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00698}00698\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00699}00699\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00700}00700\ \textcolor{comment}{\ \ \ \ /************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00701}\mbox{\hyperlink{classTunerModule_a5f739883c0e0f94bc978d7554d356735}{00701}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classTunerModule_a5f739883c0e0f94bc978d7554d356735}{sync}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{string}\ \&part,\ \textcolor{keyword}{const}\ Value\ \&val)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00702}00702\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00703}00703\ \ \ \ \ \ \ \ \ map<string,Tuner*>::iterator\ it=\mbox{\hyperlink{classTunerModule_a50bf444ccf9b870e05d86ede4b42c1d7}{tuners}}.find(part);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00704}00704\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (it!=\mbox{\hyperlink{classTunerModule_a50bf444ccf9b870e05d86ede4b42c1d7}{tuners}}.end())}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00705}00705\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (it-\/>second-\/>sync(val))}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00706}00706\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00707}00707\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00708}00708\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00709}00709\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00710}00710\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00711}00711\ \textcolor{comment}{\ \ \ \ /************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00712}\mbox{\hyperlink{classTunerModule_ae9f7b65dd4008326470644c65681c3e3}{00712}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classTunerModule_ae9f7b65dd4008326470644c65681c3e3}{tune}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{string}\ \&part,\ \textcolor{keyword}{const}\ Value\ \&val)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00713}00713\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00714}00714\ \ \ \ \ \ \ \ \ map<string,Tuner*>::iterator\ it=\mbox{\hyperlink{classTunerModule_a50bf444ccf9b870e05d86ede4b42c1d7}{tuners}}.find(part);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00715}00715\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (it!=\mbox{\hyperlink{classTunerModule_a50bf444ccf9b870e05d86ede4b42c1d7}{tuners}}.end())}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00716}00716\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (it-\/>second-\/>tune(val))}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00717}00717\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00718}00718\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00719}00719\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00720}00720\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00721}00721\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00722}00722\ \textcolor{comment}{\ \ \ \ /************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00723}\mbox{\hyperlink{classTunerModule_a307dd2de1607f30a109cc2e2e19ea59e}{00723}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classTunerModule_a307dd2de1607f30a109cc2e2e19ea59e}{save}}()}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00724}00724\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00725}00725\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{string}\ fileName=\mbox{\hyperlink{classTunerModule_a364bdaee84d8f11e2c43752c34c620ec}{rf}}-\/>getHomeContextPath();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00726}00726\ \ \ \ \ \ \ \ \ fileName+=\textcolor{stringliteral}{"{}/"{}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00727}00727\ \ \ \ \ \ \ \ \ fileName+=\mbox{\hyperlink{classTunerModule_a364bdaee84d8f11e2c43752c34c620ec}{rf}}-\/>find(\textcolor{stringliteral}{"{}from"{}}).asString();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00728}00728\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00729}00729\ \ \ \ \ \ \ \ \ ofstream\ fout;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00730}00730\ \ \ \ \ \ \ \ \ fout.open(fileName.c\_str());}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00731}00731\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00732}00732\ \ \ \ \ \ \ \ \ Bottle\ \&bGeneral=\mbox{\hyperlink{classTunerModule_a364bdaee84d8f11e2c43752c34c620ec}{rf}}-\/>findGroup(\textcolor{stringliteral}{"{}general"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00733}00733\ \ \ \ \ \ \ \ \ fout<<\textcolor{stringliteral}{"{}["{}}<<bGeneral.get(0).asString()<<\textcolor{stringliteral}{"{}]"{}}<<endl;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00734}00734\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i=1;\ i<bGeneral.size();\ i++)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00735}00735\ \ \ \ \ \ \ \ \ \ \ \ \ fout<<bGeneral.get(i).toString()<<endl;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00736}00736\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00737}00737\ \ \ \ \ \ \ \ \ fout<<endl;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00738}00738\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (map<string,Tuner*>::iterator\ it=\mbox{\hyperlink{classTunerModule_a50bf444ccf9b870e05d86ede4b42c1d7}{tuners}}.begin();\ it!=\mbox{\hyperlink{classTunerModule_a50bf444ccf9b870e05d86ede4b42c1d7}{tuners}}.end();\ ++it)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00739}00739\ \ \ \ \ \ \ \ \ \ \ \ \ fout<<it-\/>second-\/>toString()<<endl;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00740}00740\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00741}00741\ \ \ \ \ \ \ \ \ fout.close();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00742}00742\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00743}00743\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00744}00744\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00745}00745\ \textcolor{comment}{\ \ \ \ /************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00746}\mbox{\hyperlink{classTunerModule_a1b8a3762b9f74fe7c45eb603c8b38d25}{00746}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classTunerModule_a1b8a3762b9f74fe7c45eb603c8b38d25}{quit}}()}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00747}00747\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00748}00748\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classTunerModule_acff0145616f7a7a697d9adda5bc68c6a}{closing}}=\textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00749}00749\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00750}00750\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00751}00751\ \textcolor{comment}{\ \ \ \ /************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00752}\mbox{\hyperlink{classTunerModule_ad244ff975e6a8add8898d541206f64f3}{00752}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classTunerModule_ad244ff975e6a8add8898d541206f64f3}{close}}()}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00753}00753\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00754}00754\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classTunerModule_a307dd2de1607f30a109cc2e2e19ea59e}{save}}();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00755}00755\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classTunerModule_a1693cd76cfbdbefeaa1da6de6289814a}{dispose}}();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00756}00756\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classTunerModule_a1b0a958c8a9c041576afa57561643663}{rpcPort}}.close();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00757}00757\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00758}00758\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00759}00759\ \};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00760}00760\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00761}00761\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00762}00762\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00763}\mbox{\hyperlink{icub-main_2src_2tools_2fingersTuner_2main_8cpp_a0ddf1224851353fc92bfbff6f499fa97}{00763}}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{icub-tutorials_2src_2anyRobotCartesianInterface_2src_2fakeRobot_2main_8cpp_ae66f6b31b5ad750f1fe042a706a4e3d4}{main}}(\textcolor{keywordtype}{int}\ argc,\ \textcolor{keywordtype}{char}\ *argv[])}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00764}00764\ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00765}00765\ \ \ \ \ Network\ \mbox{\hyperlink{namespaceyarp}{yarp}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00766}00766\ \ \ \ \ \textcolor{keywordflow}{if}\ (!\mbox{\hyperlink{namespaceyarp}{yarp}}.checkNetwork())}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00767}00767\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00768}00768\ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}YARP\ server\ not\ available!"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00769}00769\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ 1;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00770}00770\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00771}00771\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00772}00772\ \ \ \ \ ResourceFinder\ rf;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00773}00773\ \ \ \ \ rf.setDefaultContext(\textcolor{stringliteral}{"{}fingersTuner"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00774}00774\ \ \ \ \ rf.setDefaultConfigFile(\textcolor{stringliteral}{"{}config.ini"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00775}00775\ \ \ \ \ rf.configure(argc,argv);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00776}00776\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00777}00777\ \ \ \ \ \mbox{\hyperlink{classTunerModule}{TunerModule}}\ mod;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00778}00778\ \ \ \ \ \textcolor{keywordflow}{return}\ mod.runModule(rf);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2tools_2fingersTuner_2main_8cpp_source_l00779}00779\ \}}
+
+\end{DoxyCode}

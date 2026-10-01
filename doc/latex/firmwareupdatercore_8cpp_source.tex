@@ -1,0 +1,1240 @@
+\doxysection{firmwareupdatercore.\+cpp}
+\hypertarget{firmwareupdatercore_8cpp_source}{}\label{firmwareupdatercore_8cpp_source}\index{icub-\/main/src/tools/FirmwareUpdater/firmwareupdatercore.cpp@{icub-\/main/src/tools/FirmwareUpdater/firmwareupdatercore.cpp}}
+\mbox{\hyperlink{firmwareupdatercore_8cpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00001}00001\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{firmwareupdatercore_8h}{firmwareupdatercore.h}}"{}}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00002}00002\ \textcolor{preprocessor}{\#include\ <qdebug.h>}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00003}00003\ \textcolor{preprocessor}{\#include\ <EoUpdaterProtocol.h>}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00004}00004\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00005}\mbox{\hyperlink{firmwareupdatercore_8cpp_a396f1276c4c0cd4c8ea515f853c8494f}{00005}}\ \mbox{\hyperlink{classFirmwareUpdaterCore}{FirmwareUpdaterCore}}\ *\mbox{\hyperlink{firmwareupdatercore_8cpp_a396f1276c4c0cd4c8ea515f853c8494f}{self}}\ =\ NULL;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00006}00006\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00007}00007\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00008}\mbox{\hyperlink{firmwareupdatercore_8cpp_ad2bc4a6850fa911890b15290a9b3468e}{00008}}\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{firmwareupdatercore_8cpp_ad2bc4a6850fa911890b15290a9b3468e}{updateProgressCallback}}(\textcolor{keywordtype}{float}\ fraction)}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00009}00009\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00010}00010\ \ \ \ \ \mbox{\hyperlink{firmwareupdatercore_8cpp_a396f1276c4c0cd4c8ea515f853c8494f}{self}}-\/>\mbox{\hyperlink{classFirmwareUpdaterCore_aa90544bf5809e4a58514fa57a78c255a}{updateProgress}}(fraction);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00011}00011\ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00012}00012\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00013}00013\ \textcolor{comment}{//\ 09/2020\ davide.tome@iit.it\ -\/\ address\ and\ port\ configurable\ in\ firmwareupdater.ini\ }}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00014}00014\ \textcolor{keywordtype}{bool}\ FirmwareUpdaterCore::isValidIpAddress(QString\ addr)}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00015}00015\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00016}00016\ \ \ \ \ QStringList\ ipFields;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00017}00017\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00018}00018\ \ \ \ \ ipFields\ =\ addr.split(\textcolor{stringliteral}{"{}."{}});}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00019}00019\ \ \ \ \ \textcolor{keywordflow}{if}(ipFields.count()\ ==\ 4\ \&\&\ ipFields[3].contains(\textcolor{stringliteral}{"{}:"{}}))\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00020}00020\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00021}00021\ \ \ \ \ \ \ \ \ QString\ address\_,port\_;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00022}00022\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ ipv0,\ ipv1,\ ipv2,\ ipv3;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00023}00023\ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00024}00024\ \ \ \ \ \ \ \ \ address\_\ =\ addr.split(\textcolor{stringliteral}{"{}:"{}})[0];}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00025}00025\ \ \ \ \ \ \ \ \ port\_\ =\ ipFields[3].split(\textcolor{stringliteral}{"{}:"{}})[1];}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00026}00026\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00027}00027\ \ \ \ \ \ \ \ \ QRegExp\ re(\textcolor{stringliteral}{"{}\(\backslash\)\(\backslash\)d*"{}});\ \ \textcolor{comment}{//\ a\ digit\ (\(\backslash\)d),\ zero\ or\ more\ times\ (*)}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00028}00028\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!re.exactMatch(port\_))\ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00029}00029\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ k=0;\ k<4;\ k++)}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00030}00030\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00031}00031\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!re.exactMatch(address\_.split(\textcolor{stringliteral}{"{}."{}})[k]))\ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00032}00032\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00033}00033\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00034}00034\ \ \ \ \ \ \ \ \ ipv0\ =\ address\_.split(\textcolor{stringliteral}{"{}."{}})[0].toInt();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00035}00035\ \ \ \ \ \ \ \ \ ipv1\ =\ address\_.split(\textcolor{stringliteral}{"{}."{}})[1].toInt();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00036}00036\ \ \ \ \ \ \ \ \ ipv2\ =\ address\_.split(\textcolor{stringliteral}{"{}."{}})[2].toInt();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00037}00037\ \ \ \ \ \ \ \ \ ipv3\ =\ address\_.split(\textcolor{stringliteral}{"{}."{}})[3].toInt();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00038}00038\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00039}00039\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(ipv0\ ==\ 10\ \&\&\ 0\ <\ ipv1\ <\ 255\ \&\&\ 0\ <\ ipv2\ <\ 255\ \&\&\ 0\ <\ ipv3\ <\ 255\ \&\&\ 0\ <\ port\_.toInt()\ <\ 255)\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00040}00040\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00041}00041\ \ \ \ \ \ \ \ \ \ \ \ \ hostIPaddress\ =\ EO\_COMMON\_IPV4ADDR(ipv0,\ ipv1,\ ipv2,\ ipv3);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00042}00042\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00043}00043\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00044}00044\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00045}00045\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00046}00046\ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00047}00047\ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00048}00048\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00049}\mbox{\hyperlink{classFirmwareUpdaterCore_a64605f00c105792ab02be5e01c039c93}{00049}}\ \mbox{\hyperlink{classFirmwareUpdaterCore_a64605f00c105792ab02be5e01c039c93}{FirmwareUpdaterCore::FirmwareUpdaterCore}}(QObject\ *parent)\ :\ QObject(parent),\ mutex(QMutex::Recursive)}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00050}00050\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00051}00051\ \ \ \ \ \mbox{\hyperlink{firmwareupdatercore_8cpp_a396f1276c4c0cd4c8ea515f853c8494f}{self}}\ =\ \textcolor{keyword}{this};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00052}00052\ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00053}00053\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00054}\mbox{\hyperlink{classFirmwareUpdaterCore_ae459f8740e63f6313aa0938d8815da15}{00054}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classFirmwareUpdaterCore_ae459f8740e63f6313aa0938d8815da15}{FirmwareUpdaterCore::init}}(Searchable\&\ config,\ \textcolor{keywordtype}{int}\ port,\ QString\ address,\ \textcolor{keywordtype}{int}\ VerbositY)}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00055}00055\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00056}00056\ \ \ \ \ verbosity\ =\ VerbositY;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00057}00057\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00058}00058\ \ \ \ \ mutex.lock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00059}00059\ \ \ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00060}00060\ \ \ \ \ \mbox{\hyperlink{classFirmwareUpdaterCore_af96ba2edbd78732e053a8c81c8c26406}{setVerbosity}}(verbosity);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00061}00061\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00062}00062\ \ \ \ \ Bottle\ sensorSetConfig=config.findGroup(\textcolor{stringliteral}{"{}DRIVERS"{}}).tail();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00063}00063\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00064}00064\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ t=0;\ t<sensorSetConfig.size();\ ++t)\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00065}00065\ \ \ \ \ \ \ \ \ yarp::os::Bottle\ sensorConfig(sensorSetConfig.get(t).toString());}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00066}00066\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00067}00067\ \ \ \ \ \ \ \ \ QString\ type\ =\ QString(\textcolor{stringliteral}{"{}\%1"{}}).arg(sensorConfig.get(0).asString().c\_str());}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00068}00068\ \ \ \ \ \ \ \ \ QString\ line\ =\ QString(\textcolor{stringliteral}{"{}\%1"{}}).arg(sensorConfig.get(1).asString().c\_str());}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00069}00069\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(verbosity>0)\ qDebug()\ <<\ type\ <<\ \textcolor{stringliteral}{"{}-\/"{}}\ <<\ line;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00070}00070\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00071}00071\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00072}00072\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ num\ =\ QString(\textcolor{stringliteral}{"{}\%1"{}}).arg(line).toInt(\&\mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}});}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00073}00073\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(\mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}})\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00074}00074\ \ \ \ \ \ \ \ \ \ \ \ \ devices.append(QPair<QString,QVariant>(type,num));}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00075}00075\ \ \ \ \ \ \ \ \ \}\textcolor{keywordflow}{else}\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00076}00076\ \ \ \ \ \ \ \ \ \ \ \ \ devices.append(QPair<QString,QVariant>(type,line));}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00077}00077\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00078}00078\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00079}00079\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00080}00080\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ 09/2020\ davide.tome@iit.it\ -\/\ address\ and\ port\ configurable\ in\ firmwareupdater.ini\ }}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00081}00081\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(type\ ==\ \textcolor{stringliteral}{"{}ETH"{}})\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00082}00082\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00083}00083\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(isValidIpAddress(line))}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00084}00084\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00085}00085\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ port\ =\ line.split(\textcolor{stringliteral}{"{}:"{}})[1].toInt();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00086}00086\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ qDebug()\ <<\ \textcolor{stringliteral}{"{}IP\ address\ FOUND\ in\ .ini\ file,\ Using\ :"{}}\ <<\ line.split(\textcolor{stringliteral}{"{}:"{}})[0];}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00087}00087\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ qDebug()\ <<\ \textcolor{stringliteral}{"{}Port\ Number\ FOUND\ in\ .ini\ file,\ Using\ :"{}}\ <<\ line.split(\textcolor{stringliteral}{"{}:"{}})[1];}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00088}00088\ \ \ \ \ \ \ \ \ \ \ \ \ \}\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00089}00089\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00090}00090\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00091}00091\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ ipv0,\ ipv1,\ ipv2,\ ipv3;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00092}00092\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00093}00093\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ipv0\ =\ address.split(\textcolor{stringliteral}{"{}."{}})[0].toInt();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00094}00094\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ipv1\ =\ address.split(\textcolor{stringliteral}{"{}."{}})[1].toInt();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00095}00095\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ipv2\ =\ address.split(\textcolor{stringliteral}{"{}."{}})[2].toInt();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00096}00096\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ipv3\ =\ address.split(\textcolor{stringliteral}{"{}."{}})[3].toInt();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00097}00097\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00098}00098\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ hostIPaddress\ =\ EO\_COMMON\_IPV4ADDR(ipv0,\ ipv1,\ ipv2,\ ipv3);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00099}00099\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00100}00100\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ qDebug()\ <<\ \textcolor{stringliteral}{"{}Missing\ or\ invalid\ IP\ address\ found\ in\ .ini\ file\ (format\ is\ 10.0.X.Y:Z\ ,\ 0\ <\ X,Y\ <\ 255\ ,\ Z\ port\ number)"{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00101}00101\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ qDebug()\ <<\ \textcolor{stringliteral}{"{}Skipped,\ using\ defaults:"{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00102}00102\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(verbosity\ >=\ 1)}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00103}00103\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00104}00104\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ qInfo()\ <<\ \textcolor{stringliteral}{"{}\ \ -\/\ IP\ address:"{}}\ <<\ \mbox{\hyperlink{firmwareupdatercore_8h_a32de0e3cfb4b33d5da084bd19d16e11b}{DEFAULT\_IP\_ADDRESS}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00105}00105\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ qInfo()\ <<\ \textcolor{stringliteral}{"{}\ \ -\/\ IP\ port:\ \ \ "{}}\ <<\ \mbox{\hyperlink{firmwareupdatercore_8h_a5127cd3a1c268583d63092ae6fdcf285}{DEFAULT\_IP\_PORT}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00106}00106\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00107}00107\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00108}00108\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00109}00109\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00110}00110\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00111}00111\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00112}00112\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00113}00113\ \ \ \ \ \textcolor{keywordflow}{if}(!gMNT.\mbox{\hyperlink{classEthMaintainer_a437841460b3dddedf74d078a9838ede8}{open}}(hostIPaddress,\ port))}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00114}00114\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00115}00115\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(verbosity>0)\ qDebug(\textcolor{stringliteral}{"{}Can't\ open\ socket,\ aborting."{}});}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00116}00116\ \ \ \ \ \ \ \ \ mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00117}00117\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00118}00118\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00119}00119\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00120}00120\ \ \ \ \ mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00121}00121\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00122}00122\ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00123}00123\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00124}\mbox{\hyperlink{classFirmwareUpdaterCore_af96ba2edbd78732e053a8c81c8c26406}{00124}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classFirmwareUpdaterCore_af96ba2edbd78732e053a8c81c8c26406}{FirmwareUpdaterCore::setVerbosity}}(\textcolor{keywordtype}{int}\ verb)}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00125}00125\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00126}00126\ \ \ \ \ verbosity\ =\ verb;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00127}00127\ \ \ \ \ \textcolor{keywordtype}{bool}\ lowers\_are\_verbose\ =\ (verb\ >=\ 1)\ ?\ \textcolor{keyword}{true}\ :\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00128}00128\ \ \ \ \ gMNT.\mbox{\hyperlink{classEthMaintainer_a766d76eb62e89b91f2a6dc9ccb0bf759}{verbose}}(lowers\_are\_verbose);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00129}00129\ \ \ \ \ downloader.\mbox{\hyperlink{classcDownloader_a639ccafa3070e88613aab061fbb91401}{set\_verbose}}(lowers\_are\_verbose);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00130}00130\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00131}00131\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00132}00132\ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00133}00133\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00134}\mbox{\hyperlink{classFirmwareUpdaterCore_ad88334f0c205cce8ccf3a2e9936ca611}{00134}}\ QStringList\ \mbox{\hyperlink{classFirmwareUpdaterCore_ad88334f0c205cce8ccf3a2e9936ca611}{FirmwareUpdaterCore::getDevicesName}}()}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00135}00135\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00136}00136\ \ \ \ \ mutex.lock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00137}00137\ \ \ \ \ QStringList\ names;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00138}00138\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i=0;i<devices.count();i++)\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00139}00139\ \ \ \ \ \ \ \ \ QPair<QString,QVariant>\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}\ =\ devices.at(i);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00140}00140\ \ \ \ \ \ \ \ \ names.append(\mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}.first);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00141}00141\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00142}00142\ \ \ \ \ mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00143}00143\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00144}00144\ \ \ \ \ \textcolor{keywordflow}{return}\ names;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00145}00145\ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00146}00146\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00147}\mbox{\hyperlink{classFirmwareUpdaterCore_a7c525f8c95661609eb21da7e899a176c}{00147}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classFirmwareUpdaterCore_a7c525f8c95661609eb21da7e899a176c}{FirmwareUpdaterCore::goToMaintenance}}()}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00148}00148\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00149}00149\ \ \ \ \ mutex.lock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00150}00150\ \ \ \ \ \textcolor{keywordtype}{bool}\ ret\ =\ gMNT.\mbox{\hyperlink{classEthMaintainer_a875fcfe43aedc83f9c9cf087d3aee0b1}{go2maintenance}}(\mbox{\hyperlink{classEthMaintainer_a40d75a9e9da1f0276860ca6d9e3e4aff}{EthMaintainer::ipv4OfAllSelected}},\ \textcolor{keyword}{true},\ 5,\ 1.0);;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00151}00151\ \ \ \ \ mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00152}00152\ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00153}00153\ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00154}00154\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00155}\mbox{\hyperlink{classFirmwareUpdaterCore_a222b6e0057bdc4657060c0095e32d843}{00155}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classFirmwareUpdaterCore_a222b6e0057bdc4657060c0095e32d843}{FirmwareUpdaterCore::goToApplication}}()}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00156}00156\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00157}00157\ \ \ \ \ \textcolor{keywordflow}{return}\ gMNT.\mbox{\hyperlink{classEthMaintainer_a6b59aacc2afca9ab2897f9f4edfe4a5c}{go2application}}(\mbox{\hyperlink{classEthMaintainer_a40d75a9e9da1f0276860ca6d9e3e4aff}{EthMaintainer::ipv4OfAllSelected}},\ \textcolor{keyword}{true},\ 10,\ \textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00158}00158\ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00159}00159\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00160}\mbox{\hyperlink{classFirmwareUpdaterCore_a1b361946b549d271a1dba0127dc67cb1}{00160}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classFirmwareUpdaterCore_a1b361946b549d271a1dba0127dc67cb1}{FirmwareUpdaterCore::eraseEthEprom}}()}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00161}00161\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00162}00162\ \ \ \ \ \textcolor{keywordflow}{return}\ gMNT.\mbox{\hyperlink{classEthMaintainer_adb3709ae1c5577a558e106c1b05d9805}{command\_eeprom\_erase}}(\mbox{\hyperlink{classEthMaintainer_a40d75a9e9da1f0276860ca6d9e3e4aff}{EthMaintainer::ipv4OfAllSelected}});}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00163}00163\ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00164}00164\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00165}00165\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00166}00166\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00167}\mbox{\hyperlink{classFirmwareUpdaterCore_a1198e592eaed5c39403615896fea04ec}{00167}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classFirmwareUpdaterCore_a1198e592eaed5c39403615896fea04ec}{FirmwareUpdaterCore::jumpToUpdater}}()}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00168}00168\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00169}00169\ \ \ \ \ mutex.lock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00170}00170\ \ \ \ \ \textcolor{keywordtype}{bool}\ ret\ =\ gMNT.\mbox{\hyperlink{classEthMaintainer_a337319d0d0311d251af071e5c1dc417f}{command\_jump2updater}}(\mbox{\hyperlink{classEthMaintainer_a40d75a9e9da1f0276860ca6d9e3e4aff}{EthMaintainer::ipv4OfAllSelected}});}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00171}00171\ \ \ \ \ mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00172}00172\ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00173}00173\ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00174}00174\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00175}\mbox{\hyperlink{classFirmwareUpdaterCore_a8d6580c5f49183fa26d61fdfc26af800}{00175}}\ QList<QPair<QString,QVariant>\ >\ \mbox{\hyperlink{classFirmwareUpdaterCore_a8d6580c5f49183fa26d61fdfc26af800}{FirmwareUpdaterCore::getDevices}}()}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00176}00176\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00177}00177\ \ \ \ \ \textcolor{keywordflow}{return}\ devices;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00178}00178\ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00179}00179\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00180}\mbox{\hyperlink{classFirmwareUpdaterCore_a604453410d06690ff5a9ded9b603f1cf}{00180}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classFirmwareUpdaterCore_a604453410d06690ff5a9ded9b603f1cf}{FirmwareUpdaterCore::disconnectFrom}}(QString\ device,\ QString\ \textcolor{keywordtype}{id})}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00181}00181\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00182}00182\ \ \ \ \ \textcolor{comment}{//\ \ \ \ if(!device.isEmpty()\ \&\&\ !id.isEmpty()\ \&\&\ device.contains("{}ETH"{}))\{}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00183}00183\ \ \ \ \ \textcolor{comment}{//\ \ \ \ \ \ \ \ gMNT.boards\_get().clear();}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00184}00184\ \ \ \ \ \textcolor{comment}{//\ \ \ \ \ \ \ \ yDebug()\ <<\ "{}empty\ eth\ devices"{};}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00185}00185\ \ \ \ \ \textcolor{comment}{//\ \ \ \ \ \ \ \ qDebug()\ <<\ "{}empty\ eth\ devices"{};}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00186}00186\ \ \ \ \ \textcolor{comment}{//\ \ \ \ \}}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00187}00187\ \ \ \ \ \textcolor{comment}{//\ \ \ \ //connectTo(device,id);}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00188}00188\ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00189}00189\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00190}\mbox{\hyperlink{classFirmwareUpdaterCore_a1d5212da73d46dfd5c99794e7467faaa}{00190}}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{classFirmwareUpdaterCore_a1d5212da73d46dfd5c99794e7467faaa}{FirmwareUpdaterCore::connectTo}}(QString\ device,\ QString\ \textcolor{keywordtype}{id})}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00191}00191\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00192}00192\ \ \ \ \ mutex.lock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00193}00193\ \ \ \ \ \textcolor{keywordflow}{if}(!device.isEmpty()\ \&\&\ !\textcolor{keywordtype}{id}.isEmpty())\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00194}00194\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(device.contains(\textcolor{stringliteral}{"{}ETH"{}}))\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00195}00195\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ num\ =\ gMNT.\mbox{\hyperlink{classEthMaintainer_a3b4512b1658fbff7cf6b48d1e9540b0c}{discover}}(\textcolor{keyword}{true},\ 2,\ 1.0).\mbox{\hyperlink{classEthBoardList_a3835e0cdf55440b7b863bc08bb524ab3}{size}}();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00196}00196\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(verbosity>0)}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00197}00197\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00198}00198\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yDebug()\ <<\ \textcolor{stringliteral}{"{}FirmwareUpdaterCore::connectTo()\ has\ found\ "{}}\ <<\ num\ <<\ \textcolor{stringliteral}{"{}\ ETH\ boards"{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00199}00199\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00200}00200\ \ \ \ \ \ \ \ \ \ \ \ \ mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00201}00201\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ num;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00202}00202\ \ \ \ \ \ \ \ \ \}\textcolor{keywordflow}{else}\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00203}00203\ \ \ \ \ \ \ \ \ \ \ \ \ QString\ result;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00204}00204\ \ \ \ \ \ \ \ \ \ \ \ \ QList<sBoard>\ s\ =\ \mbox{\hyperlink{classFirmwareUpdaterCore_a18c24a98215c0dd8647660d37ed8a0f7}{getCanBoardsFromDriver}}(device,\textcolor{keywordtype}{id}.toInt(),\&result,\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00205}00205\ \ \ \ \ \ \ \ \ \ \ \ \ mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00206}00206\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ s.count();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00207}00207\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00208}00208\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00209}00209\ \ \ \ \ mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00210}00210\ \ \ \ \ \textcolor{keywordflow}{return}\ 0;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00211}00211\ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00212}00212\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00213}\mbox{\hyperlink{classFirmwareUpdaterCore_ac67ffd83ce99ec7e657314db7ba9f09d}{00213}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classFirmwareUpdaterCore_ac67ffd83ce99ec7e657314db7ba9f09d}{FirmwareUpdaterCore::isBoardInMaintenanceMode}}(QString\ ip)}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00214}00214\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00215}00215\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i=0;i<gMNT.\mbox{\hyperlink{classEthMaintainer_a75d591aaeb293b6b6b6d19346ac1c7e0}{boards\_get}}().size();i++)\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00216}00216\ \ \ \ \ \ \ \ \ QString\ boardIp\ =\ QString(\textcolor{stringliteral}{"{}\%1"{}}).arg(gMNT.\mbox{\hyperlink{classEthMaintainer_a75d591aaeb293b6b6b6d19346ac1c7e0}{boards\_get}}()[i].getIPV4string().c\_str());}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00217}00217\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(boardIp\ ==\ ip)\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00218}00218\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ gMNT.\mbox{\hyperlink{classEthMaintainer_a75d591aaeb293b6b6b6d19346ac1c7e0}{boards\_get}}()[i].isInMaintenance();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00219}00219\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00220}00220\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00221}00221\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00222}00222\ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00223}00223\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00224}\mbox{\hyperlink{classFirmwareUpdaterCore_a8ad772beacbfd3bf901d7254a8db5cba}{00224}}\ \mbox{\hyperlink{classEthBoardList}{EthBoardList}}\ \mbox{\hyperlink{classFirmwareUpdaterCore_a8ad772beacbfd3bf901d7254a8db5cba}{FirmwareUpdaterCore::getEthBoardList}}()}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00225}00225\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00226}00226\ \ \ \ \ \textcolor{keywordflow}{return}\ gMNT.\mbox{\hyperlink{classEthMaintainer_a75d591aaeb293b6b6b6d19346ac1c7e0}{boards\_get}}();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00227}00227\ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00228}00228\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00229}\mbox{\hyperlink{classFirmwareUpdaterCore_a5530f4b1b4bc4bb4c8b3a3d4fc99c359}{00229}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classFirmwareUpdaterCore_a5530f4b1b4bc4bb4c8b3a3d4fc99c359}{FirmwareUpdaterCore::setSelectedEthBoard}}(\textcolor{keywordtype}{int}\ index,\textcolor{keywordtype}{bool}\ selected)}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00230}00230\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00231}00231\ \ \ \ \ mutex.lock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00232}00232\ \ \ \ \ \textcolor{keywordflow}{if}(gMNT.\mbox{\hyperlink{classEthMaintainer_a75d591aaeb293b6b6b6d19346ac1c7e0}{boards\_get}}().\mbox{\hyperlink{classEthBoardList_a3835e0cdf55440b7b863bc08bb524ab3}{size}}()\ >\ index)\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00233}00233\ \ \ \ \ \ \ \ \ gMNT.\mbox{\hyperlink{classEthMaintainer_a75d591aaeb293b6b6b6d19346ac1c7e0}{boards\_get}}()[index].setSelected(selected);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00234}00234\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00235}00235\ \ \ \ \ mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00236}00236\ \ \ \ \ \mbox{\hyperlink{classFirmwareUpdaterCore_ae0b4704889ef2d689bf6e987f8b7a727}{selectedEnded}}();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00237}00237\ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00238}00238\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00239}\mbox{\hyperlink{classFirmwareUpdaterCore_a3c6b8d351c488d6ee150970011d9dd2e}{00239}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classFirmwareUpdaterCore_a5530f4b1b4bc4bb4c8b3a3d4fc99c359}{FirmwareUpdaterCore::setSelectedEthBoard}}(QString\ boardIp,\textcolor{keywordtype}{bool}\ selected)}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00240}00240\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00241}00241\ \ \ \ \ mutex.lock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00242}00242\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i=0;i<gMNT.\mbox{\hyperlink{classEthMaintainer_a75d591aaeb293b6b6b6d19346ac1c7e0}{boards\_get}}().size();i++)\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00243}00243\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(QString(\textcolor{stringliteral}{"{}\%1"{}}).arg(gMNT.\mbox{\hyperlink{classEthMaintainer_a75d591aaeb293b6b6b6d19346ac1c7e0}{boards\_get}}()[i].getIPV4string().c\_str())\ ==\ boardIp)\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00244}00244\ \ \ \ \ \ \ \ \ \ \ \ \ gMNT.\mbox{\hyperlink{classEthMaintainer_a75d591aaeb293b6b6b6d19346ac1c7e0}{boards\_get}}()[i].setSelected(selected);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00245}00245\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00246}00246\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00247}00247\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00248}00248\ \ \ \ \ mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00249}00249\ \ \ \ \ \mbox{\hyperlink{classFirmwareUpdaterCore_ae0b4704889ef2d689bf6e987f8b7a727}{selectedEnded}}();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00250}00250\ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00251}00251\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00252}\mbox{\hyperlink{classFirmwareUpdaterCore_a242d2a4db03064af5d6c4e0e4049fcbf}{00252}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classFirmwareUpdaterCore_a242d2a4db03064af5d6c4e0e4049fcbf}{FirmwareUpdaterCore::setSelectedCanBoards}}(QList\ <sBoard>\ selectedBoards,QString\ address,\ \textcolor{keywordtype}{int}\ deviceId)}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00253}00253\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00254}00254\ \ \ \ \ mutex.lock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00255}00255\ \ \ \ \ QString\ res;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00256}00256\ \ \ \ \ \textcolor{keywordflow}{if}(!address.isEmpty()\ \&\&\ deviceId\ ==\ -\/1)\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00257}00257\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classFirmwareUpdaterCore_a4e33ac757fbecfbdd34b27aec7ce7305}{getCanBoardsFromEth}}(address,\&res);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00258}00258\ \ \ \ \ \}\textcolor{keywordflow}{else}\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00259}00259\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classFirmwareUpdaterCore_a18c24a98215c0dd8647660d37ed8a0f7}{getCanBoardsFromDriver}}(address,deviceId,\&res);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00260}00260\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00261}00261\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00262}00262\ \ \ \ \ this-\/>canBoards\ =\ selectedBoards;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00263}00263\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00264}00264\ \ \ \ \ \textcolor{keywordflow}{foreach}\ (\mbox{\hyperlink{structsBoard}{sBoard}}\ b,\ selectedBoards)\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00265}00265\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i=0;i<downloader.\mbox{\hyperlink{classcDownloader_ad28571ff1b1c8eb7c54c302afa7d024f}{board\_list\_size}};i++)\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00266}00266\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(downloader.\mbox{\hyperlink{classcDownloader_aadeda37d2de79ecfd392eea56686def5}{board\_list}}[i].\mbox{\hyperlink{structsBoard_a58d9936ec5f379cb9ceb46e9cfa8a482}{bus}}\ ==\ b.\mbox{\hyperlink{structsBoard_a58d9936ec5f379cb9ceb46e9cfa8a482}{bus}}\ \&\&}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00267}00267\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ downloader.\mbox{\hyperlink{classcDownloader_aadeda37d2de79ecfd392eea56686def5}{board\_list}}[i].\mbox{\hyperlink{structsBoard_a74537161a223189e75e56bfb66f50335}{pid}}\ ==\ b.\mbox{\hyperlink{structsBoard_a74537161a223189e75e56bfb66f50335}{pid}})\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00268}00268\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ downloader.\mbox{\hyperlink{classcDownloader_aadeda37d2de79ecfd392eea56686def5}{board\_list}}[i].\mbox{\hyperlink{structsBoard_afabfdd475d4f531c151c7ee97940ecf7}{selected}}\ =\ b.\mbox{\hyperlink{structsBoard_afabfdd475d4f531c151c7ee97940ecf7}{selected}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00269}00269\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ downloader.\mbox{\hyperlink{classcDownloader_aadeda37d2de79ecfd392eea56686def5}{board\_list}}[i].\mbox{\hyperlink{structsBoard_a0c50e32147797b4acf2feb6c19036d01}{eeprom}}\ =\ b.\mbox{\hyperlink{structsBoard_a0c50e32147797b4acf2feb6c19036d01}{eeprom}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00270}00270\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00271}00271\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00272}00272\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00273}00273\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00274}00274\ \ \ \ \ mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00275}00275\ \ \ \ \ \mbox{\hyperlink{classFirmwareUpdaterCore_ae0b4704889ef2d689bf6e987f8b7a727}{selectedEnded}}();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00276}00276\ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00277}00277\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00278}\mbox{\hyperlink{classFirmwareUpdaterCore_aa81cef5436f92598940931de3e9bb806}{00278}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classFirmwareUpdaterCore_aa81cef5436f92598940931de3e9bb806}{FirmwareUpdaterCore::eraseCanEprom}}()}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00279}00279\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00280}00280\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00281}00281\ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00282}00282\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00283}\mbox{\hyperlink{classFirmwareUpdaterCore_a71d1928904176776fc88dedd310a7c7d}{00283}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classFirmwareUpdaterCore_a71d1928904176776fc88dedd310a7c7d}{FirmwareUpdaterCore::setSelectedCanBoard}}(\textcolor{keywordtype}{int}\ index,\textcolor{keywordtype}{bool}\ selected,QString\ address,\ \textcolor{keywordtype}{int}\ deviceId)}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00284}00284\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00285}00285\ \ \ \ \ mutex.lock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00286}00286\ \textcolor{comment}{//\ \ \ \ if(!ethAddress.isEmpty())\{}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00287}00287\ \textcolor{comment}{//\ \ \ \ \ \ \ \ if(currentAddress\ !=\ ethAddress)\{}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00288}00288\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ if(downloader.connected)\{}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00289}00289\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ downloader.stopdriver();}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00290}00290\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \}}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00291}00291\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ QString\ res;}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00292}00292\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ getCanBoardsFromEth(ethAddress,\&res);}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00293}00293\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \}}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00294}00294\ \textcolor{comment}{//\ \ \ \ \}}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00295}00295\ \ \ \ \ QString\ res;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00296}00296\ \ \ \ \ \textcolor{keywordflow}{if}(!address.isEmpty()\ \&\&\ deviceId\ ==\ -\/1)\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00297}00297\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classFirmwareUpdaterCore_a4e33ac757fbecfbdd34b27aec7ce7305}{getCanBoardsFromEth}}(address,\&res);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00298}00298\ \ \ \ \ \}\textcolor{keywordflow}{else}\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00299}00299\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classFirmwareUpdaterCore_a18c24a98215c0dd8647660d37ed8a0f7}{getCanBoardsFromDriver}}(address,deviceId,\&res);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00300}00300\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00301}00301\ \ \ \ \ downloader.\mbox{\hyperlink{classcDownloader_aadeda37d2de79ecfd392eea56686def5}{board\_list}}[index].\mbox{\hyperlink{structsBoard_afabfdd475d4f531c151c7ee97940ecf7}{selected}}=selected;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00302}00302\ \ \ \ \ mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00303}00303\ \ \ \ \ \mbox{\hyperlink{classFirmwareUpdaterCore_ae0b4704889ef2d689bf6e987f8b7a727}{selectedEnded}}();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00304}00304\ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00305}00305\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00306}00306\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00307}\mbox{\hyperlink{classFirmwareUpdaterCore_a844700707fcf8e2dd5fef6be463f5ebf}{00307}}\ \mbox{\hyperlink{structboardInfo2__t}{boardInfo2\_t}}\ \mbox{\hyperlink{classFirmwareUpdaterCore_a844700707fcf8e2dd5fef6be463f5ebf}{FirmwareUpdaterCore::getMoreDetails}}(\textcolor{keywordtype}{int}\ boardNum,QString\ *infoString,eOipv4addr\_t\ *address)}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00308}00308\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00309}00309\ \ \ \ \ mutex.lock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00310}00310\ \ \ \ \ \mbox{\hyperlink{structboardInfo2__t}{boardInfo2\_t}}\ info\ =\ gMNT.\mbox{\hyperlink{classEthMaintainer_a75d591aaeb293b6b6b6d19346ac1c7e0}{boards\_get}}()[boardNum].getInfo();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00311}00311\ \ \ \ \ \textcolor{keywordflow}{if}(address)\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00312}00312\ \ \ \ \ \ \ \ \ *address\ =\ gMNT.\mbox{\hyperlink{classEthMaintainer_a75d591aaeb293b6b6b6d19346ac1c7e0}{boards\_get}}()[boardNum].getIPV4();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00313}00313\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(infoString\ \&\&\ info.protversion\ ==\ 0)\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00314}00314\ \ \ \ \ \ \ \ \ \ \ \ \ *infoString\ =\ \ QString(\textcolor{stringliteral}{"{}\%1"{}}).arg(gMNT.\mbox{\hyperlink{classEthMaintainer_a0e980dd030c1d5b54d486dc370fc9723}{moreinformation}}(*address,\ \textcolor{keyword}{false}).c\_str());}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00315}00315\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00316}00316\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00317}00317\ \ \ \ \ mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00318}00318\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00319}00319\ \ \ \ \ \textcolor{keywordflow}{return}\ info;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00320}00320\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00321}00321\ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00322}00322\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00323}\mbox{\hyperlink{classFirmwareUpdaterCore_a40dcec281db51630e2fa66304e4cb2b8}{00323}}\ QString\ \mbox{\hyperlink{classFirmwareUpdaterCore_a40dcec281db51630e2fa66304e4cb2b8}{FirmwareUpdaterCore::getProcessFromUint}}(uint8\_t\ \textcolor{keywordtype}{id},\ \textcolor{keywordtype}{bool}\ isMultiCore)}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00324}00324\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00325}00325\ \ \ \ \ \textcolor{keywordflow}{switch}\ (\textcolor{keywordtype}{id})\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00326}00326\ \ \ \ \ \textcolor{keywordflow}{case}\ uprot\_proc\_Loader:}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00327}00327\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{stringliteral}{"{}eLoader"{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00328}00328\ \ \ \ \ \textcolor{keywordflow}{case}\ uprot\_proc\_Updater:}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00329}00329\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{stringliteral}{"{}eUpdater"{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00330}00330\ \ \ \ \ \textcolor{keywordflow}{case}\ uprot\_proc\_Application00:}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00331}00331\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (isMultiCore)}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00332}00332\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{stringliteral}{"{}appl.yri"{}}\ ;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00333}00333\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00334}00334\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{stringliteral}{"{}eApplication"{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00335}00335\ \ \ \ \ \textcolor{keywordflow}{case}\ uprot\_proc\_Application01:}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00336}00336\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (isMultiCore)}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00337}00337\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{stringliteral}{"{}appl.mot"{}}\ ;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00338}00338\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00339}00339\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{stringliteral}{"{}eApplication\_core\_1"{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00340}00340\ \ \ \ \ \textcolor{keywordflow}{case}\ uprot\_proc\_ApplPROGupdater:}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00341}00341\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{stringliteral}{"{}eApplPROGupdater"{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00342}00342\ \ \ \ \ \textcolor{keywordflow}{default}:}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00343}00343\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{stringliteral}{"{}None"{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00344}00344\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00345}00345\ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00346}00346\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00347}\mbox{\hyperlink{classFirmwareUpdaterCore_a18c24a98215c0dd8647660d37ed8a0f7}{00347}}\ QList<sBoard>\ \mbox{\hyperlink{classFirmwareUpdaterCore_a18c24a98215c0dd8647660d37ed8a0f7}{FirmwareUpdaterCore::getCanBoardsFromDriver}}(QString\ driver,\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{icub-main_2src_2tools_2canLoader_2canLoader-console_2main_8cpp_ae310115398ac381a0cdf9c7caa87164b}{networkId}},\ QString\ *retString,\ \textcolor{keywordtype}{bool}\ force)}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00348}00348\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00349}00349\ \ \ \ \ mutex.lock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00350}00350\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00351}00351\ \ \ \ \ \textcolor{keywordflow}{if}(force)\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00352}00352\ \ \ \ \ \ \ \ \ downloader.\mbox{\hyperlink{classcDownloader_ab7786d008a61a4875b5946edab44a9c9}{stopdriver}}();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00353}00353\ \ \ \ \ \}\textcolor{keywordflow}{else}\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00354}00354\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(downloader.\mbox{\hyperlink{classcDownloader_addcd4ae5594e2367d318e24003f72fe2}{connected}}\ \&\&\ (!currentAddress.isEmpty()\ ||\ (currentDriver\ !=\ driver\ ||\ currentId\ !=\ \mbox{\hyperlink{icub-main_2src_2tools_2canLoader_2canLoader-console_2main_8cpp_ae310115398ac381a0cdf9c7caa87164b}{networkId}}\ )))\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00355}00355\ \ \ \ \ \ \ \ \ \ \ \ \ downloader.\mbox{\hyperlink{classcDownloader_ab7786d008a61a4875b5946edab44a9c9}{stopdriver}}();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00356}00356\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00357}00357\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(currentDriver\ ==\ driver\ \&\&\ currentId\ ==\ \mbox{\hyperlink{icub-main_2src_2tools_2canLoader_2canLoader-console_2main_8cpp_ae310115398ac381a0cdf9c7caa87164b}{networkId}})\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00358}00358\ \ \ \ \ \ \ \ \ \ \ \ \ mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00359}00359\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ canBoards;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00360}00360\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00361}00361\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00362}00362\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00363}00363\ \ \ \ \ canBoards.clear();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00364}00364\ \ \ \ \ yarp::os::Property\ params;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00365}00365\ \ \ \ \ QString\ \mbox{\hyperlink{icub-main_2src_2tools_2canLoader_2canLoader-console_2main_8cpp_aae21f5fbbed3a16801f4d6f178b5d9ce}{networkType}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00366}00366\ \ \ \ \ \textcolor{keywordflow}{if}(driver.contains(\textcolor{stringliteral}{"{}CFW2"{}},Qt::CaseInsensitive))\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00367}00367\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{icub-main_2src_2tools_2canLoader_2canLoader-console_2main_8cpp_aae21f5fbbed3a16801f4d6f178b5d9ce}{networkType}}=\textcolor{stringliteral}{"{}cfw2can"{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00368}00368\ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}(driver.contains(\textcolor{stringliteral}{"{}ECAN"{}},Qt::CaseInsensitive))\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00369}00369\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{icub-main_2src_2tools_2canLoader_2canLoader-console_2main_8cpp_aae21f5fbbed3a16801f4d6f178b5d9ce}{networkType}}\ =\ \textcolor{stringliteral}{"{}ecan"{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00370}00370\ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}(driver.contains(\textcolor{stringliteral}{"{}PCAN"{}},Qt::CaseInsensitive))\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00371}00371\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{icub-main_2src_2tools_2canLoader_2canLoader-console_2main_8cpp_aae21f5fbbed3a16801f4d6f178b5d9ce}{networkType}}\ =\ \textcolor{stringliteral}{"{}pcan"{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00372}00372\ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}(driver.contains(\textcolor{stringliteral}{"{}SOCKET"{}},Qt::CaseInsensitive))\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00373}00373\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{icub-main_2src_2tools_2canLoader_2canLoader-console_2main_8cpp_aae21f5fbbed3a16801f4d6f178b5d9ce}{networkType}}=\textcolor{stringliteral}{"{}socketcan"{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00374}00374\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00375}00375\ \ \ \ \ params.put(\textcolor{stringliteral}{"{}device"{}},\ \mbox{\hyperlink{icub-main_2src_2tools_2canLoader_2canLoader-console_2main_8cpp_aae21f5fbbed3a16801f4d6f178b5d9ce}{networkType}}.toLatin1().data());}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00376}00376\ \ \ \ \ params.put(\textcolor{stringliteral}{"{}canDeviceNum"{}},\ \mbox{\hyperlink{icub-main_2src_2tools_2canLoader_2canLoader-console_2main_8cpp_ae310115398ac381a0cdf9c7caa87164b}{networkId}});}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00377}00377\ \ \ \ \ params.put(\textcolor{stringliteral}{"{}canTxQueue"{}},\ 64);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00378}00378\ \ \ \ \ params.put(\textcolor{stringliteral}{"{}canRxQueue"{}},\ 64);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00379}00379\ \ \ \ \ params.put(\textcolor{stringliteral}{"{}canTxTimeout"{}},\ 2000);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00380}00380\ \ \ \ \ params.put(\textcolor{stringliteral}{"{}canRxTimeout"{}},\ 2000);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00381}00381\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00382}00382\ \ \ \ \ \textcolor{comment}{//try\ to\ connect\ to\ the\ driver}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00383}00383\ \ \ \ \ \textcolor{keywordtype}{int}\ ret\ =\ downloader.\mbox{\hyperlink{classcDownloader_a7a1b28470466e9369ce662c3b07d325f}{initdriver}}(params,\ (verbosity>1)\ ?\ \textcolor{keyword}{true}\ :\ \textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00384}00384\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00385}00385\ \ \ \ \ \textcolor{keywordflow}{if}\ (0\ !=\ ret)\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00386}00386\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(-\/2\ ==\ ret)\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00387}00387\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(verbosity>0)\ qDebug()\ <<\ \textcolor{stringliteral}{"{}FirmwareUpdaterCore::getCanBoardsFromDriver():\ Init\ ETH\ driver\ -\/\ The\ ETH\ board\ has\ just\ jumped\ to\ eUpdater\(\backslash\)n\ Connect\ again"{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00388}00388\ \ \ \ \ \ \ \ \ \ \ \ \ *retString\ =\ \textcolor{stringliteral}{"{}FirmwareUpdaterCore::getCanBoardsFromDriver():\ Init\ ETH\ driver\ -\/\ The\ ETH\ board\ has\ just\ jumped\ to\ eUpdater\(\backslash\)n\ Connect\ again"{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00389}00389\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ TODO\ DIALOG}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00390}00390\ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00391}00391\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(verbosity>0)\ qDebug()\ <<\ \textcolor{stringliteral}{"{}FirmwareUpdaterCore::getCanBoardsFromDriver():\ Init\ driver\ failed\ -\/\ Hardware\ busy\ or\ not\ connected?!"{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00392}00392\ \ \ \ \ \ \ \ \ \ \ \ \ *retString\ =\ \textcolor{stringliteral}{"{}Cannot\ init\ driver\ "{}}\ +\ driver\ +\ \textcolor{stringliteral}{"{}<"{}}\ +\ \ QString::number(\mbox{\hyperlink{icub-main_2src_2tools_2canLoader_2canLoader-console_2main_8cpp_ae310115398ac381a0cdf9c7caa87164b}{networkId}})\ +\ \textcolor{stringliteral}{"{}>\ ...\ HW\ is\ busy\ or\ not\ connected"{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00393}00393\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ TODO\ DIALOG}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00394}00394\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00395}00395\ \ \ \ \ \ \ \ \ mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00396}00396\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ canBoards;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00397}00397\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00398}00398\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00399}00399\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00400}00400\ \ \ \ \ ret\ =\ downloader.\mbox{\hyperlink{classcDownloader_ad69c7daf73c5553858b4de9e4d87cbfb}{initschede}}();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00401}00401\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00402}00402\ \ \ \ \ \textcolor{keywordflow}{if}\ (ret\ ==\ -\/1)}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00403}00403\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00404}00404\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(verbosity>0)\ qDebug()\ \ <<\ \textcolor{stringliteral}{"{}FirmwareUpdaterCore::getCanBoardsFromDriver():\ No\ answer\ received\ from\ CAN\ boards\ after\ a\ successful\ driver\ init."{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00405}00405\ \ \ \ \ \ \ \ \ *retString\ =\ \textcolor{stringliteral}{"{}No\ CAN\ boards\ found\ beneath\ "{}}\ +\ driver\ +\ \textcolor{stringliteral}{"{}<"{}}\ +\ QString::number(\mbox{\hyperlink{icub-main_2src_2tools_2canLoader_2canLoader-console_2main_8cpp_ae310115398ac381a0cdf9c7caa87164b}{networkId}})\ +\ \textcolor{stringliteral}{"{}>"{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00406}00406\ \ \ \ \ \ \ \ \ downloader.\mbox{\hyperlink{classcDownloader_ab7786d008a61a4875b5946edab44a9c9}{stopdriver}}();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00407}00407\ \ \ \ \ \ \ \ \ currentAddress\ =\ \textcolor{stringliteral}{"{}"{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00408}00408\ \ \ \ \ \ \ \ \ \textcolor{comment}{//not\_connected\_status();}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00409}00409\ \ \ \ \ \ \ \ \ mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00410}00410\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ canBoards;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00411}00411\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00412}00412\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00413}00413\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i=0;\ i<downloader.\mbox{\hyperlink{classcDownloader_ad28571ff1b1c8eb7c54c302afa7d024f}{board\_list\_size}};i++)\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00414}00414\ \ \ \ \ \ \ \ \ canBoards.append(downloader.\mbox{\hyperlink{classcDownloader_aadeda37d2de79ecfd392eea56686def5}{board\_list}}[i]);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00415}00415\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00416}00416\ \ \ \ \ currentAddress\ =\ \textcolor{stringliteral}{"{}"{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00417}00417\ \ \ \ \ currentDriver\ =\ driver;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00418}00418\ \ \ \ \ currentId\ =\ \mbox{\hyperlink{icub-main_2src_2tools_2canLoader_2canLoader-console_2main_8cpp_ae310115398ac381a0cdf9c7caa87164b}{networkId}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00419}00419\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00420}00420\ \ \ \ \ \textcolor{comment}{//downloader.stopdriver();}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00421}00421\ \ \ \ \ mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00422}00422\ \ \ \ \ \textcolor{keywordflow}{return}\ canBoards;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00423}00423\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00424}00424\ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00425}00425\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00426}\mbox{\hyperlink{classFirmwareUpdaterCore_a4e33ac757fbecfbdd34b27aec7ce7305}{00426}}\ QList<sBoard\ >\ \mbox{\hyperlink{classFirmwareUpdaterCore_a4e33ac757fbecfbdd34b27aec7ce7305}{FirmwareUpdaterCore::getCanBoardsFromEth}}(QString\ address,\ QString\ *retString,\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{icub-main_2src_2tools_2canLoader_2canLoader-console_2main_8cpp_a2751ca71a903edf37564d653d6b60941}{canID}},\ \textcolor{keywordtype}{bool}\ force)}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00427}00427\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00428}00428\ \ \ \ \ mutex.lock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00429}00429\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00430}00430\ \ \ \ \ \textcolor{keywordflow}{if}(force)\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00431}00431\ \ \ \ \ \ \ \ \ downloader.\mbox{\hyperlink{classcDownloader_ab7786d008a61a4875b5946edab44a9c9}{stopdriver}}();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00432}00432\ \ \ \ \ \}\textcolor{keywordflow}{else}\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00433}00433\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(downloader.\mbox{\hyperlink{classcDownloader_addcd4ae5594e2367d318e24003f72fe2}{connected}}\ \&\&\ address\ !=\ currentAddress\ \&\&\ !currentAddress.isEmpty()\ ||\ (currentAddress.isEmpty()\ \&\&\ !currentDriver.isEmpty()))\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00434}00434\ \ \ \ \ \ \ \ \ \ \ \ \ downloader.\mbox{\hyperlink{classcDownloader_ab7786d008a61a4875b5946edab44a9c9}{stopdriver}}();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00435}00435\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00436}00436\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00437}00437\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(currentAddress\ ==\ address)\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00438}00438\ \ \ \ \ \ \ \ \ \ \ \ \ mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00439}00439\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ canBoards;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00440}00440\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00441}00441\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00442}00442\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00443}00443\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00444}00444\ \ \ \ \ canBoards.clear();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00445}00445\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{icub-main_2src_2tools_2canLoader_2canLoader-console_2main_8cpp_ab335e9c1214c2bcf4dd97a8e9567751a}{remoteAddr}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00446}00446\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{icub-main_2src_2tools_2canLoader_2canLoader-console_2main_8cpp_ae251cdee835e3b27abac17f8545fe111}{localAddr}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00447}00447\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00448}00448\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00449}00449\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00450}00450\ \ \ \ \ \textcolor{keywordflow}{if}\ (!compile\_ip\_addresses(address.toLatin1().data(),\&\mbox{\hyperlink{icub-main_2src_2tools_2canLoader_2canLoader-console_2main_8cpp_ab335e9c1214c2bcf4dd97a8e9567751a}{remoteAddr}},\&\mbox{\hyperlink{icub-main_2src_2tools_2canLoader_2canLoader-console_2main_8cpp_ae251cdee835e3b27abac17f8545fe111}{localAddr}}))\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00451}00451\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(verbosity>0)\ qDebug()\ <<\ \textcolor{stringliteral}{"{}FirmwareUpdaterCore::getCanBoardsFromEth():\ Init\ driver\ failed\ -\/\ Could\ not\ find\ network\ interface"{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00452}00452\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ TODO\ DIALOG}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00453}00453\ \ \ \ \ \ \ \ \ *retString\ =\ \textcolor{stringliteral}{"{}Init\ driver\ failed\ -\/\ Could\ not\ find\ network\ interface"{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00454}00454\ \ \ \ \ \ \ \ \ address\ =\ \textcolor{stringliteral}{"{}"{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00455}00455\ \ \ \ \ \ \ \ \ mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00456}00456\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ canBoards;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00457}00457\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00458}00458\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00459}00459\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00460}00460\ \ \ \ \ yarp::os::Property\ params;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00461}00461\ \ \ \ \ params.put(\textcolor{stringliteral}{"{}device"{}},\ \textcolor{stringliteral}{"{}ETH"{}});}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00462}00462\ \ \ \ \ params.put(\textcolor{stringliteral}{"{}local"{}},\ \textcolor{keywordtype}{int}(\ \mbox{\hyperlink{icub-main_2src_2tools_2canLoader_2canLoader-console_2main_8cpp_ae251cdee835e3b27abac17f8545fe111}{localAddr}}));}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00463}00463\ \ \ \ \ params.put(\textcolor{stringliteral}{"{}remote"{}},\textcolor{keywordtype}{int}(\mbox{\hyperlink{icub-main_2src_2tools_2canLoader_2canLoader-console_2main_8cpp_ab335e9c1214c2bcf4dd97a8e9567751a}{remoteAddr}}));}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00464}00464\ \ \ \ \ params.put(\textcolor{stringliteral}{"{}canid"{}},\mbox{\hyperlink{icub-main_2src_2tools_2canLoader_2canLoader-console_2main_8cpp_a2751ca71a903edf37564d653d6b60941}{canID}});}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00465}00465\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00466}00466\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00467}00467\ \ \ \ \ \textcolor{comment}{//try\ to\ connect\ to\ the\ driver}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00468}00468\ \ \ \ \ \textcolor{keywordtype}{int}\ ret\ =\ downloader.\mbox{\hyperlink{classcDownloader_a7a1b28470466e9369ce662c3b07d325f}{initdriver}}(params,\ (verbosity>1)\ ?\ \textcolor{keyword}{true}\ :\ \textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00469}00469\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00470}00470\ \ \ \ \ \textcolor{keywordflow}{if}\ (0\ !=\ ret)\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00471}00471\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(-\/2\ ==\ ret)\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00472}00472\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(verbosity>0)\ qDebug()\ <<\ \textcolor{stringliteral}{"{}FirmwareUpdaterCore::getCanBoardsFromEth(():\ Init\ ETH\ driver\ -\/\ The\ ETH\ board\ has\ just\ jumped\ to\ eUpdater\(\backslash\)n\ Connect\ again"{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00473}00473\ \ \ \ \ \ \ \ \ \ \ \ \ *retString\ =\ \textcolor{stringliteral}{"{}FirmwareUpdaterCore::getCanBoardsFromEth(():\ Init\ ETH\ driver\ -\/\ The\ ETH\ board\ has\ just\ jumped\ to\ eUpdater\(\backslash\)n\ Connect\ again"{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00474}00474\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ TODO\ DIALOG}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00475}00475\ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00476}00476\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(verbosity>0)\ qDebug()\ <<\ \textcolor{stringliteral}{"{}FirmwareUpdaterCore::getCanBoardsFromEth(():\ Init\ driver\ failed\ -\/\ Hardware\ busy\ or\ not\ connected?!"{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00477}00477\ \ \ \ \ \ \ \ \ \ \ \ \ *retString\ =\ \textcolor{stringliteral}{"{}FirmwareUpdaterCore::getCanBoardsFromEth():\ Init\ driver\ failed\ -\/\ Hardware\ busy\ or\ not\ connected?!"{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00478}00478\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ TODO\ DIALOG}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00479}00479\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00480}00480\ \ \ \ \ \ \ \ \ mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00481}00481\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ canBoards;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00482}00482\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00483}00483\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00484}00484\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00485}00485\ \ \ \ \ ret\ =\ downloader.\mbox{\hyperlink{classcDownloader_ad69c7daf73c5553858b4de9e4d87cbfb}{initschede}}();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00486}00486\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00487}00487\ \ \ \ \ \textcolor{keywordflow}{if}\ (ret\ ==\ -\/1)}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00488}00488\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00489}00489\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(verbosity>0)\ qDebug()\ \ <<\ \textcolor{stringliteral}{"{}FirmwareUpdaterCore::getCanBoardsFromEth():\ No\ CAN\ boards\ found\ beneath\ "{}}\ <<\ address\ <<\ \textcolor{stringliteral}{"{}\ after\ a\ successful\ driver\ init."{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00490}00490\ \ \ \ \ \ \ \ \ *retString\ =\ \textcolor{stringliteral}{"{}No\ CAN\ boards\ found\ beneath\ "{}}\ +\ address;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00491}00491\ \ \ \ \ \ \ \ \ downloader.\mbox{\hyperlink{classcDownloader_ab7786d008a61a4875b5946edab44a9c9}{stopdriver}}();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00492}00492\ \ \ \ \ \ \ \ \ address\ =\ \textcolor{stringliteral}{"{}"{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00493}00493\ \ \ \ \ \ \ \ \ \textcolor{comment}{//not\_connected\_status();}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00494}00494\ \ \ \ \ \ \ \ \ mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00495}00495\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ canBoards;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00496}00496\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00497}00497\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00498}00498\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i=0;\ i<downloader.\mbox{\hyperlink{classcDownloader_ad28571ff1b1c8eb7c54c302afa7d024f}{board\_list\_size}};i++)\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00499}00499\ \ \ \ \ \ \ \ \ canBoards.append(downloader.\mbox{\hyperlink{classcDownloader_aadeda37d2de79ecfd392eea56686def5}{board\_list}}[i]);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00500}00500\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00501}00501\ \ \ \ \ currentAddress\ =\ address;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00502}00502\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00503}00503\ \ \ \ \ \textcolor{comment}{//downloader.stopdriver();}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00504}00504\ \ \ \ \ mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00505}00505\ \ \ \ \ \textcolor{keywordflow}{return}\ canBoards;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00506}00506\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00507}00507\ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00508}00508\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00509}00509\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00510}00510\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00511}00511\ \textcolor{keywordtype}{bool}\ FirmwareUpdaterCore::compile\_ip\_addresses(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ addr,\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ *\mbox{\hyperlink{icub-main_2src_2tools_2canLoader_2canLoader-console_2main_8cpp_ab335e9c1214c2bcf4dd97a8e9567751a}{remoteAddr}},\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ *\mbox{\hyperlink{icub-main_2src_2tools_2canLoader_2canLoader-console_2main_8cpp_ae251cdee835e3b27abac17f8545fe111}{localAddr}})}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00512}00512\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00513}00513\ \ \ \ \ ACE\_UINT32\ ip1,ip2,ip3,ip4;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00514}00514\ \ \ \ \ sscanf(addr,\textcolor{stringliteral}{"{}\%d.\%d.\%d.\%d"{}},\&ip1,\&ip2,\&ip3,\&ip4);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00515}00515\ \ \ \ \ *\mbox{\hyperlink{icub-main_2src_2tools_2canLoader_2canLoader-console_2main_8cpp_ab335e9c1214c2bcf4dd97a8e9567751a}{remoteAddr}}=(ip1<<24)|(ip2<<16)|(ip3<<8)|ip4;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00516}00516\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00517}00517\ \ \ \ \ \textcolor{keywordtype}{size\_t}\ count=0;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00518}00518\ \ \ \ \ ACE\_INET\_Addr*\ addr\_array=NULL;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00519}00519\ \ \ \ \ \textcolor{keywordtype}{int}\ ret=ACE::get\_ip\_interfaces(count,addr\_array);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00520}00520\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00521}00521\ \ \ \ \ \textcolor{keywordflow}{if}\ (ret\ ||\ count<=0)}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00522}00522\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00523}00523\ \ \ \ \ \ \ \ \ mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00524}00524\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00525}00525\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00526}00526\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00527}00527\ \ \ \ \ *\mbox{\hyperlink{icub-main_2src_2tools_2canLoader_2canLoader-console_2main_8cpp_ae251cdee835e3b27abac17f8545fe111}{localAddr}}=addr\_array[0].get\_ip\_address();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00528}00528\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00529}00529\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ a=1;\ a<count;\ ++a)}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00530}00530\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00531}00531\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ ((*\mbox{\hyperlink{icub-main_2src_2tools_2canLoader_2canLoader-console_2main_8cpp_ab335e9c1214c2bcf4dd97a8e9567751a}{remoteAddr}}\ \&\ 0xFFFF0000)==(addr\_array[a].get\_ip\_address()\ \&\ 0xFFFF0000))}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00532}00532\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00533}00533\ \ \ \ \ \ \ \ \ \ \ \ \ *\mbox{\hyperlink{icub-main_2src_2tools_2canLoader_2canLoader-console_2main_8cpp_ae251cdee835e3b27abac17f8545fe111}{localAddr}}=addr\_array[a].get\_ip\_address();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00534}00534\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00535}00535\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00536}00536\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00537}00537\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00538}00538\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00539}00539\ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00540}00540\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00541}\mbox{\hyperlink{classFirmwareUpdaterCore_ab74489626945c2615ae63c930ee6dbed}{00541}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classFirmwareUpdaterCore_ab74489626945c2615ae63c930ee6dbed}{FirmwareUpdaterCore::blinkEthBoards}}()}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00542}00542\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00543}00543\ \ \ \ \ mutex.lock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00544}00544\ \ \ \ \ gMNT.\mbox{\hyperlink{classEthMaintainer_ab712a9e95835aea245ee960f17acc3e4}{command\_blink}}(\mbox{\hyperlink{classEthMaintainer_a40d75a9e9da1f0276860ca6d9e3e4aff}{EthMaintainer::ipv4OfAllSelected}});}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00545}00545\ \ \ \ \ mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00546}00546\ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00547}00547\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00548}\mbox{\hyperlink{classFirmwareUpdaterCore_a44e6d5a26a55148e3c4ecc4b39611b41}{00548}}\ QString\ \mbox{\hyperlink{classFirmwareUpdaterCore_a44e6d5a26a55148e3c4ecc4b39611b41}{FirmwareUpdaterCore::getEthBoardInfo}}(\textcolor{keywordtype}{int}\ index)}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00549}00549\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00550}00550\ \ \ \ \ mutex.lock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00551}00551\ \ \ \ \ QString\ ret\ =\ QString(\textcolor{stringliteral}{"{}\%1"{}}).arg(gMNT.\mbox{\hyperlink{classEthMaintainer_a75d591aaeb293b6b6b6d19346ac1c7e0}{boards\_get}}()[index].getInfoOnEEPROM().c\_str());}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00552}00552\ \ \ \ \ mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00553}00553\ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00554}00554\ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00555}00555\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00556}\mbox{\hyperlink{classFirmwareUpdaterCore_a7f6ecc42113806e1d8c09a1db2c3ee28}{00556}}\ QString\ \mbox{\hyperlink{classFirmwareUpdaterCore_a7f6ecc42113806e1d8c09a1db2c3ee28}{FirmwareUpdaterCore::getEthBoardAddress}}(\textcolor{keywordtype}{int}\ index)}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00557}00557\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00558}00558\ \ \ \ \ mutex.lock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00559}00559\ \ \ \ \ \textcolor{keywordtype}{char}\ board\_ipaddr[16];}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00560}00560\ \ \ \ \ ACE\_UINT32\ ip\ =\ \mbox{\hyperlink{EthMaintainer_8cpp_acce7540b0229a8fad3eab1aecf0d6dda}{ipv4toace}}(gMNT.\mbox{\hyperlink{classEthMaintainer_a75d591aaeb293b6b6b6d19346ac1c7e0}{boards\_get}}()[index].getIPV4());}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00561}00561\ \ \ \ \ sprintf(board\_ipaddr,\textcolor{stringliteral}{"{}\%d.\%d.\%d.\%d"{}},(ip>>24)\&0xFF,(ip>>16)\&0xFF,(ip>>8)\&0xFF,ip\&0xFF);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00562}00562\ \ \ \ \ mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00563}00563\ \ \ \ \ \textcolor{keywordflow}{return}\ QString(\textcolor{stringliteral}{"{}\%1"{}}).arg(board\_ipaddr);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00564}00564\ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00565}00565\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00566}\mbox{\hyperlink{classFirmwareUpdaterCore_ab9f9310f515b6736d13052f31ef3b150}{00566}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classFirmwareUpdaterCore_ab9f9310f515b6736d13052f31ef3b150}{FirmwareUpdaterCore::setEthBoardInfo}}(\textcolor{keywordtype}{int}\ index,\ QString\ newInfo)}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00567}00567\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00568}00568\ \ \ \ \ mutex.lock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00569}00569\ \ \ \ \ eOipv4addr\_t\ address\ =\ gMNT.\mbox{\hyperlink{classEthMaintainer_a75d591aaeb293b6b6b6d19346ac1c7e0}{boards\_get}}()[index].getIPV4();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00570}00570\ \ \ \ \ \textcolor{keywordtype}{bool}\ ret\ =\ gMNT.\mbox{\hyperlink{classEthMaintainer_a9359b265122d9f660689f01f0cdc223e}{command\_info32\_set}}(address,\ newInfo.toLatin1().data());}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00571}00571\ \ \ \ \ \textcolor{keywordflow}{if}(!ret)\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00572}00572\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(verbosity>0)\ qDebug()\ <<\ \textcolor{stringliteral}{"{}setEthBoardInfo\ failed"{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00573}00573\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00574}00574\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00575}00575\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00576}00576\ \ \ \ \ vector<string>\ vv\ =\ gMNT.\mbox{\hyperlink{classEthMaintainer_a9414d380290f65d587fd0f1855aad438}{command\_info32\_get}}(address);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00577}00577\ \ \ \ \ \textcolor{keywordflow}{foreach}\ (\textcolor{keywordtype}{string}\ v,\ vv)\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00578}00578\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(verbosity>0)\ qDebug()\ <<\ v.c\_str();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00579}00579\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00580}00580\ \ \ \ \ \textcolor{comment}{//\ TODO\ chiedere}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00581}00581\ \ \ \ \ \textcolor{comment}{//\ it\ already\ sets\ it\ internally\ to\ commandInfo32Get()}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00582}00582\ \ \ \ \ \textcolor{keywordflow}{if}(vv.size()\ >\ 0)\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00583}00583\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(verbosity>0)\ qDebug()\ <<\ gMNT.\mbox{\hyperlink{classEthMaintainer_a75d591aaeb293b6b6b6d19346ac1c7e0}{boards\_get}}()[index].getInfoOnEEPROM().c\_str();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00584}00584\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00585}00585\ \ \ \ \ mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00586}00586\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00587}00587\ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00588}00588\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00589}\mbox{\hyperlink{classFirmwareUpdaterCore_ac97111660161148861c05926c7acbd02}{00589}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classFirmwareUpdaterCore_ac97111660161148861c05926c7acbd02}{FirmwareUpdaterCore::setCanBoardInfo}}(\textcolor{keywordtype}{int}\ bus,\ \textcolor{keywordtype}{int}\ \textcolor{keywordtype}{id},\ QString\ newInfo,QString\ address,\ \textcolor{keywordtype}{int}\ deviceId,QString\ *resultString)}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00590}00590\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00591}00591\ \ \ \ \ mutex.lock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00592}00592\ \ \ \ \ QString\ res;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00593}00593\ \ \ \ \ \textcolor{keywordflow}{if}(!address.isEmpty()\ \&\&\ deviceId\ ==\ -\/1)\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00594}00594\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classFirmwareUpdaterCore_a4e33ac757fbecfbdd34b27aec7ce7305}{getCanBoardsFromEth}}(address,\&res);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00595}00595\ \ \ \ \ \}\textcolor{keywordflow}{else}\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00596}00596\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classFirmwareUpdaterCore_a18c24a98215c0dd8647660d37ed8a0f7}{getCanBoardsFromDriver}}(address,deviceId,\&res);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00597}00597\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00598}00598\ \ \ \ \ downloader.\mbox{\hyperlink{classcDownloader_a650e0880541d2c4e94957b6a11e4bdc5}{change\_board\_info}}(bus,\ \textcolor{keywordtype}{id},\ newInfo.toLatin1().data());}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00599}00599\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00600}00600\ \textcolor{comment}{//\ \ \ \ if(!ethAddress.isEmpty())\{}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00601}00601\ \textcolor{comment}{//\ \ \ \ \ \ \ \ if(currentAddress\ !=\ ethAddress)\{}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00602}00602\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ if(downloader.connected)\{}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00603}00603\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ downloader.stopdriver();}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00604}00604\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \}}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00605}00605\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ getCanBoardsFromEth(ethAddress,resultString);}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00606}00606\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \}}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00607}00607\ \textcolor{comment}{//\ \ \ \ \ \ \ \ downloader.change\_board\_info(bus,\ id,\ newInfo.toLatin1().data());}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00608}00608\ \textcolor{comment}{//\ \ \ \ \}}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00609}00609\ \ \ \ \ mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00610}00610\ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00611}00611\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00612}\mbox{\hyperlink{classFirmwareUpdaterCore_acdf0e1aabd6948f60ce3360bf00b4424}{00612}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classFirmwareUpdaterCore_acdf0e1aabd6948f60ce3360bf00b4424}{FirmwareUpdaterCore::setCanBoardAddress}}(\textcolor{keywordtype}{int}\ bus,\ \textcolor{keywordtype}{int}\ \textcolor{keywordtype}{id},\ \textcolor{keywordtype}{int}\ canType,QString\ newAddress,QString\ address,\textcolor{keywordtype}{int}\ deviceId,QString\ *resultString)}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00613}00613\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00614}00614\ \ \ \ \ mutex.lock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00615}00615\ \ \ \ \ QString\ res;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00616}00616\ \ \ \ \ \textcolor{keywordflow}{if}(!address.isEmpty()\ \&\&\ deviceId\ ==\ -\/1)\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00617}00617\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classFirmwareUpdaterCore_a4e33ac757fbecfbdd34b27aec7ce7305}{getCanBoardsFromEth}}(address,\&res);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00618}00618\ \ \ \ \ \}\textcolor{keywordflow}{else}\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00619}00619\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classFirmwareUpdaterCore_a18c24a98215c0dd8647660d37ed8a0f7}{getCanBoardsFromDriver}}(address,deviceId,\&res);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00620}00620\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00621}00621\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00622}00622\ \ \ \ \ \textcolor{keywordtype}{int}\ new\_val\ =\ newAddress.toInt();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00623}00623\ \ \ \ \ \textcolor{keywordflow}{if}\ (new\_val\ <=0\ ||\ new\_val>\ 15)\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00624}00624\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(verbosity>0)\ qDebug()\ <<\ \textcolor{stringliteral}{"{}Error,\ new\ address\ out\ of\ range\ 0\ -\/\ 15"{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00625}00625\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00626}00626\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00627}00627\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00628}00628\ \ \ \ \ \textcolor{keywordflow}{if}\ (new\_val\ ==\ \textcolor{keywordtype}{id})\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00629}00629\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(verbosity>0)\ qDebug()\ <<\ \textcolor{stringliteral}{"{}Error,\ same\ address\ set"{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00630}00630\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00631}00631\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00632}00632\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00633}00633\ \ \ \ \ downloader.\mbox{\hyperlink{classcDownloader_a12f441dc91687354be314a029e315f02}{change\_card\_address}}(bus,\ \textcolor{keywordtype}{id},\ new\_val,canType);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00634}00634\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00635}00635\ \textcolor{comment}{//\ \ \ \ if(!ethAddress.isEmpty())\{}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00636}00636\ \textcolor{comment}{//\ \ \ \ \ \ \ \ if(currentAddress\ !=\ ethAddress)\{}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00637}00637\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ if(downloader.connected)\{}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00638}00638\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ downloader.stopdriver();}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00639}00639\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \}}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00640}00640\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ getCanBoardsFromEth(ethAddress,resultString);}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00641}00641\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \}}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00642}00642\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00643}00643\ \textcolor{comment}{//\ \ \ \ \ \ \ \ int\ new\_val\ =\ newAddress.toInt();}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00644}00644\ \textcolor{comment}{//\ \ \ \ \ \ \ \ if\ (new\_val\ <=0\ ||\ new\_val>\ 15)\{}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00645}00645\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ if(verbosity>0)\ qDebug()\ <<\ "{}Error,\ new\ address\ out\ of\ range\ 0\ -\/\ 15"{};}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00646}00646\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ return\ false;}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00647}00647\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \}}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00648}00648\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00649}00649\ \textcolor{comment}{//\ \ \ \ \ \ \ \ if\ (new\_val\ ==\ id)\{}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00650}00650\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ if(verbosity>0)\ qDebug()\ <<\ "{}Error,\ same\ address\ set"{};}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00651}00651\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ return\ false;}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00652}00652\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \}}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00653}00653\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00654}00654\ \textcolor{comment}{//\ \ \ \ \ \ \ \ downloader.change\_card\_address(bus,\ id,\ new\_val,canType);}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00655}00655\ \textcolor{comment}{//\ \ \ \ \}}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00656}00656\ \ \ \ \ mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00657}00657\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00658}00658\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00659}00659\ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00660}00660\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00661}\mbox{\hyperlink{classFirmwareUpdaterCore_a30c2de0e8a305e78a607092bfd3bb2bb}{00661}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classFirmwareUpdaterCore_a30c2de0e8a305e78a607092bfd3bb2bb}{FirmwareUpdaterCore::setEthBoardAddress}}(\textcolor{keywordtype}{int}\ index,\ QString\ newAddress)}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00662}00662\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00663}00663\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00664}00664\ \ \ \ \ mutex.lock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00665}00665\ \ \ \ \ \textcolor{keywordtype}{int}\ ip1,ip2,ip3,ip4;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00666}00666\ \ \ \ \ sscanf(newAddress.toLatin1().data(),\textcolor{stringliteral}{"{}\%d.\%d.\%d.\%d"{}},\&ip1,\&ip2,\&ip3,\&ip4);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00667}00667\ \ \ \ \ \textcolor{keywordflow}{if}\ (ip1<0\ ||\ ip1>255\ ||\ ip2<0\ ||\ ip2>255\ ||\ ip3<0\ ||\ ip3>255\ ||\ ip4<0\ ||\ ip4>255)\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00668}00668\ \ \ \ \ \ \ \ \ mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00669}00669\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00670}00670\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00671}00671\ \ \ \ \ ACE\_UINT32\ iNewAddress=(ip1<<24)|(ip2<<16)|(ip3<<8)|ip4;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00672}00672\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00673}00673\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00674}00674\ \ \ \ \ ACE\_UINT32\ address\ =\ \mbox{\hyperlink{EthMaintainer_8cpp_acce7540b0229a8fad3eab1aecf0d6dda}{ipv4toace}}(gMNT.\mbox{\hyperlink{classEthMaintainer_a75d591aaeb293b6b6b6d19346ac1c7e0}{boards\_get}}()[index].getIPV4());}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00675}00675\ \ \ \ \ ACE\_UINT32\ mask\ =\ 0xFFFFFF00;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00676}00676\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00677}00677\ \ \ \ \ \textcolor{keywordflow}{if}(iNewAddress\ ==\ (iNewAddress\ \&\ mask))\{\ \textcolor{comment}{//\ checks\ new\ ip\ address\ is\ not\ a\ network\ address\ .\ For\ example\ x.y.z.w/24\ x.y.z.0}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00678}00678\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(verbosity>0)\ qDebug()\ <<\ \textcolor{stringliteral}{"{}Error\ Setting\ address"{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00679}00679\ \ \ \ \ \ \ \ \ mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00680}00680\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00681}00681\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00682}00682\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00683}00683\ \ \ \ \ \textcolor{keywordflow}{if}((\string~mask)\ ==\ (iNewAddress\ \&\ (\string~mask)))\{\ \textcolor{comment}{//\ checks\ new\ ip\ address\ is\ not\ a\ broadcast\ address\ .\ For\ example\ x.y.z.w/24\ x.y.z.255}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00684}00684\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(verbosity>0)\ qDebug()\ <<\ \textcolor{stringliteral}{"{}Error\ Setting\ address"{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00685}00685\ \ \ \ \ \ \ \ \ mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00686}00686\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00687}00687\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00688}00688\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00689}00689\ \ \ \ \ \textcolor{keywordflow}{if}\ (iNewAddress\ ==\ address)\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00690}00690\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(verbosity>0)\ qDebug()\ <<\ \textcolor{stringliteral}{"{}Error,\ same\ address\ set"{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00691}00691\ \ \ \ \ \ \ \ \ mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00692}00692\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00693}00693\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00694}00694\ \ \ \ \ \textcolor{keywordtype}{char}\ old\_addr[16];}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00695}00695\ \ \ \ \ sprintf(old\_addr,\textcolor{stringliteral}{"{}\%d.\%d.\%d.\%d"{}},(address>>24)\&0xFF,(address>>16)\&0xFF,(address>>8)\&0xFF,address\&0xFF);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00696}00696\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00697}00697\ \ \ \ \ \textcolor{keywordtype}{bool}\ ret\ =\ gMNT.\mbox{\hyperlink{classEthMaintainer_af00bd53a7ee7b1b465d32af6d53401ee}{command\_changeaddress}}(\mbox{\hyperlink{EthMaintainer_8cpp_a9d4e8c2ad05b7486c9024e7135b309f2}{acetoipv4}}(address),\ \mbox{\hyperlink{EthMaintainer_8cpp_a9d4e8c2ad05b7486c9024e7135b309f2}{acetoipv4}}(iNewAddress),\ \textcolor{keyword}{true},\ \textcolor{keyword}{true},\ \textcolor{keyword}{true},\ \textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00698}00698\ \ \ \ \ mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00699}00699\ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00700}00700\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00701}00701\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00702}00702\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00703}00703\ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00704}00704\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00705}00705\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00706}\mbox{\hyperlink{classFirmwareUpdaterCore_adff7cde3a70c60931365b304b1eef3da}{00706}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classFirmwareUpdaterCore_adff7cde3a70c60931365b304b1eef3da}{FirmwareUpdaterCore::uploadLoader}}(QString\ filename,QString\ *resultString)}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00707}00707\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00708}00708\ \ \ \ \ mutex.lock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00709}00709\ \ \ \ \ FILE\ *programFile=fopen(filename.toLatin1().data(),\textcolor{stringliteral}{"{}r"{}});}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00710}00710\ \ \ \ \ \textcolor{keywordflow}{if}\ (!programFile)\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00711}00711\ \ \ \ \ \ \ \ \ \textcolor{comment}{//TODO\ ERROR}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00712}00712\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(verbosity>0)\ qDebug()\ <<\ \textcolor{stringliteral}{"{}Error\ opening\ the\ selected\ file!"{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00713}00713\ \ \ \ \ \ \ \ \ mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00714}00714\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00715}00715\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00716}00716\ \ \ \ \ eOipv4addr\_t\ ipv4\ =\ 0;\ \textcolor{comment}{//\ all\ selected}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00717}00717\ \ \ \ \ eObrd\_ethtype\_t\ type\ =\ eobrd\_ethtype\_none;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00718}00718\ \ \ \ \ eOversion\_t\ ver;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00719}00719\ \ \ \ \ ver.major\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00720}00720\ \ \ \ \ ver.minor\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00721}00721\ \ \ \ \ std::string\ result;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00722}00722\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}}\ =\ gMNT.\mbox{\hyperlink{classEthMaintainer_ac1ae5bd91cf38392122779fb9517f495}{program}}(ipv4,\ type,\ eLoader,\ ver,\ programFile,\ \textcolor{keyword}{false},\ \mbox{\hyperlink{firmwareupdatercore_8cpp_ad2bc4a6850fa911890b15290a9b3468e}{updateProgressCallback}},\ \textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00723}00723\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00724}00724\ \ \ \ \ \mbox{\hyperlink{sine_8m_a14e2cbac46a5d611bf112b1f4beb7021}{fclose}}(programFile);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00725}00725\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00726}00726\ \ \ \ \ *resultString\ =\ QString(\textcolor{stringliteral}{"{}\%1"{}}).arg(result.c\_str());}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00727}00727\ \ \ \ \ \textcolor{keywordflow}{if}(\mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}})\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00728}00728\ \ \ \ \ \ \ \ \ mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00729}00729\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00730}00730\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00731}00731\ \ \ \ \ mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00732}00732\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00733}00733\ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00734}00734\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00735}00735\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00736}\mbox{\hyperlink{classFirmwareUpdaterCore_aba8d019cc3d5b8263e910fe4bc522720}{00736}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classFirmwareUpdaterCore_aba8d019cc3d5b8263e910fe4bc522720}{FirmwareUpdaterCore::uploadUpdater}}(QString\ filename,QString\ *resultString)}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00737}00737\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00738}00738\ \ \ \ \ mutex.lock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00739}00739\ \ \ \ \ FILE\ *programFile=fopen(filename.toLatin1().data(),\textcolor{stringliteral}{"{}r"{}});}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00740}00740\ \ \ \ \ \textcolor{keywordflow}{if}\ (!programFile)\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00741}00741\ \ \ \ \ \ \ \ \ \textcolor{comment}{//TODO\ ERROR}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00742}00742\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(verbosity>0)\ qDebug()\ <<\ \textcolor{stringliteral}{"{}Error\ opening\ the\ selected\ file!"{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00743}00743\ \ \ \ \ \ \ \ \ mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00744}00744\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00745}00745\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00746}00746\ \ \ \ \ eOipv4addr\_t\ ipv4\ =\ 0;\ \textcolor{comment}{//\ all\ selected}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00747}00747\ \ \ \ \ eObrd\_ethtype\_t\ type\ =\ eobrd\_ethtype\_none;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00748}00748\ \ \ \ \ eOversion\_t\ ver;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00749}00749\ \ \ \ \ ver.major\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00750}00750\ \ \ \ \ ver.minor\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00751}00751\ \ \ \ \ std::string\ result;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00752}00752\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}}\ =\ gMNT.\mbox{\hyperlink{classEthMaintainer_ac1ae5bd91cf38392122779fb9517f495}{program}}(ipv4,\ type,\ eUpdater,\ ver,\ programFile,\ \textcolor{keyword}{false},\ \mbox{\hyperlink{firmwareupdatercore_8cpp_ad2bc4a6850fa911890b15290a9b3468e}{updateProgressCallback}},\ \textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00753}00753\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00754}00754\ \ \ \ \ \mbox{\hyperlink{sine_8m_a14e2cbac46a5d611bf112b1f4beb7021}{fclose}}(programFile);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00755}00755\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00756}00756\ \ \ \ \ *resultString\ =\ QString(\textcolor{stringliteral}{"{}\%1"{}}).arg(result.c\_str());}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00757}00757\ \ \ \ \ \textcolor{keywordflow}{if}(\mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}})\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00758}00758\ \ \ \ \ \ \ \ \ mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00759}00759\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00760}00760\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00761}00761\ \ \ \ \ mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00762}00762\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00763}00763\ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00764}00764\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00765}00765\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00766}00766\ \textcolor{preprocessor}{\#ifdef\ SERIALMETHOD}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00767}00767\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classFirmwareUpdaterCore_a406018a07f98b5fff10da04317e7c2da}{FirmwareUpdaterCore::uploadCanApplication}}(QString\ filename,QString\ *resultString,\ QString\ ethAddress)}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00768}00768\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00769}00769\ \ \ \ \ mutex.lock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00770}00770\ \ \ \ \ \textcolor{keywordflow}{if}(!ethAddress.isEmpty())\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00771}00771\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(currentAddress\ !=\ ethAddress)\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00772}00772\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(downloader.\mbox{\hyperlink{classcDownloader_addcd4ae5594e2367d318e24003f72fe2}{connected}})\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00773}00773\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ downloader.\mbox{\hyperlink{classcDownloader_ab7786d008a61a4875b5946edab44a9c9}{stopdriver}}();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00774}00774\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00775}00775\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classFirmwareUpdaterCore_a4e33ac757fbecfbdd34b27aec7ce7305}{getCanBoardsFromEth}}(ethAddress,resultString);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00776}00776\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00777}00777\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00778}00778\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00779}00779\ \ \ \ \ \textcolor{keywordtype}{double}\ timer\_start\ =0;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00780}00780\ \ \ \ \ \textcolor{keywordtype}{double}\ timer\_end\ \ \ =0;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00781}00781\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00782}00782\ \ \ \ \ \textcolor{keywordflow}{if}\ (downloader.\mbox{\hyperlink{classcDownloader_addcd4ae5594e2367d318e24003f72fe2}{connected}}\ ==\ \textcolor{keyword}{false})\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00783}00783\ \ \ \ \ \ \ \ \ *resultString\ =\textcolor{stringliteral}{"{}Driver\ not\ running"{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00784}00784\ \ \ \ \ \ \ \ \ mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00785}00785\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00786}00786\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00787}00787\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00788}00788\ \ \ \ \ \textcolor{comment}{//check\ if\ at\ least\ one\ board\ was\ selected}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00789}00789\ \ \ \ \ \textcolor{keywordtype}{bool}\ at\_least\_one\_board\_selected\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00790}00790\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00791}00791\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i=0;\ i<downloader.\mbox{\hyperlink{classcDownloader_ad28571ff1b1c8eb7c54c302afa7d024f}{board\_list\_size}};\ i++)\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00792}00792\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (downloader.\mbox{\hyperlink{classcDownloader_aadeda37d2de79ecfd392eea56686def5}{board\_list}}[i].\mbox{\hyperlink{structsBoard_ac45b73d448d120130478a36d65e69eb4}{status}}==\mbox{\hyperlink{downloader_8h_a92fc1df0bcb67740e073cdab2accbc7d}{BOARD\_RUNNING}}\ \&\&}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00793}00793\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ downloader.\mbox{\hyperlink{classcDownloader_aadeda37d2de79ecfd392eea56686def5}{board\_list}}[i].\mbox{\hyperlink{structsBoard_afabfdd475d4f531c151c7ee97940ecf7}{selected}}==\textcolor{keyword}{true})}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00794}00794\ \ \ \ \ \ \ \ \ \ \ \ \ at\_least\_one\_board\_selected\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00795}00795\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00796}00796\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00797}00797\ \ \ \ \ \textcolor{keywordflow}{if}\ (!at\_least\_one\_board\_selected)\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00798}00798\ \ \ \ \ \ \ \ \ *resultString\ =\ \textcolor{stringliteral}{"{}No\ Boards\ selected!\ -\/\ Select\ one\ or\ more\ boards\ to\ update\ the\ firmware"{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00799}00799\ \ \ \ \ \ \ \ \ mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00800}00800\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00801}00801\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00802}00802\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00803}00803\ \ \ \ \ QMap<int,int>\ canDevices;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00804}00804\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i=0;\ i<downloader.\mbox{\hyperlink{classcDownloader_ad28571ff1b1c8eb7c54c302afa7d024f}{board\_list\_size}};\ i++)}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00805}00805\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00806}00806\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (downloader.\mbox{\hyperlink{classcDownloader_aadeda37d2de79ecfd392eea56686def5}{board\_list}}[i].\mbox{\hyperlink{structsBoard_afabfdd475d4f531c151c7ee97940ecf7}{selected}}==\textcolor{keyword}{true})}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00807}00807\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00808}00808\ \ \ \ \ \ \ \ \ \ \ \ \ canDevices.insertMulti(downloader.\mbox{\hyperlink{classcDownloader_aadeda37d2de79ecfd392eea56686def5}{board\_list}}[i].\mbox{\hyperlink{structsBoard_a58d9936ec5f379cb9ceb46e9cfa8a482}{bus}},i);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00809}00809\ \ \ \ \ \ \ \ \ \ \ \ \ downloader.\mbox{\hyperlink{classcDownloader_aadeda37d2de79ecfd392eea56686def5}{board\_list}}[i].\mbox{\hyperlink{structsBoard_afabfdd475d4f531c151c7ee97940ecf7}{selected}}\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00810}00810\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(verbosity>0)\ qDebug()\ <<\ \textcolor{stringliteral}{"{}FOUND\ SELECTED\ SCHEDA\ "{}}\ <<\ i\ <<\ \textcolor{stringliteral}{"{}\ ON\ BUS\ "{}}\ <<\ downloader.\mbox{\hyperlink{classcDownloader_aadeda37d2de79ecfd392eea56686def5}{board\_list}}[i].\mbox{\hyperlink{structsBoard_a58d9936ec5f379cb9ceb46e9cfa8a482}{bus}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00811}00811\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00812}00812\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00813}00813\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00814}00814\ \ \ \ \ \textcolor{keywordtype}{int}\ ret\ \ \ \ \ \ =\ 0;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00815}00815\ \ \ \ \ \textcolor{keywordtype}{int}\ finished\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00816}00816\ \ \ \ \ \textcolor{keywordtype}{int}\ busCount\ =\ canDevices.uniqueKeys().count();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00817}00817\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ k=0;k<busCount;k++)\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00818}00818\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00819}00819\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ bus\ =\ canDevices.uniqueKeys().at(k);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00820}00820\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00821}00821\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (downloader.\mbox{\hyperlink{classcDownloader_a02ca5c3d448e2145f1b5d512ba829d42}{open\_file}}(filename.toLatin1().data())!=0)\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00822}00822\ \ \ \ \ \ \ \ \ \ \ \ \ *resultString\ =\ \textcolor{stringliteral}{"{}Error\ opening\ the\ selected\ file!"{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00823}00823\ \ \ \ \ \ \ \ \ \ \ \ \ mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00824}00824\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00825}00825\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00826}00826\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(verbosity>0)\ qDebug()\ <<\ \textcolor{stringliteral}{"{}FILE\ "{}}\ <<\ filename\ <<\ \textcolor{stringliteral}{"{}\ OPENED"{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00827}00827\ \ \ \ \ \ \ \ \ \textcolor{comment}{//TODO}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00828}00828\ \ \ \ \ \ \ \ \ \textcolor{comment}{//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00829}00829\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ \ \ \ \ \ \ if\ (strstr\ (buffer,\ "{}calibrationDataSN"{})\ !=\ 0)}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00830}00830\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ \ \ \ \ \ \ \{}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00831}00831\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ load\_calibration\ (buffer);}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00832}00832\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ return\ ALL\_OK;}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00833}00833\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ \ \ \ \ \ \ \}}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00834}00834\ \ \ \ \ \ \ \ \ \textcolor{comment}{//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00835}00835\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00836}00836\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Get\ an\ identification\ of\ the\ firmware\ fot\ the\ file\ that\ you\ have\ selected}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00837}00837\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ \ \ int\ firmware\_board\_type=0;}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00838}00838\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ \ \ int\ firmware\_version=0;}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00839}00839\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ \ \ int\ firmware\_revision=0;}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00840}00840\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00841}00841\ \ \ \ \ \ \ \ \ \textcolor{comment}{//indentify\ download\ type\ from\ the\ type\ of\ the\ selected\ boards}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00842}00842\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ download\_type\ =\ icubCanProto\_boardType\_\_unknown;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00843}00843\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ download\_eeprom\ =\textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00844}00844\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00845}00845\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00846}00846\ \ \ \ \ \ \ \ \ QList<int>\ indexes\ =\ canDevices.values(bus);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00847}00847\ \textcolor{comment}{//\ \ \ \ \ \ \ \ foreach\ (int\ index,\ indexes)\ \{}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00848}00848\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ downloader.board\_list[index].selected\ =\ true;}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00849}00849\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ if(verbosity>0)\ qDebug()\ <<\ "{}SELECTING\ BOARD\ "{}\ <<\ index\ <<\ "{}\ OF\ BUS\ "{}\ <<\ k;}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00850}00850\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \}}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00851}00851\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00852}00852\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00853}00853\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i=0;i<indexes.count();i++)\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00854}00854\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ index\ =\ indexes.at(i);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00855}00855\ \ \ \ \ \ \ \ \ \ \ \ \ downloader.\mbox{\hyperlink{classcDownloader_aadeda37d2de79ecfd392eea56686def5}{board\_list}}[index].\mbox{\hyperlink{structsBoard_afabfdd475d4f531c151c7ee97940ecf7}{selected}}\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00856}00856\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(verbosity>0)\ qDebug()\ <<\ \textcolor{stringliteral}{"{}SELECTING\ BOARD\ "{}}\ <<\ index\ <<\ \textcolor{stringliteral}{"{}\ OF\ BUS\ "{}}\ <<\ bus;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00857}00857\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (downloader.\mbox{\hyperlink{classcDownloader_aadeda37d2de79ecfd392eea56686def5}{board\_list}}[index].\mbox{\hyperlink{structsBoard_ac45b73d448d120130478a36d65e69eb4}{status}}==\mbox{\hyperlink{downloader_8h_a92fc1df0bcb67740e073cdab2accbc7d}{BOARD\_RUNNING}})\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00858}00858\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (downloader.\mbox{\hyperlink{classcDownloader_a45cf185765493ec8977da1174c321755}{startscheda}}(bus,}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00859}00859\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ downloader.\mbox{\hyperlink{classcDownloader_aadeda37d2de79ecfd392eea56686def5}{board\_list}}[index].\mbox{\hyperlink{structsBoard_a74537161a223189e75e56bfb66f50335}{pid}},}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00860}00860\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ downloader.\mbox{\hyperlink{classcDownloader_aadeda37d2de79ecfd392eea56686def5}{board\_list}}[index].\mbox{\hyperlink{structsBoard_a0c50e32147797b4acf2feb6c19036d01}{eeprom}},}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00861}00861\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ downloader.\mbox{\hyperlink{classcDownloader_aadeda37d2de79ecfd392eea56686def5}{board\_list}}[index].\mbox{\hyperlink{structsBoard_a6a8634489b3f6e0a63f165af877c27da}{type}})!=0)\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00862}00862\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *resultString\ =\ \textcolor{stringliteral}{"{}Unable\ to\ start\ the\ board\ -\/\ Unable\ to\ send\ message\ 'start'\ or\ no\ answer\ received"{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00863}00863\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00864}00864\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00865}00865\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00866}00866\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(verbosity>0)\ qDebug()\ <<\ \textcolor{stringliteral}{"{}START\ SCHEDA\ \ "{}}\ <<\ index\ <<\ \textcolor{stringliteral}{"{}\ ON\ BUS\ "{}}\ <<\ bus\ <<\ \textcolor{stringliteral}{"{}\ OK"{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00867}00867\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ downloader.\mbox{\hyperlink{classcDownloader_aadeda37d2de79ecfd392eea56686def5}{board\_list}}[index].\mbox{\hyperlink{structsBoard_ac45b73d448d120130478a36d65e69eb4}{status}}=\mbox{\hyperlink{downloader_8h_ad3c1e5365df863574f40061ed524be48}{BOARD\_WAITING}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00868}00868\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00869}00869\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ download\_type\ =\ downloader.\mbox{\hyperlink{classcDownloader_aadeda37d2de79ecfd392eea56686def5}{board\_list}}[index].\mbox{\hyperlink{structsBoard_a6a8634489b3f6e0a63f165af877c27da}{type}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00870}00870\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ download\_eeprom\ =\ downloader.\mbox{\hyperlink{classcDownloader_aadeda37d2de79ecfd392eea56686def5}{board\_list}}[index].\mbox{\hyperlink{structsBoard_a0c50e32147797b4acf2feb6c19036d01}{eeprom}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00871}00871\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00872}00872\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00873}00873\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00874}00874\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00875}00875\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00876}00876\ \textcolor{comment}{//\ \ \ \ \ \ \ \ //\ Start\ the\ download\ for\ the\ selected\ boards}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00877}00877\ \textcolor{comment}{//\ \ \ \ \ \ \ \ for\ (int\ i=0;\ i<downloader.board\_list\_size;\ i++)\{}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00878}00878\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ if\ (downloader.board\_list[i].status==BOARD\_RUNNING\ \&\&\ downloader.board\_list[i].selected==true)\{}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00879}00879\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ if\ (downloader.startscheda(downloader.board\_list[i].bus,}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00880}00880\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ downloader.board\_list[i].pid,}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00881}00881\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ downloader.board\_list[i].eeprom,}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00882}00882\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ downloader.board\_list[i].type)!=0)\{}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00883}00883\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *resultString\ =\ "{}Unable\ to\ start\ the\ board\ -\/\ Unable\ to\ send\ message\ 'start'\ or\ no\ answer\ received"{};}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00884}00884\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ return\ false;}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00885}00885\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}\ else\ \{}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00886}00886\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ if(verbosity>0)\ qDebug()\ <<\ "{}START\ SCHEDA\ \ "{}\ <<\ i\ <<\ "{}\ OK"{};}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00887}00887\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ downloader.board\_list[i].status=BOARD\_WAITING;}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00888}00888\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00889}00889\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ download\_type\ =\ downloader.board\_list[i].type;}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00890}00890\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ download\_eeprom\ =\ downloader.board\_list[i].eeprom;}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00891}00891\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \}}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00892}00892\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \}}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00893}00893\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00894}00894\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00895}00895\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00896}00896\ \ \ \ \ \ \ \ \ timer\_start=\ yarp::os::Time::now();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00897}00897\ \ \ \ \ \ \ \ \ finished\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00898}00898\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ print00\ =\ \textcolor{keyword}{false},\ print25\ =\ \textcolor{keyword}{false},\ print50\ =\ \textcolor{keyword}{false},\ print75\ =\ \textcolor{keyword}{false},\ print99\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00899}00899\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Start\ the\ download\ for\ the\ selected\ boards}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00900}00900\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{do}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00901}00901\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00902}00902\ \ \ \ \ \ \ \ \ \ \ \ \ ret\ =\ downloader.\mbox{\hyperlink{classcDownloader_adacbfb37f4765e074db5274f6f159cbb}{download\_file}}(bus,\ 0x0F,\ download\_type,download\_eeprom);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00903}00903\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\textcolor{keywordtype}{float}(downloader.\mbox{\hyperlink{classcDownloader_a65c502aa343c7c136b8b142a63c97882}{progress}})/downloader.\mbox{\hyperlink{classcDownloader_a666bd8d9724d1b637929693677057cd3}{file\_length}}/busCount\ >0.0\ \ \&\&\ print00==\textcolor{keyword}{false})\ \ \ \ \{\textcolor{keywordflow}{if}(verbosity>0)\ qDebug(\textcolor{stringliteral}{"{}downloading\ \%s,\ 1\%\%\ done\(\backslash\)n"{}},filename.toLatin1().data());\ print00=\textcolor{keyword}{true};\}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00904}00904\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\textcolor{keywordtype}{float}(downloader.\mbox{\hyperlink{classcDownloader_a65c502aa343c7c136b8b142a63c97882}{progress}})/downloader.\mbox{\hyperlink{classcDownloader_a666bd8d9724d1b637929693677057cd3}{file\_length}}/busCount\ >0.25\ \&\&\ print25==\textcolor{keyword}{false})\ \ \ \ \{\textcolor{keywordflow}{if}(verbosity>0)\ qDebug(\textcolor{stringliteral}{"{}downloading\ \%s,\ 25\%\%\ done\(\backslash\)n"{}},filename.toLatin1().data());\ print25=\textcolor{keyword}{true};\}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00905}00905\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\textcolor{keywordtype}{float}(downloader.\mbox{\hyperlink{classcDownloader_a65c502aa343c7c136b8b142a63c97882}{progress}})/downloader.\mbox{\hyperlink{classcDownloader_a666bd8d9724d1b637929693677057cd3}{file\_length}}/busCount\ >0.50\ \&\&\ print50==\textcolor{keyword}{false})\ \ \ \ \{\textcolor{keywordflow}{if}(verbosity>0)\ qDebug(\textcolor{stringliteral}{"{}downloading\ \%s,\ 50\%\%\ done\(\backslash\)n"{}},filename.toLatin1().data());\ print50=\textcolor{keyword}{true};\}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00906}00906\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\textcolor{keywordtype}{float}(downloader.\mbox{\hyperlink{classcDownloader_a65c502aa343c7c136b8b142a63c97882}{progress}})/downloader.\mbox{\hyperlink{classcDownloader_a666bd8d9724d1b637929693677057cd3}{file\_length}}/busCount\ >0.75\ \&\&\ print75==\textcolor{keyword}{false})\ \ \ \ \{\textcolor{keywordflow}{if}(verbosity>0)\ qDebug(\textcolor{stringliteral}{"{}downloading\ \%s,\ 75\%\%\ done\(\backslash\)n"{}},filename.toLatin1().data());\ print75=\textcolor{keyword}{true};\}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00907}00907\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\textcolor{keywordtype}{float}(downloader.\mbox{\hyperlink{classcDownloader_a65c502aa343c7c136b8b142a63c97882}{progress}})/downloader.\mbox{\hyperlink{classcDownloader_a666bd8d9724d1b637929693677057cd3}{file\_length}}/busCount\ >0.99\ \&\&\ print99==\textcolor{keyword}{false})\ \ \ \ \{\textcolor{keywordflow}{if}(verbosity>0)\ qDebug(\textcolor{stringliteral}{"{}downloading\ \%s,\ finished!\(\backslash\)n"{}},filename.toLatin1().data());\ print99=\textcolor{keyword}{true};\}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00908}00908\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00909}00909\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (ret==1)\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00910}00910\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classFirmwareUpdaterCore_aa90544bf5809e4a58514fa57a78c255a}{updateProgress}}(\textcolor{keywordtype}{float}(downloader.\mbox{\hyperlink{classcDownloader_a65c502aa343c7c136b8b142a63c97882}{progress}})/downloader.\mbox{\hyperlink{classcDownloader_a666bd8d9724d1b637929693677057cd3}{file\_length}}/busCount);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00911}00911\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00912}00912\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (ret==-\/1)\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00913}00913\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(verbosity>0)\ qDebug()\ <<\ \textcolor{stringliteral}{"{}Fatal\ Error\ during\ download,\ terminate"{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00914}00914\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *resultString\ =\ \textcolor{stringliteral}{"{}Fatal\ Error\ during\ download,\ terminate"{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00915}00915\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ finished\ =\ 1;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00916}00916\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00917}00917\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (ret==0)\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00918}00918\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(verbosity>0)\ qDebug()\ <<\ \textcolor{stringliteral}{"{}Download\ terminated"{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00919}00919\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *resultString\ =\ \textcolor{stringliteral}{"{}Download\ terminated"{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00920}00920\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ finished\ =\ 1;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00921}00921\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00922}00922\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00923}00923\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00924}00924\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (finished!=1);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00925}00925\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00926}00926\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ End\ the\ download\ for\ the\ selected\ boards}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00927}00927\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00928}00928\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(downloader.\mbox{\hyperlink{classcDownloader_a5c90b8cf6f567a6d905cc2986800fb45}{stopscheda}}(bus,\ 15)\ !=\ 0)\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00929}00929\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(verbosity>0)\ qDebug()\ <<\ \textcolor{stringliteral}{"{}ERROR\ STOPPING\ SCHEDA"{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00930}00930\ \ \ \ \ \ \ \ \ \}\textcolor{keywordflow}{else}\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00931}00931\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(verbosity>0)\ qDebug()\ <<\ \textcolor{stringliteral}{"{}scheda\ stopped"{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00932}00932\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00933}00933\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00934}00934\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{foreach}\ (\textcolor{keywordtype}{int}\ index,\ indexes)\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00935}00935\ \ \ \ \ \ \ \ \ \ \ \ \ downloader.\mbox{\hyperlink{classcDownloader_aadeda37d2de79ecfd392eea56686def5}{board\_list}}[index].\mbox{\hyperlink{structsBoard_afabfdd475d4f531c151c7ee97940ecf7}{selected}}\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00936}00936\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(verbosity>0)\ qDebug()\ <<\ \textcolor{stringliteral}{"{}DE-\/SELECTING\ BOARD\ "{}}\ <<\ index\ <<\ \textcolor{stringliteral}{"{}\ OF\ BUS\ "{}}\ <<\ bus;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00937}00937\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00938}00938\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00939}00939\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00940}00940\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00941}00941\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00942}00942\ \ \ \ \ timer\_end=\ yarp::os::Time::now();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00943}00943\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00944}00944\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00945}00945\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00946}00946\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00947}00947\ \ \ \ \ \textcolor{comment}{//Display\ result\ message}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00948}00948\ \ \ \ \ \textcolor{keywordflow}{if}\ (ret\ ==\ 0)}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00949}00949\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00950}00950\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ time\_text\ [50];}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00951}00951\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ download\_time\ =\ (timer\_end-\/timer\_start)\ ;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00952}00952\ \ \ \ \ \ \ \ \ sprintf\ (time\_text,\ \textcolor{stringliteral}{"{}All\ Board\ OK!\ Download\ Time\ (s):\ \%.2f"{}},\ download\_time);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00953}00953\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00954}00954\ \ \ \ \ \ \ \ \ *resultString\ =\ QString(\textcolor{stringliteral}{"{}Download\ Finished.\ \%1"{}}).arg(time\_text);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00955}00955\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00956}00956\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classFirmwareUpdaterCore_aa90544bf5809e4a58514fa57a78c255a}{updateProgress}}(1.0);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00957}00957\ \ \ \ \ \ \ \ \ mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00958}00958\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00959}00959\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00960}00960\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00961}00961\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00962}00962\ \ \ \ \ \ \ \ \ \textcolor{comment}{//*resultString\ =\ "{}Error\ during\ file\ transfer"{};}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00963}00963\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00964}00964\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classFirmwareUpdaterCore_aa90544bf5809e4a58514fa57a78c255a}{updateProgress}}(1.0);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00965}00965\ \ \ \ \ \ \ \ \ mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00966}00966\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00967}00967\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00968}00968\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00969}00969\ \ \ \ \ mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00970}00970\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00971}00971\ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00972}00972\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00973}00973\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00974}\mbox{\hyperlink{classFirmwareUpdaterCore_a406018a07f98b5fff10da04317e7c2da}{00974}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classFirmwareUpdaterCore_a406018a07f98b5fff10da04317e7c2da}{FirmwareUpdaterCore::uploadCanApplication}}(QString\ filename,QString\ *resultString,\ \textcolor{keywordtype}{bool}\ ee,\ QString\ address,\textcolor{keywordtype}{int}\ deviceId,QList\ <sBoard>\ *resultCanBoards)}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00975}00975\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00976}00976\ \textcolor{comment}{//\ \ \ \ if(!address.isEmpty())\{}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00977}00977\ \textcolor{comment}{//\ \ \ \ \ \ \ \ if(currentAddress\ !=\ address)\{}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00978}00978\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ if(downloader.connected)\{}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00979}00979\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ downloader.stopdriver();}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00980}00980\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \}}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00981}00981\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ getCanBoardsFromEth(address,resultString);}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00982}00982\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \}}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00983}00983\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00984}00984\ \textcolor{comment}{//\ \ \ \ \}}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00985}00985\ \ \ \ \ QString\ res;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00986}00986\ \ \ \ \ \textcolor{keywordflow}{if}(!address.isEmpty()\ \&\&\ deviceId\ ==\ -\/1)\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00987}00987\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classFirmwareUpdaterCore_a4e33ac757fbecfbdd34b27aec7ce7305}{getCanBoardsFromEth}}(address,\&res);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00988}00988\ \ \ \ \ \}\textcolor{keywordflow}{else}\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00989}00989\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classFirmwareUpdaterCore_a18c24a98215c0dd8647660d37ed8a0f7}{getCanBoardsFromDriver}}(address,deviceId,\&res);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00990}00990\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00991}00991\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00992}00992\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00993}00993\ \ \ \ \ \textcolor{keywordtype}{double}\ timer\_start\ =0;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00994}00994\ \ \ \ \ \textcolor{keywordtype}{double}\ timer\_end\ \ \ =0;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00995}00995\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00996}00996\ \ \ \ \ \textcolor{keywordflow}{if}\ (downloader.\mbox{\hyperlink{classcDownloader_addcd4ae5594e2367d318e24003f72fe2}{connected}}\ ==\ \textcolor{keyword}{false})\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00997}00997\ \ \ \ \ \ \ \ \ *resultString\ =\textcolor{stringliteral}{"{}Driver\ not\ running"{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00998}00998\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l00999}00999\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01000}01000\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01001}01001\ \ \ \ \ \textcolor{comment}{//check\ if\ at\ least\ one\ board\ was\ selected}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01002}01002\ \ \ \ \ \textcolor{keywordtype}{bool}\ at\_least\_one\_board\_selected\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01003}01003\ \ \ \ \ \textcolor{keywordtype}{int}\ i\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01004}01004\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01005}01005\ \ \ \ \ \textcolor{keywordflow}{for}\ (i=0;\ i<downloader.\mbox{\hyperlink{classcDownloader_ad28571ff1b1c8eb7c54c302afa7d024f}{board\_list\_size}};\ i++)\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01006}01006\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (downloader.\mbox{\hyperlink{classcDownloader_aadeda37d2de79ecfd392eea56686def5}{board\_list}}[i].\mbox{\hyperlink{structsBoard_ac45b73d448d120130478a36d65e69eb4}{status}}==\mbox{\hyperlink{downloader_8h_a92fc1df0bcb67740e073cdab2accbc7d}{BOARD\_RUNNING}}\ \&\&}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01007}01007\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ downloader.\mbox{\hyperlink{classcDownloader_aadeda37d2de79ecfd392eea56686def5}{board\_list}}[i].\mbox{\hyperlink{structsBoard_afabfdd475d4f531c151c7ee97940ecf7}{selected}}==\textcolor{keyword}{true})}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01008}01008\ \ \ \ \ \ \ \ \ \ \ \ \ at\_least\_one\_board\_selected\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01009}01009\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01010}01010\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01011}01011\ \ \ \ \ \textcolor{keywordflow}{if}\ (!at\_least\_one\_board\_selected)\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01012}01012\ \ \ \ \ \ \ \ \ *resultString\ =\ \textcolor{stringliteral}{"{}No\ Boards\ selected!\ -\/\ Select\ one\ or\ more\ boards\ to\ update\ the\ firmware"{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01013}01013\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01014}01014\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01015}01015\ \ \ \ \ \textcolor{keywordflow}{if}\ (downloader.\mbox{\hyperlink{classcDownloader_a02ca5c3d448e2145f1b5d512ba829d42}{open\_file}}(filename.toLatin1().data())!=0)\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01016}01016\ \ \ \ \ \ \ \ \ *resultString\ =\ \textcolor{stringliteral}{"{}Error\ opening\ the\ selected\ file!"{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01017}01017\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01018}01018\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01019}01019\ \ \ \ \ \textcolor{comment}{//TODO}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01020}01020\ \textcolor{comment}{//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01021}01021\ \ \ \ \ \textcolor{comment}{//\ \ \ \ \ \ \ \ if\ (strstr\ (buffer,\ "{}calibrationDataSN"{})\ !=\ 0)}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01022}01022\ \ \ \ \ \textcolor{comment}{//\ \ \ \ \ \ \ \ \{}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01023}01023\ \ \ \ \ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ load\_calibration\ (buffer);}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01024}01024\ \ \ \ \ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ return\ ALL\_OK;}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01025}01025\ \ \ \ \ \textcolor{comment}{//\ \ \ \ \ \ \ \ \}}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01026}01026\ \textcolor{comment}{//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01027}01027\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01028}01028\ \ \ \ \ \textcolor{comment}{//\ Get\ an\ identification\ of\ the\ firmware\ fot\ the\ file\ that\ you\ have\ selected}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01029}01029\ \ \ \ \ \textcolor{keywordtype}{int}\ firmware\_board\_type=0;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01030}01030\ \ \ \ \ \textcolor{keywordtype}{int}\ firmware\_version=0;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01031}01031\ \ \ \ \ \textcolor{keywordtype}{int}\ firmware\_revision=0;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01032}01032\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01033}01033\ \ \ \ \ \textcolor{comment}{//indentify\ download\ type\ from\ the\ type\ of\ the\ selected\ boards}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01034}01034\ \ \ \ \ \textcolor{keywordtype}{int}\ download\_type\ =\ icubCanProto\_boardType\_\_unknown;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01035}01035\ \ \ \ \ \textcolor{keywordtype}{bool}\ download\_eeprom\ =\textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01036}01036\ \ \ \ \ \textcolor{keywordflow}{for}\ (i=0;\ i<downloader.\mbox{\hyperlink{classcDownloader_ad28571ff1b1c8eb7c54c302afa7d024f}{board\_list\_size}};\ i++)}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01037}01037\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01038}01038\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (downloader.\mbox{\hyperlink{classcDownloader_aadeda37d2de79ecfd392eea56686def5}{board\_list}}[i].\mbox{\hyperlink{structsBoard_afabfdd475d4f531c151c7ee97940ecf7}{selected}}==\textcolor{keyword}{true})}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01039}01039\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01040}01040\ \ \ \ \ \ \ \ \ \ \ \ \ download\_type\ =\ downloader.\mbox{\hyperlink{classcDownloader_aadeda37d2de79ecfd392eea56686def5}{board\_list}}[i].\mbox{\hyperlink{structsBoard_a6a8634489b3f6e0a63f165af877c27da}{type}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01041}01041\ \ \ \ \ \ \ \ \ \ \ \ \ download\_eeprom\ =\ downloader.\mbox{\hyperlink{classcDownloader_aadeda37d2de79ecfd392eea56686def5}{board\_list}}[i].\mbox{\hyperlink{structsBoard_a0c50e32147797b4acf2feb6c19036d01}{eeprom}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01042}01042\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01043}01043\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01044}01044\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01045}01045\ \ \ \ \ download\_eeprom\ =\ ee;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01046}01046\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01047}01047\ \ \ \ \ \textcolor{comment}{//\ Start\ the\ download\ for\ the\ selected\ boards}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01048}01048\ \ \ \ \ \textcolor{keywordflow}{for}\ (i=0;\ i<downloader.\mbox{\hyperlink{classcDownloader_ad28571ff1b1c8eb7c54c302afa7d024f}{board\_list\_size}};\ i++)\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01049}01049\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (downloader.\mbox{\hyperlink{classcDownloader_aadeda37d2de79ecfd392eea56686def5}{board\_list}}[i].\mbox{\hyperlink{structsBoard_ac45b73d448d120130478a36d65e69eb4}{status}}==\mbox{\hyperlink{downloader_8h_a92fc1df0bcb67740e073cdab2accbc7d}{BOARD\_RUNNING}}\ \&\&\ downloader.\mbox{\hyperlink{classcDownloader_aadeda37d2de79ecfd392eea56686def5}{board\_list}}[i].\mbox{\hyperlink{structsBoard_afabfdd475d4f531c151c7ee97940ecf7}{selected}}==\textcolor{keyword}{true})\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01050}01050\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//bool\ EE\ =\ downloader.board\_list[i].eeprom;}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01051}01051\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ EE\ =\ ee;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01052}01052\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (downloader.\mbox{\hyperlink{classcDownloader_a45cf185765493ec8977da1174c321755}{startscheda}}(downloader.\mbox{\hyperlink{classcDownloader_aadeda37d2de79ecfd392eea56686def5}{board\_list}}[i].\mbox{\hyperlink{structsBoard_a58d9936ec5f379cb9ceb46e9cfa8a482}{bus}},\ downloader.\mbox{\hyperlink{classcDownloader_aadeda37d2de79ecfd392eea56686def5}{board\_list}}[i].\mbox{\hyperlink{structsBoard_a74537161a223189e75e56bfb66f50335}{pid}},\ EE,\ downloader.\mbox{\hyperlink{classcDownloader_aadeda37d2de79ecfd392eea56686def5}{board\_list}}[i].\mbox{\hyperlink{structsBoard_a6a8634489b3f6e0a63f165af877c27da}{type}})!=0)\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01053}01053\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *resultString\ =\ \textcolor{stringliteral}{"{}Unable\ to\ start\ the\ board\ -\/\ Unable\ to\ send\ message\ 'start'\ or\ no\ answer\ received"{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01054}01054\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01055}01055\ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01056}01056\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ downloader.\mbox{\hyperlink{classcDownloader_aadeda37d2de79ecfd392eea56686def5}{board\_list}}[i].\mbox{\hyperlink{structsBoard_ac45b73d448d120130478a36d65e69eb4}{status}}=\mbox{\hyperlink{downloader_8h_ad3c1e5365df863574f40061ed524be48}{BOARD\_WAITING}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01057}01057\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01058}01058\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01059}01059\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01060}01060\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01061}01061\ \ \ \ \ \textcolor{keywordtype}{int}\ ret\ \ \ \ \ \ =\ 0;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01062}01062\ \ \ \ \ \textcolor{keywordtype}{int}\ finished\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01063}01063\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01064}01064\ \ \ \ \ timer\_start=\ yarp::os::Time::now();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01065}01065\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01066}01066\ \textcolor{comment}{//\ \ \ \ bool\ acemortest\_notyetstopped\ =\ true;}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01067}01067\ \textcolor{comment}{//\ \ \ \ const\ float\ acemortest\_progress\ =\ 0.10;}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01068}01068\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01069}01069\ \ \ \ \ \textcolor{keywordtype}{bool}\ print00\ =\ \textcolor{keyword}{false},\ print25\ =\ \textcolor{keyword}{false},\ print50\ =\ \textcolor{keyword}{false},\ print75\ =\ \textcolor{keyword}{false},\ print99\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01070}01070\ \ \ \ \ \textcolor{comment}{//\ Start\ the\ download\ for\ the\ selected\ boards}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01071}01071\ \ \ \ \ \textcolor{keywordflow}{do}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01072}01072\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01073}01073\ \ \ \ \ \ \ \ \ ret\ =\ downloader.\mbox{\hyperlink{classcDownloader_adacbfb37f4765e074db5274f6f159cbb}{download\_file}}(\mbox{\hyperlink{classCanPacket_a3fcffddf8198738ca1ade930976f47f6aca4ffc606e0fbe748a42cfe0f489c343}{CanPacket::everyCANbus}},\ 0x0F,\ download\_type,download\_eeprom);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01074}01074\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\textcolor{keywordtype}{float}(downloader.\mbox{\hyperlink{classcDownloader_a65c502aa343c7c136b8b142a63c97882}{progress}})/downloader.\mbox{\hyperlink{classcDownloader_a666bd8d9724d1b637929693677057cd3}{file\_length}}\ >0.0\ \ \&\&\ print00==\textcolor{keyword}{false})\ \ \ \ \{\textcolor{keywordflow}{if}(verbosity>0)\ qDebug(\textcolor{stringliteral}{"{}programming\ \%s:\ 1\%\%\ done"{}},filename.toLatin1().data());\ print00=\textcolor{keyword}{true};\}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01075}01075\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\textcolor{keywordtype}{float}(downloader.\mbox{\hyperlink{classcDownloader_a65c502aa343c7c136b8b142a63c97882}{progress}})/downloader.\mbox{\hyperlink{classcDownloader_a666bd8d9724d1b637929693677057cd3}{file\_length}}\ >0.25\ \&\&\ print25==\textcolor{keyword}{false})\ \ \ \ \{\textcolor{keywordflow}{if}(verbosity>0)\ qDebug(\textcolor{stringliteral}{"{}programming\ \%s:\ 25\%\%\ done"{}},filename.toLatin1().data());\ print25=\textcolor{keyword}{true};\}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01076}01076\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\textcolor{keywordtype}{float}(downloader.\mbox{\hyperlink{classcDownloader_a65c502aa343c7c136b8b142a63c97882}{progress}})/downloader.\mbox{\hyperlink{classcDownloader_a666bd8d9724d1b637929693677057cd3}{file\_length}}\ >0.50\ \&\&\ print50==\textcolor{keyword}{false})\ \ \ \ \{\textcolor{keywordflow}{if}(verbosity>0)\ qDebug(\textcolor{stringliteral}{"{}programming\ \%s:\ 50\%\%\ done"{}},filename.toLatin1().data());\ print50=\textcolor{keyword}{true};\}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01077}01077\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\textcolor{keywordtype}{float}(downloader.\mbox{\hyperlink{classcDownloader_a65c502aa343c7c136b8b142a63c97882}{progress}})/downloader.\mbox{\hyperlink{classcDownloader_a666bd8d9724d1b637929693677057cd3}{file\_length}}\ >0.75\ \&\&\ print75==\textcolor{keyword}{false})\ \ \ \ \{\textcolor{keywordflow}{if}(verbosity>0)\ qDebug(\textcolor{stringliteral}{"{}programming\ \%s:\ 75\%\%\ done"{}},filename.toLatin1().data());\ print75=\textcolor{keyword}{true};\}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01078}01078\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\textcolor{keywordtype}{float}(downloader.\mbox{\hyperlink{classcDownloader_a65c502aa343c7c136b8b142a63c97882}{progress}})/downloader.\mbox{\hyperlink{classcDownloader_a666bd8d9724d1b637929693677057cd3}{file\_length}}\ >0.99\ \&\&\ print99==\textcolor{keyword}{false})\ \ \ \ \{\textcolor{keywordflow}{if}(verbosity>0)\ qDebug(\textcolor{stringliteral}{"{}programming\ \%s:\ finished!"{}},filename.toLatin1().data());\ print99=\textcolor{keyword}{true};\}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01079}01079\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01080}01080\ \textcolor{comment}{//\ \ \ \ \ \ \ \ if\ ((float(downloader.progress)/downloader.file\_length\ >\ acemortest\_progress)\ \&\&\ (acemortest\_notyetstopped))}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01081}01081\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \{}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01082}01082\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ //\ place\ you\ breakpoint\ in\ here.}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01083}01083\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ acemortest\_notyetstopped\ =\ false;}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01084}01084\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \}}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01085}01085\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01086}01086\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (ret==1)}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01087}01087\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01088}01088\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classFirmwareUpdaterCore_aa90544bf5809e4a58514fa57a78c255a}{updateProgress}}(\textcolor{keywordtype}{float}(downloader.\mbox{\hyperlink{classcDownloader_a65c502aa343c7c136b8b142a63c97882}{progress}})/downloader.\mbox{\hyperlink{classcDownloader_a666bd8d9724d1b637929693677057cd3}{file\_length}});}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01089}01089\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01090}01090\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (ret==-\/1)}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01091}01091\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01092}01092\ \ \ \ \ \ \ \ \ \ \ \ \ *resultString\ =\ \textcolor{stringliteral}{"{}Fatal\ Error\ during\ download,\ terminate"{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01093}01093\ \ \ \ \ \ \ \ \ \ \ \ \ finished\ =\ 1;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01094}01094\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01095}01095\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (ret==0)}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01096}01096\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01097}01097\ \ \ \ \ \ \ \ \ \ \ \ \ *resultString\ =\ \textcolor{stringliteral}{"{}Download\ terminated"{}};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01098}01098\ \ \ \ \ \ \ \ \ \ \ \ \ finished\ =\ 1;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01099}01099\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01100}01100\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01101}01101\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01102}01102\ \ \ \ \ \textcolor{keywordflow}{while}\ (finished!=1);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01103}01103\ \ \ \ \ timer\_end=\ yarp::os::Time::now();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01104}01104\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01105}01105\ \ \ \ \ \textcolor{comment}{//\ End\ the\ download\ for\ the\ selected\ boards}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01106}01106\ \ \ \ \ \textcolor{keywordtype}{int}\ errors\ =0;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01107}01107\ \ \ \ \ downloader.\mbox{\hyperlink{classcDownloader_a5c90b8cf6f567a6d905cc2986800fb45}{stopscheda}}(\mbox{\hyperlink{classCanPacket_a3fcffddf8198738ca1ade930976f47f6aca4ffc606e0fbe748a42cfe0f489c343}{CanPacket::everyCANbus}},\ 15);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01108}01108\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01109}01109\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01110}01110\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01111}01111\ \ \ \ \ yarp::os::Time::delay(3.0);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01112}01112\ \ \ \ \ \textcolor{comment}{//Display\ result\ message}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01113}01113\ \ \ \ \ \textcolor{keywordflow}{if}\ (ret\ ==\ 0)}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01114}01114\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01115}01115\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ time\_text\ [50];}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01116}01116\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ download\_time\ =\ (timer\_end-\/timer\_start)\ ;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01117}01117\ \ \ \ \ \ \ \ \ sprintf\ (time\_text,\ \textcolor{stringliteral}{"{}All\ Board\ OK!\ Download\ Time\ (s):\ \%.2f"{}},\ download\_time);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01118}01118\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01119}01119\ \ \ \ \ \ \ \ \ *resultString\ =\ QString(\textcolor{stringliteral}{"{}Download\ Finished.\ \%1"{}}).arg(time\_text);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01120}01120\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01121}01121\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classFirmwareUpdaterCore_aa90544bf5809e4a58514fa57a78c255a}{updateProgress}}(1.0);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01122}01122\ \ \ \ \ \ \ \ \ downloader.\mbox{\hyperlink{classcDownloader_ad69c7daf73c5553858b4de9e4d87cbfb}{initschede}}();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01123}01123\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01124}01124\ \ \ \ \ \ \ \ \ canBoards.clear();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01125}01125\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i=0;\ i<downloader.\mbox{\hyperlink{classcDownloader_ad28571ff1b1c8eb7c54c302afa7d024f}{board\_list\_size}};i++)\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01126}01126\ \ \ \ \ \ \ \ \ \ \ \ \ canBoards.append(downloader.\mbox{\hyperlink{classcDownloader_aadeda37d2de79ecfd392eea56686def5}{board\_list}}[i]);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01127}01127\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01128}01128\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(resultCanBoards)\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01129}01129\ \ \ \ \ \ \ \ \ \ \ \ \ *resultCanBoards\ =\ canBoards;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01130}01130\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01131}01131\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01132}01132\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01133}01133\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01134}01134\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01135}01135\ \ \ \ \ \ \ \ \ \textcolor{comment}{//*resultString\ =\ "{}Error\ during\ file\ transfer"{};}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01136}01136\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01137}01137\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classFirmwareUpdaterCore_aa90544bf5809e4a58514fa57a78c255a}{updateProgress}}(1.0);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01138}01138\ \ \ \ \ \ \ \ \ downloader.\mbox{\hyperlink{classcDownloader_ad69c7daf73c5553858b4de9e4d87cbfb}{initschede}}();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01139}01139\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01140}01140\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01141}01141\ \ \ \ \ downloader.\mbox{\hyperlink{classcDownloader_ad69c7daf73c5553858b4de9e4d87cbfb}{initschede}}();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01142}01142\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01143}01143\ \ \ \ \ canBoards.clear();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01144}01144\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i=0;\ i<downloader.\mbox{\hyperlink{classcDownloader_ad28571ff1b1c8eb7c54c302afa7d024f}{board\_list\_size}};i++)\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01145}01145\ \ \ \ \ \ \ \ \ canBoards.append(downloader.\mbox{\hyperlink{classcDownloader_aadeda37d2de79ecfd392eea56686def5}{board\_list}}[i]);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01146}01146\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01147}01147\ \ \ \ \ *resultCanBoards\ =\ canBoards;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01148}01148\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01149}01149\ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01150}01150\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01151}01151\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01152}\mbox{\hyperlink{classFirmwareUpdaterCore_ade01cb759ae6665b67f060085e9e1bac}{01152}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classFirmwareUpdaterCore_ade01cb759ae6665b67f060085e9e1bac}{FirmwareUpdaterCore::uploadEthApplication}}(QString\ filename,QString\ *resultString)}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01153}01153\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01154}01154\ \ \ \ \ mutex.lock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01155}01155\ \ \ \ \ FILE\ *programFile=fopen(filename.toLatin1().data(),\textcolor{stringliteral}{"{}r"{}});}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01156}01156\ \textcolor{comment}{//\ \ \ \ if(verbosity>0)\ qDebug()\ <<\ "{}attempting\ opening\ the\ selected\ file:"{}\ <<\ filename\ <<\ "{}or\ .."{}\ <<\ filename.toLatin1().data();}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01157}01157\ \ \ \ \ \textcolor{keywordflow}{if}\ (!programFile)\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01158}01158\ \ \ \ \ \ \ \ \ \textcolor{comment}{//TODO\ ERROR}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01159}01159\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(verbosity>0)\ qDebug()\ <<\ \textcolor{stringliteral}{"{}Error\ opening\ the\ selected\ file:"{}}\ <<\ filename\ <<\ \textcolor{stringliteral}{"{}or\ .."{}}\ <<\ filename.toLatin1().data();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01160}01160\ \ \ \ \ \ \ \ \ mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01161}01161\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01162}01162\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01163}01163\ \ \ \ \ eOipv4addr\_t\ ipv4\ =\ 0;\ \textcolor{comment}{//\ all\ selected}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01164}01164\ \ \ \ \ eObrd\_ethtype\_t\ type\ =\ eobrd\_ethtype\_none;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01165}01165\ \ \ \ \ eOversion\_t\ ver;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01166}01166\ \ \ \ \ ver.major\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01167}01167\ \ \ \ \ ver.minor\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01168}01168\ \ \ \ \ std::string\ result;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01169}01169\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}}\ =\ gMNT.\mbox{\hyperlink{classEthMaintainer_ac1ae5bd91cf38392122779fb9517f495}{program}}(ipv4,\ type,\ eApplication,\ ver,\ programFile,\ \textcolor{keyword}{false},\ \mbox{\hyperlink{firmwareupdatercore_8cpp_ad2bc4a6850fa911890b15290a9b3468e}{updateProgressCallback}},\ \textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01170}01170\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01171}01171\ \ \ \ \ \mbox{\hyperlink{sine_8m_a14e2cbac46a5d611bf112b1f4beb7021}{fclose}}(programFile);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01172}01172\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01173}01173\ \ \ \ \ *resultString\ =\ QString(\textcolor{stringliteral}{"{}\%1"{}}).arg(result.c\_str());}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01174}01174\ \ \ \ \ \textcolor{keywordflow}{if}(\mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}})\{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01175}01175\ \ \ \ \ \ \ \ \ mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01176}01176\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01177}01177\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01178}01178\ \ \ \ \ mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01179}01179\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01180}01180\ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01181}01181\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01182}01182\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01183}01183\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01184}\mbox{\hyperlink{classFirmwareUpdaterCore_aea347afa83f596a7cc4199a9d8ab8f22}{01184}}\ \mbox{\hyperlink{classcDownloader}{cDownloader}}\ *\mbox{\hyperlink{classFirmwareUpdaterCore_aea347afa83f596a7cc4199a9d8ab8f22}{FirmwareUpdaterCore::getDownloader}}()}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01185}01185\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01186}01186\ \ \ \ \ \textcolor{keywordflow}{return}\ \&downloader;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01187}01187\ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01188}01188\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01189}01189\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01190}01190\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01191}\mbox{\hyperlink{classFirmwareUpdaterCore_ade8603b2884a0a5344c2ad4d5617269e}{01191}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classFirmwareUpdaterCore_ade8603b2884a0a5344c2ad4d5617269e}{FirmwareUpdaterCore::restartEthBoards}}()}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01192}01192\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01193}01193\ \ \ \ \ mutex.lock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01194}01194\ \ \ \ \ gMNT.\mbox{\hyperlink{classEthMaintainer_ae9da67f07681709ec2bf7cd4f4487aa4}{command\_restart}}(\mbox{\hyperlink{classEthMaintainer_a40d75a9e9da1f0276860ca6d9e3e4aff}{EthMaintainer::ipv4OfAllSelected}});}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01195}01195\ \ \ \ \ mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01196}01196\ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01197}01197\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01198}01198\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01199}\mbox{\hyperlink{classFirmwareUpdaterCore_aaddd15ebf7a1a732861976a743c097c0}{01199}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classFirmwareUpdaterCore_aaddd15ebf7a1a732861976a743c097c0}{FirmwareUpdaterCore::bootFromApplication}}()}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01200}01200\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01201}01201\ \ \ \ \ mutex.lock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01202}01202\ \ \ \ \ gMNT.\mbox{\hyperlink{classEthMaintainer_a43e64262f20bd64903a755ed453b9e77}{command\_def2run}}(\mbox{\hyperlink{classEthMaintainer_a40d75a9e9da1f0276860ca6d9e3e4aff}{EthMaintainer::ipv4OfAllSelected}},\ eApplication,\ \textcolor{keyword}{false},\ \textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01203}01203\ \ \ \ \ mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01204}01204\ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01205}01205\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01206}\mbox{\hyperlink{classFirmwareUpdaterCore_aae9addc65b8c91b81d03f9e520936efd}{01206}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classFirmwareUpdaterCore_aae9addc65b8c91b81d03f9e520936efd}{FirmwareUpdaterCore::bootFromUpdater}}()}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01207}01207\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01208}01208\ \ \ \ \ mutex.lock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01209}01209\ \ \ \ \ gMNT.\mbox{\hyperlink{classEthMaintainer_a43e64262f20bd64903a755ed453b9e77}{command\_def2run}}(\mbox{\hyperlink{classEthMaintainer_a40d75a9e9da1f0276860ca6d9e3e4aff}{EthMaintainer::ipv4OfAllSelected}},\ eUpdater,\ \textcolor{keyword}{false},\ \textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01210}01210\ \ \ \ \ mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01211}01211\ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01212}01212\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01213}\mbox{\hyperlink{classFirmwareUpdaterCore_a88b5454a65569e7d3f78364c4c8541b7}{01213}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classFirmwareUpdaterCore_a88b5454a65569e7d3f78364c4c8541b7}{FirmwareUpdaterCore::selectCanBoardsByAddresses}}(\textcolor{keyword}{const}\ std::vector<std::pair<int,\ int>>\&\ addresses)}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01214}01214\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01215}01215\ \ \ \ \ mutex.lock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01216}01216\ \ \ \ \ QSet<QPair<int,\ int>>\ addresses\_set;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01217}01217\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keyword}{const}\ \textcolor{keyword}{auto}\&\ addr\ :\ addresses)\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01218}01218\ \ \ \ \ \ \ \ \ addresses\_set.insert(qMakePair(addr.first,\ addr.second));}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01219}01219\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01220}01220\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i\ =\ 0;\ i\ <\ downloader.\mbox{\hyperlink{classcDownloader_ad28571ff1b1c8eb7c54c302afa7d024f}{board\_list\_size}};\ ++i)\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01221}01221\ \ \ \ \ \ \ \ \ downloader.\mbox{\hyperlink{classcDownloader_aadeda37d2de79ecfd392eea56686def5}{board\_list}}[i].\mbox{\hyperlink{structsBoard_afabfdd475d4f531c151c7ee97940ecf7}{selected}}\ =\ addresses\_set.contains(qMakePair(downloader.\mbox{\hyperlink{classcDownloader_aadeda37d2de79ecfd392eea56686def5}{board\_list}}[i].\mbox{\hyperlink{structsBoard_a58d9936ec5f379cb9ceb46e9cfa8a482}{bus}},\ downloader.\mbox{\hyperlink{classcDownloader_aadeda37d2de79ecfd392eea56686def5}{board\_list}}[i].\mbox{\hyperlink{structsBoard_a74537161a223189e75e56bfb66f50335}{pid}}));}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01222}01222\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01223}01223\ \ \ \ \ mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01224}01224\ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01225}01225\ }
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01226}\mbox{\hyperlink{classFirmwareUpdaterCore_a0e0d2852800509f92a7621042d482c6c}{01226}}\ QList<sBoard>\ \mbox{\hyperlink{classFirmwareUpdaterCore_a0e0d2852800509f92a7621042d482c6c}{FirmwareUpdaterCore::getSelectedCanBoards}}()\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01227}01227\ \ \ \ \ QMutexLocker\ locker(\&mutex);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01228}01228\ \ \ \ \ QList<sBoard>\ result;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01229}01229\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i\ =\ 0;\ i\ <\ downloader.\mbox{\hyperlink{classcDownloader_ad28571ff1b1c8eb7c54c302afa7d024f}{board\_list\_size}};\ ++i)\ \{}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01230}01230\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (downloader.\mbox{\hyperlink{classcDownloader_aadeda37d2de79ecfd392eea56686def5}{board\_list}}[i].\mbox{\hyperlink{structsBoard_afabfdd475d4f531c151c7ee97940ecf7}{selected}})}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01231}01231\ \ \ \ \ \ \ \ \ \ \ \ \ result.append(downloader.\mbox{\hyperlink{classcDownloader_aadeda37d2de79ecfd392eea56686def5}{board\_list}}[i]);}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01232}01232\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01233}01233\ \ \ \ \ \textcolor{keywordflow}{return}\ result;}
+\DoxyCodeLine{\Hypertarget{firmwareupdatercore_8cpp_source_l01234}01234\ \}}
+
+\end{DoxyCode}

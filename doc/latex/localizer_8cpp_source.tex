@@ -1,0 +1,743 @@
+\doxysection{localizer.\+cpp}
+\hypertarget{localizer_8cpp_source}{}\label{localizer_8cpp_source}\index{icub-\/main/src/modules/iKinGazeCtrl/src/localizer.cpp@{icub-\/main/src/modules/iKinGazeCtrl/src/localizer.cpp}}
+\mbox{\hyperlink{localizer_8cpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00001}00001\ \textcolor{comment}{/*\ }}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00002}00002\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010\ RobotCub\ Consortium,\ European\ Commission\ FP6\ Project\ IST-\/004370}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00003}00003\ \textcolor{comment}{\ *\ Author:\ Ugo\ Pattacini,\ Alessandro\ Roncone}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00004}00004\ \textcolor{comment}{\ *\ email:\ \ ugo.pattacini@iit.it,\ alessandro.roncone@iit.it}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00005}00005\ \textcolor{comment}{\ *\ website:\ www.robotcub.org}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00006}00006\ \textcolor{comment}{\ *\ Permission\ is\ granted\ to\ copy,\ distribute,\ and/or\ modify\ this\ program}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00007}00007\ \textcolor{comment}{\ *\ under\ the\ terms\ of\ the\ GNU\ General\ Public\ License,\ version\ 2\ or\ any}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00008}00008\ \textcolor{comment}{\ *\ later\ version\ published\ by\ the\ Free\ Software\ Foundation.}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00009}00009\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00010}00010\ \textcolor{comment}{\ *\ A\ copy\ of\ the\ license\ can\ be\ found\ at}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00011}00011\ \textcolor{comment}{\ *\ http://www.robotcub.org/icub/license/gpl.txt}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00012}00012\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00013}00013\ \textcolor{comment}{\ *\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00014}00014\ \textcolor{comment}{\ *\ WITHOUT\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00015}00015\ \textcolor{comment}{\ *\ MERCHANTABILITY\ or\ FITNESS\ FOR\ A\ PARTICULAR\ PURPOSE.\ See\ the\ GNU\ General}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00016}00016\ \textcolor{comment}{\ *\ Public\ License\ for\ more\ details}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00017}00017\ \textcolor{comment}{*/}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00018}00018\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00019}00019\ \textcolor{preprocessor}{\#include\ <cmath>}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00020}00020\ \textcolor{preprocessor}{\#include\ <algorithm>}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00021}00021\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00022}00022\ \textcolor{preprocessor}{\#include\ <yarp/math/SVD.h>}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00023}00023\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{localizer_8h}{iCub/localizer.h}}>}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00024}00024\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{solver_8h}{iCub/solver.h}}>}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00025}00025\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00026}00026\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00027}00027\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00028}\mbox{\hyperlink{classLocalizer_ac96c09dc01a5109005a22a1f1fbf1fde}{00028}}\ \mbox{\hyperlink{classLocalizer_ac96c09dc01a5109005a22a1f1fbf1fde}{Localizer::Localizer}}(\mbox{\hyperlink{classExchangeData}{ExchangeData}}\ *\_commData,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ \_period)\ :}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00029}00029\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ PeriodicThread((double)\_period/1000.0),\ commData(\_commData),}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00030}00030\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ period(\_period)}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00031}00031\ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00032}00032\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1iKin_1_1iCubHeadCenter}{iCubHeadCenter}}\ eyeC(\textcolor{stringliteral}{"{}right\_v"{}}+\mbox{\hyperlink{classLocalizer_a5489bb0e91a19c7837c9da39d18e4e58}{commData}}-\/>\mbox{\hyperlink{classExchangeData_adf93c0deb256c3fdd716c7b32fb356c2}{head\_version}}.\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinLimbVersion_af39d2441eed8c2bc7935c3eca2766edb}{get\_version}}());}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00033}00033\ \ \ \ \ \mbox{\hyperlink{classGazeComponent_af0d811689807c394a6e9c6d49ca29c1d}{eyeL}}=\textcolor{keyword}{new}\ \mbox{\hyperlink{classiCub_1_1iKin_1_1iCubEye}{iCubEye}}(\textcolor{stringliteral}{"{}left\_v"{}}+\mbox{\hyperlink{classLocalizer_a5489bb0e91a19c7837c9da39d18e4e58}{commData}}-\/>\mbox{\hyperlink{classExchangeData_adf93c0deb256c3fdd716c7b32fb356c2}{head\_version}}.\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinLimbVersion_af39d2441eed8c2bc7935c3eca2766edb}{get\_version}}());}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00034}00034\ \ \ \ \ \mbox{\hyperlink{classGazeComponent_aa94da445b35148d2b6bdbe9244cc46c1}{eyeR}}=\textcolor{keyword}{new}\ \mbox{\hyperlink{classiCub_1_1iKin_1_1iCubEye}{iCubEye}}(\textcolor{stringliteral}{"{}right\_v"{}}+\mbox{\hyperlink{classLocalizer_a5489bb0e91a19c7837c9da39d18e4e58}{commData}}-\/>\mbox{\hyperlink{classExchangeData_adf93c0deb256c3fdd716c7b32fb356c2}{head\_version}}.\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinLimbVersion_af39d2441eed8c2bc7935c3eca2766edb}{get\_version}}());}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00035}00035\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00036}00036\ \ \ \ \ \textcolor{comment}{//\ remove\ constraints\ on\ the\ links}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00037}00037\ \ \ \ \ \textcolor{comment}{//\ we\ use\ the\ chains\ for\ logging\ purpose}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00038}00038\ \ \ \ \ \mbox{\hyperlink{classGazeComponent_af0d811689807c394a6e9c6d49ca29c1d}{eyeL}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_ae52c86ba3b5e0b5dd938f591d69e29ad}{setAllConstraints}}(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00039}00039\ \ \ \ \ \mbox{\hyperlink{classGazeComponent_aa94da445b35148d2b6bdbe9244cc46c1}{eyeR}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_ae52c86ba3b5e0b5dd938f591d69e29ad}{setAllConstraints}}(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00040}00040\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00041}00041\ \ \ \ \ \textcolor{comment}{//\ release\ links}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00042}00042\ \ \ \ \ \mbox{\hyperlink{classGazeComponent_af0d811689807c394a6e9c6d49ca29c1d}{eyeL}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a3313709546ba299f11daf91fb6890684}{releaseLink}}(0);\ eyeC.\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a3313709546ba299f11daf91fb6890684}{releaseLink}}(0);\ \mbox{\hyperlink{classGazeComponent_aa94da445b35148d2b6bdbe9244cc46c1}{eyeR}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a3313709546ba299f11daf91fb6890684}{releaseLink}}(0);}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00043}00043\ \ \ \ \ \mbox{\hyperlink{classGazeComponent_af0d811689807c394a6e9c6d49ca29c1d}{eyeL}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a3313709546ba299f11daf91fb6890684}{releaseLink}}(1);\ eyeC.\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a3313709546ba299f11daf91fb6890684}{releaseLink}}(1);\ \mbox{\hyperlink{classGazeComponent_aa94da445b35148d2b6bdbe9244cc46c1}{eyeR}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a3313709546ba299f11daf91fb6890684}{releaseLink}}(1);}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00044}00044\ \ \ \ \ \mbox{\hyperlink{classGazeComponent_af0d811689807c394a6e9c6d49ca29c1d}{eyeL}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a3313709546ba299f11daf91fb6890684}{releaseLink}}(2);\ eyeC.\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a3313709546ba299f11daf91fb6890684}{releaseLink}}(2);\ \mbox{\hyperlink{classGazeComponent_aa94da445b35148d2b6bdbe9244cc46c1}{eyeR}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a3313709546ba299f11daf91fb6890684}{releaseLink}}(2);}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00045}00045\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00046}00046\ \ \ \ \ \textcolor{comment}{//\ add\ aligning\ matrices\ read\ from\ configuration\ file}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00047}00047\ \ \ \ \ \mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_a5843d21a62043a1bbd9b7a18808f15ee}{getAlignHN}}(\mbox{\hyperlink{classLocalizer_a5489bb0e91a19c7837c9da39d18e4e58}{commData}}-\/>\mbox{\hyperlink{classExchangeData_a03b5bd4c0e0f77ffbb9e520fbd3dd3bd}{rf\_cameras}},\textcolor{stringliteral}{"{}ALIGN\_KIN\_LEFT"{}},\mbox{\hyperlink{classGazeComponent_af0d811689807c394a6e9c6d49ca29c1d}{eyeL}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinLimb_ae0c121656774905c58b668b450417f0e}{asChain}}(),\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00048}00048\ \ \ \ \ \mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_a5843d21a62043a1bbd9b7a18808f15ee}{getAlignHN}}(\mbox{\hyperlink{classLocalizer_a5489bb0e91a19c7837c9da39d18e4e58}{commData}}-\/>\mbox{\hyperlink{classExchangeData_a03b5bd4c0e0f77ffbb9e520fbd3dd3bd}{rf\_cameras}},\textcolor{stringliteral}{"{}ALIGN\_KIN\_RIGHT"{}},\mbox{\hyperlink{classGazeComponent_aa94da445b35148d2b6bdbe9244cc46c1}{eyeR}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinLimb_ae0c121656774905c58b668b450417f0e}{asChain}}(),\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00049}00049\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00050}00050\ \ \ \ \ \textcolor{comment}{//\ overwrite\ aligning\ matrices\ iff\ specified\ through\ tweak\ values}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00051}00051\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classLocalizer_a5489bb0e91a19c7837c9da39d18e4e58}{commData}}-\/>\mbox{\hyperlink{classExchangeData_a93e469abe4a5e36b669b3598d40c1533}{tweakOverwrite}})}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00052}00052\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00053}00053\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_a5843d21a62043a1bbd9b7a18808f15ee}{getAlignHN}}(\mbox{\hyperlink{classLocalizer_a5489bb0e91a19c7837c9da39d18e4e58}{commData}}-\/>\mbox{\hyperlink{classExchangeData_ab09a6ebb162ab38afbd2ec3518dcd192}{rf\_tweak}},\textcolor{stringliteral}{"{}ALIGN\_KIN\_LEFT"{}},\mbox{\hyperlink{classGazeComponent_af0d811689807c394a6e9c6d49ca29c1d}{eyeL}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinLimb_ae0c121656774905c58b668b450417f0e}{asChain}}(),\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00054}00054\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_a5843d21a62043a1bbd9b7a18808f15ee}{getAlignHN}}(\mbox{\hyperlink{classLocalizer_a5489bb0e91a19c7837c9da39d18e4e58}{commData}}-\/>\mbox{\hyperlink{classExchangeData_ab09a6ebb162ab38afbd2ec3518dcd192}{rf\_tweak}},\textcolor{stringliteral}{"{}ALIGN\_KIN\_RIGHT"{}},\mbox{\hyperlink{classGazeComponent_aa94da445b35148d2b6bdbe9244cc46c1}{eyeR}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinLimb_ae0c121656774905c58b668b450417f0e}{asChain}}(),\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00055}00055\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00056}00056\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00057}00057\ \ \ \ \ \textcolor{comment}{//\ get\ the\ absolute\ reference\ frame\ of\ the\ head}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00058}00058\ \ \ \ \ Vector\ q(eyeC.\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_ad41a688c358119a3095e08a067d94f82}{getDOF}}(),0.0);}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00059}00059\ \ \ \ \ \mbox{\hyperlink{classLocalizer_a09e41530c0d85d49461a82f39fde77af}{eyeCAbsFrame}}=eyeC.\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a0b503aeeb58dc5cb228c174bf8500599}{getH}}(q);}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00060}00060\ \ \ \ \ \textcolor{comment}{//\ ...\ and\ its\ inverse}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00061}00061\ \ \ \ \ \mbox{\hyperlink{classLocalizer_a41c7e68fe1d3c36c9b2f5285cb467ac7}{invEyeCAbsFrame}}=SE3inv(\mbox{\hyperlink{classLocalizer_a09e41530c0d85d49461a82f39fde77af}{eyeCAbsFrame}});}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00062}00062\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00063}00063\ \ \ \ \ \textcolor{comment}{//\ get\ the\ length\ of\ the\ half\ of\ the\ eyes\ baseline}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00064}00064\ \ \ \ \ \mbox{\hyperlink{classLocalizer_a01c5af146605e1ad35556ba464f56945}{eyesHalfBaseline}}=0.5*\mbox{\hyperlink{group__Maths_ga791f0548018b3597da95e70a3b226806}{norm}}(\mbox{\hyperlink{classGazeComponent_af0d811689807c394a6e9c6d49ca29c1d}{eyeL}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a78408241048e9c9d0e976f22ae522eea}{EndEffPose}}().subVector(0,2)-\/\mbox{\hyperlink{classGazeComponent_aa94da445b35148d2b6bdbe9244cc46c1}{eyeR}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a78408241048e9c9d0e976f22ae522eea}{EndEffPose}}().subVector(0,2));}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00065}00065\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00066}00066\ \ \ \ \ \textcolor{keywordtype}{bool}\ ret;}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00067}00067\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00068}00068\ \ \ \ \ \textcolor{comment}{//\ get\ camera\ projection\ matrix}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00069}00069\ \ \ \ \ ret=\mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_a5c5c580550b288babb2d9d5c1c1f91f0}{getCamParams}}(\mbox{\hyperlink{classLocalizer_a5489bb0e91a19c7837c9da39d18e4e58}{commData}}-\/>\mbox{\hyperlink{classExchangeData_a03b5bd4c0e0f77ffbb9e520fbd3dd3bd}{rf\_cameras}},\textcolor{stringliteral}{"{}CAMERA\_CALIBRATION\_LEFT"{}},\&\mbox{\hyperlink{classLocalizer_a0079f885a6d43d21405fc42c4101c6a2}{PrjL}},\mbox{\hyperlink{classLocalizer_a4866be5208c2349c1e7965c974a67a8e}{widthL}},\mbox{\hyperlink{classLocalizer_a9c13f0777ddb404bef6a8563d77158a9}{heightL}},\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00070}00070\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classLocalizer_a5489bb0e91a19c7837c9da39d18e4e58}{commData}}-\/>\mbox{\hyperlink{classExchangeData_a93e469abe4a5e36b669b3598d40c1533}{tweakOverwrite}})}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00071}00071\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00072}00072\ \ \ \ \ \ \ \ \ Matrix\ *Prj;}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00073}00073\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_a5c5c580550b288babb2d9d5c1c1f91f0}{getCamParams}}(\mbox{\hyperlink{classLocalizer_a5489bb0e91a19c7837c9da39d18e4e58}{commData}}-\/>\mbox{\hyperlink{classExchangeData_ab09a6ebb162ab38afbd2ec3518dcd192}{rf\_tweak}},\textcolor{stringliteral}{"{}CAMERA\_CALIBRATION\_LEFT"{}},\&Prj,\mbox{\hyperlink{classLocalizer_a4866be5208c2349c1e7965c974a67a8e}{widthL}},\mbox{\hyperlink{classLocalizer_a9c13f0777ddb404bef6a8563d77158a9}{heightL}},\textcolor{keyword}{true}))}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00074}00074\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00075}00075\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{delete}\ \mbox{\hyperlink{classLocalizer_a0079f885a6d43d21405fc42c4101c6a2}{PrjL}};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00076}00076\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classLocalizer_a0079f885a6d43d21405fc42c4101c6a2}{PrjL}}=Prj;}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00077}00077\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00078}00078\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00079}00079\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00080}00080\ \ \ \ \ \textcolor{keywordflow}{if}\ (ret)}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00081}00081\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00082}00082\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classLocalizer_a709517199fc1e4cf28044eaab25dc6ff}{cxl}}=(*PrjL)(0,2);}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00083}00083\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classLocalizer_ac9e566d07aa93ede878b4e14d7b7b2ad}{cyl}}=(*PrjL)(1,2);}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00084}00084\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classLocalizer_a6c9883ff1f1626b4d45033e651dbc1af}{invPrjL}}=\textcolor{keyword}{new}\ Matrix(pinv(\mbox{\hyperlink{classLocalizer_a0079f885a6d43d21405fc42c4101c6a2}{PrjL}}-\/>transposed()).transposed());}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00085}00085\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00086}00086\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00087}00087\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classLocalizer_a0079f885a6d43d21405fc42c4101c6a2}{PrjL}}=\mbox{\hyperlink{classLocalizer_a6c9883ff1f1626b4d45033e651dbc1af}{invPrjL}}=\textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00088}00088\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00089}00089\ \ \ \ \ \textcolor{comment}{//\ get\ camera\ projection\ matrix}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00090}00090\ \ \ \ \ ret=\mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_a5c5c580550b288babb2d9d5c1c1f91f0}{getCamParams}}(\mbox{\hyperlink{classLocalizer_a5489bb0e91a19c7837c9da39d18e4e58}{commData}}-\/>\mbox{\hyperlink{classExchangeData_a03b5bd4c0e0f77ffbb9e520fbd3dd3bd}{rf\_cameras}},\textcolor{stringliteral}{"{}CAMERA\_CALIBRATION\_RIGHT"{}},\&\mbox{\hyperlink{classLocalizer_abe89e9359bd0c844c954c70de49d5c7f}{PrjR}},\mbox{\hyperlink{classLocalizer_ab69882e378e509c699ad5eb9be62782a}{widthR}},\mbox{\hyperlink{classLocalizer_a6f6988b8be88245a2318247ea9e224bc}{heightR}},\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00091}00091\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classLocalizer_a5489bb0e91a19c7837c9da39d18e4e58}{commData}}-\/>\mbox{\hyperlink{classExchangeData_a93e469abe4a5e36b669b3598d40c1533}{tweakOverwrite}})}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00092}00092\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00093}00093\ \ \ \ \ \ \ \ \ Matrix\ *Prj;}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00094}00094\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{modules_2iKinGazeCtrl_2include_2iCub_2utils_8h_a5c5c580550b288babb2d9d5c1c1f91f0}{getCamParams}}(\mbox{\hyperlink{classLocalizer_a5489bb0e91a19c7837c9da39d18e4e58}{commData}}-\/>\mbox{\hyperlink{classExchangeData_ab09a6ebb162ab38afbd2ec3518dcd192}{rf\_tweak}},\textcolor{stringliteral}{"{}CAMERA\_CALIBRATION\_RIGHT"{}},\&Prj,\mbox{\hyperlink{classLocalizer_ab69882e378e509c699ad5eb9be62782a}{widthR}},\mbox{\hyperlink{classLocalizer_a6f6988b8be88245a2318247ea9e224bc}{heightR}},\textcolor{keyword}{true}))}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00095}00095\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00096}00096\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{delete}\ \mbox{\hyperlink{classLocalizer_abe89e9359bd0c844c954c70de49d5c7f}{PrjR}};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00097}00097\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classLocalizer_abe89e9359bd0c844c954c70de49d5c7f}{PrjR}}=Prj;}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00098}00098\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00099}00099\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00100}00100\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00101}00101\ \ \ \ \ \textcolor{keywordflow}{if}\ (ret)}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00102}00102\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00103}00103\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classLocalizer_a6fc1d75a3d7d6e2f671b0dfd8f198c20}{cxr}}=(*PrjR)(0,2);}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00104}00104\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classLocalizer_a47bb21198d281493150299dafb293dd4}{cyr}}=(*PrjR)(1,2);}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00105}00105\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classLocalizer_a81ad22375cfcce40c208bf176402b2b8}{invPrjR}}=\textcolor{keyword}{new}\ Matrix(pinv(\mbox{\hyperlink{classLocalizer_abe89e9359bd0c844c954c70de49d5c7f}{PrjR}}-\/>transposed()).transposed());}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00106}00106\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00107}00107\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00108}00108\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classLocalizer_abe89e9359bd0c844c954c70de49d5c7f}{PrjR}}=\mbox{\hyperlink{classLocalizer_a81ad22375cfcce40c208bf176402b2b8}{invPrjR}}=\textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00109}00109\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00110}00110\ \ \ \ \ Vector\ Kp(1,0.001),\ Ki(1,0.001),\ Kd(1,0.0);}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00111}00111\ \ \ \ \ Vector\ Wp(1,1.0),\ \ \ Wi(1,1.0),\ \ \ Wd(1,1.0);}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00112}00112\ \ \ \ \ Vector\ N(1,10.0),\ \ \ Tt(1,1.0);}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00113}00113\ \ \ \ \ Matrix\ satLim(1,2);}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00114}00114\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00115}00115\ \ \ \ \ satLim(0,0)=0.05;}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00116}00116\ \ \ \ \ satLim(0,1)=10.0;}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00117}00117\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00118}00118\ \ \ \ \ \mbox{\hyperlink{classLocalizer_a9fe005bd03734ccd1ce385f4cc53030c}{pid}}=\textcolor{keyword}{new}\ \mbox{\hyperlink{classiCub_1_1ctrl_1_1parallelPID}{parallelPID}}(0.05,Kp,Ki,Kd,Wp,Wi,Wd,N,Tt,satLim);}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00119}00119\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00120}00120\ \ \ \ \ Vector\ z0(1,0.5);}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00121}00121\ \ \ \ \ \mbox{\hyperlink{classLocalizer_a9fe005bd03734ccd1ce385f4cc53030c}{pid}}-\/>\mbox{\hyperlink{classiCub_1_1ctrl_1_1parallelPID_ac38020d840119f494b4ff721a30da52d}{reset}}(z0);}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00122}00122\ \ \ \ \ \mbox{\hyperlink{classLocalizer_aaf8f926abe31657809f339328d21f85a}{dominantEye}}=\textcolor{stringliteral}{"{}left"{}};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00123}00123\ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00124}00124\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00125}00125\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00126}00126\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00127}\mbox{\hyperlink{classLocalizer_a5a7f7d458283a3d7f19007b9cfa48fec}{00127}}\ \mbox{\hyperlink{classLocalizer_a5a7f7d458283a3d7f19007b9cfa48fec}{Localizer::\string~Localizer}}()}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00128}00128\ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00129}00129\ \ \ \ \ \textcolor{keyword}{delete}\ \mbox{\hyperlink{classGazeComponent_af0d811689807c394a6e9c6d49ca29c1d}{eyeL}};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00130}00130\ \ \ \ \ \textcolor{keyword}{delete}\ \mbox{\hyperlink{classGazeComponent_aa94da445b35148d2b6bdbe9244cc46c1}{eyeR}};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00131}00131\ \ \ \ \ \textcolor{keyword}{delete}\ \mbox{\hyperlink{classLocalizer_a9fe005bd03734ccd1ce385f4cc53030c}{pid}};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00132}00132\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00133}00133\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classLocalizer_a0079f885a6d43d21405fc42c4101c6a2}{PrjL}}!=\textcolor{keyword}{nullptr})}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00134}00134\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00135}00135\ \ \ \ \ \ \ \ \ \textcolor{keyword}{delete}\ \mbox{\hyperlink{classLocalizer_a0079f885a6d43d21405fc42c4101c6a2}{PrjL}};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00136}00136\ \ \ \ \ \ \ \ \ \textcolor{keyword}{delete}\ \mbox{\hyperlink{classLocalizer_a6c9883ff1f1626b4d45033e651dbc1af}{invPrjL}};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00137}00137\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00138}00138\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00139}00139\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classLocalizer_abe89e9359bd0c844c954c70de49d5c7f}{PrjR}}!=\textcolor{keyword}{nullptr})}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00140}00140\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00141}00141\ \ \ \ \ \ \ \ \ \textcolor{keyword}{delete}\ \mbox{\hyperlink{classLocalizer_abe89e9359bd0c844c954c70de49d5c7f}{PrjR}};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00142}00142\ \ \ \ \ \ \ \ \ \textcolor{keyword}{delete}\ \mbox{\hyperlink{classLocalizer_a81ad22375cfcce40c208bf176402b2b8}{invPrjR}};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00143}00143\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00144}00144\ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00145}00145\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00146}00146\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00147}00147\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00148}\mbox{\hyperlink{classLocalizer_af352d9eaa7daba164373173c11d05836}{00148}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classLocalizer_af352d9eaa7daba164373173c11d05836}{Localizer::threadInit}}()}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00149}00149\ \{\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00150}00150\ \ \ \ \ \mbox{\hyperlink{classLocalizer_a6985fb47feef125be7faabddcec7e920}{port\_mono}}.open(\mbox{\hyperlink{classLocalizer_a5489bb0e91a19c7837c9da39d18e4e58}{commData}}-\/>\mbox{\hyperlink{classExchangeData_af8394e496d3725ffb30cb69012fd35d8}{localStemName}}+\textcolor{stringliteral}{"{}/mono:i"{}});}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00151}00151\ \ \ \ \ \mbox{\hyperlink{classLocalizer_a4429d115a142229b2099a98fbe643551}{port\_stereo}}.open(\mbox{\hyperlink{classLocalizer_a5489bb0e91a19c7837c9da39d18e4e58}{commData}}-\/>\mbox{\hyperlink{classExchangeData_af8394e496d3725ffb30cb69012fd35d8}{localStemName}}+\textcolor{stringliteral}{"{}/stereo:i"{}});}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00152}00152\ \ \ \ \ \mbox{\hyperlink{classLocalizer_aa3add7874c1ac747138b682d8d8629e6}{port\_anglesIn}}.open(\mbox{\hyperlink{classLocalizer_a5489bb0e91a19c7837c9da39d18e4e58}{commData}}-\/>\mbox{\hyperlink{classExchangeData_af8394e496d3725ffb30cb69012fd35d8}{localStemName}}+\textcolor{stringliteral}{"{}/angles:i"{}});}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00153}00153\ \ \ \ \ \mbox{\hyperlink{classLocalizer_aaaa0dd33b0ddcf15e6d44a47f1f53059}{port\_anglesOut}}.open(\mbox{\hyperlink{classLocalizer_a5489bb0e91a19c7837c9da39d18e4e58}{commData}}-\/>\mbox{\hyperlink{classExchangeData_af8394e496d3725ffb30cb69012fd35d8}{localStemName}}+\textcolor{stringliteral}{"{}/angles:o"{}});}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00154}00154\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00155}00155\ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}Starting\ Localizer\ at\ \%d\ ms"{}},\mbox{\hyperlink{classLocalizer_a521f2f183217bbf0906873a9f611d3c6}{period}});}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00156}00156\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00157}00157\ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00158}00158\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00159}00159\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00160}\mbox{\hyperlink{classLocalizer_a8c117e05803ffe949dad67974b1b02dc}{00160}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classLocalizer_a8c117e05803ffe949dad67974b1b02dc}{Localizer::threadRelease}}()}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00161}00161\ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00162}00162\ \ \ \ \ \mbox{\hyperlink{classLocalizer_a6985fb47feef125be7faabddcec7e920}{port\_mono}}.interrupt();}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00163}00163\ \ \ \ \ \mbox{\hyperlink{classLocalizer_a4429d115a142229b2099a98fbe643551}{port\_stereo}}.interrupt();}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00164}00164\ \ \ \ \ \mbox{\hyperlink{classLocalizer_aa3add7874c1ac747138b682d8d8629e6}{port\_anglesIn}}.interrupt();}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00165}00165\ \ \ \ \ \mbox{\hyperlink{classLocalizer_aaaa0dd33b0ddcf15e6d44a47f1f53059}{port\_anglesOut}}.interrupt();}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00166}00166\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00167}00167\ \ \ \ \ \mbox{\hyperlink{classLocalizer_a6985fb47feef125be7faabddcec7e920}{port\_mono}}.close();}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00168}00168\ \ \ \ \ \mbox{\hyperlink{classLocalizer_a4429d115a142229b2099a98fbe643551}{port\_stereo}}.close();}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00169}00169\ \ \ \ \ \mbox{\hyperlink{classLocalizer_aa3add7874c1ac747138b682d8d8629e6}{port\_anglesIn}}.close();}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00170}00170\ \ \ \ \ \mbox{\hyperlink{classLocalizer_aaaa0dd33b0ddcf15e6d44a47f1f53059}{port\_anglesOut}}.close();}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00171}00171\ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00172}00172\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00173}00173\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00174}00174\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00175}\mbox{\hyperlink{classLocalizer_a57a3a04cdfa279a62c54332a871e5b8b}{00175}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classLocalizer_a57a3a04cdfa279a62c54332a871e5b8b}{Localizer::afterStart}}(\textcolor{keywordtype}{bool}\ s)}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00176}00176\ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00177}00177\ \ \ \ \ \textcolor{keywordflow}{if}\ (s)}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00178}00178\ \ \ \ \ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}Localizer\ started\ successfully"{}});}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00179}00179\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00180}00180\ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}Localizer\ did\ not\ start!"{}});}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00181}00181\ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00182}00182\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00183}00183\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00184}00184\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00185}\mbox{\hyperlink{classLocalizer_a101ea048aec3fb72e924ac691c7635e2}{00185}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classLocalizer_a101ea048aec3fb72e924ac691c7635e2}{Localizer::getPidOptions}}(Bottle\ \&options)}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00186}00186\ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00187}00187\ \ \ \ \ lock\_guard<mutex>\ lck(\mbox{\hyperlink{classLocalizer_aa89424ad6f6641e87a49c4ec91531df5}{mtx}});}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00188}00188\ \ \ \ \ \mbox{\hyperlink{classLocalizer_a9fe005bd03734ccd1ce385f4cc53030c}{pid}}-\/>\mbox{\hyperlink{classiCub_1_1ctrl_1_1parallelPID_a0598bad778681f7fa7e10c45bf7ae63e}{getOptions}}(options);}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00189}00189\ \ \ \ \ Bottle\ \&bDominantEye=options.addList();}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00190}00190\ \ \ \ \ bDominantEye.addString(\textcolor{stringliteral}{"{}dominantEye"{}});}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00191}00191\ \ \ \ \ bDominantEye.addString(\mbox{\hyperlink{classLocalizer_aaf8f926abe31657809f339328d21f85a}{dominantEye}});}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00192}00192\ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00193}00193\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00194}00194\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00195}00195\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00196}\mbox{\hyperlink{classLocalizer_a890e8ed7abe88d857dec4a32affc0d12}{00196}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classLocalizer_a890e8ed7abe88d857dec4a32affc0d12}{Localizer::setPidOptions}}(\textcolor{keyword}{const}\ Bottle\ \&options)}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00197}00197\ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00198}00198\ \ \ \ \ lock\_guard<mutex>\ lck(\mbox{\hyperlink{classLocalizer_aa89424ad6f6641e87a49c4ec91531df5}{mtx}});}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00199}00199\ \ \ \ \ \mbox{\hyperlink{classLocalizer_a9fe005bd03734ccd1ce385f4cc53030c}{pid}}-\/>\mbox{\hyperlink{classiCub_1_1ctrl_1_1parallelPID_a6628f9c6c390c5482eff11d0da48b084}{setOptions}}(options);}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00200}00200\ \ \ \ \ \textcolor{keywordflow}{if}\ (options.check(\textcolor{stringliteral}{"{}dominantEye"{}}))}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00201}00201\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00202}00202\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{string}\ domEye=options.find(\textcolor{stringliteral}{"{}dominantEye"{}}).asString();}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00203}00203\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ ((domEye==\textcolor{stringliteral}{"{}left"{}})\ ||\ (domEye==\textcolor{stringliteral}{"{}right"{}}))}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00204}00204\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classLocalizer_aaf8f926abe31657809f339328d21f85a}{dominantEye}}=domEye;}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00205}00205\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00206}00206\ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00207}00207\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00208}00208\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00209}00209\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00210}\mbox{\hyperlink{classLocalizer_aed8548adec5ab569994d070b636fd104}{00210}}\ Vector\ \mbox{\hyperlink{classLocalizer_aed8548adec5ab569994d070b636fd104}{Localizer::getAbsAngles}}(\textcolor{keyword}{const}\ Vector\ \&\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}})}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00211}00211\ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00212}00212\ \ \ \ \ Vector\ \mbox{\hyperlink{pcap__wrapper__linux_8cpp_ae44275d34c468c2018022eafb08b7179}{fp}}=\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00213}00213\ \ \ \ \ \mbox{\hyperlink{pcap__wrapper__linux_8cpp_ae44275d34c468c2018022eafb08b7179}{fp}}.push\_back(1.0);\ \ \textcolor{comment}{//\ impose\ homogeneous\ coordinates}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00214}00214\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00215}00215\ \ \ \ \ \textcolor{comment}{//\ get\ fp\ wrt\ head-\/centered\ system}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00216}00216\ \ \ \ \ Vector\ fph=\mbox{\hyperlink{classLocalizer_a41c7e68fe1d3c36c9b2f5285cb467ac7}{invEyeCAbsFrame}}*\mbox{\hyperlink{pcap__wrapper__linux_8cpp_ae44275d34c468c2018022eafb08b7179}{fp}};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00217}00217\ \ \ \ \ fph.pop\_back();}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00218}00218\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00219}00219\ \ \ \ \ Vector\ ang(3);}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00220}00220\ \ \ \ \ ang[0]=atan2(fph[0],fph[2]);}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00221}00221\ \ \ \ \ ang[1]=-\/atan2(fph[1],fabs(fph[2]));}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00222}00222\ \ \ \ \ ang[2]=2.0*atan2(\mbox{\hyperlink{classLocalizer_a01c5af146605e1ad35556ba464f56945}{eyesHalfBaseline}},\mbox{\hyperlink{group__Maths_ga791f0548018b3597da95e70a3b226806}{norm}}(fph));}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00223}00223\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00224}00224\ \ \ \ \ \textcolor{keywordflow}{return}\ ang;}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00225}00225\ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00226}00226\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00227}00227\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00228}00228\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00229}\mbox{\hyperlink{classLocalizer_a865523ad4d827f3cfdbac9b5491f1080}{00229}}\ Vector\ \mbox{\hyperlink{classLocalizer_a865523ad4d827f3cfdbac9b5491f1080}{Localizer::get3DPoint}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{string}\ \&type,\ \textcolor{keyword}{const}\ Vector\ \&ang)}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00230}00230\ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00231}00231\ \ \ \ \ lock\_guard<mutex>\ lck(\mbox{\hyperlink{classLocalizer_aa89424ad6f6641e87a49c4ec91531df5}{mtx}});}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00232}00232\ \ \ \ \ \textcolor{keywordtype}{double}\ azi=ang[0];}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00233}00233\ \ \ \ \ \textcolor{keywordtype}{double}\ ele=ang[1];}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00234}00234\ \ \ \ \ \textcolor{keywordtype}{double}\ ver=ang[2];}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00235}00235\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00236}00236\ \ \ \ \ Vector\ q(8,0.0);}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00237}00237\ \ \ \ \ \textcolor{keywordflow}{if}\ (type==\textcolor{stringliteral}{"{}rel"{}})}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00238}00238\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00239}00239\ \ \ \ \ \ \ \ \ Vector\ torso=\mbox{\hyperlink{classLocalizer_a5489bb0e91a19c7837c9da39d18e4e58}{commData}}-\/>\mbox{\hyperlink{classExchangeData_ab175726efc09db0ad0cbd85da333f915}{get\_torso}}();}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00240}00240\ \ \ \ \ \ \ \ \ Vector\ head=\mbox{\hyperlink{classLocalizer_a5489bb0e91a19c7837c9da39d18e4e58}{commData}}-\/>\mbox{\hyperlink{classExchangeData_a0cb277b927a34e4d59365a3e54fdba58}{get\_q}}();}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00241}00241\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00242}00242\ \ \ \ \ \ \ \ \ q[0]=torso[0];}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00243}00243\ \ \ \ \ \ \ \ \ q[1]=torso[1];}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00244}00244\ \ \ \ \ \ \ \ \ q[2]=torso[2];}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00245}00245\ \ \ \ \ \ \ \ \ q[3]=head[0];}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00246}00246\ \ \ \ \ \ \ \ \ q[4]=head[1];}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00247}00247\ \ \ \ \ \ \ \ \ q[5]=head[2];}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00248}00248\ \ \ \ \ \ \ \ \ q[6]=head[3];}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00249}00249\ \ \ \ \ \ \ \ \ q[7]=head[4];}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00250}00250\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00251}00251\ \ \ \ \ \ \ \ \ ver+=head[5];}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00252}00252\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00253}00253\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00254}00254\ \ \ \ \ \textcolor{comment}{//\ impose\ vergence\ !=\ 0.0}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00255}00255\ \ \ \ \ ver=std::max(ver,\mbox{\hyperlink{classLocalizer_a5489bb0e91a19c7837c9da39d18e4e58}{commData}}-\/>\mbox{\hyperlink{classExchangeData_acbe44d9ac13590b99d2729c047639760}{minAllowedVergence}});\ \ \ \ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00256}00256\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00257}00257\ \ \ \ \ q[7]+=ver/2.0;}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00258}00258\ \ \ \ \ \mbox{\hyperlink{classGazeComponent_af0d811689807c394a6e9c6d49ca29c1d}{eyeL}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a9232068a0e37c01c09ce31c93ab9be42}{setAng}}(q);}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00259}00259\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00260}00260\ \ \ \ \ q[7]-\/=ver;}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00261}00261\ \ \ \ \ \mbox{\hyperlink{classGazeComponent_aa94da445b35148d2b6bdbe9244cc46c1}{eyeR}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a9232068a0e37c01c09ce31c93ab9be42}{setAng}}(q);}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00262}00262\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00263}00263\ \ \ \ \ \textcolor{comment}{//\ compute\ new\ fp\ due\ to\ changed\ vergence}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00264}00264\ \ \ \ \ Vector\ \mbox{\hyperlink{pcap__wrapper__linux_8cpp_ae44275d34c468c2018022eafb08b7179}{fp}};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00265}00265\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1iKin_1_1CartesianHelper_a69ba39d3b515dfc6b8a8a5577204a5b9}{CartesianHelper::computeFixationPointData}}(*(\mbox{\hyperlink{classGazeComponent_af0d811689807c394a6e9c6d49ca29c1d}{eyeL}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinLimb_ae0c121656774905c58b668b450417f0e}{asChain}}()),*(\mbox{\hyperlink{classGazeComponent_aa94da445b35148d2b6bdbe9244cc46c1}{eyeR}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinLimb_ae0c121656774905c58b668b450417f0e}{asChain}}()),\mbox{\hyperlink{pcap__wrapper__linux_8cpp_ae44275d34c468c2018022eafb08b7179}{fp}});}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00266}00266\ \ \ \ \ \mbox{\hyperlink{pcap__wrapper__linux_8cpp_ae44275d34c468c2018022eafb08b7179}{fp}}.push\_back(1.0);\ \ \textcolor{comment}{//\ impose\ homogeneous\ coordinates\ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00267}00267\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00268}00268\ \ \ \ \ \textcolor{comment}{//\ compute\ rotational\ matrix\ to}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00269}00269\ \ \ \ \ \textcolor{comment}{//\ account\ for\ elevation\ and\ azimuth}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00270}00270\ \ \ \ \ Vector\ \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}(4),\ \mbox{\hyperlink{show__eyes__axes_8m_a2fb1c5cf58867b5bbc9a1b145a86f3a0}{y}}(4);}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00271}00271\ \ \ \ \ \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}[0]=1.0;\ \ \ \ \mbox{\hyperlink{show__eyes__axes_8m_a2fb1c5cf58867b5bbc9a1b145a86f3a0}{y}}[0]=0.0;}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00272}00272\ \ \ \ \ \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}[1]=0.0;\ \ \ \ \mbox{\hyperlink{show__eyes__axes_8m_a2fb1c5cf58867b5bbc9a1b145a86f3a0}{y}}[1]=1.0;}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00273}00273\ \ \ \ \ \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}[2]=0.0;\ \ \ \ \mbox{\hyperlink{show__eyes__axes_8m_a2fb1c5cf58867b5bbc9a1b145a86f3a0}{y}}[2]=0.0;}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00274}00274\ \ \ \ \ \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}[3]=ele;\ \ \ \ \mbox{\hyperlink{show__eyes__axes_8m_a2fb1c5cf58867b5bbc9a1b145a86f3a0}{y}}[3]=azi;\ \ \ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00275}00275\ \ \ \ \ Matrix\ R=axis2dcm(\mbox{\hyperlink{show__eyes__axes_8m_a2fb1c5cf58867b5bbc9a1b145a86f3a0}{y}})*axis2dcm(\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}});}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00276}00276\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00277}00277\ \ \ \ \ Vector\ fph,\ xd;}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00278}00278\ \ \ \ \ \textcolor{keywordflow}{if}\ (type==\textcolor{stringliteral}{"{}rel"{}})}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00279}00279\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00280}00280\ \ \ \ \ \ \ \ \ Matrix\ frame=\mbox{\hyperlink{classLocalizer_a5489bb0e91a19c7837c9da39d18e4e58}{commData}}-\/>\mbox{\hyperlink{classExchangeData_ac58f28c693f4c16e5e93385201ad998a}{get\_fpFrame}}();}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00281}00281\ \ \ \ \ \ \ \ \ fph=SE3inv(frame)*\mbox{\hyperlink{pcap__wrapper__linux_8cpp_ae44275d34c468c2018022eafb08b7179}{fp}};\ \ \ \ \ \ \ \textcolor{comment}{//\ get\ fp\ wrt\ relative\ head-\/centered\ frame}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00282}00282\ \ \ \ \ \ \ \ \ xd=frame*(R*fph);\ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ apply\ rotation\ and\ retrieve\ fp\ wrt\ root\ frame}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00283}00283\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00284}00284\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00285}00285\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00286}00286\ \ \ \ \ \ \ \ \ fph=\mbox{\hyperlink{classLocalizer_a41c7e68fe1d3c36c9b2f5285cb467ac7}{invEyeCAbsFrame}}*\mbox{\hyperlink{pcap__wrapper__linux_8cpp_ae44275d34c468c2018022eafb08b7179}{fp}};\ \ \ \ \ \textcolor{comment}{//\ get\ fp\ wrt\ absolute\ head-\/centered\ frame}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00287}00287\ \ \ \ \ \ \ \ \ xd=\mbox{\hyperlink{classLocalizer_a09e41530c0d85d49461a82f39fde77af}{eyeCAbsFrame}}*(R*fph);\ \ \ \ \textcolor{comment}{//\ apply\ rotation\ and\ retrieve\ fp\ wrt\ root\ frame}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00288}00288\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00289}00289\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00290}00290\ \ \ \ \ xd.pop\_back();}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00291}00291\ \ \ \ \ \textcolor{keywordflow}{return}\ xd;}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00292}00292\ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00293}00293\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00294}00294\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00295}00295\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00296}\mbox{\hyperlink{classLocalizer_ae5cb5d6b0990effd03c2dce912b04472}{00296}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classLocalizer_ae5cb5d6b0990effd03c2dce912b04472}{Localizer::projectPoint}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{string}\ \&type,\ \textcolor{keyword}{const}\ Vector\ \&\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}},\ Vector\ \&px)}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00297}00297\ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00298}00298\ \ \ \ \ lock\_guard<mutex>\ lck(\mbox{\hyperlink{classLocalizer_aa89424ad6f6641e87a49c4ec91531df5}{mtx}});}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00299}00299\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}.length()<3)}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00300}00300\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00301}00301\ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}Not\ enough\ values\ given\ for\ the\ point!"{}});}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00302}00302\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00303}00303\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00304}00304\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00305}00305\ \ \ \ \ \textcolor{keywordtype}{bool}\ isLeft=(type==\textcolor{stringliteral}{"{}left"{}});}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00306}00306\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00307}00307\ \ \ \ \ Matrix\ \ *Prj=(isLeft?\mbox{\hyperlink{classLocalizer_a0079f885a6d43d21405fc42c4101c6a2}{PrjL}}:\mbox{\hyperlink{classLocalizer_abe89e9359bd0c844c954c70de49d5c7f}{PrjR}});}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00308}00308\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1iKin_1_1iCubEye}{iCubEye}}\ *eye=(isLeft?\mbox{\hyperlink{classGazeComponent_af0d811689807c394a6e9c6d49ca29c1d}{eyeL}}:\mbox{\hyperlink{classGazeComponent_aa94da445b35148d2b6bdbe9244cc46c1}{eyeR}});}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00309}00309\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00310}00310\ \ \ \ \ \textcolor{keywordflow}{if}\ (Prj!=\textcolor{keyword}{nullptr})}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00311}00311\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00312}00312\ \ \ \ \ \ \ \ \ Vector\ torso=\mbox{\hyperlink{classLocalizer_a5489bb0e91a19c7837c9da39d18e4e58}{commData}}-\/>\mbox{\hyperlink{classExchangeData_ab175726efc09db0ad0cbd85da333f915}{get\_torso}}();}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00313}00313\ \ \ \ \ \ \ \ \ Vector\ head=\mbox{\hyperlink{classLocalizer_a5489bb0e91a19c7837c9da39d18e4e58}{commData}}-\/>\mbox{\hyperlink{classExchangeData_a0cb277b927a34e4d59365a3e54fdba58}{get\_q}}();}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00314}00314\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00315}00315\ \ \ \ \ \ \ \ \ Vector\ q(8);}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00316}00316\ \ \ \ \ \ \ \ \ q[0]=torso[0];}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00317}00317\ \ \ \ \ \ \ \ \ q[1]=torso[1];}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00318}00318\ \ \ \ \ \ \ \ \ q[2]=torso[2];}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00319}00319\ \ \ \ \ \ \ \ \ q[3]=head[0];}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00320}00320\ \ \ \ \ \ \ \ \ q[4]=head[1];}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00321}00321\ \ \ \ \ \ \ \ \ q[5]=head[2];}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00322}00322\ \ \ \ \ \ \ \ \ q[6]=head[3];}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00323}00323\ \ \ \ \ \ \ \ \ q[7]=head[4]+head[5]/(isLeft?2.0:-\/2.0);}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00324}00324\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00325}00325\ \ \ \ \ \ \ \ \ Vector\ xo=\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00326}00326\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ impose\ homogeneous\ coordinates}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00327}00327\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (xo.length()<4)}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00328}00328\ \ \ \ \ \ \ \ \ \ \ \ \ xo.push\_back(1.0);}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00329}00329\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00330}00330\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00331}00331\ \ \ \ \ \ \ \ \ \ \ \ \ xo=xo.subVector(0,3);\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00332}00332\ \ \ \ \ \ \ \ \ \ \ \ \ xo[3]=1.0;}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00333}00333\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00334}00334\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00335}00335\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ find\ position\ wrt\ the\ camera\ frame}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00336}00336\ \ \ \ \ \ \ \ \ Vector\ xe=SE3inv(eye-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a0b503aeeb58dc5cb228c174bf8500599}{getH}}(q))*xo;}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00337}00337\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00338}00338\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ find\ the\ 2D\ projection}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00339}00339\ \ \ \ \ \ \ \ \ px=*Prj*xe;}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00340}00340\ \ \ \ \ \ \ \ \ px=px/px[2];}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00341}00341\ \ \ \ \ \ \ \ \ px.pop\_back();}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00342}00342\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00343}00343\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00344}00344\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00345}00345\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00346}00346\ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}Unspecified\ projection\ matrix\ for\ \%s\ camera!"{}},type.c\_str());}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00347}00347\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00348}00348\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00349}00349\ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00350}00350\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00351}00351\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00352}00352\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00353}\mbox{\hyperlink{classLocalizer_a8c9023012b8689203dd5a703a7a72f63}{00353}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classLocalizer_ae5cb5d6b0990effd03c2dce912b04472}{Localizer::projectPoint}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{string}\ \&type,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ u,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ v,}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00354}00354\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{show__eyes__axes_8m_a25ed1bcb423b0b7200f485fc5ff71c8e}{z}},\ Vector\ \&\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}})}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00355}00355\ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00356}00356\ \ \ \ \ lock\_guard<mutex>\ lck(\mbox{\hyperlink{classLocalizer_aa89424ad6f6641e87a49c4ec91531df5}{mtx}});}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00357}00357\ \ \ \ \ \textcolor{keywordtype}{bool}\ isLeft=(type==\textcolor{stringliteral}{"{}left"{}});}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00358}00358\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00359}00359\ \ \ \ \ Matrix\ \ *invPrj=(isLeft?\mbox{\hyperlink{classLocalizer_a6c9883ff1f1626b4d45033e651dbc1af}{invPrjL}}:\mbox{\hyperlink{classLocalizer_a81ad22375cfcce40c208bf176402b2b8}{invPrjR}});}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00360}00360\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1iKin_1_1iCubEye}{iCubEye}}\ *eye=(isLeft?\mbox{\hyperlink{classGazeComponent_af0d811689807c394a6e9c6d49ca29c1d}{eyeL}}:\mbox{\hyperlink{classGazeComponent_aa94da445b35148d2b6bdbe9244cc46c1}{eyeR}});}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00361}00361\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00362}00362\ \ \ \ \ \textcolor{keywordflow}{if}\ (invPrj!=\textcolor{keyword}{nullptr})}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00363}00363\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00364}00364\ \ \ \ \ \ \ \ \ Vector\ torso=\mbox{\hyperlink{classLocalizer_a5489bb0e91a19c7837c9da39d18e4e58}{commData}}-\/>\mbox{\hyperlink{classExchangeData_ab175726efc09db0ad0cbd85da333f915}{get\_torso}}();}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00365}00365\ \ \ \ \ \ \ \ \ Vector\ head=\mbox{\hyperlink{classLocalizer_a5489bb0e91a19c7837c9da39d18e4e58}{commData}}-\/>\mbox{\hyperlink{classExchangeData_a0cb277b927a34e4d59365a3e54fdba58}{get\_q}}();}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00366}00366\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00367}00367\ \ \ \ \ \ \ \ \ Vector\ q(8);}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00368}00368\ \ \ \ \ \ \ \ \ q[0]=torso[0];}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00369}00369\ \ \ \ \ \ \ \ \ q[1]=torso[1];}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00370}00370\ \ \ \ \ \ \ \ \ q[2]=torso[2];}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00371}00371\ \ \ \ \ \ \ \ \ q[3]=head[0];}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00372}00372\ \ \ \ \ \ \ \ \ q[4]=head[1];}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00373}00373\ \ \ \ \ \ \ \ \ q[5]=head[2];}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00374}00374\ \ \ \ \ \ \ \ \ q[6]=head[3];}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00375}00375\ \ \ \ \ \ \ \ \ q[7]=head[4]+head[5]/(isLeft?2.0:-\/2.0);}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00376}00376\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00377}00377\ \ \ \ \ \ \ \ \ Vector\ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}(3);}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00378}00378\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}[0]=\mbox{\hyperlink{show__eyes__axes_8m_a25ed1bcb423b0b7200f485fc5ff71c8e}{z}}*u;}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00379}00379\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}[1]=\mbox{\hyperlink{show__eyes__axes_8m_a25ed1bcb423b0b7200f485fc5ff71c8e}{z}}*v;}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00380}00380\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}[2]=\mbox{\hyperlink{show__eyes__axes_8m_a25ed1bcb423b0b7200f485fc5ff71c8e}{z}};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00381}00381\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00382}00382\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ find\ the\ 3D\ position\ from\ the\ 2D\ projection,}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00383}00383\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ knowing\ the\ coordinate\ z\ in\ the\ camera\ frame}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00384}00384\ \ \ \ \ \ \ \ \ Vector\ xe=*invPrj*\mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00385}00385\ \ \ \ \ \ \ \ \ xe[3]=1.0;\ \ \textcolor{comment}{//\ impose\ homogeneous\ coordinates}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00386}00386\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00387}00387\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ find\ position\ wrt\ the\ root\ frame\ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00388}00388\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}=eye-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a0b503aeeb58dc5cb228c174bf8500599}{getH}}(q)*xe;}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00389}00389\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}.pop\_back();}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00390}00390\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00391}00391\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00392}00392\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00393}00393\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00394}00394\ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}Unspecified\ projection\ matrix\ for\ \%s\ camera!"{}},type.c\_str());}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00395}00395\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00396}00396\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00397}00397\ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00398}00398\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00399}00399\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00400}00400\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00401}\mbox{\hyperlink{classLocalizer_a9a0728f17329511725a9b62dffd5ca8f}{00401}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classLocalizer_ae5cb5d6b0990effd03c2dce912b04472}{Localizer::projectPoint}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{string}\ \&type,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ u,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ v,}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00402}00402\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Vector\ \&plane,\ Vector\ \&\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}})}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00403}00403\ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00404}00404\ \ \ \ \ \textcolor{keywordflow}{if}\ (plane.length()<4)}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00405}00405\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00406}00406\ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}Not\ enough\ values\ given\ for\ the\ projection\ plane!"{}});}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00407}00407\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00408}00408\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00409}00409\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00410}00410\ \ \ \ \ \textcolor{keywordtype}{bool}\ isLeft=(type==\textcolor{stringliteral}{"{}left"{}});}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00411}00411\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1iKin_1_1iCubEye}{iCubEye}}\ *eye=(isLeft?\mbox{\hyperlink{classGazeComponent_af0d811689807c394a6e9c6d49ca29c1d}{eyeL}}:\mbox{\hyperlink{classGazeComponent_aa94da445b35148d2b6bdbe9244cc46c1}{eyeR}});}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00412}00412\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00413}00413\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classLocalizer_ae5cb5d6b0990effd03c2dce912b04472}{projectPoint}}(type,u,v,1.0,\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}))}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00414}00414\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00415}00415\ \ \ \ \ \ \ \ \ lock\_guard<mutex>\ lck(\mbox{\hyperlink{classLocalizer_aa89424ad6f6641e87a49c4ec91531df5}{mtx}});}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00416}00416\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00417}00417\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ pick\ up\ a\ point\ belonging\ to\ the\ plane}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00418}00418\ \ \ \ \ \ \ \ \ Vector\ p0(3,0.0);}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00419}00419\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (plane[0]!=0.0)}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00420}00420\ \ \ \ \ \ \ \ \ \ \ \ \ p0[0]=-\/plane[3]/plane[0];}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00421}00421\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (plane[1]!=0.0)}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00422}00422\ \ \ \ \ \ \ \ \ \ \ \ \ p0[1]=-\/plane[3]/plane[1];}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00423}00423\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (plane[2]!=0.0)}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00424}00424\ \ \ \ \ \ \ \ \ \ \ \ \ p0[2]=-\/plane[3]/plane[2];}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00425}00425\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00426}00426\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00427}00427\ \ \ \ \ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}Error\ while\ specifying\ projection\ plane!"{}});}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00428}00428\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00429}00429\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00430}00430\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00431}00431\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ take\ a\ vector\ orthogonal\ to\ the\ plane}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00432}00432\ \ \ \ \ \ \ \ \ Vector\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}(3);}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00433}00433\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}[0]=plane[0];}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00434}00434\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}[1]=plane[1];}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00435}00435\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}[2]=plane[2];}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00436}00436\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00437}00437\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ compute\ the\ projection}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00438}00438\ \ \ \ \ \ \ \ \ Vector\ \mbox{\hyperlink{compute__ekf__fast_8m_a08a4415e9d594ff960030b921d42b91e}{e}}=eye-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a78408241048e9c9d0e976f22ae522eea}{EndEffPose}}().subVector(0,2);}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00439}00439\ \ \ \ \ \ \ \ \ Vector\ v=\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}-\/\mbox{\hyperlink{compute__ekf__fast_8m_a08a4415e9d594ff960030b921d42b91e}{e}};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00440}00440\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}=\mbox{\hyperlink{compute__ekf__fast_8m_a08a4415e9d594ff960030b921d42b91e}{e}}+(\mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(p0-\/\mbox{\hyperlink{compute__ekf__fast_8m_a08a4415e9d594ff960030b921d42b91e}{e}},\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}})/\mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(v,\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}))*v;}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00441}00441\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00442}00442\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00443}00443\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00444}00444\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00445}00445\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00446}00446\ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00447}00447\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00448}00448\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00449}00449\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00450}\mbox{\hyperlink{classLocalizer_ac9b186dd1bddff152d37e8724945bffb}{00450}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classLocalizer_ac9b186dd1bddff152d37e8724945bffb}{Localizer::triangulatePoint}}(\textcolor{keyword}{const}\ Vector\ \&pxl,\ \textcolor{keyword}{const}\ Vector\ \&pxr,\ Vector\ \&\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}})}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00451}00451\ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00452}00452\ \ \ \ \ lock\_guard<mutex>\ lck(\mbox{\hyperlink{classLocalizer_aa89424ad6f6641e87a49c4ec91531df5}{mtx}});}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00453}00453\ \ \ \ \ \textcolor{keywordflow}{if}\ ((pxl.length()<2)\ ||\ (pxr.length()<2))}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00454}00454\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00455}00455\ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}Not\ enough\ values\ given\ for\ the\ pixels!"{}});}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00456}00456\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00457}00457\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00458}00458\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00459}00459\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classLocalizer_a0079f885a6d43d21405fc42c4101c6a2}{PrjL}}\ \&\&\ \mbox{\hyperlink{classLocalizer_abe89e9359bd0c844c954c70de49d5c7f}{PrjR}})}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00460}00460\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00461}00461\ \ \ \ \ \ \ \ \ Vector\ torso=\mbox{\hyperlink{classLocalizer_a5489bb0e91a19c7837c9da39d18e4e58}{commData}}-\/>\mbox{\hyperlink{classExchangeData_ab175726efc09db0ad0cbd85da333f915}{get\_torso}}();}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00462}00462\ \ \ \ \ \ \ \ \ Vector\ head=\mbox{\hyperlink{classLocalizer_a5489bb0e91a19c7837c9da39d18e4e58}{commData}}-\/>\mbox{\hyperlink{classExchangeData_a0cb277b927a34e4d59365a3e54fdba58}{get\_q}}();}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00463}00463\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00464}00464\ \ \ \ \ \ \ \ \ Vector\ qL(8);}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00465}00465\ \ \ \ \ \ \ \ \ qL[0]=torso[0];}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00466}00466\ \ \ \ \ \ \ \ \ qL[1]=torso[1];}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00467}00467\ \ \ \ \ \ \ \ \ qL[2]=torso[2];}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00468}00468\ \ \ \ \ \ \ \ \ qL[3]=head[0];}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00469}00469\ \ \ \ \ \ \ \ \ qL[4]=head[1];}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00470}00470\ \ \ \ \ \ \ \ \ qL[5]=head[2];}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00471}00471\ \ \ \ \ \ \ \ \ qL[6]=head[3];}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00472}00472\ \ \ \ \ \ \ \ \ qL[7]=head[4]+head[5]/2.0;}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00473}00473\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00474}00474\ \ \ \ \ \ \ \ \ Vector\ qR=qL;}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00475}00475\ \ \ \ \ \ \ \ \ qR[7]-\/=head[5];}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00476}00476\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00477}00477\ \ \ \ \ \ \ \ \ Matrix\ HL=SE3inv(\mbox{\hyperlink{classGazeComponent_af0d811689807c394a6e9c6d49ca29c1d}{eyeL}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a0b503aeeb58dc5cb228c174bf8500599}{getH}}(qL));}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00478}00478\ \ \ \ \ \ \ \ \ Matrix\ HR=SE3inv(\mbox{\hyperlink{classGazeComponent_aa94da445b35148d2b6bdbe9244cc46c1}{eyeR}}-\/>\mbox{\hyperlink{classiCub_1_1iKin_1_1iKinChain_a0b503aeeb58dc5cb228c174bf8500599}{getH}}(qR));}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00479}00479\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00480}00480\ \ \ \ \ \ \ \ \ Matrix\ tmp=\mbox{\hyperlink{compute__ekf__sym_8m_a35baefda5ec044ac7c1f5a41815b5b45}{zeros}}(3,4);\ tmp(2,2)=1.0;}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00481}00481\ \ \ \ \ \ \ \ \ tmp(0,2)=pxl[0];\ tmp(1,2)=pxl[1];}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00482}00482\ \ \ \ \ \ \ \ \ Matrix\ AL=(*\mbox{\hyperlink{classLocalizer_a0079f885a6d43d21405fc42c4101c6a2}{PrjL}}-\/tmp)*HL;}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00483}00483\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00484}00484\ \ \ \ \ \ \ \ \ tmp(0,2)=pxr[0];\ tmp(1,2)=pxr[1];}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00485}00485\ \ \ \ \ \ \ \ \ Matrix\ AR=(*\mbox{\hyperlink{classLocalizer_abe89e9359bd0c844c954c70de49d5c7f}{PrjR}}-\/tmp)*HR;}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00486}00486\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00487}00487\ \ \ \ \ \ \ \ \ Matrix\ \mbox{\hyperlink{sine_8m_a3b98e2dffc6cb06a89dcb0d5c60a0206}{A}}(4,3);}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00488}00488\ \ \ \ \ \ \ \ \ Vector\ b(4);}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00489}00489\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i=0;\ i<2;\ i++)}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00490}00490\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00491}00491\ \ \ \ \ \ \ \ \ \ \ \ \ b[i]=-\/AL(i,3);}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00492}00492\ \ \ \ \ \ \ \ \ \ \ \ \ b[i+2]=-\/AR(i,3);}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00493}00493\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00494}00494\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ j=0;\ j<3;\ j++)}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00495}00495\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00496}00496\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{sine_8m_a3b98e2dffc6cb06a89dcb0d5c60a0206}{A}}(i,j)=AL(i,j);}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00497}00497\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{sine_8m_a3b98e2dffc6cb06a89dcb0d5c60a0206}{A}}(i+2,j)=AR(i,j);}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00498}00498\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00499}00499\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00500}00500\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00501}00501\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ solve\ the\ least-\/squares\ problem}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00502}00502\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}=pinv(\mbox{\hyperlink{sine_8m_a3b98e2dffc6cb06a89dcb0d5c60a0206}{A}})*b;}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00503}00503\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00504}00504\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00505}00505\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00506}00506\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00507}00507\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00508}00508\ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}Unspecified\ projection\ matrix\ for\ at\ least\ one\ camera!"{}});}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00509}00509\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00510}00510\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00511}00511\ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00512}00512\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00513}00513\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00514}00514\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00515}\mbox{\hyperlink{classLocalizer_a7be8957a3a01e1628622d03bf2249814}{00515}}\ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{classLocalizer_a7be8957a3a01e1628622d03bf2249814}{Localizer::getDistFromVergence}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ ver)}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00516}00516\ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00517}00517\ \ \ \ \ \textcolor{keywordtype}{double}\ tg=tan(\mbox{\hyperlink{namespaceiCub_1_1ctrl_a52299223f405fb68877b56af10f9a3f2}{CTRL\_DEG2RAD}}*ver/2.0);}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00518}00518\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classLocalizer_a01c5af146605e1ad35556ba464f56945}{eyesHalfBaseline}}*sqrt(1.0+1.0/(tg*tg));}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00519}00519\ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00520}00520\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00521}00521\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00522}00522\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00523}\mbox{\hyperlink{classLocalizer_a7dd076acfff32dfcd812bbc7fcac0cf5}{00523}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classLocalizer_a7dd076acfff32dfcd812bbc7fcac0cf5}{Localizer::handleMonocularInput}}()}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00524}00524\ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00525}00525\ \ \ \ \ \textcolor{keywordflow}{if}\ (Bottle\ *mono=\mbox{\hyperlink{classLocalizer_a6985fb47feef125be7faabddcec7e920}{port\_mono}}.read(\textcolor{keyword}{false}))}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00526}00526\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00527}00527\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (mono-\/>size()>=4)}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00528}00528\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00529}00529\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{string}\ type=mono-\/>get(0).asString();}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00530}00530\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ u=mono-\/>get(1).asFloat64();}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00531}00531\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ v=mono-\/>get(2).asFloat64();}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00532}00532\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{show__eyes__axes_8m_a25ed1bcb423b0b7200f485fc5ff71c8e}{z}};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00533}00533\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00534}00534\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}}=\textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00535}00535\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (mono-\/>get(3).isFloat64())}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00536}00536\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00537}00537\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{show__eyes__axes_8m_a25ed1bcb423b0b7200f485fc5ff71c8e}{z}}=mono-\/>get(3).asFloat64();}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00538}00538\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}}=\textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00539}00539\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00540}00540\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ ((mono-\/>get(3).asString()==\textcolor{stringliteral}{"{}ver"{}})\ \&\&\ (mono-\/>size()>=5))}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00541}00541\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00542}00542\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ ver=mono-\/>get(4).asFloat64();}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00543}00543\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{show__eyes__axes_8m_a25ed1bcb423b0b7200f485fc5ff71c8e}{z}}=\mbox{\hyperlink{classLocalizer_a7be8957a3a01e1628622d03bf2249814}{getDistFromVergence}}(ver);}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00544}00544\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}}=\textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00545}00545\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00546}00546\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00547}00547\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}})}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00548}00548\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00549}00549\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Vector\ \mbox{\hyperlink{pcap__wrapper__linux_8cpp_ae44275d34c468c2018022eafb08b7179}{fp}};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00550}00550\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classLocalizer_ae5cb5d6b0990effd03c2dce912b04472}{projectPoint}}(type,u,v,\mbox{\hyperlink{show__eyes__axes_8m_a25ed1bcb423b0b7200f485fc5ff71c8e}{z}},\mbox{\hyperlink{pcap__wrapper__linux_8cpp_ae44275d34c468c2018022eafb08b7179}{fp}}))}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00551}00551\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classLocalizer_a5489bb0e91a19c7837c9da39d18e4e58}{commData}}-\/>\mbox{\hyperlink{classExchangeData_ad152a69e3f243d53e867b45806f14520}{port\_xd}}-\/>\mbox{\hyperlink{classxdPort_a3b4fab22b12b8f8f9a1072582d49177a}{set\_xd}}(\mbox{\hyperlink{pcap__wrapper__linux_8cpp_ae44275d34c468c2018022eafb08b7179}{fp}});}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00552}00552\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00553}00553\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00554}00554\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00555}00555\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00556}00556\ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}Got\ wrong\ monocular\ information!"{}});}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00557}00557\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00558}00558\ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00559}00559\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00560}00560\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00561}00561\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00562}\mbox{\hyperlink{classLocalizer_a5e1e5c4d47fcaca7f4fbc97e68e589b3}{00562}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classLocalizer_a5e1e5c4d47fcaca7f4fbc97e68e589b3}{Localizer::handleStereoInput}}()}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00563}00563\ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00564}00564\ \ \ \ \ \textcolor{keywordflow}{if}\ (Bottle\ *stereo=\mbox{\hyperlink{classLocalizer_a4429d115a142229b2099a98fbe643551}{port\_stereo}}.read(\textcolor{keyword}{false}))}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00565}00565\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00566}00566\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ ((\mbox{\hyperlink{classLocalizer_a0079f885a6d43d21405fc42c4101c6a2}{PrjL}}!=\textcolor{keyword}{nullptr})\ ||\ (\mbox{\hyperlink{classLocalizer_abe89e9359bd0c844c954c70de49d5c7f}{PrjR}}!=\textcolor{keyword}{nullptr}))}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00567}00567\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00568}00568\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (stereo-\/>size()>=4)}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00569}00569\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00570}00570\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ ul=stereo-\/>get(0).asFloat64();}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00571}00571\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ vl=stereo-\/>get(1).asFloat64();}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00572}00572\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ ur=stereo-\/>get(2).asFloat64();}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00573}00573\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ vr=stereo-\/>get(3).asFloat64();}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00574}00574\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00575}00575\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Vector\ ref(1),\ fb(1),\ \mbox{\hyperlink{pcap__wrapper__linux_8cpp_ae44275d34c468c2018022eafb08b7179}{fp}};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00576}00576\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ u,\ v;}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00577}00577\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00578}00578\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ref=0.0;}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00579}00579\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classLocalizer_aaf8f926abe31657809f339328d21f85a}{dominantEye}}==\textcolor{stringliteral}{"{}left"{}})}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00580}00580\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00581}00581\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ u=ul;}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00582}00582\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ v=vl;}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00583}00583\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ fb=\mbox{\hyperlink{classLocalizer_a6fc1d75a3d7d6e2f671b0dfd8f198c20}{cxr}}-\/ur;}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00584}00584\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ by\ inverting\ the\ sign\ of\ the\ error\ (e=ref-\/fb=-\/fb)}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00585}00585\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ we\ can\ keep\ gains\ always\ positive}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00586}00586\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00587}00587\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00588}00588\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00589}00589\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ u=ur;}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00590}00590\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ v=vr;}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00591}00591\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ fb=ul-\/\mbox{\hyperlink{classLocalizer_a709517199fc1e4cf28044eaab25dc6ff}{cxl}};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00592}00592\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00593}00593\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00594}00594\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classLocalizer_aa89424ad6f6641e87a49c4ec91531df5}{mtx}}.lock();}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00595}00595\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Vector\ \mbox{\hyperlink{show__eyes__axes_8m_a25ed1bcb423b0b7200f485fc5ff71c8e}{z}}=\mbox{\hyperlink{classLocalizer_a9fe005bd03734ccd1ce385f4cc53030c}{pid}}-\/>\mbox{\hyperlink{classiCub_1_1ctrl_1_1parallelPID_aea6532cd6c404beadfa12a35a6b2d4fa}{compute}}(ref,fb);}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00596}00596\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classLocalizer_aa89424ad6f6641e87a49c4ec91531df5}{mtx}}.unlock();}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00597}00597\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00598}00598\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classLocalizer_ae5cb5d6b0990effd03c2dce912b04472}{projectPoint}}(\mbox{\hyperlink{classLocalizer_aaf8f926abe31657809f339328d21f85a}{dominantEye}},u,v,\mbox{\hyperlink{show__eyes__axes_8m_a25ed1bcb423b0b7200f485fc5ff71c8e}{z}}[0],\mbox{\hyperlink{pcap__wrapper__linux_8cpp_ae44275d34c468c2018022eafb08b7179}{fp}}))}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00599}00599\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classLocalizer_a5489bb0e91a19c7837c9da39d18e4e58}{commData}}-\/>\mbox{\hyperlink{classExchangeData_ad152a69e3f243d53e867b45806f14520}{port\_xd}}-\/>\mbox{\hyperlink{classxdPort_a3b4fab22b12b8f8f9a1072582d49177a}{set\_xd}}(\mbox{\hyperlink{pcap__wrapper__linux_8cpp_ae44275d34c468c2018022eafb08b7179}{fp}});}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00600}00600\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00601}00601\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00602}00602\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}Got\ wrong\ stereo\ information!"{}});}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00603}00603\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00604}00604\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00605}00605\ \ \ \ \ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}Unspecified\ projection\ matrix!"{}});}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00606}00606\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00607}00607\ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00608}00608\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00609}00609\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00610}00610\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00611}\mbox{\hyperlink{classLocalizer_a1768d3ecf342895713d61bb2c6ac0d2e}{00611}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classLocalizer_a1768d3ecf342895713d61bb2c6ac0d2e}{Localizer::handleAnglesInput}}()}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00612}00612\ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00613}00613\ \ \ \ \ \textcolor{keywordflow}{if}\ (Bottle\ *angles=\mbox{\hyperlink{classLocalizer_aa3add7874c1ac747138b682d8d8629e6}{port\_anglesIn}}.read(\textcolor{keyword}{false}))}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00614}00614\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00615}00615\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (angles-\/>size()>=4)}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00616}00616\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00617}00617\ \ \ \ \ \ \ \ \ \ \ \ \ Vector\ ang(3);}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00618}00618\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00619}00619\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{string}\ type=angles-\/>get(0).asString();}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00620}00620\ \ \ \ \ \ \ \ \ \ \ \ \ ang[0]=\mbox{\hyperlink{namespaceiCub_1_1ctrl_a52299223f405fb68877b56af10f9a3f2}{CTRL\_DEG2RAD}}*angles-\/>get(1).asFloat64();}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00621}00621\ \ \ \ \ \ \ \ \ \ \ \ \ ang[1]=\mbox{\hyperlink{namespaceiCub_1_1ctrl_a52299223f405fb68877b56af10f9a3f2}{CTRL\_DEG2RAD}}*angles-\/>get(2).asFloat64();}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00622}00622\ \ \ \ \ \ \ \ \ \ \ \ \ ang[2]=\mbox{\hyperlink{namespaceiCub_1_1ctrl_a52299223f405fb68877b56af10f9a3f2}{CTRL\_DEG2RAD}}*angles-\/>get(3).asFloat64();}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00623}00623\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00624}00624\ \ \ \ \ \ \ \ \ \ \ \ \ Vector\ xd=\mbox{\hyperlink{classLocalizer_a865523ad4d827f3cfdbac9b5491f1080}{get3DPoint}}(type,ang);}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00625}00625\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classLocalizer_a5489bb0e91a19c7837c9da39d18e4e58}{commData}}-\/>\mbox{\hyperlink{classExchangeData_ad152a69e3f243d53e867b45806f14520}{port\_xd}}-\/>\mbox{\hyperlink{classxdPort_a3b4fab22b12b8f8f9a1072582d49177a}{set\_xd}}(xd);}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00626}00626\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00627}00627\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00628}00628\ \ \ \ \ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}Got\ wrong\ angles\ information!"{}});}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00629}00629\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00630}00630\ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00631}00631\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00632}00632\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00633}00633\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00634}\mbox{\hyperlink{classLocalizer_ab78c5037b65ec0889b330c0ffcedb504}{00634}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classLocalizer_ab78c5037b65ec0889b330c0ffcedb504}{Localizer::handleAnglesOutput}}()}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00635}00635\ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00636}00636\ \ \ \ \ \textcolor{keywordtype}{double}\ x\_stamp;}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00637}00637\ \ \ \ \ Vector\ \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}=\mbox{\hyperlink{classLocalizer_a5489bb0e91a19c7837c9da39d18e4e58}{commData}}-\/>\mbox{\hyperlink{classExchangeData_a5d59639e1fed64eec0ac01a49f2894a6}{get\_x}}(x\_stamp);}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00638}00638\ \ \ \ \ \mbox{\hyperlink{classLocalizer_ae753b98c3369d78b5f717ea02ccc1708}{txInfo\_ang}}.update(x\_stamp);}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00639}00639\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00640}00640\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classLocalizer_aaaa0dd33b0ddcf15e6d44a47f1f53059}{port\_anglesOut}}.getOutputCount()>0)}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00641}00641\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00642}00642\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classLocalizer_aaaa0dd33b0ddcf15e6d44a47f1f53059}{port\_anglesOut}}.prepare()=\mbox{\hyperlink{namespaceiCub_1_1ctrl_a335ee3373d8ec68927b7b42c111fe408}{CTRL\_RAD2DEG}}*\mbox{\hyperlink{classLocalizer_aed8548adec5ab569994d070b636fd104}{getAbsAngles}}(\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}});}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00643}00643\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classLocalizer_aaaa0dd33b0ddcf15e6d44a47f1f53059}{port\_anglesOut}}.setEnvelope(\mbox{\hyperlink{classLocalizer_ae753b98c3369d78b5f717ea02ccc1708}{txInfo\_ang}});}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00644}00644\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classLocalizer_aaaa0dd33b0ddcf15e6d44a47f1f53059}{port\_anglesOut}}.write();}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00645}00645\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00646}00646\ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00647}00647\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00648}00648\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00649}00649\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00650}\mbox{\hyperlink{classLocalizer_ac67358b993322b5be4da515dbb22e496}{00650}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classLocalizer_ac67358b993322b5be4da515dbb22e496}{Localizer::getIntrinsicsMatrix}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{string}\ \&type,\ Matrix\ \&M,}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00651}00651\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ \&w,\ \textcolor{keywordtype}{int}\ \&\mbox{\hyperlink{compute__ekf__sym_8m_a5e36941b3d856737e81516acd45edc50}{h}})}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00652}00652\ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00653}00653\ \ \ \ \ \textcolor{keywordflow}{if}\ (type==\textcolor{stringliteral}{"{}left"{}})}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00654}00654\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00655}00655\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classLocalizer_a0079f885a6d43d21405fc42c4101c6a2}{PrjL}}!=\textcolor{keyword}{nullptr})}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00656}00656\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00657}00657\ \ \ \ \ \ \ \ \ \ \ \ \ M=*\mbox{\hyperlink{classLocalizer_a0079f885a6d43d21405fc42c4101c6a2}{PrjL}};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00658}00658\ \ \ \ \ \ \ \ \ \ \ \ \ w=\mbox{\hyperlink{classLocalizer_a4866be5208c2349c1e7965c974a67a8e}{widthL}};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00659}00659\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{compute__ekf__sym_8m_a5e36941b3d856737e81516acd45edc50}{h}}=\mbox{\hyperlink{classLocalizer_a9c13f0777ddb404bef6a8563d77158a9}{heightL}};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00660}00660\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00661}00661\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00662}00662\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00663}00663\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00664}00664\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00665}00665\ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (type==\textcolor{stringliteral}{"{}right"{}})}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00666}00666\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00667}00667\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classLocalizer_abe89e9359bd0c844c954c70de49d5c7f}{PrjR}}!=\textcolor{keyword}{nullptr})}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00668}00668\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00669}00669\ \ \ \ \ \ \ \ \ \ \ \ \ M=*\mbox{\hyperlink{classLocalizer_abe89e9359bd0c844c954c70de49d5c7f}{PrjR}};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00670}00670\ \ \ \ \ \ \ \ \ \ \ \ \ w=\mbox{\hyperlink{classLocalizer_ab69882e378e509c699ad5eb9be62782a}{widthR}};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00671}00671\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{compute__ekf__sym_8m_a5e36941b3d856737e81516acd45edc50}{h}}=\mbox{\hyperlink{classLocalizer_a6f6988b8be88245a2318247ea9e224bc}{heightR}};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00672}00672\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00673}00673\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00674}00674\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00675}00675\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00676}00676\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00677}00677\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00678}00678\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00679}00679\ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00680}00680\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00681}00681\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00682}00682\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00683}\mbox{\hyperlink{classLocalizer_a2a1de62a394027463c79b91b15aee9b2}{00683}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classLocalizer_a2a1de62a394027463c79b91b15aee9b2}{Localizer::setIntrinsicsMatrix}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{string}\ \&type,\ \textcolor{keyword}{const}\ Matrix\ \&M,}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00684}00684\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ w,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{compute__ekf__sym_8m_a5e36941b3d856737e81516acd45edc50}{h}})}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00685}00685\ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00686}00686\ \ \ \ \ \textcolor{keywordflow}{if}\ (type==\textcolor{stringliteral}{"{}left"{}})}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00687}00687\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00688}00688\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classLocalizer_a0079f885a6d43d21405fc42c4101c6a2}{PrjL}}!=\textcolor{keyword}{nullptr})}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00689}00689\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00690}00690\ \ \ \ \ \ \ \ \ \ \ \ \ *\mbox{\hyperlink{classLocalizer_a0079f885a6d43d21405fc42c4101c6a2}{PrjL}}=M;}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00691}00691\ \ \ \ \ \ \ \ \ \ \ \ \ *\mbox{\hyperlink{classLocalizer_a6c9883ff1f1626b4d45033e651dbc1af}{invPrjL}}=pinv(M.transposed()).transposed();}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00692}00692\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00693}00693\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00694}00694\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00695}00695\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classLocalizer_a0079f885a6d43d21405fc42c4101c6a2}{PrjL}}=\textcolor{keyword}{new}\ Matrix(M);}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00696}00696\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classLocalizer_a6c9883ff1f1626b4d45033e651dbc1af}{invPrjL}}=\textcolor{keyword}{new}\ Matrix(pinv(M.transposed()).transposed());}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00697}00697\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00698}00698\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00699}00699\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classLocalizer_a4866be5208c2349c1e7965c974a67a8e}{widthL}}=w;}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00700}00700\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classLocalizer_a9c13f0777ddb404bef6a8563d77158a9}{heightL}}=\mbox{\hyperlink{compute__ekf__sym_8m_a5e36941b3d856737e81516acd45edc50}{h}};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00701}00701\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00702}00702\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00703}00703\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00704}00704\ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (type==\textcolor{stringliteral}{"{}right"{}})}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00705}00705\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00706}00706\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classLocalizer_abe89e9359bd0c844c954c70de49d5c7f}{PrjR}}!=\textcolor{keyword}{nullptr})}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00707}00707\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00708}00708\ \ \ \ \ \ \ \ \ \ \ \ \ *\mbox{\hyperlink{classLocalizer_abe89e9359bd0c844c954c70de49d5c7f}{PrjR}}=M;}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00709}00709\ \ \ \ \ \ \ \ \ \ \ \ \ *\mbox{\hyperlink{classLocalizer_a81ad22375cfcce40c208bf176402b2b8}{invPrjR}}=pinv(M.transposed()).transposed();}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00710}00710\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00711}00711\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00712}00712\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00713}00713\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classLocalizer_abe89e9359bd0c844c954c70de49d5c7f}{PrjR}}=\textcolor{keyword}{new}\ Matrix(M);}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00714}00714\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classLocalizer_a81ad22375cfcce40c208bf176402b2b8}{invPrjR}}=\textcolor{keyword}{new}\ Matrix(pinv(M.transposed()).transposed());}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00715}00715\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00716}00716\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00717}00717\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classLocalizer_ab69882e378e509c699ad5eb9be62782a}{widthR}}=w;}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00718}00718\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classLocalizer_a6f6988b8be88245a2318247ea9e224bc}{heightR}}=\mbox{\hyperlink{compute__ekf__sym_8m_a5e36941b3d856737e81516acd45edc50}{h}};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00719}00719\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00720}00720\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00721}00721\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00722}00722\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00723}00723\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00724}00724\ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00725}00725\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00726}00726\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00727}00727\ \textcolor{comment}{/************************************************************************/}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00728}\mbox{\hyperlink{classLocalizer_a8d16aa08cff87fd25a2fb4f0a1b32e96}{00728}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classLocalizer_a8d16aa08cff87fd25a2fb4f0a1b32e96}{Localizer::run}}()}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00729}00729\ \{}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00730}00730\ \ \ \ \ \mbox{\hyperlink{classLocalizer_a7dd076acfff32dfcd812bbc7fcac0cf5}{handleMonocularInput}}();}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00731}00731\ \ \ \ \ \mbox{\hyperlink{classLocalizer_a5e1e5c4d47fcaca7f4fbc97e68e589b3}{handleStereoInput}}();}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00732}00732\ \ \ \ \ \mbox{\hyperlink{classLocalizer_a1768d3ecf342895713d61bb2c6ac0d2e}{handleAnglesInput}}();}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00733}00733\ \ \ \ \ \mbox{\hyperlink{classLocalizer_ab78c5037b65ec0889b330c0ffcedb504}{handleAnglesOutput}}();}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00734}00734\ \}}
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00735}00735\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00736}00736\ }
+\DoxyCodeLine{\Hypertarget{localizer_8cpp_source_l00737}00737\ }
+
+\end{DoxyCode}

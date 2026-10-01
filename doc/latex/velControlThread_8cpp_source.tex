@@ -1,0 +1,354 @@
+\doxysection{vel\+Control\+Thread.\+cpp}
+\hypertarget{velControlThread_8cpp_source}{}\label{velControlThread_8cpp_source}\index{icub-\/main/src/modules/velocityControl/velControlThread.cpp@{icub-\/main/src/modules/velocityControl/velControlThread.cpp}}
+\mbox{\hyperlink{velControlThread_8cpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00001}00001\ \textcolor{comment}{//\ -\/*-\/\ mode:C++;\ tab-\/width:4;\ c-\/basic-\/offset:4;\ indent-\/tabs-\/mode:nil\ -\/*-\/}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00002}00002\ }
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00003}00003\ \textcolor{comment}{//\ Copyright\ (C)\ 2008\ RobotCub\ Consortium}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00004}00004\ \textcolor{comment}{//\ Author:\ Lorenzo\ Natale}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00005}00005\ \textcolor{comment}{//\ CopyPolicy:\ Released\ under\ the\ terms\ of\ the\ GNU\ GPL\ v2.0.}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00006}00006\ }
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00007}00007\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{velControlThread_8h}{velControlThread.h}}"{}}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00008}00008\ \textcolor{preprocessor}{\#include\ <string.h>}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00009}00009\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00010}00010\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{math_8h}{math.h}}>}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00011}00011\ \textcolor{preprocessor}{\#include\ <yarp/os/Log.h>}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00012}00012\ \textcolor{preprocessor}{\#include\ <yarp/os/LogStream.h>}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00013}00013\ }
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00014}00014\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceyarp_1_1dev}{yarp::dev}};}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00015}00015\ \textcolor{keyword}{using\ namespace\ }yarp::os;}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00016}00016\ \textcolor{keyword}{using\ namespace\ }yarp::sig;}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00017}00017\ }
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00018}\mbox{\hyperlink{velControlThread_8cpp_af27e997f23a74ea04437dd1dafa67355}{00018}}\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{velControlThread_8cpp_af27e997f23a74ea04437dd1dafa67355}{MAX\_SPEED}}=250;}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00019}\mbox{\hyperlink{velControlThread_8cpp_a24349f63ea802fb5de6bf0125c94bb01}{00019}}\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{velControlThread_8cpp_a24349f63ea802fb5de6bf0125c94bb01}{AVERAGE}}=50;}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00020}\mbox{\hyperlink{velControlThread_8cpp_ab41adc3709338f6fbd504530526fbef8}{00020}}\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{velControlThread_8cpp_ab41adc3709338f6fbd504530526fbef8}{ACCELERATIONS}}=1000000;}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00021}\mbox{\hyperlink{velControlThread_8cpp_a3d18c462b178d1fac1dbc175ce2ea5be}{00021}}\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{velControlThread_8cpp_a3d18c462b178d1fac1dbc175ce2ea5be}{MAX\_GAIN}}\ =\ 10.0;}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00022}00022\ }
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00023}\mbox{\hyperlink{velControlThread_8cpp_acf795bf8c16a5ede1840734ccddf7611}{00023}}\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{velControlThread_8cpp_acf795bf8c16a5ede1840734ccddf7611}{VELOCITY\_INDEX\_OFFSET}}=1000;}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00024}00024\ }
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00025}\mbox{\hyperlink{classvelControlThread_a1fdf04b28a8f497bb6f17e3803d800de}{00025}}\ \mbox{\hyperlink{classvelControlThread_a1fdf04b28a8f497bb6f17e3803d800de}{velControlThread::velControlThread}}(\textcolor{keywordtype}{int}\ rate):}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00026}00026\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespaceyarp}{yarp}}::os::PeriodicThread((double)rate/1000.0)}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00027}00027\ \{}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00028}00028\ \ \ \ \ control\_rate\ =\ rate;}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00029}00029\ \ \ \ \ suspended\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00030}00030\ \}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00031}00031\ }
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00032}\mbox{\hyperlink{classvelControlThread_a7176f404ad1b572150c42825c2e97743}{00032}}\ \mbox{\hyperlink{classvelControlThread_a7176f404ad1b572150c42825c2e97743}{velControlThread::\string~velControlThread}}()}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00033}00033\ \{\}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00034}00034\ }
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00035}\mbox{\hyperlink{classvelControlThread_ae195c97615a5fd11161f356766f55be6}{00035}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classvelControlThread_ae195c97615a5fd11161f356766f55be6}{velControlThread::run}}()}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00036}00036\ \{}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00037}00037\ \ \ \ \ \textcolor{keywordtype}{double}\ t\_start\ =\ yarp::os::Time::now();}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00038}00038\ }
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00039}00039\ \ \ \ \ \textcolor{keywordflow}{if}\ (getIterations()>100)}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00040}00040\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00041}00041\ \ \ \ \ \ \ \ \ yDebug(\textcolor{stringliteral}{"{}Thread\ ran\ \%d\ times,\ est\ period\ \%lf[ms],\ used\ \%lf[ms]\(\backslash\)n"{}},}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00042}00042\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ getIterations(),}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00043}00043\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 1000.0*getEstimatedPeriod(),}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00044}00044\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 1000.0*getEstimatedUsed());}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00045}00045\ \ \ \ \ \ \ \ \ resetStat();}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00046}00046\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00047}00047\ \ \ \ \ std::lock\_guard<std::mutex>\ lck(\_mutex);}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00048}00048\ }
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00050}00050\ \ \ \ \ \textcolor{comment}{//this\ command\ receives\ also\ feedforward\ velocities}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00051}00051\ \ \ \ \ yarp::os::Bottle\ *bot\ =\ command\_port.read(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00052}00052\ \ \ \ \ \textcolor{keywordflow}{if}(bot!=NULL)}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00053}00053\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00054}00054\ \ \ \ \ \ \ \ \ nb\_void\_loops\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00055}00055\ \ \ \ \ \ \ \ \ \textcolor{comment}{//fprintf(stderr,\ "{}\(\backslash\)n\ Receiving\ command:\ \(\backslash\)t"{});}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00056}00056\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ size\ =\ bot-\/>size()/2;}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00057}00057\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i=0;i<size;i++)}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00058}00058\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00059}00059\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ ind\ =\ bot-\/>get(2*i).asInt32();}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00060}00060\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(ind\ <\ \mbox{\hyperlink{velControlThread_8cpp_acf795bf8c16a5ede1840734ccddf7611}{VELOCITY\_INDEX\_OFFSET}})\ }
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00061}00061\ \ \ \ \ \ \ \ \ \ \ \ \ \{\textcolor{comment}{//this\ is\ a\ position\ command}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00062}00062\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ targets(ind)\ =\ bot-\/>get(2*i+1).asFloat64();}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00063}00063\ \ \ \ \ \ \ \ \ \ \ \ \ \}\ }
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00064}00064\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ }
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00065}00065\ \ \ \ \ \ \ \ \ \ \ \ \ \{\textcolor{comment}{//this\ is\ a\ velocity\ command}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00066}00066\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ffVelocities(ind\ -\/\ \mbox{\hyperlink{velControlThread_8cpp_acf795bf8c16a5ede1840734ccddf7611}{VELOCITY\_INDEX\_OFFSET}})\ =\ bot-\/>get(2*i+1).asFloat64();}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00067}00067\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00068}00068\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//fprintf(stderr,\ "{}for\ joint\ *\%d,\ received\ \%f,\ \(\backslash\)t"{},\ ind,\ targets(ind));}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00069}00069\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00070}00070\ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00071}00071\ \ \ \ \ \ \ \ \ nb\_void\_loops++;}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00072}00072\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(nb\_void\_loops\ >\ 5)\ \{}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00073}00073\ \ \ \ \ \ \ \ \ \ \ \ \ ffVelocities\ =\ 0.0;}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00074}00074\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00075}00075\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00076}00076\ }
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00077}00077\ \ \ \ \ \textcolor{comment}{//getting\ commands\ from\ the\ slow\ port}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00078}00078\ \ \ \ \ yarp::os::Bottle\ *vec\ =\ command\_port2.read(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00079}00079\ \ \ \ \ \textcolor{keywordflow}{if}\ (vec!=NULL)}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00080}00080\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00081}00081\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ k=0;k<nJoints;k++)}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00082}00082\ \ \ \ \ \ \ \ \ \ \ \ \ targets(k)=vec-\/>get(k).asFloat64();}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00083}00083\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00084}00084\ }
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00085}00085\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{int}\ count=0;}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00086}00086\ \ \ \ \ count++;}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00087}00087\ }
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00088}00088\ \ \ \ \ ienc-\/>getEncoders(encoders.data());}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00089}00089\ }
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00090}00090\ \ \ \ \ \textcolor{comment}{//ienc-\/>getEncoderSpeeds(encoders\_speed.data());}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00091}00091\ \ \ \ \ \textcolor{comment}{//fprintf(stderr,\ "{}printing\ to\ file\ \(\backslash\)n"{});}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00092}00092\ \textcolor{preprocessor}{\#if\ 0}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00093}00093\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i=0;i<nJoints;i++)}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00094}00094\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{saveNetwork_8m_a0eba6f64b9c26507a877bcb0c4f270e2}{fprintf}}(currentSpeedFile,\textcolor{stringliteral}{"{}\%f\ "{}},encoders(i));}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00095}00095\ \ \ \ \ \mbox{\hyperlink{saveNetwork_8m_a0eba6f64b9c26507a877bcb0c4f270e2}{fprintf}}(currentSpeedFile,\textcolor{stringliteral}{"{}\%f\(\backslash\)n"{}},t\_start-\/time\_watch);}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00096}00096\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00097}00097\ }
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00098}00098\ \ \ \ \ Kd=0.0;}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00099}00099\ }
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00100}00100\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ k=0;k<nJoints;k++)}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00101}00101\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00102}00102\ \ \ \ \ \ \ \textcolor{comment}{//\ \ printf\ ("{}\%+6.3f\ "{},\ targets(k));}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00103}00103\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ current\_err\ =\ targets(k)-\/encoders(k);}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00104}00104\ \ \ \ \ \ \ \ \ error\_d(k)\ =\ (current\_err\ -\/\ error(k))/((\textcolor{keywordtype}{double})control\_rate)*1000.0;}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00105}00105\ \ \ \ \ \ \ \ \ error(k)\ =\ current\_err;}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00106}00106\ }
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00107}00107\ \ \ \ \ \ \ \ \ \textcolor{comment}{//we\ calculate\ the\ command\ Adding\ the\ ffVelocities}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00108}00108\ \ \ \ \ \ \ \ \ command(k)\ =\ Kp(k)*error(k)\ +\ Kd(k)*error\_d(k)\ +\ ffVelocities(k);}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00109}00109\ \ \ \ \ \ \ \ \ \textcolor{comment}{//printf\ ("{}\%+3.3f\ "{},\ command(k));}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00110}00110\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00111}00111\ \ \ \ \ \textcolor{comment}{//printf\ ("{}\(\backslash\)n"{});}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00112}00112\ \ \ \ \ \textcolor{comment}{//\ \ \ \ std::cout\ <<\ command.toString()\ <<\ std::endl;}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00113}00113\ \ \ \ \textcolor{comment}{//\ \ \ \ \ printf\ ("{}\(\backslash\)n"{});}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00114}00114\ \ \ \ \ \mbox{\hyperlink{classvelControlThread_a6bc924890146779ebde01a7cfd45b31b}{limitSpeed}}(command);}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00115}00115\ }
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00116}00116\ \ \ \ \ \textcolor{keywordflow}{if}\ (suspended)}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00117}00117\ \ \ \ \ \ \ \ \ command=0;}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00118}00118\ }
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00119}00119\ \textcolor{preprocessor}{\#if\ 0}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00120}00120\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i=0;i<nJoints;i++)}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00121}00121\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{saveNetwork_8m_a0eba6f64b9c26507a877bcb0c4f270e2}{fprintf}}(targetSpeedFile,\textcolor{stringliteral}{"{}\%f\ "{}},command(i));}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00122}00122\ \ \ \ \ \mbox{\hyperlink{saveNetwork_8m_a0eba6f64b9c26507a877bcb0c4f270e2}{fprintf}}(targetSpeedFile,\textcolor{stringliteral}{"{}\%f\(\backslash\)n"{}},t\_start-\/time\_watch);}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00123}00123\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00124}00124\ \ \ \ \ \textcolor{comment}{//printf\ ("{}\%s\(\backslash\)n"{},\ command.toString().c\_str());}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00125}00125\ \ \ \ \ \textcolor{keywordflow}{if}(!suspended)}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00126}00126\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00127}00127\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (0)}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00128}00128\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00129}00129\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//@@@this\ is\ used\ to\ directly\ command\ positions,\ with\ no\ minum\ jerk\ tajectory}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00130}00130\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//not\ to\ be\ used\ (risky!),\ unless\ you\ know\ wahat\ you\ are\ doing.}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00131}00131\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//ipid-\/>setReferences(this-\/>targets.data());}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00132}00132\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i=0;i<nJoints;i++)}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00133}00133\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00134}00134\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (fabs(targets(i)-\/encoders(i))>6.0)}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00135}00135\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ipos-\/>positionMove(i,targets(i));}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00136}00136\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00137}00137\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ipid-\/>setPidReference(yarp::dev::VOCAB\_PIDTYPE\_POSITION,i,targets(i));}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00138}00138\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00139}00139\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00140}00140\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00141}00141\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00142}00142\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ trials\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00143}00143\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}(!ivel-\/>velocityMove(command.data()))}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00144}00144\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00145}00145\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ trials++;}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00146}00146\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}velcontrol\ ERROR>>\ velocity\ move\ sent\ false\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00147}00147\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(trials>10)}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00148}00148\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00149}00149\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}velcontrol\ ERROR>>\ tried\ 10\ times\ to\ velocityMove,\ halting...\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00150}00150\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>\mbox{\hyperlink{classvelControlThread_a38d8489af49a3858a49aa8cece2acd86}{halt}}();}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00151}00151\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00152}00152\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00153}00153\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00154}00154\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00155}00155\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00156}00156\ \}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00157}00157\ }
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00158}\mbox{\hyperlink{classvelControlThread_a4dfef70f5c607bccabe539c3b2c2cff6}{00158}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classvelControlThread_a4dfef70f5c607bccabe539c3b2c2cff6}{velControlThread::threadInit}}()}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00159}00159\ \{}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00160}00160\ \ \ \ \ suspended=\textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00161}00161\ \ \ \ \ ienc-\/>getEncoders(encoders.data());}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00162}00162\ \ \ \ \ \textcolor{comment}{//ienc-\/>getEncoderSpeeds(encoders\_speed.data());}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00163}00163\ \ \ \ \ targets=encoders;}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00164}00164\ \ \ \ \ ffVelocities\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00165}00165\ \ \ \ \ count\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00166}00166\ \ \ \ \ time\_watch\ =\ Time::now();}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00167}00167\ \ \ \ \ time\_loop\ =\ 0.0;}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00168}00168\ }
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00169}00169\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00170}00170\ \}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00171}00171\ }
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00172}\mbox{\hyperlink{classvelControlThread_a61cae942de4ae2b51e8b0a94c5563b04}{00172}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classvelControlThread_a61cae942de4ae2b51e8b0a94c5563b04}{velControlThread::threadRelease}}()}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00173}00173\ \{}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00174}00174\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ k=0;k<nJoints;k++)}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00175}00175\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00176}00176\ \ \ \ \ \ \ \ \ ivel-\/>stop();}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00177}00177\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ k\ =\ 0;\ k\ <\ nJoints;\ k++)}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00178}00178\ \ \ \ \ \ \ \ \ \ \ \ \ imod-\/>setControlMode(k,\ VOCAB\_CM\_POSITION);}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00179}00179\ \ \ \ \ \ \ \ \ suspended\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00180}00180\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00181}00181\ }
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00182}00182\ \ \ \ \ command\_port.close();}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00183}00183\ \ \ \ \ command\_port2.close();}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00184}00184\ }
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00185}00185\ \textcolor{preprocessor}{\#if\ 0}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00186}00186\ \ \ \ \ \mbox{\hyperlink{sine_8m_a14e2cbac46a5d611bf112b1f4beb7021}{fclose}}(targetSpeedFile);}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00187}00187\ \ \ \ \ \mbox{\hyperlink{sine_8m_a14e2cbac46a5d611bf112b1f4beb7021}{fclose}}(currentSpeedFile);}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00188}00188\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00189}00189\ \}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00190}00190\ }
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00191}\mbox{\hyperlink{classvelControlThread_a49ced3cbe02de251c683fcd2650b4502}{00191}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classvelControlThread_a49ced3cbe02de251c683fcd2650b4502}{velControlThread::init}}(PolyDriver\ *d,\ std::string\ partName,\ std::string\ robotName)}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00192}00192\ \{}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00193}00193\ \ \ \ \ \textcolor{keywordtype}{char}\ tmp[255];}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00194}00194\ }
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00195}00195\ \ \ \ \ nb\_void\_loops\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00196}00196\ }
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00198}00198\ \ \ \ \ sprintf(tmp,\textcolor{stringliteral}{"{}/\%s/vc/\%s/fastCommand"{}},\ robotName.c\_str(),\ partName.c\_str());}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00199}00199\ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}opening\ port\ for\ part\ \%s\(\backslash\)n"{}},tmp);}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00200}00200\ \ \ \ \ command\_port.open(tmp);}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00201}00201\ }
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00202}00202\ \ \ \ \ std::string\ tmp2;}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00203}00203\ \ \ \ \ tmp2=\textcolor{stringliteral}{"{}/"{}};}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00204}00204\ \ \ \ \ tmp2+=robotName.c\_str();}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00205}00205\ \ \ \ \ tmp2+=\textcolor{stringliteral}{"{}/vc/"{}};}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00206}00206\ \ \ \ \ tmp2+=partName.c\_str();}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00207}00207\ \ \ \ \ tmp2+=\textcolor{stringliteral}{"{}/command"{}};}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00208}00208\ \ \ \ \ command\_port2.open(tmp2.c\_str());}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00209}00209\ }
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00210}00210\ \ \ \ \ \textcolor{keywordflow}{if}\ (d==0)}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00211}00211\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00212}00212\ }
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00213}00213\ \ \ \ \ driver=d;}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00214}00214\ }
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00215}00215\ \ \ \ \ driver-\/>view(ivel);}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00216}00216\ \ \ \ \ driver-\/>view(ipos);}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00217}00217\ \ \ \ \ driver-\/>view(ienc);}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00218}00218\ \ \ \ \ driver-\/>view(imod);}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00219}00219\ \ \ \ \ driver-\/>view(ipid);}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00220}00220\ }
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00221}00221\ \ \ \ \ \textcolor{keywordflow}{if}\ (\ (ivel==0)||(ienc==0)\ ||\ (imod==0)\ ||\ (ipid==0)\ ||\ (ipos==0))}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00222}00222\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00223}00223\ }
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00224}00224\ \ \ \ \ ivel-\/>getAxes(\&nJoints);}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00225}00225\ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}controlling\ \%d\ DOFs\(\backslash\)n"{}},nJoints);}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00226}00226\ }
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00227}00227\ \ \ \ \ Vector\ accs;}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00228}00228\ \ \ \ \ accs.resize(nJoints);}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00229}00229\ \ \ \ \ Vector\ speeds;}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00230}00230\ \ \ \ \ speeds.resize(nJoints);}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00231}00231\ \ \ \ \ ivel-\/>getRefAccelerations(accs.data());}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00232}00232\ \ \ \ \ accs=\mbox{\hyperlink{velControlThread_8cpp_ab41adc3709338f6fbd504530526fbef8}{ACCELERATIONS}};}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00233}00233\ \ \ \ \ ivel-\/>setRefAccelerations(accs.data());}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00234}00234\ \ \ \ \ speeds=50.0;}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00235}00235\ \ \ \ \ ipos-\/>setRefSpeeds(speeds.data());}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00236}00236\ }
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00237}00237\ \ \ \ \ encoders.resize(nJoints);}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00238}00238\ \ \ \ \ encoders\_speed.resize(nJoints);}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00239}00239\ \ \ \ \ command.resize(nJoints);}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00240}00240\ \ \ \ \ targets.resize(nJoints);}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00241}00241\ \ \ \ \ ffVelocities.resize(nJoints);}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00242}00242\ \ \ \ \ command=0;}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00243}00243\ \ \ \ \ targets=0;}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00244}00244\ \ \ \ \ ffVelocities\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00245}00245\ \ \ \ \ Kp.resize(nJoints);}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00246}00246\ \ \ \ \ Kp=0;}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00247}00247\ \ \ \ \ Kd.resize(nJoints);}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00248}00248\ \ \ \ \ Kd=0;}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00249}00249\ \ \ \ \ error.resize(nJoints);}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00250}00250\ \ \ \ \ error=0;}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00251}00251\ \ \ \ \ error\_d.resize(nJoints);}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00252}00252\ \ \ \ \ error\_d=0;}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00253}00253\ }
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00254}00254\ \ \ \ \ maxVel.resize(nJoints);}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00255}00255\ \ \ \ \ maxVel\ =\ 0.0;}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00256}00256\ }
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00257}00257\ \textcolor{preprocessor}{\#if\ 0}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00258}00258\ \ \ \ \ sprintf(tmp,\textcolor{stringliteral}{"{}\%s\_target\_speed.dat"{}},partName.c\_str());}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00259}00259\ \ \ \ \ targetSpeedFile\ =\ fopen(tmp,\textcolor{stringliteral}{"{}w"{}});}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00260}00260\ \ \ \ \ sprintf(tmp,\textcolor{stringliteral}{"{}\%s\_current\_speed.dat"{}},partName.c\_str());}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00261}00261\ \ \ \ \ currentSpeedFile\ =\ fopen(tmp,\textcolor{stringliteral}{"{}w"{}});}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00262}00262\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00263}00263\ }
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00264}00264\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00265}00265\ \}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00266}00266\ }
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00267}\mbox{\hyperlink{classvelControlThread_a38d8489af49a3858a49aa8cece2acd86}{00267}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classvelControlThread_a38d8489af49a3858a49aa8cece2acd86}{velControlThread::halt}}()}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00268}00268\ \{}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00269}00269\ \ \ \ \ suspended=\textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00270}00270\ \ \ \ \ ivel-\/>stop();}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00271}00271\ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}Suspended\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00272}00272\ \ \ \ \ targets=encoders;}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00273}00273\ \ \ \ \ ffVelocities\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00274}00274\ \}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00275}00275\ }
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00276}\mbox{\hyperlink{classvelControlThread_a06764f588748b3abc097b5c30d7e43c4}{00276}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classvelControlThread_a06764f588748b3abc097b5c30d7e43c4}{velControlThread::go}}()}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00277}00277\ \{}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00278}00278\ \ \ \ \ suspended=\textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00279}00279\ \ \ \ \ \textcolor{keywordtype}{int}\ mode=0;}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00280}00280\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ k\ =\ 0;\ k\ <\ nJoints;\ k++)}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00281}00281\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00282}00282\ \ \ \ \ \ \ \ \ imod-\/>getControlMode(k,\ \&mode);}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00283}00283\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (mode!=VOCAB\_CM\_MIXED\ \&\&\ mode!=VOCAB\_CM\_VELOCITY)}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00284}00284\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00285}00285\ \ \ \ \ \ \ \ \ \ \ \ \ std::string\ s\ =\ yarp::os::Vocab32::decode(mode);}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00286}00286\ \ \ \ \ \ \ \ \ \ \ \ \ yWarning(\textcolor{stringliteral}{"{}Joint\ (\%d)\ is\ in\ mode\ (\%s)\ and\ does\ not\ accepts\ velocty\ commands.\ You\ have\ first\ to\ set\ either\ VOCAB\_CM\_VELOCITY\ or\ VOCAB\_CM\_MIXED\ control\ mode\(\backslash\)n"{}},\ k,\ s.c\_str());}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00287}00287\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00288}00288\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00289}00289\ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}Run\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00290}00290\ \ \ \ \ targets=encoders;}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00291}00291\ \ \ \ \ ffVelocities\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00292}00292\ \}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00293}00293\ }
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00294}\mbox{\hyperlink{classvelControlThread_a177f75c46cffafc8058b6f9861b79248}{00294}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classvelControlThread_a177f75c46cffafc8058b6f9861b79248}{velControlThread::setRef}}(\textcolor{keywordtype}{int}\ i,\ \textcolor{keywordtype}{double}\ pos)}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00295}00295\ \{}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00296}00296\ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}Setting\ new\ target\ \%d\ to\ \%lf\(\backslash\)n"{}},\ i,\ pos);}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00297}00297\ }
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00298}00298\ \ \ \ \ std::lock\_guard<std::mutex>\ lck(\_mutex);}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00299}00299\ \ \ \ \ targets(i)=pos;}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00300}00300\ \ \ \ \ ffVelocities(i)=0;}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00301}00301\ \}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00302}00302\ }
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00303}\mbox{\hyperlink{classvelControlThread_aad2d556c95593fd0abd2796beeaf6975}{00303}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classvelControlThread_aad2d556c95593fd0abd2796beeaf6975}{velControlThread::setVel}}(\textcolor{keywordtype}{int}\ i,\ \textcolor{keywordtype}{double}\ vel)}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00304}00304\ \{}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00305}00305\ \ \ \ \ std::lock\_guard<std::mutex>\ lck(\_mutex);}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00306}00306\ }
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00307}00307\ \ \ \ \ \textcolor{keywordflow}{if}((vel\ >\ 0.0)\ \&\&\ (vel\ <\ \mbox{\hyperlink{velControlThread_8cpp_af27e997f23a74ea04437dd1dafa67355}{MAX\_SPEED}})\ \&\&\ (i>=0)\ \&\&\ (i<nJoints))}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00308}00308\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00309}00309\ \ \ \ \ \ \ \ \ maxVel(i)\ =\ vel;}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00310}00310\ \ \ \ \ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}setting\ max\ vel\ of\ joint\ \%d\ to\ \%f\(\backslash\)n"{}},i,maxVel(i));}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00311}00311\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00312}00312\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00313}00313\ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}Impossible\ to\ set\ max\ vel\ higher\ than\ \%f\(\backslash\)n"{}},\mbox{\hyperlink{velControlThread_8cpp_af27e997f23a74ea04437dd1dafa67355}{MAX\_SPEED}});}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00314}00314\ \}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00315}00315\ }
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00316}\mbox{\hyperlink{classvelControlThread_a0a7434e7b822183790b1edbc4898739b}{00316}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classvelControlThread_a0a7434e7b822183790b1edbc4898739b}{velControlThread::setGain}}(\textcolor{keywordtype}{int}\ i,\ \textcolor{keywordtype}{double}\ gain)}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00317}00317\ \{}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00318}00318\ \ \ \ \ std::lock\_guard<std::mutex>\ lck(\_mutex);}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00319}00319\ }
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00320}00320\ \ \ \ \ \textcolor{keywordflow}{if}\ (gain>\mbox{\hyperlink{velControlThread_8cpp_a3d18c462b178d1fac1dbc175ce2ea5be}{MAX\_GAIN}})}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00321}00321\ \ \ \ \ \ \ \ \ gain=\mbox{\hyperlink{velControlThread_8cpp_a3d18c462b178d1fac1dbc175ce2ea5be}{MAX\_GAIN}};}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00322}00322\ }
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00323}00323\ \ \ \ \ \textcolor{keywordflow}{if}((gain\ >=\ 0.0)\ \&\&\ (i>=0)\ \&\&\ (i<nJoints))}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00324}00324\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00325}00325\ \ \ \ \ \ \ \ \ Kp(i)\ =\ gain;}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00326}00326\ \ \ \ \ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}Setting\ gain\ for\ joint\ \%d\ to\ \%lf\(\backslash\)n"{}},\ i,\ Kp(i));}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00327}00327\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00328}00328\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00329}00329\ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}Cannot\ set\ gain\ of\ joint\ \%d\(\backslash\)n"{}},i);}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00330}00330\ \}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00331}00331\ }
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00332}00332\ }
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00333}\mbox{\hyperlink{classvelControlThread_a6bc924890146779ebde01a7cfd45b31b}{00333}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classvelControlThread_a6bc924890146779ebde01a7cfd45b31b}{velControlThread::limitSpeed}}(Vector\ \&v)}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00334}00334\ \{}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00335}00335\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ k=0;\ k<nJoints;k++)}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00336}00336\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00337}00337\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(command(k)!=command(k))\textcolor{comment}{//check\ not\ Nan}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00338}00338\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00339}00339\ \ \ \ \ \ \ \ \ \ \ \ \ command(k)=0.0;}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00340}00340\ \ \ \ \ \ \ \ \ \ \ \ \ yWarning(\textcolor{stringliteral}{"{}WARNING::Receiving\ NaN\ values\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00341}00341\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00342}00342\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (fabs(command(k))>maxVel(k))}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00343}00343\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00344}00344\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (command(k)>0)}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00345}00345\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ command(k)=maxVel(k);}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00346}00346\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00347}00347\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ command(k)=-\/maxVel(k);}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00348}00348\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00349}00349\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{velControlThread_8cpp_source_l00350}00350\ \}}
+
+\end{DoxyCode}

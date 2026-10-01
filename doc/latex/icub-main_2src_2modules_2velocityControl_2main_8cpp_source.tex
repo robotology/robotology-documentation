@@ -1,0 +1,254 @@
+\doxysection{main.\+cpp}
+\hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source}{}\label{icub-main_2src_2modules_2velocityControl_2main_8cpp_source}\index{icub-\/main/src/modules/velocityControl/main.cpp@{icub-\/main/src/modules/velocityControl/main.cpp}}
+\mbox{\hyperlink{icub-main_2src_2modules_2velocityControl_2main_8cpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00001}00001\ \textcolor{comment}{//\ -\/*-\/\ mode:C++;\ tab-\/width:4;\ c-\/basic-\/offset:4;\ indent-\/tabs-\/mode:nil\ -\/*-\/}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00002}00002\ \textcolor{comment}{//\ Copyright\ (C)\ 2008\ RobotCub\ Consortium}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00003}00003\ \textcolor{comment}{//\ Author:\ Lorenzo\ Natale}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00004}00004\ \textcolor{comment}{//\ CopyPolicy:\ Released\ under\ the\ terms\ of\ the\ GNU\ GPL\ v2.0.}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00005}00005\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00109}00109\ \textcolor{preprocessor}{\#include\ <stdio.h>}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00110}00110\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00111}00111\ \textcolor{preprocessor}{\#include\ <yarp/os/Network.h>}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00112}00112\ \textcolor{preprocessor}{\#include\ <yarp/os/Property.h>}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00113}00113\ \textcolor{preprocessor}{\#include\ <yarp/os/Time.h>}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00114}00114\ \textcolor{preprocessor}{\#include\ <yarp/dev/PolyDriver.h>}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00115}00115\ \textcolor{preprocessor}{\#include\ <yarp/os/BufferedPort.h>}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00116}00116\ \textcolor{preprocessor}{\#include\ <yarp/os/RFModule.h>}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00117}00117\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{velControlThread_8h}{velControlThread.h}}"{}}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00118}00118\ \textcolor{preprocessor}{\#include\ <yarp/os/Log.h>}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00119}00119\ \textcolor{preprocessor}{\#include\ <yarp/os/LogStream.h>}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00120}00120\ \textcolor{preprocessor}{\#include\ <string.h>}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00121}00121\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00122}00122\ \textcolor{comment}{/*default\ rate\ for\ the\ control\ loop*/}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00123}\mbox{\hyperlink{icub-main_2src_2modules_2velocityControl_2main_8cpp_abf21fc733dcce5c1eb4eb969c1ef31c6}{00123}}\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{icub-main_2src_2modules_2velocityControl_2main_8cpp_abf21fc733dcce5c1eb4eb969c1ef31c6}{CONTROL\_RATE}}=20;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00124}00124\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00125}00125\ \textcolor{keyword}{using\ namespace\ }yarp::os;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00126}00126\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceyarp_1_1dev}{yarp::dev}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00127}00127\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00128}00128\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classVelControlModule}{VelControlModule}}:\ \textcolor{keyword}{public}\ RFModule\ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00129}00129\ \textcolor{keyword}{private}:}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00130}00130\ \ \ \ \ PolyDriver\ driver;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00131}00131\ \ \ \ \ \mbox{\hyperlink{classvelControlThread}{velControlThread}}\ *vc;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00132}00132\ \ \ \ \ \textcolor{keywordtype}{char}\ partName[255];}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00133}00133\ \ \ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00134}00134\ \ \ \ \ \textcolor{comment}{//added\ by\ ludovic}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00135}00135\ \ \ \ \ Port\ input\_port;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00137}00137\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00138}00138\ \ \ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00139}\mbox{\hyperlink{classVelControlModule_ab3154c4a38da8c27fe47010bb7f20397}{00139}}\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classVelControlModule_ab3154c4a38da8c27fe47010bb7f20397}{respond}}(\textcolor{keyword}{const}\ yarp::os::Bottle\ \&command,\ yarp::os::Bottle\ \&reply)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00140}00140\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00141}00141\ \ \ \ \ \ \ \ \ reply.clear();\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00142}00142\ \ \ \ \ \ \ \ \ yDebug(\textcolor{stringliteral}{"{}receiving\ command\ from\ port\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00143}00143\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ index\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00144}00144\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ cmdSize\ =\ command.size();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00145}00145\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00146}00146\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}(cmdSize>0)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00147}00147\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00148}00148\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{switch}(command.get(index).asVocab32())}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00149}00149\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00150}00150\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ yarp::os::createVocab32(\textcolor{charliteral}{'s'},\textcolor{charliteral}{'u'},\textcolor{charliteral}{'s'},\textcolor{charliteral}{'p'}):}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00151}00151\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ reply.addVocab32(\textcolor{stringliteral}{"{}ack"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00152}00152\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ vc-\/>\mbox{\hyperlink{classvelControlThread_a38d8489af49a3858a49aa8cece2acd86}{halt}}();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00153}00153\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ cmdSize-\/-\/;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00154}00154\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ index++;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00155}00155\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00156}00156\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ yarp::os::createVocab32(\textcolor{charliteral}{'r'},\textcolor{charliteral}{'u'},\textcolor{charliteral}{'n'}):}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00157}00157\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ reply.addVocab32(\textcolor{stringliteral}{"{}ack"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00158}00158\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ vc-\/>\mbox{\hyperlink{classvelControlThread_a06764f588748b3abc097b5c30d7e43c4}{go}}();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00159}00159\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ cmdSize-\/-\/;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00160}00160\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ index++;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00161}00161\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00162}00162\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//this\ set\ current\ position\ reference}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00163}00163\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ yarp::os::createVocab32(\textcolor{charliteral}{'s'},\textcolor{charliteral}{'e'},\textcolor{charliteral}{'t'}):}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00164}00164\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (command.size()>=3)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00165}00165\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00166}00166\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ i=command.get(index+1).asInt32();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00167}00167\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ pos=command.get(index+2).asFloat64();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00168}00168\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ vc-\/>\mbox{\hyperlink{classvelControlThread_a177f75c46cffafc8058b6f9861b79248}{setRef}}(i,\ pos);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00169}00169\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ index\ +=3;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00170}00170\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ cmdSize-\/=3;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00171}00171\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00172}00172\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00173}00173\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00174}00174\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ cmdSize-\/-\/;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00175}00175\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ index++;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00176}00176\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}Invalid\ set\ message,\ ignoring\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00177}00177\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00178}00178\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ reply.addVocab32(\textcolor{stringliteral}{"{}ack"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00179}00179\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00180}00180\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//this\ set\ maximum\ velocity\ (limiter)}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00181}00181\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ yarp::os::createVocab32(\textcolor{charliteral}{'s'},\textcolor{charliteral}{'v'},\textcolor{charliteral}{'e'},\textcolor{charliteral}{'l'}):}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00182}00182\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(command.size()>=3)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00183}00183\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00184}00184\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ i=command.get(index+1).asInt32();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00185}00185\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ vel\ =\ command.get(index+2).asFloat64();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00186}00186\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ vc-\/>\mbox{\hyperlink{classvelControlThread_aad2d556c95593fd0abd2796beeaf6975}{setVel}}(i,vel);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00187}00187\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ index\ +=\ 3;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00188}00188\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ cmdSize-\/=3;;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00189}00189\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ reply.addVocab32(\textcolor{stringliteral}{"{}ack"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00190}00190\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00191}00191\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00192}00192\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00193}00193\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ cmdSize-\/-\/;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00194}00194\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ index++;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00195}00195\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}Invalid\ set\ vel\ message,\ ignoring\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00196}00196\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ reply.addVocab32(\textcolor{stringliteral}{"{}fail"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00197}00197\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00198}00198\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00199}00199\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ yarp::os::createVocab32(\textcolor{charliteral}{'g'},\textcolor{charliteral}{'a'},\textcolor{charliteral}{'i'},\textcolor{charliteral}{'n'}):}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00200}00200\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(command.size()>=3)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00201}00201\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00202}00202\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ i=command.get(index+1).asInt32();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00203}00203\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ gain\ =\ command.get(index+2).asFloat64();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00204}00204\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ vc-\/>\mbox{\hyperlink{classvelControlThread_a0a7434e7b822183790b1edbc4898739b}{setGain}}(i,gain);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00205}00205\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ index+=3;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00206}00206\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ cmdSize-\/=3;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00207}00207\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ reply.addVocab32(\textcolor{stringliteral}{"{}ack"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00208}00208\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00209}00209\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00210}00210\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00211}00211\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ cmdSize-\/-\/;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00212}00212\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ index++;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00213}00213\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}Invalid\ set\ gain\ message,\ ignoring\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00214}00214\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ reply.addVocab32(\textcolor{stringliteral}{"{}fail"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00215}00215\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00216}00216\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00217}00217\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ yarp::os::createVocab32(\textcolor{charliteral}{'h'},\textcolor{charliteral}{'e'},\textcolor{charliteral}{'l'},\textcolor{charliteral}{'p'}):}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00218}00218\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{saveNetwork_8m_a0eba6f64b9c26507a877bcb0c4f270e2}{fprintf}}(stdout,\textcolor{stringliteral}{"{}VelocityControl\ module,\ valid\ commands\ are:\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00219}00219\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{saveNetwork_8m_a0eba6f64b9c26507a877bcb0c4f270e2}{fprintf}}(stdout,\textcolor{stringliteral}{"{}-\/\ \ \ [susp]\ \ \ \ \ \ \ \ \ suspend\ the\ controller\ (command\ zero\ velocity)\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00220}00220\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{saveNetwork_8m_a0eba6f64b9c26507a877bcb0c4f270e2}{fprintf}}(stdout,\textcolor{stringliteral}{"{}-\/\ \ \ [run]\ \ \ \ \ \ \ \ \ \ start\ (and\ resume\ after\ being\ suspended)\ the\ controller\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00221}00221\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{saveNetwork_8m_a0eba6f64b9c26507a877bcb0c4f270e2}{fprintf}}(stdout,\textcolor{stringliteral}{"{}-\/\ \ \ [quit]\ \ \ \ \ \ \ \ \ quit\ the\ module\ (exit)\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00222}00222\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{saveNetwork_8m_a0eba6f64b9c26507a877bcb0c4f270e2}{fprintf}}(stdout,\textcolor{stringliteral}{"{}-\/\ \ \ [set]\ \ <j>\ <p>\ move\ joint\ j\ to\ p\ (degrees)\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00223}00223\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{saveNetwork_8m_a0eba6f64b9c26507a877bcb0c4f270e2}{fprintf}}(stdout,\textcolor{stringliteral}{"{}-\/\ \ \ [svel]\ <j>\ <v>\ set\ maximum\ speed\ for\ joint\ j\ to\ v\ (deg/sec)\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00224}00224\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{saveNetwork_8m_a0eba6f64b9c26507a877bcb0c4f270e2}{fprintf}}(stdout,\textcolor{stringliteral}{"{}-\/\ \ \ [gain]\ <j>\ <k>\ set\ P\ gain\ for\ joint\ j\ to\ k\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00225}00225\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{saveNetwork_8m_a0eba6f64b9c26507a877bcb0c4f270e2}{fprintf}}(stdout,\textcolor{stringliteral}{"{}-\/\ \ \ [help]\ to\ get\ this\ help\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00226}00226\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{saveNetwork_8m_a0eba6f64b9c26507a877bcb0c4f270e2}{fprintf}}(stdout,\textcolor{stringliteral}{"{}\(\backslash\)n\ typical\ commands:\(\backslash\)n\ gain\ 0\ 10\(\backslash\)n\ svel\ 0\ 10\(\backslash\)n\ run\(\backslash\)n\ set\ 0\ x\(\backslash\)n\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00227}00227\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00228}00228\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ reply.addVocab32(\textcolor{stringliteral}{"{}many"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00229}00229\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ reply.addVocab32(\textcolor{stringliteral}{"{}ack"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00230}00230\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ reply.addString(\textcolor{stringliteral}{"{}VelocityControl\ module,\ valid\ commands\ are:"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00231}00231\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ reply.addString(\textcolor{stringliteral}{"{}-\/\ \ \ [susp]\ \ \ \ \ \ \ \ \ suspend\ the\ controller\ (command\ zero\ velocity)"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00232}00232\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ reply.addString(\textcolor{stringliteral}{"{}-\/\ \ \ [run]\ \ \ \ \ \ \ \ \ \ start\ (and\ resume\ after\ being\ suspended)\ the\ controller"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00233}00233\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ reply.addString(\textcolor{stringliteral}{"{}-\/\ \ \ [quit]\ \ \ \ \ \ \ \ \ quit\ the\ module\ (exit)"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00234}00234\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ reply.addString(\textcolor{stringliteral}{"{}-\/\ \ \ [set]\ \ <j>\ <p>\ move\ joint\ j\ to\ p\ (degrees)"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00235}00235\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ reply.addString(\textcolor{stringliteral}{"{}-\/\ \ \ [svel]\ <j>\ <v>\ set\ maximum\ speed\ for\ joint\ j\ to\ v\ (deg/sec)"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00236}00236\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ reply.addString(\textcolor{stringliteral}{"{}-\/\ \ \ [gain]\ <j>\ <k>\ set\ P\ gain\ for\ joint\ j\ to\ k"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00237}00237\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ reply.addString(\textcolor{stringliteral}{"{}-\/\ \ \ [help]\ to\ get\ this\ help"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00238}00238\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ reply.addString(\textcolor{stringliteral}{"{}\(\backslash\)n\ typical\ commands:\(\backslash\)n\ gain\ 0\ 10\(\backslash\)n\ svel\ 0\ 10\(\backslash\)n\ run\(\backslash\)n\ set\ 0\ x\(\backslash\)n\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00239}00239\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00240}00240\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{default}:}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00241}00241\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}Invalid\ command,\ ignoring\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00242}00242\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ reply.addVocab32(\textcolor{stringliteral}{"{}fail"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00243}00243\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//cmdSize-\/-\/;}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00244}00244\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//index++;}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00245}00245\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//return\ respond(command,\ reply);\ //\ call\ default}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00246}00246\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00247}00247\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00248}00248\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00249}00249\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00250}00250\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00251}00251\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00252}00252\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00253}00253\ \ \ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00254}\mbox{\hyperlink{classVelControlModule_a8cd96be74553017ebdd266d74fb8494d}{00254}}\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classVelControlModule_a8cd96be74553017ebdd266d74fb8494d}{configure}}(yarp::os::ResourceFinder\ \&rf)}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00255}00255\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00256}00256\ \ \ \ \ \ \ \ \ Property\ options;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00257}00257\ \ \ \ \ \ \ \ \ options.fromString(rf.toString());}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00258}00258\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ robotName[255];}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00259}00259\ \ \ \ \ \ \ \ \ options.put(\textcolor{stringliteral}{"{}device"{}},\ \textcolor{stringliteral}{"{}remote\_controlboard"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00260}00260\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(options.check(\textcolor{stringliteral}{"{}robot"{}}))}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00261}00261\ \ \ \ \ \ \ \ \ \ \ \ \ strncpy(robotName,\ options.find(\textcolor{stringliteral}{"{}robot"{}}).asString().c\_str(),\textcolor{keyword}{sizeof}(robotName));}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00262}00262\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00263}00263\ \ \ \ \ \ \ \ \ \ \ \ \ strncpy(robotName,\ \textcolor{stringliteral}{"{}icub"{}},\ \textcolor{keyword}{sizeof}(robotName));}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00264}00264\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00265}00265\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(options.check(\textcolor{stringliteral}{"{}part"{}}))}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00266}00266\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00267}00267\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ tmp[800];}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00268}00268\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ snprintf(tmp,\ \textcolor{keyword}{sizeof}(tmp),\ \textcolor{stringliteral}{"{}/\%s/vc/\%s/client"{}},}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00269}00269\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ robotName,}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00270}00270\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ options.find(\textcolor{stringliteral}{"{}part"{}}).asString().c\_str());}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00271}00271\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ options.put(\textcolor{stringliteral}{"{}local"{}},tmp);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00272}00272\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00273}00273\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ snprintf(tmp,\ \textcolor{keyword}{sizeof}(tmp),\textcolor{stringliteral}{"{}/\%s/\%s"{}},}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00274}00274\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ robotName,}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00275}00275\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ options.find(\textcolor{stringliteral}{"{}part"{}}).asString().c\_str());}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00276}00276\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ options.put(\textcolor{stringliteral}{"{}remote"{}},\ tmp);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00277}00277\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00278}00278\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ snprintf(tmp,\ \textcolor{keyword}{sizeof}(tmp),\ \textcolor{stringliteral}{"{}/\%s/vc/\%s/input"{}},}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00279}00279\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ robotName,}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00280}00280\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ options.find(\textcolor{stringliteral}{"{}part"{}}).asString().c\_str());}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00281}00281\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ input\_port.open(tmp);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00282}00282\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00283}00283\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ options.put(\textcolor{stringliteral}{"{}carrier"{}},\ \textcolor{stringliteral}{"{}mcast"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00284}00284\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00285}00285\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ attach(input\_port);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00286}00286\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00287}00287\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00288}00288\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00289}00289\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}Please\ specify\ part\ (e.g.\ -\/-\/part\ head)\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00290}00290\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00291}00291\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00293}00293\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00294}00294\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!driver.open(options))}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00295}00295\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00296}00296\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}Error\ opening\ device,\ check\ parameters\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00297}00297\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00298}00298\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00299}00299\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00301}00301\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ period\ =\ \mbox{\hyperlink{icub-main_2src_2modules_2velocityControl_2main_8cpp_abf21fc733dcce5c1eb4eb969c1ef31c6}{CONTROL\_RATE}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00302}00302\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(options.check(\textcolor{stringliteral}{"{}period"{}}))}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00303}00303\ \ \ \ \ \ \ \ \ \ \ \ \ period\ =\ options.find(\textcolor{stringliteral}{"{}period"{}}).asInt32();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00304}00304\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00305}00305\ \ \ \ \ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}control\ rate\ is\ \%d\ ms"{}},period);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00306}00306\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00307}00307\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!options.check(\textcolor{stringliteral}{"{}part"{}}))}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00308}00308\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00309}00309\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00310}00310\ \ \ \ \ \ \ \ \ snprintf(partName,\ \textcolor{keyword}{sizeof}(partName),\ \textcolor{stringliteral}{"{}\%s"{}},\ options.find(\textcolor{stringliteral}{"{}part"{}}).asString().c\_str());}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00311}00311\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00312}00312\ \ \ \ \ \ \ \ \ vc=\textcolor{keyword}{new}\ \mbox{\hyperlink{classvelControlThread}{velControlThread}}(period);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00313}00313\ \ \ \ \ \ \ \ \ vc-\/>\mbox{\hyperlink{classvelControlThread_a49ced3cbe02de251c683fcd2650b4502}{init}}(\&driver,\ partName,}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00314}00314\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ robotName);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00315}00315\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00316}00316\ \ \ \ \ \ \ \ \ vc-\/>start();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00317}00317\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00318}00318\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00319}00319\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00320}\mbox{\hyperlink{classVelControlModule_a0ac12401a5658f9fb2ff0da0a19756be}{00320}}\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classVelControlModule_a0ac12401a5658f9fb2ff0da0a19756be}{close}}()}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00321}00321\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00322}00322\ \ \ \ \ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}Closing\ module\ [\%s]\(\backslash\)n"{}},\ partName);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00323}00323\ \ \ \ \ \ \ \ \ vc-\/>stop();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00324}00324\ \ \ \ \ \ \ \ \ vc-\/>\mbox{\hyperlink{classvelControlThread_a38d8489af49a3858a49aa8cece2acd86}{halt}}();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00325}00325\ \ \ \ \ \ \ \ \ \textcolor{keyword}{delete}\ vc;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00326}00326\ \ \ \ \ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}Thead\ [\%s]\ stopped\(\backslash\)n"{}},\ partName);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00327}00327\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00328}00328\ \ \ \ \ \ \ \ \ driver.close();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00329}00329\ \ \ \ \ \ \ \ \ input\_port.close();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00330}00330\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00331}00331\ \ \ \ \ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}Module\ [\%s]\ closed\(\backslash\)n"{}},\ partName);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00332}00332\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00333}00333\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00334}00334\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00335}\mbox{\hyperlink{classVelControlModule_a3bd7a4fcb7f47534e3aae644e1d91266}{00335}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classVelControlModule_a3bd7a4fcb7f47534e3aae644e1d91266}{updateModule}}()}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00336}00336\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00337}00337\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00338}00338\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00339}00339\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00340}00340\ \};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00341}00341\ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00342}\mbox{\hyperlink{icub-main_2src_2modules_2velocityControl_2main_8cpp_a0ddf1224851353fc92bfbff6f499fa97}{00342}}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{icub-tutorials_2src_2anyRobotCartesianInterface_2src_2fakeRobot_2main_8cpp_ae66f6b31b5ad750f1fe042a706a4e3d4}{main}}(\textcolor{keywordtype}{int}\ argc,\ \textcolor{keywordtype}{char}\ *argv[])}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00343}00343\ \{}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00344}00344\ \ \ \ \ Network\ \mbox{\hyperlink{namespaceyarp}{yarp}};}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00345}00345\ \ \ \ \ \mbox{\hyperlink{classVelControlModule}{VelControlModule}}\ mod;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00346}00346\ \ \ \ \ ResourceFinder\ rf;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00347}00347\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00348}00348\ \ \ \ \ rf.\mbox{\hyperlink{classVelControlModule_a8cd96be74553017ebdd266d74fb8494d}{configure}}(argc,\ argv);}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00349}00349\ \ \ \ \ \textcolor{keywordflow}{if}\ (mod.\mbox{\hyperlink{classVelControlModule_a8cd96be74553017ebdd266d74fb8494d}{configure}}(rf)==\textcolor{keyword}{false})\ \textcolor{keywordflow}{return}\ 1;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00350}00350\ \ \ \ \ mod.runModule();}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00351}00351\ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}Main\ returning\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00352}00352\ \ \ \ \ \textcolor{keywordflow}{return}\ 0;}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00353}00353\ \}}
+\DoxyCodeLine{\Hypertarget{icub-main_2src_2modules_2velocityControl_2main_8cpp_source_l00354}00354\ }
+
+\end{DoxyCode}

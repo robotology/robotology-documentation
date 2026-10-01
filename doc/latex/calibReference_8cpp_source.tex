@@ -1,0 +1,761 @@
+\doxysection{calib\+Reference.\+cpp}
+\hypertarget{calibReference_8cpp_source}{}\label{calibReference_8cpp_source}\index{icub-\/main/src/libraries/optimization/src/calibReference.cpp@{icub-\/main/src/libraries/optimization/src/calibReference.cpp}}
+\mbox{\hyperlink{calibReference_8cpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00001}00001\ \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00002}00002\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2013\ iCub\ Facility\ -\/\ Istituto\ Italiano\ di\ Tecnologia}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00003}00003\ \textcolor{comment}{\ *\ Author:\ Ugo\ Pattacini}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00004}00004\ \textcolor{comment}{\ *\ email:\ \ ugo.pattacini@iit.it}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00005}00005\ \textcolor{comment}{\ *\ Permission\ is\ granted\ to\ copy,\ distribute,\ and/or\ modify\ this\ program}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00006}00006\ \textcolor{comment}{\ *\ under\ the\ terms\ of\ the\ GNU\ General\ Public\ License,\ version\ 2\ or\ any}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00007}00007\ \textcolor{comment}{\ *\ later\ version\ published\ by\ the\ Free\ Software\ Foundation.}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00008}00008\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00009}00009\ \textcolor{comment}{\ *\ A\ copy\ of\ the\ license\ can\ be\ found\ at}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00010}00010\ \textcolor{comment}{\ *\ http://www.robotcub.org/icub/license/gpl.txt}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00011}00011\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00012}00012\ \textcolor{comment}{\ *\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00013}00013\ \textcolor{comment}{\ *\ WITHOUT\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00014}00014\ \textcolor{comment}{\ *\ MERCHANTABILITY\ or\ FITNESS\ FOR\ A\ PARTICULAR\ PURPOSE.\ See\ the\ GNU\ General}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00015}00015\ \textcolor{comment}{\ *\ Public\ License\ for\ more\ details}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00016}00016\ \textcolor{comment}{*/}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00017}00017\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00018}00018\ \textcolor{preprocessor}{\#include\ <cmath>}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00019}00019\ \textcolor{preprocessor}{\#include\ <algorithm>}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00020}00020\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00021}00021\ \textcolor{preprocessor}{\#include\ <yarp/math/Math.h>}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00022}00022\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{math_8h}{iCub/ctrl/math.h}}>}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00023}00023\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{calibReference_8h}{iCub/optimization/calibReference.h}}>}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00024}00024\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00025}00025\ \textcolor{preprocessor}{\#include\ <IpTNLP.hpp>}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00026}00026\ \textcolor{preprocessor}{\#include\ <IpIpoptApplication.hpp>}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00027}00027\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00028}00028\ \textcolor{keyword}{using\ namespace\ }std;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00029}00029\ \textcolor{keyword}{using\ namespace\ }yarp::os;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00030}00030\ \textcolor{keyword}{using\ namespace\ }yarp::sig;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00031}00031\ \textcolor{keyword}{using\ namespace\ }yarp::math;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00032}00032\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceiCub_1_1ctrl}{iCub::ctrl}};}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00033}00033\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceiCub_1_1optimization}{iCub::optimization}};}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00034}00034\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00035}00035\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00036}00036\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespaceiCub}{iCub}}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00037}00037\ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00038}00038\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00039}00039\ \textcolor{keyword}{namespace\ }optimization}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00040}00040\ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00041}00041\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00042}00042\ \textcolor{comment}{/****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00043}\mbox{\hyperlink{namespaceiCub_1_1optimization_a8b1dc0b9bcab4ea6b89e9e6bc24fff52}{00043}}\ \textcolor{keyword}{inline}\ Matrix\ \mbox{\hyperlink{namespaceiCub_1_1optimization_a8b1dc0b9bcab4ea6b89e9e6bc24fff52}{computeH}}(\textcolor{keyword}{const}\ Vector\ \&\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}})}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00044}00044\ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00045}00045\ \ \ \ \ Matrix\ \mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}}=euler2dcm(\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}.subVector(3,5));}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00046}00046\ \ \ \ \ \mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}}(0,3)=\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}[0];\ \mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}}(1,3)=\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}[1];\ \mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}}(2,3)=\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}[2];}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00047}00047\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00048}00048\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}};}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00049}00049\ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00050}00050\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00051}00051\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00052}00052\ \textcolor{comment}{/****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00053}\mbox{\hyperlink{namespaceiCub_1_1optimization_a9d1ad7e4d6fbc000fb1b9f1676ac2db3}{00053}}\ \textcolor{keyword}{inline}\ Matrix\ \mbox{\hyperlink{namespaceiCub_1_1optimization_a8b1dc0b9bcab4ea6b89e9e6bc24fff52}{computeH}}(\textcolor{keyword}{const}\ Ipopt::Number\ *\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}})}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00054}00054\ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00055}00055\ \ \ \ \ Vector\ \_x(6);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00056}00056\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<\_x.length();\ i++)}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00057}00057\ \ \ \ \ \ \ \ \ \_x[i]=\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}[i];}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00058}00058\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00059}00059\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{namespaceiCub_1_1optimization_a8b1dc0b9bcab4ea6b89e9e6bc24fff52}{computeH}}(\_x);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00060}00060\ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00061}00061\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00062}00062\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00063}00063\ \textcolor{comment}{/****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00064}\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP}{00064}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP}{CalibReferenceWithMatchedPointsNLP}}\ :\ \textcolor{keyword}{public}\ Ipopt::TNLP}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00065}00065\ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00066}00066\ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00067}\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a84ca2a152dc7769bd10fc4ad5e5b8cd8}{00067}}\ \ \ \ \ \textcolor{keyword}{const}\ deque<Vector>\ \&\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a84ca2a152dc7769bd10fc4ad5e5b8cd8}{p0}};}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00068}\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a61fdace450e382fa62459d44f7a170e3}{00068}}\ \ \ \ \ \textcolor{keyword}{const}\ deque<Vector>\ \&\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a61fdace450e382fa62459d44f7a170e3}{p1}};}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00069}00069\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00070}\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a4568547030ee914e7e22ed56cc9e5729}{00070}}\ \ \ \ \ Vector\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a4568547030ee914e7e22ed56cc9e5729}{min}};}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00071}\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a302864f31995f5c28960cd53a1335044}{00071}}\ \ \ \ \ Vector\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a302864f31995f5c28960cd53a1335044}{max}};}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00072}\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a867fbaacba388aea1df21e3e54baceea}{00072}}\ \ \ \ \ Vector\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a867fbaacba388aea1df21e3e54baceea}{x0}};}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00073}\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a4947e0a3a951a00778cf160f00762333}{00073}}\ \ \ \ \ Vector\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a4947e0a3a951a00778cf160f00762333}{x}};}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00074}00074\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00075}00075\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00076}00076\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00077}\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a11f17fe14abb91c1762b37e198e99095}{00077}}\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a11f17fe14abb91c1762b37e198e99095}{CalibReferenceWithMatchedPointsNLP}}(\textcolor{keyword}{const}\ deque<Vector>\ \&\_p0,}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00078}00078\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ deque<Vector>\ \&\_p1,}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00079}00079\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Vector\ \&\_min,\ \textcolor{keyword}{const}\ Vector\ \&\_max)\ :}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00080}00080\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a84ca2a152dc7769bd10fc4ad5e5b8cd8}{p0}}(\_p0),\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a61fdace450e382fa62459d44f7a170e3}{p1}}(\_p1)}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00081}00081\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00082}00082\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a4568547030ee914e7e22ed56cc9e5729}{min}}=\_min;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00083}00083\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a302864f31995f5c28960cd53a1335044}{max}}=\_max;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00084}00084\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a867fbaacba388aea1df21e3e54baceea}{x0}}=0.5*(\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a4568547030ee914e7e22ed56cc9e5729}{min}}+\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a302864f31995f5c28960cd53a1335044}{max}});}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00085}00085\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00086}00086\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00087}00087\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00088}\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a2887765e19427f2d2bfc1b2d60644331}{00088}}\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a2887765e19427f2d2bfc1b2d60644331}{set\_x0}}(\textcolor{keyword}{const}\ Vector\ \&\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a867fbaacba388aea1df21e3e54baceea}{x0}})}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00089}00089\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00090}00090\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{size\_t}\ len=std::min(this-\/>x0.length(),\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a867fbaacba388aea1df21e3e54baceea}{x0}}.length());}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00091}00091\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<len;\ i++)}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00092}00092\ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>x0[i]=\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a867fbaacba388aea1df21e3e54baceea}{x0}}[i];}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00093}00093\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00094}00094\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00095}00095\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00096}\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a72ba88d417c220c984bb237bbc65e75f}{00096}}\ \ \ \ \ \textcolor{keyword}{virtual}\ Vector\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a72ba88d417c220c984bb237bbc65e75f}{get\_result}}()\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00097}00097\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00098}00098\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a4947e0a3a951a00778cf160f00762333}{x}};}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00099}00099\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00100}00100\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00101}00101\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00102}\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a0ff5975836b5e09f45f12c77e131495d}{00102}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a0ff5975836b5e09f45f12c77e131495d}{get\_nlp\_info}}(Ipopt::Index\ \&\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},\ Ipopt::Index\ \&m,\ Ipopt::Index\ \&nnz\_jac\_g,}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00103}00103\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Index\ \&nnz\_h\_lag,\ IndexStyleEnum\ \&index\_style)}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00104}00104\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00105}00105\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}=6;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00106}00106\ \ \ \ \ \ \ \ \ m=nnz\_jac\_g=nnz\_h\_lag=0;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00107}00107\ \ \ \ \ \ \ \ \ index\_style=TNLP::C\_STYLE;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00108}00108\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00109}00109\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00110}00110\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00111}00111\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00112}00112\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00113}\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_afbbebc957132931de9948ec8613fdc5b}{00113}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_afbbebc957132931de9948ec8613fdc5b}{get\_bounds\_info}}(Ipopt::Index\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},\ Ipopt::Number\ *x\_l,\ Ipopt::Number\ *x\_u,}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00114}00114\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Index\ m,\ Ipopt::Number\ *g\_l,\ Ipopt::Number\ *g\_u)}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00115}00115\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00116}00116\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (Ipopt::Index\ i=0;\ i<\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}};\ i++)}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00117}00117\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00118}00118\ \ \ \ \ \ \ \ \ \ \ \ \ x\_l[i]=\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a4568547030ee914e7e22ed56cc9e5729}{min}}[i];}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00119}00119\ \ \ \ \ \ \ \ \ \ \ \ \ x\_u[i]=\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a302864f31995f5c28960cd53a1335044}{max}}[i];}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00120}00120\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00121}00121\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00122}00122\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00123}00123\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00124}00124\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00125}00125\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00126}\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a0e9f8b06a41cc785c37f1fa9eda22298}{00126}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a0e9f8b06a41cc785c37f1fa9eda22298}{get\_starting\_point}}(Ipopt::Index\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},\ \textcolor{keywordtype}{bool}\ init\_x,\ Ipopt::Number\ *\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a4947e0a3a951a00778cf160f00762333}{x}},}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00127}00127\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ init\_z,\ Ipopt::Number\ *z\_L,\ Ipopt::Number\ *z\_U,}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00128}00128\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Index\ m,\ \textcolor{keywordtype}{bool}\ init\_lambda,\ Ipopt::Number\ *lambda)}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00129}00129\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00130}00130\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (Ipopt::Index\ i=0;\ i<\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}};\ i++)}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00131}00131\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a4947e0a3a951a00778cf160f00762333}{x}}[i]=\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a867fbaacba388aea1df21e3e54baceea}{x0}}[i];}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00132}00132\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00133}00133\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00134}00134\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00135}00135\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00136}00136\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00137}\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_ac23181b851aeddbb69c2c77cbe239a62}{00137}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_ac23181b851aeddbb69c2c77cbe239a62}{eval\_f}}(Ipopt::Index\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},\ \textcolor{keyword}{const}\ Ipopt::Number\ *\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a4947e0a3a951a00778cf160f00762333}{x}},\ \textcolor{keywordtype}{bool}\ new\_x,}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00138}00138\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Number\ \&obj\_value)}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00139}00139\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00140}00140\ \ \ \ \ \ \ \ \ Matrix\ \mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}}=\mbox{\hyperlink{namespaceiCub_1_1optimization_a8b1dc0b9bcab4ea6b89e9e6bc24fff52}{computeH}}(\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a4947e0a3a951a00778cf160f00762333}{x}});}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00141}00141\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00142}00142\ \ \ \ \ \ \ \ \ obj\_value=0.0;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00143}00143\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a84ca2a152dc7769bd10fc4ad5e5b8cd8}{p0}}.size()>0)}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00144}00144\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00145}00145\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a84ca2a152dc7769bd10fc4ad5e5b8cd8}{p0}}.size();\ i++)}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00146}00146\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ obj\_value+=\mbox{\hyperlink{group__Maths_ga77ee962cf3363413bca2239f9744198a}{norm2}}(\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a61fdace450e382fa62459d44f7a170e3}{p1}}[i]-\/\mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}}*\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a84ca2a152dc7769bd10fc4ad5e5b8cd8}{p0}}[i]);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00147}00147\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00148}00148\ \ \ \ \ \ \ \ \ \ \ \ \ obj\_value/=\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a84ca2a152dc7769bd10fc4ad5e5b8cd8}{p0}}.size();}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00149}00149\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00150}00150\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00151}00151\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00152}00152\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00153}00153\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00154}00154\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00155}\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a6f9997e7723af53d0ea9773ebf1e5a32}{00155}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a6f9997e7723af53d0ea9773ebf1e5a32}{eval\_grad\_f}}(Ipopt::Index\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},\ \textcolor{keyword}{const}\ Ipopt::Number*\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a4947e0a3a951a00778cf160f00762333}{x}},\ \textcolor{keywordtype}{bool}\ new\_x,}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00156}00156\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Number\ *grad\_f)}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00157}00157\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00158}00158\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ ca=cos(\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a4947e0a3a951a00778cf160f00762333}{x}}[3]);\ \ \textcolor{keywordtype}{double}\ sa=sin(\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a4947e0a3a951a00778cf160f00762333}{x}}[3]);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00159}00159\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ cb=cos(\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a4947e0a3a951a00778cf160f00762333}{x}}[4]);\ \ \textcolor{keywordtype}{double}\ sb=sin(\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a4947e0a3a951a00778cf160f00762333}{x}}[4]);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00160}00160\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ cg=cos(\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a4947e0a3a951a00778cf160f00762333}{x}}[5]);\ \ \textcolor{keywordtype}{double}\ sg=sin(\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a4947e0a3a951a00778cf160f00762333}{x}}[5]);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00161}00161\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00162}00162\ \ \ \ \ \ \ \ \ Matrix\ Rza=eye(4,4);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00163}00163\ \ \ \ \ \ \ \ \ Rza(0,0)=ca;\ \ \ Rza(1,1)=ca;\ \ \ Rza(1,0)=sa;\ \ \ Rza(0,1)=-\/sa;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00164}00164\ \ \ \ \ \ \ \ \ Matrix\ dRza=\mbox{\hyperlink{compute__ekf__sym_8m_a35baefda5ec044ac7c1f5a41815b5b45}{zeros}}(4,4);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00165}00165\ \ \ \ \ \ \ \ \ dRza(0,0)=-\/sa;\ dRza(1,1)=-\/sa;\ dRza(1,0)=ca;\ \ dRza(0,1)=-\/ca;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00166}00166\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00167}00167\ \ \ \ \ \ \ \ \ Matrix\ Rzg=eye(4,4);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00168}00168\ \ \ \ \ \ \ \ \ Rzg(0,0)=cg;\ \ \ Rzg(1,1)=cg;\ \ \ Rzg(1,0)=sg;\ \ \ Rzg(0,1)=-\/sg;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00169}00169\ \ \ \ \ \ \ \ \ Matrix\ dRzg=\mbox{\hyperlink{compute__ekf__sym_8m_a35baefda5ec044ac7c1f5a41815b5b45}{zeros}}(4,4);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00170}00170\ \ \ \ \ \ \ \ \ dRzg(0,0)=-\/sg;\ dRzg(1,1)=-\/sg;\ dRzg(1,0)=cg;\ \ dRzg(0,1)=-\/cg;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00171}00171\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00172}00172\ \ \ \ \ \ \ \ \ Matrix\ Ryb=eye(4,4);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00173}00173\ \ \ \ \ \ \ \ \ Ryb(0,0)=cb;\ \ \ Ryb(2,2)=cb;\ \ \ Ryb(2,0)=-\/sb;\ \ Ryb(0,2)=sb;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00174}00174\ \ \ \ \ \ \ \ \ Matrix\ dRyb=\mbox{\hyperlink{compute__ekf__sym_8m_a35baefda5ec044ac7c1f5a41815b5b45}{zeros}}(4,4);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00175}00175\ \ \ \ \ \ \ \ \ dRyb(0,0)=-\/sb;\ dRyb(2,2)=-\/sb;\ dRyb(2,0)=-\/cb;\ dRyb(0,2)=cb;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00176}00176\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00177}00177\ \ \ \ \ \ \ \ \ Matrix\ dHdx0=\mbox{\hyperlink{compute__ekf__sym_8m_a35baefda5ec044ac7c1f5a41815b5b45}{zeros}}(4,4);\ dHdx0(0,3)=1.0;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00178}00178\ \ \ \ \ \ \ \ \ Matrix\ dHdx1=\mbox{\hyperlink{compute__ekf__sym_8m_a35baefda5ec044ac7c1f5a41815b5b45}{zeros}}(4,4);\ dHdx1(1,3)=1.0;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00179}00179\ \ \ \ \ \ \ \ \ Matrix\ dHdx2=\mbox{\hyperlink{compute__ekf__sym_8m_a35baefda5ec044ac7c1f5a41815b5b45}{zeros}}(4,4);\ dHdx2(2,3)=1.0;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00180}00180\ \ \ \ \ \ \ \ \ Matrix\ dHdx3=dRza*Ryb*Rzg;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00181}00181\ \ \ \ \ \ \ \ \ Matrix\ dHdx4=Rza*dRyb*Rzg;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00182}00182\ \ \ \ \ \ \ \ \ Matrix\ dHdx5=Rza*Ryb*dRzg;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00183}00183\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00184}00184\ \ \ \ \ \ \ \ \ Matrix\ \mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}}=\mbox{\hyperlink{namespaceiCub_1_1optimization_a8b1dc0b9bcab4ea6b89e9e6bc24fff52}{computeH}}(\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a4947e0a3a951a00778cf160f00762333}{x}});}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00185}00185\ \ \ \ \ \ \ \ \ grad\_f[0]=grad\_f[1]=grad\_f[2]=0.0;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00186}00186\ \ \ \ \ \ \ \ \ grad\_f[3]=grad\_f[4]=grad\_f[5]=0.0;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00187}00187\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a84ca2a152dc7769bd10fc4ad5e5b8cd8}{p0}}.size()>0)}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00188}00188\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00189}00189\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a84ca2a152dc7769bd10fc4ad5e5b8cd8}{p0}}.size();\ i++)}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00190}00190\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00191}00191\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Vector\ d=\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a61fdace450e382fa62459d44f7a170e3}{p1}}[i]-\/\mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}}*\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a84ca2a152dc7769bd10fc4ad5e5b8cd8}{p0}}[i];}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00192}00192\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ grad\_f[0]-\/=2.0*\mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(d,(dHdx0*\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a84ca2a152dc7769bd10fc4ad5e5b8cd8}{p0}}[i]));}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00193}00193\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ grad\_f[1]-\/=2.0*\mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(d,(dHdx1*\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a84ca2a152dc7769bd10fc4ad5e5b8cd8}{p0}}[i]));}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00194}00194\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ grad\_f[2]-\/=2.0*\mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(d,(dHdx2*\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a84ca2a152dc7769bd10fc4ad5e5b8cd8}{p0}}[i]));}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00195}00195\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ grad\_f[3]-\/=2.0*\mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(d,(dHdx3*\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a84ca2a152dc7769bd10fc4ad5e5b8cd8}{p0}}[i]));}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00196}00196\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ grad\_f[4]-\/=2.0*\mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(d,(dHdx4*\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a84ca2a152dc7769bd10fc4ad5e5b8cd8}{p0}}[i]));}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00197}00197\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ grad\_f[5]-\/=2.0*\mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(d,(dHdx5*\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a84ca2a152dc7769bd10fc4ad5e5b8cd8}{p0}}[i]));}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00198}00198\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00199}00199\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00200}00200\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (Ipopt::Index\ i=0;\ i<\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}};\ i++)}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00201}00201\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ grad\_f[i]/=\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a84ca2a152dc7769bd10fc4ad5e5b8cd8}{p0}}.size();}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00202}00202\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00203}00203\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00204}00204\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00205}00205\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00206}00206\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00207}00207\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00208}\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a1222293a005c53c472e9cab99e71037c}{00208}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a1222293a005c53c472e9cab99e71037c}{eval\_g}}(Ipopt::Index\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},\ \textcolor{keyword}{const}\ Ipopt::Number\ *\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a4947e0a3a951a00778cf160f00762333}{x}},\ \textcolor{keywordtype}{bool}\ new\_x,}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00209}00209\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Index\ m,\ Ipopt::Number\ *g)}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00210}00210\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00211}00211\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00212}00212\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00213}00213\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00214}00214\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00215}\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a7db0b860174f0121345f0c03378904ee}{00215}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a7db0b860174f0121345f0c03378904ee}{eval\_jac\_g}}(Ipopt::Index\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},\ \textcolor{keyword}{const}\ Ipopt::Number\ *\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a4947e0a3a951a00778cf160f00762333}{x}},\ \textcolor{keywordtype}{bool}\ new\_x,}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00216}00216\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Index\ m,\ Ipopt::Index\ nele\_jac,\ Ipopt::Index\ *iRow,}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00217}00217\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Index\ *jCol,\ Ipopt::Number\ *values)}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00218}00218\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00219}00219\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00220}00220\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00221}00221\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00222}00222\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00223}\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a2628e0e1be252dc1ded7d4ca1bfd22a2}{00223}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a2628e0e1be252dc1ded7d4ca1bfd22a2}{eval\_h}}(Ipopt::Index\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},\ \textcolor{keyword}{const}\ Ipopt::Number\ *\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a4947e0a3a951a00778cf160f00762333}{x}},\ \textcolor{keywordtype}{bool}\ new\_x,}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00224}00224\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Number\ obj\_factor,\ Ipopt::Index\ m,\ \textcolor{keyword}{const}\ Ipopt::Number\ *lambda,}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00225}00225\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ new\_lambda,\ Ipopt::Index\ nele\_hess,\ Ipopt::Index\ *iRow,}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00226}00226\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Index\ *jCol,\ Ipopt::Number\ *values)}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00227}00227\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00228}00228\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00229}00229\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00230}00230\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00231}00231\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00232}\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a50bd3a67d4145e0d298736049a92ba81}{00232}}\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a50bd3a67d4145e0d298736049a92ba81}{finalize\_solution}}(Ipopt::SolverReturn\ status,\ Ipopt::Index\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00233}00233\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Ipopt::Number\ *\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a4947e0a3a951a00778cf160f00762333}{x}},\ \textcolor{keyword}{const}\ Ipopt::Number\ *z\_L,}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00234}00234\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Ipopt::Number\ *z\_U,\ Ipopt::Index\ m,}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00235}00235\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Ipopt::Number\ *g,\ \textcolor{keyword}{const}\ Ipopt::Number\ *lambda,}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00236}00236\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Number\ obj\_value,\ \textcolor{keyword}{const}\ Ipopt::IpoptData\ *ip\_data,}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00237}00237\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::IpoptCalculatedQuantities\ *ip\_cq)}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00238}00238\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00239}00239\ \ \ \ \ \ \ \ \ this-\/>x.resize(\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}});}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00240}00240\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (Ipopt::Index\ i=0;\ i<\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}};\ i++)}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00241}00241\ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>x[i]=\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a4947e0a3a951a00778cf160f00762333}{x}}[i];}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00242}00242\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00243}00243\ \};}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00244}00244\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00245}00245\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00246}00246\ \textcolor{comment}{/****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00247}\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithScaledMatchedPointsNLP}{00247}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithScaledMatchedPointsNLP}{CalibReferenceWithScaledMatchedPointsNLP}}\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP}{CalibReferenceWithMatchedPointsNLP}}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00248}00248\ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00249}00249\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00250}00250\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00251}\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithScaledMatchedPointsNLP_a06ba92d6dbeecdcf94214c293937c92f}{00251}}\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithScaledMatchedPointsNLP_a06ba92d6dbeecdcf94214c293937c92f}{CalibReferenceWithScaledMatchedPointsNLP}}(\textcolor{keyword}{const}\ deque<Vector>\ \&\_p0,}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00252}00252\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ deque<Vector>\ \&\_p1,}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00253}00253\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Vector\ \&\_min,\ \textcolor{keyword}{const}\ Vector\ \&\_max)\ :}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00254}00254\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP}{CalibReferenceWithMatchedPointsNLP}}(\_p0,\_p1,\_min,\_max)\ \{\ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00255}00255\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00256}00256\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00257}\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithScaledMatchedPointsNLP_a035175358659b2711ff26cf911f432f1}{00257}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithScaledMatchedPointsNLP_a035175358659b2711ff26cf911f432f1}{get\_nlp\_info}}(Ipopt::Index\ \&\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},\ Ipopt::Index\ \&m,\ Ipopt::Index\ \&nnz\_jac\_g,}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00258}00258\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Index\ \&nnz\_h\_lag,\ IndexStyleEnum\ \&index\_style)}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00259}00259\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00260}00260\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a0ff5975836b5e09f45f12c77e131495d}{CalibReferenceWithMatchedPointsNLP::get\_nlp\_info}}(\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},m,nnz\_jac\_g,nnz\_h\_lag,index\_style);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00261}00261\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}=6+3;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00262}00262\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00263}00263\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00264}00264\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00265}00265\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00266}00266\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00267}\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithScaledMatchedPointsNLP_a7f4d114414112e94784b85359c8c51e8}{00267}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithScaledMatchedPointsNLP_a7f4d114414112e94784b85359c8c51e8}{eval\_f}}(Ipopt::Index\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},\ \textcolor{keyword}{const}\ Ipopt::Number\ *\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a4947e0a3a951a00778cf160f00762333}{x}},\ \textcolor{keywordtype}{bool}\ new\_x,}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00268}00268\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Number\ \&obj\_value)}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00269}00269\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00270}00270\ \ \ \ \ \ \ \ \ Matrix\ \mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}}=\mbox{\hyperlink{namespaceiCub_1_1optimization_a8b1dc0b9bcab4ea6b89e9e6bc24fff52}{computeH}}(\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a4947e0a3a951a00778cf160f00762333}{x}});}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00271}00271\ \ \ \ \ \ \ \ \ Vector\ s(4);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00272}00272\ \ \ \ \ \ \ \ \ s[0]=\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a4947e0a3a951a00778cf160f00762333}{x}}[6];}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00273}00273\ \ \ \ \ \ \ \ \ s[1]=\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a4947e0a3a951a00778cf160f00762333}{x}}[7];}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00274}00274\ \ \ \ \ \ \ \ \ s[2]=\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a4947e0a3a951a00778cf160f00762333}{x}}[8];}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00275}00275\ \ \ \ \ \ \ \ \ s[3]=1.0;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00276}00276\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00277}00277\ \ \ \ \ \ \ \ \ obj\_value=0.0;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00278}00278\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a84ca2a152dc7769bd10fc4ad5e5b8cd8}{p0}}.size()>0)}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00279}00279\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00280}00280\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a84ca2a152dc7769bd10fc4ad5e5b8cd8}{p0}}.size();\ i++)}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00281}00281\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ obj\_value+=\mbox{\hyperlink{group__Maths_ga77ee962cf3363413bca2239f9744198a}{norm2}}(\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a61fdace450e382fa62459d44f7a170e3}{p1}}[i]-\/s*(\mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}}*\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a84ca2a152dc7769bd10fc4ad5e5b8cd8}{p0}}[i]));}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00282}00282\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00283}00283\ \ \ \ \ \ \ \ \ \ \ \ \ obj\_value/=\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a84ca2a152dc7769bd10fc4ad5e5b8cd8}{p0}}.size();}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00284}00284\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00285}00285\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00286}00286\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00287}00287\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00288}00288\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00289}00289\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00290}\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithScaledMatchedPointsNLP_a6d94856e4896ee4afd539cdcfebd6eda}{00290}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithScaledMatchedPointsNLP_a6d94856e4896ee4afd539cdcfebd6eda}{eval\_grad\_f}}(Ipopt::Index\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},\ \textcolor{keyword}{const}\ Ipopt::Number*\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a4947e0a3a951a00778cf160f00762333}{x}},\ \textcolor{keywordtype}{bool}\ new\_x,}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00291}00291\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Number\ *grad\_f)}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00292}00292\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00293}00293\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ ca=cos(\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a4947e0a3a951a00778cf160f00762333}{x}}[3]);\ \ \textcolor{keywordtype}{double}\ sa=sin(\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a4947e0a3a951a00778cf160f00762333}{x}}[3]);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00294}00294\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ cb=cos(\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a4947e0a3a951a00778cf160f00762333}{x}}[4]);\ \ \textcolor{keywordtype}{double}\ sb=sin(\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a4947e0a3a951a00778cf160f00762333}{x}}[4]);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00295}00295\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ cg=cos(\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a4947e0a3a951a00778cf160f00762333}{x}}[5]);\ \ \textcolor{keywordtype}{double}\ sg=sin(\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a4947e0a3a951a00778cf160f00762333}{x}}[5]);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00296}00296\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00297}00297\ \ \ \ \ \ \ \ \ Matrix\ Rza=eye(4,4);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00298}00298\ \ \ \ \ \ \ \ \ Rza(0,0)=ca;\ \ \ Rza(1,1)=ca;\ \ \ Rza(1,0)=sa;\ \ \ Rza(0,1)=-\/sa;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00299}00299\ \ \ \ \ \ \ \ \ Matrix\ dRza=\mbox{\hyperlink{compute__ekf__sym_8m_a35baefda5ec044ac7c1f5a41815b5b45}{zeros}}(4,4);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00300}00300\ \ \ \ \ \ \ \ \ dRza(0,0)=-\/sa;\ dRza(1,1)=-\/sa;\ dRza(1,0)=ca;\ \ dRza(0,1)=-\/ca;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00301}00301\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00302}00302\ \ \ \ \ \ \ \ \ Matrix\ Rzg=eye(4,4);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00303}00303\ \ \ \ \ \ \ \ \ Rzg(0,0)=cg;\ \ \ Rzg(1,1)=cg;\ \ \ Rzg(1,0)=sg;\ \ \ Rzg(0,1)=-\/sg;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00304}00304\ \ \ \ \ \ \ \ \ Matrix\ dRzg=\mbox{\hyperlink{compute__ekf__sym_8m_a35baefda5ec044ac7c1f5a41815b5b45}{zeros}}(4,4);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00305}00305\ \ \ \ \ \ \ \ \ dRzg(0,0)=-\/sg;\ dRzg(1,1)=-\/sg;\ dRzg(1,0)=cg;\ \ dRzg(0,1)=-\/cg;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00306}00306\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00307}00307\ \ \ \ \ \ \ \ \ Matrix\ Ryb=eye(4,4);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00308}00308\ \ \ \ \ \ \ \ \ Ryb(0,0)=cb;\ \ \ Ryb(2,2)=cb;\ \ \ Ryb(2,0)=-\/sb;\ \ Ryb(0,2)=sb;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00309}00309\ \ \ \ \ \ \ \ \ Matrix\ dRyb=\mbox{\hyperlink{compute__ekf__sym_8m_a35baefda5ec044ac7c1f5a41815b5b45}{zeros}}(4,4);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00310}00310\ \ \ \ \ \ \ \ \ dRyb(0,0)=-\/sb;\ dRyb(2,2)=-\/sb;\ dRyb(2,0)=-\/cb;\ dRyb(0,2)=cb;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00311}00311\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00312}00312\ \ \ \ \ \ \ \ \ Matrix\ dHdx0=\mbox{\hyperlink{compute__ekf__sym_8m_a35baefda5ec044ac7c1f5a41815b5b45}{zeros}}(4,4);\ dHdx0(0,3)=1.0;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00313}00313\ \ \ \ \ \ \ \ \ Matrix\ dHdx1=\mbox{\hyperlink{compute__ekf__sym_8m_a35baefda5ec044ac7c1f5a41815b5b45}{zeros}}(4,4);\ dHdx1(1,3)=1.0;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00314}00314\ \ \ \ \ \ \ \ \ Matrix\ dHdx2=\mbox{\hyperlink{compute__ekf__sym_8m_a35baefda5ec044ac7c1f5a41815b5b45}{zeros}}(4,4);\ dHdx2(2,3)=1.0;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00315}00315\ \ \ \ \ \ \ \ \ Matrix\ dHdx3=dRza*Ryb*Rzg;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00316}00316\ \ \ \ \ \ \ \ \ Matrix\ dHdx4=Rza*dRyb*Rzg;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00317}00317\ \ \ \ \ \ \ \ \ Matrix\ dHdx5=Rza*Ryb*dRzg;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00318}00318\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00319}00319\ \ \ \ \ \ \ \ \ Matrix\ \mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}}=\mbox{\hyperlink{namespaceiCub_1_1optimization_a8b1dc0b9bcab4ea6b89e9e6bc24fff52}{computeH}}(\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a4947e0a3a951a00778cf160f00762333}{x}});}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00320}00320\ \ \ \ \ \ \ \ \ Matrix\ dHdx6=\mbox{\hyperlink{compute__ekf__sym_8m_a35baefda5ec044ac7c1f5a41815b5b45}{zeros}}(4,4);\ dHdx6(0,0)=1.0;\ dHdx6*=\mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}};}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00321}00321\ \ \ \ \ \ \ \ \ Matrix\ dHdx7=\mbox{\hyperlink{compute__ekf__sym_8m_a35baefda5ec044ac7c1f5a41815b5b45}{zeros}}(4,4);\ dHdx7(1,1)=1.0;\ dHdx7*=\mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}};}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00322}00322\ \ \ \ \ \ \ \ \ Matrix\ dHdx8=\mbox{\hyperlink{compute__ekf__sym_8m_a35baefda5ec044ac7c1f5a41815b5b45}{zeros}}(4,4);\ dHdx8(2,2)=1.0;\ dHdx8*=\mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}};}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00323}00323\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00324}00324\ \ \ \ \ \ \ \ \ Vector\ s(4);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00325}00325\ \ \ \ \ \ \ \ \ s[0]=\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a4947e0a3a951a00778cf160f00762333}{x}}[6];}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00326}00326\ \ \ \ \ \ \ \ \ s[1]=\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a4947e0a3a951a00778cf160f00762333}{x}}[7];}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00327}00327\ \ \ \ \ \ \ \ \ s[2]=\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a4947e0a3a951a00778cf160f00762333}{x}}[8];}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00328}00328\ \ \ \ \ \ \ \ \ s[3]=1.0;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00329}00329\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00330}00330\ \ \ \ \ \ \ \ \ grad\_f[0]=grad\_f[1]=grad\_f[2]=0.0;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00331}00331\ \ \ \ \ \ \ \ \ grad\_f[3]=grad\_f[4]=grad\_f[5]=0.0;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00332}00332\ \ \ \ \ \ \ \ \ grad\_f[6]=grad\_f[7]=grad\_f[8]=0.0;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00333}00333\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a84ca2a152dc7769bd10fc4ad5e5b8cd8}{p0}}.size()>0)}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00334}00334\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00335}00335\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a84ca2a152dc7769bd10fc4ad5e5b8cd8}{p0}}.size();\ i++)}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00336}00336\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00337}00337\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Vector\ d=\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a61fdace450e382fa62459d44f7a170e3}{p1}}[i]-\/s*(\mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}}*\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a84ca2a152dc7769bd10fc4ad5e5b8cd8}{p0}}[i]);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00338}00338\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ grad\_f[0]-\/=2.0*\mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(d,(dHdx0*\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a84ca2a152dc7769bd10fc4ad5e5b8cd8}{p0}}[i]));}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00339}00339\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ grad\_f[1]-\/=2.0*\mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(d,(dHdx1*\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a84ca2a152dc7769bd10fc4ad5e5b8cd8}{p0}}[i]));}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00340}00340\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ grad\_f[2]-\/=2.0*\mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(d,(dHdx2*\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a84ca2a152dc7769bd10fc4ad5e5b8cd8}{p0}}[i]));}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00341}00341\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ grad\_f[3]-\/=2.0*\mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(d,(dHdx3*\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a84ca2a152dc7769bd10fc4ad5e5b8cd8}{p0}}[i]));}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00342}00342\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ grad\_f[4]-\/=2.0*\mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(d,(dHdx4*\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a84ca2a152dc7769bd10fc4ad5e5b8cd8}{p0}}[i]));}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00343}00343\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ grad\_f[5]-\/=2.0*\mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(d,(dHdx5*\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a84ca2a152dc7769bd10fc4ad5e5b8cd8}{p0}}[i]));}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00344}00344\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ grad\_f[6]-\/=2.0*\mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(d,(dHdx6*\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a84ca2a152dc7769bd10fc4ad5e5b8cd8}{p0}}[i]));}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00345}00345\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ grad\_f[7]-\/=2.0*\mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(d,(dHdx7*\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a84ca2a152dc7769bd10fc4ad5e5b8cd8}{p0}}[i]));}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00346}00346\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ grad\_f[8]-\/=2.0*\mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(d,(dHdx8*\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a84ca2a152dc7769bd10fc4ad5e5b8cd8}{p0}}[i]));}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00347}00347\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00348}00348\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00349}00349\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (Ipopt::Index\ i=0;\ i<\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}};\ i++)}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00350}00350\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ grad\_f[i]/=\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a84ca2a152dc7769bd10fc4ad5e5b8cd8}{p0}}.size();}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00351}00351\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00352}00352\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00353}00353\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00354}00354\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00355}00355\ \};}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00356}00356\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00357}00357\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00358}00358\ \textcolor{comment}{/****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00359}\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithScalarScaledMatchedPointsNLP}{00359}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithScalarScaledMatchedPointsNLP}{CalibReferenceWithScalarScaledMatchedPointsNLP}}\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP}{CalibReferenceWithMatchedPointsNLP}}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00360}00360\ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00361}00361\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00362}00362\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00363}\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithScalarScaledMatchedPointsNLP_a599b31311cf6d10ad393a2bdb1e01d6d}{00363}}\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithScalarScaledMatchedPointsNLP_a599b31311cf6d10ad393a2bdb1e01d6d}{CalibReferenceWithScalarScaledMatchedPointsNLP}}(\textcolor{keyword}{const}\ deque<Vector>\ \&\_p0,}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00364}00364\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ deque<Vector>\ \&\_p1,}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00365}00365\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Vector\ \&\_min,\ \textcolor{keyword}{const}\ Vector\ \&\_max)\ :}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00366}00366\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP}{CalibReferenceWithMatchedPointsNLP}}(\_p0,\_p1,\_min,\_max)\ \{\ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00367}00367\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00368}00368\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00369}\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithScalarScaledMatchedPointsNLP_a5ea59d7c73a254131174fcb56c4c43c0}{00369}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithScalarScaledMatchedPointsNLP_a5ea59d7c73a254131174fcb56c4c43c0}{get\_nlp\_info}}(Ipopt::Index\ \&\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},\ Ipopt::Index\ \&m,\ Ipopt::Index\ \&nnz\_jac\_g,}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00370}00370\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Index\ \&nnz\_h\_lag,\ IndexStyleEnum\ \&index\_style)}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00371}00371\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00372}00372\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a0ff5975836b5e09f45f12c77e131495d}{CalibReferenceWithMatchedPointsNLP::get\_nlp\_info}}(\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},m,nnz\_jac\_g,nnz\_h\_lag,index\_style);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00373}00373\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}}=6+1;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00374}00374\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00375}00375\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00376}00376\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00377}00377\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00378}00378\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00379}\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithScalarScaledMatchedPointsNLP_a62832e4510d93eb3c50ec2a71529d52e}{00379}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithScalarScaledMatchedPointsNLP_a62832e4510d93eb3c50ec2a71529d52e}{eval\_f}}(Ipopt::Index\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},\ \textcolor{keyword}{const}\ Ipopt::Number\ *\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a4947e0a3a951a00778cf160f00762333}{x}},\ \textcolor{keywordtype}{bool}\ new\_x,}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00380}00380\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Number\ \&obj\_value)}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00381}00381\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00382}00382\ \ \ \ \ \ \ \ \ Matrix\ \mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}}=\mbox{\hyperlink{namespaceiCub_1_1optimization_a8b1dc0b9bcab4ea6b89e9e6bc24fff52}{computeH}}(\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a4947e0a3a951a00778cf160f00762333}{x}});}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00383}00383\ \ \ \ \ \ \ \ \ Vector\ s(4);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00384}00384\ \ \ \ \ \ \ \ \ s[0]=s[1]=s[2]=\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a4947e0a3a951a00778cf160f00762333}{x}}[6];}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00385}00385\ \ \ \ \ \ \ \ \ s[3]=1.0;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00386}00386\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00387}00387\ \ \ \ \ \ \ \ \ obj\_value=0.0;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00388}00388\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a84ca2a152dc7769bd10fc4ad5e5b8cd8}{p0}}.size()>0)}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00389}00389\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00390}00390\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a84ca2a152dc7769bd10fc4ad5e5b8cd8}{p0}}.size();\ i++)}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00391}00391\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ obj\_value+=\mbox{\hyperlink{group__Maths_ga77ee962cf3363413bca2239f9744198a}{norm2}}(\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a61fdace450e382fa62459d44f7a170e3}{p1}}[i]-\/s*(\mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}}*\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a84ca2a152dc7769bd10fc4ad5e5b8cd8}{p0}}[i]));}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00392}00392\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00393}00393\ \ \ \ \ \ \ \ \ \ \ \ \ obj\_value/=\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a84ca2a152dc7769bd10fc4ad5e5b8cd8}{p0}}.size();}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00394}00394\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00395}00395\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00396}00396\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00397}00397\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00398}00398\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00399}00399\ \textcolor{comment}{\ \ \ \ /****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00400}\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithScalarScaledMatchedPointsNLP_a4dea0452ad7f09a2e4e03c685c003965}{00400}}\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithScalarScaledMatchedPointsNLP_a4dea0452ad7f09a2e4e03c685c003965}{eval\_grad\_f}}(Ipopt::Index\ \mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}},\ \textcolor{keyword}{const}\ Ipopt::Number*\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a4947e0a3a951a00778cf160f00762333}{x}},\ \textcolor{keywordtype}{bool}\ new\_x,}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00401}00401\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Ipopt::Number\ *grad\_f)}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00402}00402\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00403}00403\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ ca=cos(\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a4947e0a3a951a00778cf160f00762333}{x}}[3]);\ \ \textcolor{keywordtype}{double}\ sa=sin(\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a4947e0a3a951a00778cf160f00762333}{x}}[3]);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00404}00404\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ cb=cos(\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a4947e0a3a951a00778cf160f00762333}{x}}[4]);\ \ \textcolor{keywordtype}{double}\ sb=sin(\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a4947e0a3a951a00778cf160f00762333}{x}}[4]);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00405}00405\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ cg=cos(\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a4947e0a3a951a00778cf160f00762333}{x}}[5]);\ \ \textcolor{keywordtype}{double}\ sg=sin(\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a4947e0a3a951a00778cf160f00762333}{x}}[5]);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00406}00406\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00407}00407\ \ \ \ \ \ \ \ \ Matrix\ Rza=eye(4,4);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00408}00408\ \ \ \ \ \ \ \ \ Rza(0,0)=ca;\ \ \ Rza(1,1)=ca;\ \ \ Rza(1,0)=sa;\ \ \ Rza(0,1)=-\/sa;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00409}00409\ \ \ \ \ \ \ \ \ Matrix\ dRza=\mbox{\hyperlink{compute__ekf__sym_8m_a35baefda5ec044ac7c1f5a41815b5b45}{zeros}}(4,4);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00410}00410\ \ \ \ \ \ \ \ \ dRza(0,0)=-\/sa;\ dRza(1,1)=-\/sa;\ dRza(1,0)=ca;\ \ dRza(0,1)=-\/ca;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00411}00411\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00412}00412\ \ \ \ \ \ \ \ \ Matrix\ Rzg=eye(4,4);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00413}00413\ \ \ \ \ \ \ \ \ Rzg(0,0)=cg;\ \ \ Rzg(1,1)=cg;\ \ \ Rzg(1,0)=sg;\ \ \ Rzg(0,1)=-\/sg;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00414}00414\ \ \ \ \ \ \ \ \ Matrix\ dRzg=\mbox{\hyperlink{compute__ekf__sym_8m_a35baefda5ec044ac7c1f5a41815b5b45}{zeros}}(4,4);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00415}00415\ \ \ \ \ \ \ \ \ dRzg(0,0)=-\/sg;\ dRzg(1,1)=-\/sg;\ dRzg(1,0)=cg;\ \ dRzg(0,1)=-\/cg;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00416}00416\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00417}00417\ \ \ \ \ \ \ \ \ Matrix\ Ryb=eye(4,4);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00418}00418\ \ \ \ \ \ \ \ \ Ryb(0,0)=cb;\ \ \ Ryb(2,2)=cb;\ \ \ Ryb(2,0)=-\/sb;\ \ Ryb(0,2)=sb;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00419}00419\ \ \ \ \ \ \ \ \ Matrix\ dRyb=\mbox{\hyperlink{compute__ekf__sym_8m_a35baefda5ec044ac7c1f5a41815b5b45}{zeros}}(4,4);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00420}00420\ \ \ \ \ \ \ \ \ dRyb(0,0)=-\/sb;\ dRyb(2,2)=-\/sb;\ dRyb(2,0)=-\/cb;\ dRyb(0,2)=cb;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00421}00421\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00422}00422\ \ \ \ \ \ \ \ \ Matrix\ dHdx0=\mbox{\hyperlink{compute__ekf__sym_8m_a35baefda5ec044ac7c1f5a41815b5b45}{zeros}}(4,4);\ dHdx0(0,3)=1.0;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00423}00423\ \ \ \ \ \ \ \ \ Matrix\ dHdx1=\mbox{\hyperlink{compute__ekf__sym_8m_a35baefda5ec044ac7c1f5a41815b5b45}{zeros}}(4,4);\ dHdx1(1,3)=1.0;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00424}00424\ \ \ \ \ \ \ \ \ Matrix\ dHdx2=\mbox{\hyperlink{compute__ekf__sym_8m_a35baefda5ec044ac7c1f5a41815b5b45}{zeros}}(4,4);\ dHdx2(2,3)=1.0;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00425}00425\ \ \ \ \ \ \ \ \ Matrix\ dHdx3=dRza*Ryb*Rzg;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00426}00426\ \ \ \ \ \ \ \ \ Matrix\ dHdx4=Rza*dRyb*Rzg;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00427}00427\ \ \ \ \ \ \ \ \ Matrix\ dHdx5=Rza*Ryb*dRzg;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00428}00428\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00429}00429\ \ \ \ \ \ \ \ \ Matrix\ \mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}}=\mbox{\hyperlink{namespaceiCub_1_1optimization_a8b1dc0b9bcab4ea6b89e9e6bc24fff52}{computeH}}(\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a4947e0a3a951a00778cf160f00762333}{x}});}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00430}00430\ \ \ \ \ \ \ \ \ Matrix\ dHdx6=\mbox{\hyperlink{compute__ekf__sym_8m_a35baefda5ec044ac7c1f5a41815b5b45}{zeros}}(4,4);\ dHdx6(0,0)=1.0;\ dHdx6*=\mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}};}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00431}00431\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00432}00432\ \ \ \ \ \ \ \ \ Vector\ s(4);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00433}00433\ \ \ \ \ \ \ \ \ s[0]=s[1]=s[2]=\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a4947e0a3a951a00778cf160f00762333}{x}}[6];}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00434}00434\ \ \ \ \ \ \ \ \ s[3]=1.0;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00435}00435\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00436}00436\ \ \ \ \ \ \ \ \ grad\_f[0]=grad\_f[1]=grad\_f[2]=0.0;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00437}00437\ \ \ \ \ \ \ \ \ grad\_f[3]=grad\_f[4]=grad\_f[5]=0.0;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00438}00438\ \ \ \ \ \ \ \ \ grad\_f[6]=0.0;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00439}00439\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a84ca2a152dc7769bd10fc4ad5e5b8cd8}{p0}}.size()>0)}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00440}00440\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00441}00441\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a84ca2a152dc7769bd10fc4ad5e5b8cd8}{p0}}.size();\ i++)}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00442}00442\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00443}00443\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Vector\ d=\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a61fdace450e382fa62459d44f7a170e3}{p1}}[i]-\/s*(\mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}}*\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a84ca2a152dc7769bd10fc4ad5e5b8cd8}{p0}}[i]);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00444}00444\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ grad\_f[0]-\/=2.0*\mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(d,(dHdx0*\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a84ca2a152dc7769bd10fc4ad5e5b8cd8}{p0}}[i]));}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00445}00445\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ grad\_f[1]-\/=2.0*\mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(d,(dHdx1*\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a84ca2a152dc7769bd10fc4ad5e5b8cd8}{p0}}[i]));}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00446}00446\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ grad\_f[2]-\/=2.0*\mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(d,(dHdx2*\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a84ca2a152dc7769bd10fc4ad5e5b8cd8}{p0}}[i]));}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00447}00447\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ grad\_f[3]-\/=2.0*\mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(d,(dHdx3*\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a84ca2a152dc7769bd10fc4ad5e5b8cd8}{p0}}[i]));}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00448}00448\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ grad\_f[4]-\/=2.0*\mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(d,(dHdx4*\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a84ca2a152dc7769bd10fc4ad5e5b8cd8}{p0}}[i]));}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00449}00449\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ grad\_f[5]-\/=2.0*\mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(d,(dHdx5*\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a84ca2a152dc7769bd10fc4ad5e5b8cd8}{p0}}[i]));}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00450}00450\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ grad\_f[6]-\/=2.0*\mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(d,(dHdx6*\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a84ca2a152dc7769bd10fc4ad5e5b8cd8}{p0}}[i]));}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00451}00451\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00452}00452\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00453}00453\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (Ipopt::Index\ i=0;\ i<\mbox{\hyperlink{debugFunctions_8cpp_a76f11d9a0a47b94f72c2d0e77fb32240}{n}};\ i++)}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00454}00454\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ grad\_f[i]/=\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP_a84ca2a152dc7769bd10fc4ad5e5b8cd8}{p0}}.size();}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00455}00455\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00456}00456\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00457}00457\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00458}00458\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00459}00459\ \};}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00460}00460\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00461}00461\ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00462}00462\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00463}00463\ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00464}00464\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00465}00465\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00466}00466\ \textcolor{comment}{/****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00467}\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_aee71d3e3b9d2fdd020677f188b458f30}{00467}}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_aee71d3e3b9d2fdd020677f188b458f30}{CalibReferenceWithMatchedPoints::CalibReferenceWithMatchedPoints}}()}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00468}00468\ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00469}00469\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a532fec68cdad225eeb111f33542b0bf7}{max\_iter}}=300;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00470}00470\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a68087b32aedf00724d0bd3368106b225}{tol}}=1\mbox{\hyperlink{compute__ekf__fast_8m_a08a4415e9d594ff960030b921d42b91e}{e}}-\/8;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00471}00471\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00472}00472\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_ada9d9a5e880385976175f1be2eccafcf}{min}}.resize(6);\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a9eb545fc49079d32e0f70d13a7535f30}{max}}.resize(6);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00473}00473\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_ada9d9a5e880385976175f1be2eccafcf}{min}}[0]=-\/1.0;\ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a9eb545fc49079d32e0f70d13a7535f30}{max}}[0]=1.0;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00474}00474\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_ada9d9a5e880385976175f1be2eccafcf}{min}}[1]=-\/1.0;\ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a9eb545fc49079d32e0f70d13a7535f30}{max}}[1]=1.0;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00475}00475\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_ada9d9a5e880385976175f1be2eccafcf}{min}}[2]=-\/1.0;\ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a9eb545fc49079d32e0f70d13a7535f30}{max}}[2]=1.0;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00476}00476\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_ada9d9a5e880385976175f1be2eccafcf}{min}}[3]=-\/\mbox{\hyperlink{XSensMTx_8cpp_ae71449b1cc6e6250b91f539153a7a0d3}{M\_PI}};\ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a9eb545fc49079d32e0f70d13a7535f30}{max}}[3]=\mbox{\hyperlink{XSensMTx_8cpp_ae71449b1cc6e6250b91f539153a7a0d3}{M\_PI}};}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00477}00477\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_ada9d9a5e880385976175f1be2eccafcf}{min}}[4]=-\/\mbox{\hyperlink{XSensMTx_8cpp_ae71449b1cc6e6250b91f539153a7a0d3}{M\_PI}};\ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a9eb545fc49079d32e0f70d13a7535f30}{max}}[4]=\mbox{\hyperlink{XSensMTx_8cpp_ae71449b1cc6e6250b91f539153a7a0d3}{M\_PI}};}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00478}00478\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_ada9d9a5e880385976175f1be2eccafcf}{min}}[5]=-\/\mbox{\hyperlink{XSensMTx_8cpp_ae71449b1cc6e6250b91f539153a7a0d3}{M\_PI}};\ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a9eb545fc49079d32e0f70d13a7535f30}{max}}[5]=\mbox{\hyperlink{XSensMTx_8cpp_ae71449b1cc6e6250b91f539153a7a0d3}{M\_PI}};}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00479}00479\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00480}00480\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_ab2b11320eecfdac7a578825e02cbf182}{min\_s}}.resize(3);\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_ad4233d3fab720b7fa7f601477b1f7f7c}{max\_s}}.resize(3);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00481}00481\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_ab2b11320eecfdac7a578825e02cbf182}{min\_s}}[0]=0.1;\ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_ad4233d3fab720b7fa7f601477b1f7f7c}{max\_s}}[0]=10.0;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00482}00482\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_ab2b11320eecfdac7a578825e02cbf182}{min\_s}}[1]=0.1;\ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_ad4233d3fab720b7fa7f601477b1f7f7c}{max\_s}}[1]=10.0;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00483}00483\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_ab2b11320eecfdac7a578825e02cbf182}{min\_s}}[2]=0.1;\ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_ad4233d3fab720b7fa7f601477b1f7f7c}{max\_s}}[2]=10.0;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00484}00484\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00485}00485\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a7e87ad484cb8aa31040f31c54ae7cd44}{min\_s\_scalar}}=0.1;\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_aeb6a2ba4f655d90c087a9edc081f94a2}{max\_s\_scalar}}=10.0;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00486}00486\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00487}00487\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_aa15ea2ba943ca79be250e099a2131800}{x0}}=0.5*(\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_ada9d9a5e880385976175f1be2eccafcf}{min}}+\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a9eb545fc49079d32e0f70d13a7535f30}{max}});}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00488}00488\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a6dc6af0c056660594ba53c628dbb25c2}{s0}}.resize(3,1.0);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00489}00489\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a8be994e7b0a8397cf30d380cf7a8a34b}{s0\_scalar}}=1.0;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00490}00490\ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00491}00491\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00492}00492\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00493}00493\ \textcolor{comment}{/****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00494}00494\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_ad230a02771ee242b729f196ebd935f66}{CalibReferenceWithMatchedPoints::setBounds}}(\textcolor{keyword}{const}\ Matrix\ \&min,}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00495}00495\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Matrix\ \&max)}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00496}00496\ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00497}00497\ \ \ \ \ \textcolor{keywordflow}{if}\ ((\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_ada9d9a5e880385976175f1be2eccafcf}{min}}.rows()<3)\ ||\ (\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_ada9d9a5e880385976175f1be2eccafcf}{min}}.cols()<3)\ ||}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00498}00498\ \ \ \ \ \ \ \ \ (\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a9eb545fc49079d32e0f70d13a7535f30}{max}}.rows()<3)\ ||\ (\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a9eb545fc49079d32e0f70d13a7535f30}{max}}.cols()<3))}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00499}00499\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00500}00500\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00501}00501\ \ \ \ \ this-\/>min[0]=\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_ada9d9a5e880385976175f1be2eccafcf}{min}}(0,3);\ this-\/>max[0]=\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a9eb545fc49079d32e0f70d13a7535f30}{max}}(0,3);\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00502}00502\ \ \ \ \ this-\/>min[1]=\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_ada9d9a5e880385976175f1be2eccafcf}{min}}(1,3);\ this-\/>max[1]=\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a9eb545fc49079d32e0f70d13a7535f30}{max}}(1,3);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00503}00503\ \ \ \ \ this-\/>min[2]=\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_ada9d9a5e880385976175f1be2eccafcf}{min}}(2,3);\ this-\/>max[2]=\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a9eb545fc49079d32e0f70d13a7535f30}{max}}(2,3);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00504}00504\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00505}00505\ \ \ \ \ this-\/>min[3]=\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_ada9d9a5e880385976175f1be2eccafcf}{min}}(0,0);\ this-\/>max[3]=\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a9eb545fc49079d32e0f70d13a7535f30}{max}}(0,0);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00506}00506\ \ \ \ \ this-\/>min[4]=\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_ada9d9a5e880385976175f1be2eccafcf}{min}}(0,1);\ this-\/>max[4]=\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a9eb545fc49079d32e0f70d13a7535f30}{max}}(0,1);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00507}00507\ \ \ \ \ this-\/>min[5]=\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_ada9d9a5e880385976175f1be2eccafcf}{min}}(0,2);\ this-\/>max[5]=\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a9eb545fc49079d32e0f70d13a7535f30}{max}}(0,2);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00508}00508\ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00509}00509\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00510}00510\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00511}00511\ \textcolor{comment}{/****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00512}00512\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_ad230a02771ee242b729f196ebd935f66}{CalibReferenceWithMatchedPoints::setBounds}}(\textcolor{keyword}{const}\ Vector\ \&min,}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00513}00513\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Vector\ \&max)}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00514}00514\ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00515}00515\ \ \ \ \ \textcolor{keywordtype}{size\_t}\ len\_min=std::min(this-\/>min.length(),\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_ada9d9a5e880385976175f1be2eccafcf}{min}}.length());}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00516}00516\ \ \ \ \ \textcolor{keywordtype}{size\_t}\ len\_max=std::min(this-\/>max.length(),\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a9eb545fc49079d32e0f70d13a7535f30}{max}}.length());}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00517}00517\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00518}00518\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<len\_min;\ i++)}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00519}00519\ \ \ \ \ \ \ \ \ this-\/>min[i]=\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_ada9d9a5e880385976175f1be2eccafcf}{min}}[i];}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00520}00520\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00521}00521\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<len\_max;\ i++)}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00522}00522\ \ \ \ \ \ \ \ \ this-\/>max[i]=\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a9eb545fc49079d32e0f70d13a7535f30}{max}}[i];}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00523}00523\ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00524}00524\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00525}00525\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00526}00526\ \textcolor{comment}{/****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00527}00527\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_ab453952a39eebc6bb90e005fb9dea8b1}{CalibReferenceWithMatchedPoints::setScalingBounds}}(\textcolor{keyword}{const}\ Vector\ \&min,}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00528}00528\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Vector\ \&max)}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00529}00529\ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00530}00530\ \ \ \ \ \textcolor{keywordtype}{size\_t}\ len\_min=std::min(this-\/>\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_ab2b11320eecfdac7a578825e02cbf182}{min\_s}}.length(),min.length());}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00531}00531\ \ \ \ \ \textcolor{keywordtype}{size\_t}\ len\_max=std::min(this-\/>\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_ad4233d3fab720b7fa7f601477b1f7f7c}{max\_s}}.length(),max.length());}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00532}00532\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00533}00533\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<len\_min;\ i++)}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00534}00534\ \ \ \ \ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_ab2b11320eecfdac7a578825e02cbf182}{min\_s}}[i]=\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_ada9d9a5e880385976175f1be2eccafcf}{min}}[i];}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00535}00535\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00536}00536\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<len\_max;\ i++)}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00537}00537\ \ \ \ \ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_ad4233d3fab720b7fa7f601477b1f7f7c}{max\_s}}[i]=\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a9eb545fc49079d32e0f70d13a7535f30}{max}}[i];}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00538}00538\ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00539}00539\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00540}00540\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00541}00541\ \textcolor{comment}{/****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00542}\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a5269f9b6729a40dcd9cb5ca36efd390e}{00542}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_ab453952a39eebc6bb90e005fb9dea8b1}{CalibReferenceWithMatchedPoints::setScalingBounds}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ min,}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00543}00543\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ max)}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00544}00544\ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00545}00545\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a7e87ad484cb8aa31040f31c54ae7cd44}{min\_s\_scalar}}=\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_ada9d9a5e880385976175f1be2eccafcf}{min}};}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00546}00546\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_aeb6a2ba4f655d90c087a9edc081f94a2}{max\_s\_scalar}}=\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a9eb545fc49079d32e0f70d13a7535f30}{max}};}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00547}00547\ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00548}00548\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00549}00549\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00550}00550\ \textcolor{comment}{/****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00551}\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_adec56cb265ddfd569c45132a0f87692a}{00551}}\ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_adec56cb265ddfd569c45132a0f87692a}{CalibReferenceWithMatchedPoints::evalError}}(\textcolor{keyword}{const}\ Matrix\ \&\mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}})}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00552}00552\ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00553}00553\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{debugFunctions_8cpp_a7a3172cc98e93d8eadfb9ab30373799e}{error}}=0.0;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00554}00554\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a28341291664fcf9e7030b3879a380fbb}{p0}}.size()>0)}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00555}00555\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00556}00556\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i=0;\ i<\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a28341291664fcf9e7030b3879a380fbb}{p0}}.size();\ i++)}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00557}00557\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{debugFunctions_8cpp_a7a3172cc98e93d8eadfb9ab30373799e}{error}}+=\mbox{\hyperlink{group__Maths_ga791f0548018b3597da95e70a3b226806}{norm}}(\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a43a8ad56ddd279f5c19c6da92236160f}{p1}}[i]-\/\mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}}*\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a28341291664fcf9e7030b3879a380fbb}{p0}}[i]);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00558}00558\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00559}00559\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{debugFunctions_8cpp_a7a3172cc98e93d8eadfb9ab30373799e}{error}}/=\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a28341291664fcf9e7030b3879a380fbb}{p0}}.size();}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00560}00560\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00561}00561\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00562}00562\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{debugFunctions_8cpp_a7a3172cc98e93d8eadfb9ab30373799e}{error}};}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00563}00563\ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00564}00564\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00565}00565\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00566}00566\ \textcolor{comment}{/****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00567}\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_ad65ae36cc216f7393fdf8eafabf4b513}{00567}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_ad65ae36cc216f7393fdf8eafabf4b513}{CalibReferenceWithMatchedPoints::addPoints}}(\textcolor{keyword}{const}\ Vector\ \&p0,}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00568}00568\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Vector\ \&p1)}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00569}00569\ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00570}00570\ \ \ \ \ \textcolor{keywordflow}{if}\ ((\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a28341291664fcf9e7030b3879a380fbb}{p0}}.length()>=3)\ \&\&\ (\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a43a8ad56ddd279f5c19c6da92236160f}{p1}}.length()>=3))}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00571}00571\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00572}00572\ \ \ \ \ \ \ \ \ Vector\ \_p0=\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a28341291664fcf9e7030b3879a380fbb}{p0}}.subVector(0,2);\ \_p0.push\_back(1.0);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00573}00573\ \ \ \ \ \ \ \ \ Vector\ \_p1=\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a43a8ad56ddd279f5c19c6da92236160f}{p1}}.subVector(0,2);\ \_p1.push\_back(1.0);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00574}00574\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00575}00575\ \ \ \ \ \ \ \ \ this-\/>p0.push\_back(\_p0);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00576}00576\ \ \ \ \ \ \ \ \ this-\/>p1.push\_back(\_p1);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00577}00577\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00578}00578\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00579}00579\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00580}00580\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00581}00581\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00582}00582\ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00583}00583\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00584}00584\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00585}00585\ \textcolor{comment}{/****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00586}\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a0b4725ee4fe71b3c0023b155ce7d2516}{00586}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a0b4725ee4fe71b3c0023b155ce7d2516}{CalibReferenceWithMatchedPoints::getPoints}}(deque<Vector>\ \&p0,}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00587}00587\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ deque<Vector>\ \&p1)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00588}00588\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00589}00589\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a28341291664fcf9e7030b3879a380fbb}{p0}}=this-\/>\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a28341291664fcf9e7030b3879a380fbb}{p0}};}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00590}00590\ \ \ \ \ p1=this-\/>\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a43a8ad56ddd279f5c19c6da92236160f}{p1}};}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00591}00591\ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00592}00592\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00593}00593\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00594}00594\ \textcolor{comment}{/****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00595}\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_aaecf5abec797ed7823ca3f9ec587ea64}{00595}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_aaecf5abec797ed7823ca3f9ec587ea64}{CalibReferenceWithMatchedPoints::clearPoints}}()}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00596}00596\ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00597}00597\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a28341291664fcf9e7030b3879a380fbb}{p0}}.clear();}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00598}00598\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a43a8ad56ddd279f5c19c6da92236160f}{p1}}.clear();}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00599}00599\ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00600}00600\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00601}00601\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00602}00602\ \textcolor{comment}{/****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00603}\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_ab442cbe7cf68d60cc2ceaacc3fd60700}{00603}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_ab442cbe7cf68d60cc2ceaacc3fd60700}{CalibReferenceWithMatchedPoints::setInitialGuess}}(\textcolor{keyword}{const}\ Matrix\ \&\mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}})}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00604}00604\ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00605}00605\ \ \ \ \ \textcolor{keywordflow}{if}\ ((\mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}}.rows()>=4)\ \&\&\ (\mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}}.cols()>=4))}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00606}00606\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00607}00607\ \ \ \ \ \ \ \ \ Vector\ euler=dcm2euler(\mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}});}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00608}00608\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_aa15ea2ba943ca79be250e099a2131800}{x0}}[0]=\mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}}(0,3);\ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_aa15ea2ba943ca79be250e099a2131800}{x0}}[1]=\mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}}(1,3);\ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_aa15ea2ba943ca79be250e099a2131800}{x0}}[2]=\mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}}(2,3);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00609}00609\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_aa15ea2ba943ca79be250e099a2131800}{x0}}[3]=euler[0];\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_aa15ea2ba943ca79be250e099a2131800}{x0}}[4]=euler[1];\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_aa15ea2ba943ca79be250e099a2131800}{x0}}[5]=euler[2];}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00610}00610\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00611}00611\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00612}00612\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00613}00613\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00614}00614\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00615}00615\ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00616}00616\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00617}00617\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00618}00618\ \textcolor{comment}{/****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00619}00619\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_ab7741c390d53116dfac048847fd1bd00}{CalibReferenceWithMatchedPoints::setScalingInitialGuess}}(\textcolor{keyword}{const}\ Vector\ \&s)}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00620}00620\ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00621}00621\ \ \ \ \ \textcolor{keywordflow}{if}\ (s.length()>=\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a6dc6af0c056660594ba53c628dbb25c2}{s0}}.length())}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00622}00622\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00623}00623\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a6dc6af0c056660594ba53c628dbb25c2}{s0}}=s.subVector(0,(\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int})\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a6dc6af0c056660594ba53c628dbb25c2}{s0}}.length()-\/1);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00624}00624\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00625}00625\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00626}00626\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00627}00627\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00628}00628\ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00629}00629\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00630}00630\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00631}00631\ \textcolor{comment}{/****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00632}\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a643612716aff4e536d57eb064a06869f}{00632}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_ab7741c390d53116dfac048847fd1bd00}{CalibReferenceWithMatchedPoints::setScalingInitialGuess}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ s)}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00633}00633\ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00634}00634\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a8be994e7b0a8397cf30d380cf7a8a34b}{s0\_scalar}}=s;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00635}00635\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00636}00636\ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00637}00637\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00638}00638\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00639}00639\ \textcolor{comment}{/****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00640}\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a721f0fb1bbde3d3b9233745f2f45c5b0}{00640}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a721f0fb1bbde3d3b9233745f2f45c5b0}{CalibReferenceWithMatchedPoints::setCalibrationOptions}}(\textcolor{keyword}{const}\ Property\ \&options)}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00641}00641\ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00642}00642\ \ \ \ \ \textcolor{keywordflow}{if}\ (options.check(\textcolor{stringliteral}{"{}max\_iter"{}}))}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00643}00643\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a532fec68cdad225eeb111f33542b0bf7}{max\_iter}}=options.find(\textcolor{stringliteral}{"{}max\_iter"{}}).asInt32();}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00644}00644\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00645}00645\ \ \ \ \ \textcolor{keywordflow}{if}\ (options.check(\textcolor{stringliteral}{"{}tol"{}}))}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00646}00646\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a68087b32aedf00724d0bd3368106b225}{tol}}=options.find(\textcolor{stringliteral}{"{}tol"{}}).asFloat64();}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00647}00647\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00648}00648\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00649}00649\ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00650}00650\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00651}00651\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00652}00652\ \textcolor{comment}{/****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00653}00653\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a54eb6a837d3717795fa030e7490e8896}{CalibReferenceWithMatchedPoints::calibrate}}(Matrix\ \&\mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}},\ \textcolor{keywordtype}{double}\ \&\mbox{\hyperlink{debugFunctions_8cpp_a7a3172cc98e93d8eadfb9ab30373799e}{error}})}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00654}00654\ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00655}00655\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a28341291664fcf9e7030b3879a380fbb}{p0}}.size()>0)}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00656}00656\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00657}00657\ \ \ \ \ \ \ \ \ Ipopt::SmartPtr<Ipopt::IpoptApplication>\ app=\textcolor{keyword}{new}\ Ipopt::IpoptApplication;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00658}00658\ \ \ \ \ \ \ \ \ app-\/>Options()-\/>SetNumericValue(\textcolor{stringliteral}{"{}tol"{}},\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a68087b32aedf00724d0bd3368106b225}{tol}});}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00659}00659\ \ \ \ \ \ \ \ \ app-\/>Options()-\/>SetIntegerValue(\textcolor{stringliteral}{"{}acceptable\_iter"{}},0);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00660}00660\ \ \ \ \ \ \ \ \ app-\/>Options()-\/>SetStringValue(\textcolor{stringliteral}{"{}mu\_strategy"{}},\textcolor{stringliteral}{"{}adaptive"{}});}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00661}00661\ \ \ \ \ \ \ \ \ app-\/>Options()-\/>SetIntegerValue(\textcolor{stringliteral}{"{}max\_iter"{}},\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a532fec68cdad225eeb111f33542b0bf7}{max\_iter}});}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00662}00662\ \ \ \ \ \ \ \ \ app-\/>Options()-\/>SetStringValue(\textcolor{stringliteral}{"{}nlp\_scaling\_method"{}},\textcolor{stringliteral}{"{}gradient-\/based"{}});}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00663}00663\ \ \ \ \ \ \ \ \ app-\/>Options()-\/>SetStringValue(\textcolor{stringliteral}{"{}hessian\_approximation"{}},\textcolor{stringliteral}{"{}limited-\/memory"{}});}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00664}00664\ \ \ \ \ \ \ \ \ app-\/>Options()-\/>SetIntegerValue(\textcolor{stringliteral}{"{}print\_level"{}},0);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00665}00665\ \ \ \ \ \ \ \ \ app-\/>Options()-\/>SetStringValue(\textcolor{stringliteral}{"{}derivative\_test"{}},\textcolor{stringliteral}{"{}none"{}});}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00666}00666\ \ \ \ \ \ \ \ \ app-\/>Initialize();}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00667}00667\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00668}00668\ \ \ \ \ \ \ \ \ Ipopt::SmartPtr<CalibReferenceWithMatchedPointsNLP>\ nlp=\textcolor{keyword}{new}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPointsNLP}{CalibReferenceWithMatchedPointsNLP}}(\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a28341291664fcf9e7030b3879a380fbb}{p0}},\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a43a8ad56ddd279f5c19c6da92236160f}{p1}},\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_ada9d9a5e880385976175f1be2eccafcf}{min}},\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a9eb545fc49079d32e0f70d13a7535f30}{max}});}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00669}00669\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00670}00670\ \ \ \ \ \ \ \ \ nlp-\/>set\_x0(\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_aa15ea2ba943ca79be250e099a2131800}{x0}});}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00671}00671\ \ \ \ \ \ \ \ \ Ipopt::ApplicationReturnStatus\ status=app-\/>OptimizeTNLP(GetRawPtr(nlp));}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00672}00672\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00673}00673\ \ \ \ \ \ \ \ \ Vector\ \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}=nlp-\/>get\_result();}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00674}00674\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}}=\mbox{\hyperlink{namespaceiCub_1_1optimization_a8b1dc0b9bcab4ea6b89e9e6bc24fff52}{computeH}}(\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}});}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00675}00675\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{debugFunctions_8cpp_a7a3172cc98e93d8eadfb9ab30373799e}{error}}=\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_adec56cb265ddfd569c45132a0f87692a}{evalError}}(\mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}});}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00676}00676\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00677}00677\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (status==Ipopt::Solve\_Succeeded);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00678}00678\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00679}00679\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00680}00680\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00681}00681\ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00682}00682\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00683}00683\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00684}00684\ \textcolor{comment}{/****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00685}00685\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a54eb6a837d3717795fa030e7490e8896}{CalibReferenceWithMatchedPoints::calibrate}}(Matrix\ \&\mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}},\ Vector\ \&s,}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00686}00686\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ \&\mbox{\hyperlink{debugFunctions_8cpp_a7a3172cc98e93d8eadfb9ab30373799e}{error}})}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00687}00687\ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00688}00688\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a28341291664fcf9e7030b3879a380fbb}{p0}}.size()>0)}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00689}00689\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00690}00690\ \ \ \ \ \ \ \ \ Ipopt::SmartPtr<Ipopt::IpoptApplication>\ app=\textcolor{keyword}{new}\ Ipopt::IpoptApplication;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00691}00691\ \ \ \ \ \ \ \ \ app-\/>Options()-\/>SetNumericValue(\textcolor{stringliteral}{"{}tol"{}},\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a68087b32aedf00724d0bd3368106b225}{tol}});}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00692}00692\ \ \ \ \ \ \ \ \ app-\/>Options()-\/>SetIntegerValue(\textcolor{stringliteral}{"{}acceptable\_iter"{}},0);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00693}00693\ \ \ \ \ \ \ \ \ app-\/>Options()-\/>SetStringValue(\textcolor{stringliteral}{"{}mu\_strategy"{}},\textcolor{stringliteral}{"{}adaptive"{}});}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00694}00694\ \ \ \ \ \ \ \ \ app-\/>Options()-\/>SetIntegerValue(\textcolor{stringliteral}{"{}max\_iter"{}},\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a532fec68cdad225eeb111f33542b0bf7}{max\_iter}});}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00695}00695\ \ \ \ \ \ \ \ \ app-\/>Options()-\/>SetStringValue(\textcolor{stringliteral}{"{}nlp\_scaling\_method"{}},\textcolor{stringliteral}{"{}gradient-\/based"{}});}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00696}00696\ \ \ \ \ \ \ \ \ app-\/>Options()-\/>SetStringValue(\textcolor{stringliteral}{"{}hessian\_approximation"{}},\textcolor{stringliteral}{"{}limited-\/memory"{}});}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00697}00697\ \ \ \ \ \ \ \ \ app-\/>Options()-\/>SetIntegerValue(\textcolor{stringliteral}{"{}print\_level"{}},0);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00698}00698\ \ \ \ \ \ \ \ \ app-\/>Options()-\/>SetStringValue(\textcolor{stringliteral}{"{}derivative\_test"{}},\textcolor{stringliteral}{"{}none"{}});}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00699}00699\ \ \ \ \ \ \ \ \ app-\/>Initialize();}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00700}00700\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00701}00701\ \ \ \ \ \ \ \ \ Ipopt::SmartPtr<CalibReferenceWithScaledMatchedPointsNLP>\ nlp=\textcolor{keyword}{new}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithScaledMatchedPointsNLP}{CalibReferenceWithScaledMatchedPointsNLP}}(\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a28341291664fcf9e7030b3879a380fbb}{p0}},\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a43a8ad56ddd279f5c19c6da92236160f}{p1}},cat(\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_ada9d9a5e880385976175f1be2eccafcf}{min}},\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_ab2b11320eecfdac7a578825e02cbf182}{min\_s}}),cat(\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a9eb545fc49079d32e0f70d13a7535f30}{max}},\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_ad4233d3fab720b7fa7f601477b1f7f7c}{max\_s}}));}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00702}00702\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00703}00703\ \ \ \ \ \ \ \ \ nlp-\/>set\_x0(cat(\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_aa15ea2ba943ca79be250e099a2131800}{x0}},\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a6dc6af0c056660594ba53c628dbb25c2}{s0}}));}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00704}00704\ \ \ \ \ \ \ \ \ Ipopt::ApplicationReturnStatus\ status=app-\/>OptimizeTNLP(GetRawPtr(nlp));}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00705}00705\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00706}00706\ \ \ \ \ \ \ \ \ Vector\ \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}=nlp-\/>get\_result();}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00707}00707\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}}=\mbox{\hyperlink{namespaceiCub_1_1optimization_a8b1dc0b9bcab4ea6b89e9e6bc24fff52}{computeH}}(\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}});}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00708}00708\ \ \ \ \ \ \ \ \ s=\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}.subVector(6,8);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00709}00709\ \ \ \ \ \ \ \ \ Matrix\ S=eye(4,4);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00710}00710\ \ \ \ \ \ \ \ \ S(0,0)=s[0];\ S(1,1)=s[1];\ S(2,2)=s[2];}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00711}00711\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{debugFunctions_8cpp_a7a3172cc98e93d8eadfb9ab30373799e}{error}}=\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_adec56cb265ddfd569c45132a0f87692a}{evalError}}(S*\mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}});}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00712}00712\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00713}00713\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (status==Ipopt::Solve\_Succeeded);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00714}00714\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00715}00715\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00716}00716\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00717}00717\ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00718}00718\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00719}00719\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00720}00720\ \textcolor{comment}{/****************************************************************/}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00721}00721\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a54eb6a837d3717795fa030e7490e8896}{CalibReferenceWithMatchedPoints::calibrate}}(Matrix\ \&\mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}},\ \textcolor{keywordtype}{double}\ \&s,}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00722}00722\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ \&\mbox{\hyperlink{debugFunctions_8cpp_a7a3172cc98e93d8eadfb9ab30373799e}{error}})}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00723}00723\ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00724}00724\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a28341291664fcf9e7030b3879a380fbb}{p0}}.size()>0)}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00725}00725\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00726}00726\ \ \ \ \ \ \ \ \ Ipopt::SmartPtr<Ipopt::IpoptApplication>\ \mbox{\hyperlink{namespacescripting_a265700246c88a22b544ebd10aeeb5122}{app}}=\textcolor{keyword}{new}\ Ipopt::IpoptApplication;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00727}00727\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacescripting_a265700246c88a22b544ebd10aeeb5122}{app}}-\/>Options()-\/>SetNumericValue(\textcolor{stringliteral}{"{}tol"{}},\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a68087b32aedf00724d0bd3368106b225}{tol}});}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00728}00728\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacescripting_a265700246c88a22b544ebd10aeeb5122}{app}}-\/>Options()-\/>SetIntegerValue(\textcolor{stringliteral}{"{}acceptable\_iter"{}},0);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00729}00729\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacescripting_a265700246c88a22b544ebd10aeeb5122}{app}}-\/>Options()-\/>SetStringValue(\textcolor{stringliteral}{"{}mu\_strategy"{}},\textcolor{stringliteral}{"{}adaptive"{}});}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00730}00730\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacescripting_a265700246c88a22b544ebd10aeeb5122}{app}}-\/>Options()-\/>SetIntegerValue(\textcolor{stringliteral}{"{}max\_iter"{}},\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a532fec68cdad225eeb111f33542b0bf7}{max\_iter}});}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00731}00731\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacescripting_a265700246c88a22b544ebd10aeeb5122}{app}}-\/>Options()-\/>SetStringValue(\textcolor{stringliteral}{"{}nlp\_scaling\_method"{}},\textcolor{stringliteral}{"{}gradient-\/based"{}});}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00732}00732\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacescripting_a265700246c88a22b544ebd10aeeb5122}{app}}-\/>Options()-\/>SetStringValue(\textcolor{stringliteral}{"{}hessian\_approximation"{}},\textcolor{stringliteral}{"{}limited-\/memory"{}});}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00733}00733\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacescripting_a265700246c88a22b544ebd10aeeb5122}{app}}-\/>Options()-\/>SetIntegerValue(\textcolor{stringliteral}{"{}print\_level"{}},0);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00734}00734\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacescripting_a265700246c88a22b544ebd10aeeb5122}{app}}-\/>Options()-\/>SetStringValue(\textcolor{stringliteral}{"{}derivative\_test"{}},\textcolor{stringliteral}{"{}none"{}});}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00735}00735\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacescripting_a265700246c88a22b544ebd10aeeb5122}{app}}-\/>Initialize();}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00736}00736\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00737}00737\ \ \ \ \ \ \ \ \ Ipopt::SmartPtr<CalibReferenceWithScalarScaledMatchedPointsNLP>\ nlp=\textcolor{keyword}{new}\ \mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithScalarScaledMatchedPointsNLP}{CalibReferenceWithScalarScaledMatchedPointsNLP}}(\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a28341291664fcf9e7030b3879a380fbb}{p0}},\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a43a8ad56ddd279f5c19c6da92236160f}{p1}},cat(\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_ada9d9a5e880385976175f1be2eccafcf}{min}},\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a7e87ad484cb8aa31040f31c54ae7cd44}{min\_s\_scalar}}),cat(\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a9eb545fc49079d32e0f70d13a7535f30}{max}},\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_aeb6a2ba4f655d90c087a9edc081f94a2}{max\_s\_scalar}}));}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00738}00738\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00739}00739\ \ \ \ \ \ \ \ \ nlp-\/>set\_x0(cat(\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_aa15ea2ba943ca79be250e099a2131800}{x0}},\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_a8be994e7b0a8397cf30d380cf7a8a34b}{s0\_scalar}}));}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00740}00740\ \ \ \ \ \ \ \ \ Ipopt::ApplicationReturnStatus\ status=\mbox{\hyperlink{namespacescripting_a265700246c88a22b544ebd10aeeb5122}{app}}-\/>OptimizeTNLP(GetRawPtr(nlp));}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00741}00741\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00742}00742\ \ \ \ \ \ \ \ \ Vector\ \mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}=nlp-\/>get\_result();}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00743}00743\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}}=\mbox{\hyperlink{namespaceiCub_1_1optimization_a8b1dc0b9bcab4ea6b89e9e6bc24fff52}{computeH}}(\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}});}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00744}00744\ \ \ \ \ \ \ \ \ s=\mbox{\hyperlink{compute__ekf__sym_8m_abe119338ba11d7fd166333a3941bc2c4}{x}}[6];}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00745}00745\ \ \ \ \ \ \ \ \ Matrix\ S=eye(4,4);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00746}00746\ \ \ \ \ \ \ \ \ S(0,0)=S(1,1)=S(2,2)=s;}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00747}00747\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{debugFunctions_8cpp_a7a3172cc98e93d8eadfb9ab30373799e}{error}}=\mbox{\hyperlink{classiCub_1_1optimization_1_1CalibReferenceWithMatchedPoints_adec56cb265ddfd569c45132a0f87692a}{evalError}}(S*\mbox{\hyperlink{compute__ekf__fast_8m_afaafc315b95987fc2b071bcd8f698b81}{H}});}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00748}00748\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00749}00749\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (status==Ipopt::Solve\_Succeeded);}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00750}00750\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00751}00751\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00752}00752\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00753}00753\ \}}
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00754}00754\ }
+\DoxyCodeLine{\Hypertarget{calibReference_8cpp_source_l00755}00755\ }
+
+\end{DoxyCode}

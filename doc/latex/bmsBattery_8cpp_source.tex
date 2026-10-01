@@ -1,0 +1,227 @@
+\doxysection{bms\+Battery.\+cpp}
+\hypertarget{bmsBattery_8cpp_source}{}\label{bmsBattery_8cpp_source}\index{icub-\/main/src/libraries/icubmod/bmsBattery/bmsBattery.cpp@{icub-\/main/src/libraries/icubmod/bmsBattery/bmsBattery.cpp}}
+\mbox{\hyperlink{bmsBattery_8cpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00001}00001\ \textcolor{comment}{//\ -\/*-\/\ mode:C++;\ tab-\/width:4;\ c-\/basic-\/offset:4;\ indent-\/tabs-\/mode:nil\ -\/*-\/}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00002}00002\ }
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00003}00003\ \textcolor{comment}{//\ Copyright:\ (C)\ 2015\ iCub\ Facility}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00004}00004\ \textcolor{comment}{//\ Authors:\ Marco\ Randazzo\ <marco.randazzo@iit.it>}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00005}00005\ \textcolor{comment}{//\ CopyPolicy:\ Released\ under\ the\ terms\ of\ the\ GNU\ GPL\ v2.0.}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00006}00006\ }
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00007}00007\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{bmsBattery_8h}{bmsBattery.h}}>}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00008}00008\ }
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00009}00009\ \textcolor{preprocessor}{\#include\ <yarp/os/Time.h>}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00010}00010\ \textcolor{preprocessor}{\#include\ <yarp/os/LogStream.h>}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00011}00011\ \textcolor{preprocessor}{\#include\ <yarp/os/Log.h>}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00012}00012\ \textcolor{preprocessor}{\#include\ <iostream>}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00013}00013\ \textcolor{preprocessor}{\#include\ <string.h>}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00014}00014\ \textcolor{preprocessor}{\#include\ <time.h>}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00015}00015\ \textcolor{preprocessor}{\#include\ <stdlib.h>}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00016}00016\ }
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00017}00017\ \textcolor{keyword}{using\ namespace\ }std;}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00018}\mbox{\hyperlink{bmsBattery_8cpp_a6fd4eca6489c7a417e639fbedb4113ea}{00018}}\ \textcolor{preprocessor}{\#define\ DEBUG\_TEST\ 1}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00019}00019\ }
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00020}\mbox{\hyperlink{classBmsBattery_a866cd727d38f4786cb9160739c7aa4c4}{00020}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classBmsBattery_a866cd727d38f4786cb9160739c7aa4c4}{BmsBattery::open}}(yarp::os::Searchable\&\ config)}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00021}00021\ \{}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00022}00022\ \ \ \ \ \textcolor{keywordtype}{bool}\ correct=\textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00023}00023\ }
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00024}00024\ \ \ \ \ \textcolor{comment}{//debug}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00025}00025\ \ \ \ \ yDebug(\textcolor{stringliteral}{"{}\%s\(\backslash\)n"{}},\ config.toString().c\_str());}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00026}00026\ }
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00027}00027\ \ \ \ \ Bottle\&\ group\_general\ =\ config.findGroup(\textcolor{stringliteral}{"{}GENERAL"{}});}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00028}00028\ \ \ \ \ Bottle\&\ group\_serial\ \ =\ config.findGroup(\textcolor{stringliteral}{"{}SERIAL\_PORT"{}});}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00029}00029\ }
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00030}00030\ \ \ \ \ \textcolor{keywordflow}{if}\ (group\_general.isNull())}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00031}00031\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00032}00032\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}Insufficient\ parameters\ to\ BmsBattery,\ section\ GENERAL\ missing"{}};}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00033}00033\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00034}00034\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00035}00035\ }
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00036}00036\ \ \ \ \ \textcolor{keywordflow}{if}\ (group\_serial.isNull())}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00037}00037\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00038}00038\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}Insufficient\ parameters\ to\ BmsBattery,\ section\ SERIAL\_PORT\ missing"{}};}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00039}00039\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00040}00040\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00041}00041\ }
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00042}00042\ \ \ \ \ \textcolor{keywordtype}{int}\ period=config.find(\textcolor{stringliteral}{"{}thread\_period"{}}).asInt32();}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00043}00043\ \ \ \ \ setPeriod((\textcolor{keywordtype}{double})period/1000.0);}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00044}00044\ }
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00045}00045\ \ \ \ \ Property\ prop;}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00046}00046\ \ \ \ \ std::string\ ps\ =\ group\_serial.toString();}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00047}00047\ \ \ \ \ prop.fromString(ps);}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00048}00048\ \ \ \ \ prop.put(\textcolor{stringliteral}{"{}device"{}},\ \textcolor{stringliteral}{"{}serialport"{}});}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00049}00049\ }
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00050}00050\ \ \ \ \ \textcolor{comment}{//open\ the\ driver}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00051}00051\ \ \ \ \ \mbox{\hyperlink{classBmsBattery_ae11980553c7f401a727363fdd997b76a}{driver}}.open(prop);}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00052}00052\ \ \ \ \ \textcolor{keywordflow}{if}\ (!\mbox{\hyperlink{classBmsBattery_ae11980553c7f401a727363fdd997b76a}{driver}}.isValid())}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00053}00053\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00054}00054\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}Error\ opening\ PolyDriver\ check\ parameters"{}};}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00055}00055\ \textcolor{preprocessor}{\#ifndef\ DEBUG\_TEST\ }}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00056}00056\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00057}00057\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00058}00058\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00059}00059\ }
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00060}00060\ \ \ \ \ \textcolor{comment}{//open\ the\ serial\ interface}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00061}00061\ \ \ \ \ \mbox{\hyperlink{classBmsBattery_ae11980553c7f401a727363fdd997b76a}{driver}}.view(\mbox{\hyperlink{classBmsBattery_acda497362a1d9dcae84c85fd4f82c11c}{pSerial}});}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00062}00062\ \ \ \ \ \textcolor{keywordflow}{if}\ (!\mbox{\hyperlink{classBmsBattery_acda497362a1d9dcae84c85fd4f82c11c}{pSerial}})}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00063}00063\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00064}00064\ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}Error\ opening\ serial\ driver.\ Device\ not\ available"{}});}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00065}00065\ \textcolor{preprocessor}{\#ifndef\ DEBUG\_TEST\ }}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00066}00066\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00067}00067\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00068}00068\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00069}00069\ }
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00070}00070\ \ \ \ \ \textcolor{comment}{//\ Other\ options}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00071}00071\ \ \ \ \ this-\/>\mbox{\hyperlink{classBmsBattery_a41cf5fec13e1be797b06cf34ea329fc6}{verboseEnable}}\ =\ group\_general.check(\textcolor{stringliteral}{"{}verbose"{}},\ Value(0),\ \textcolor{stringliteral}{"{}enable/disable\ the\ verbose\ mode"{}}).asBool();}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00072}00072\ \ \ \ \ this-\/>\mbox{\hyperlink{classBmsBattery_a4b15a0b92c517b195855273b8662b132}{screenEnable}}\ =\ group\_general.check(\textcolor{stringliteral}{"{}screen"{}},\ Value(0),\ \textcolor{stringliteral}{"{}enable/disable\ the\ screen\ output"{}}).asBool();}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00073}00073\ \ \ \ \ this-\/>\mbox{\hyperlink{classBmsBattery_aa4766d001c064460429387b657117c2f}{debugEnable}}\ =\ group\_general.check(\textcolor{stringliteral}{"{}debug"{}},\ Value(0),\ \textcolor{stringliteral}{"{}enable/disable\ the\ debug\ mode"{}}).asBool();}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00074}00074\ }
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00075}00075\ \ \ \ \ PeriodicThread::start();}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00076}00076\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00077}00077\ \}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00078}00078\ }
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00079}\mbox{\hyperlink{classBmsBattery_a83028010e4fcf81cbfa1470040624d4b}{00079}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classBmsBattery_a83028010e4fcf81cbfa1470040624d4b}{BmsBattery::close}}()}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00080}00080\ \{}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00081}00081\ \ \ \ \ \textcolor{comment}{//stop\ the\ thread}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00082}00082\ \ \ \ \ PeriodicThread::stop();}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00083}00083\ }
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00084}00084\ \ \ \ \ \textcolor{comment}{//stop\ the\ driver}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00085}00085\ \ \ \ \ \mbox{\hyperlink{classBmsBattery_ae11980553c7f401a727363fdd997b76a}{driver}}.close();}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00086}00086\ }
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00087}00087\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00088}00088\ \}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00089}00089\ }
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00090}\mbox{\hyperlink{classBmsBattery_a93befd40a026ae6043598246ef9e2aaa}{00090}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classBmsBattery_a93befd40a026ae6043598246ef9e2aaa}{BmsBattery::threadInit}}()}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00091}00091\ \{}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00092}00092\ \ \ \ \ \mbox{\hyperlink{classBmsBattery_a2b90ba5d4133ca07c1318b019f57a23b}{battery\_info}}\ =\ \textcolor{stringliteral}{"{}icub\ battery\ system\ v1.0"{}};}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00093}00093\ \ \ \ \ \mbox{\hyperlink{classBmsBattery_a346e1b07730308e3916b301da9ec8c61}{battery\_voltage}}\ \ \ \ \ =\ 0.0;}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00094}00094\ \ \ \ \ \mbox{\hyperlink{classBmsBattery_a95c4c34bb759283669d3910866ee8093}{battery\_current}}\ \ \ \ \ =\ 0.0;}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00095}00095\ \ \ \ \ \mbox{\hyperlink{classBmsBattery_af51620898f9b9d0c09af86bc1a18f785}{battery\_charge}}\ \ \ \ \ \ =\ 0.0;}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00096}00096\ \ \ \ \ \mbox{\hyperlink{classBmsBattery_adb08fbfcf31222b1e2c640d99da856e3}{battery\_temperature}}\ =\ 0.0;}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00097}00097\ \ \ \ \ \mbox{\hyperlink{classBmsBattery_a244c678f86a09925c68fa21fbf6f020c}{timeStamp}}\ =\ yarp::os::Time::now();}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00098}00098\ }
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00099}00099\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00100}00100\ \}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00101}00101\ }
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00102}00102\ \textcolor{keywordtype}{bool}\ BmsBattery::verify\_checksum(\textcolor{keywordtype}{int}\&\ raw\_battery\_current,\ \textcolor{keywordtype}{int}\&\ \ raw\_battery\_voltage,\ \textcolor{keywordtype}{int}\&\ \ raw\_battery\_charge,\ \textcolor{keywordtype}{int}\&\ \ raw\_battery\_checksum)}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00103}00103\ \{}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00104}00104\ \ \ \ \ \textcolor{keywordflow}{if}\ (raw\_battery\_checksum\ ==\ raw\_battery\_current\ +\ raw\_battery\_voltage\ +\ raw\_battery\_charge)}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00105}00105\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00106}00106\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00107}00107\ \}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00108}00108\ }
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00109}\mbox{\hyperlink{classBmsBattery_ae3e949bb5f34e432e54421a88f90ec0f}{00109}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classBmsBattery_ae3e949bb5f34e432e54421a88f90ec0f}{BmsBattery::run}}()}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00110}00110\ \{}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00111}00111\ \ \ \ \ \textcolor{keywordtype}{double}\ timeNow=yarp::os::Time::now();}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00112}00112\ \ \ \ \ lock\_guard<mutex>\ lck(\mbox{\hyperlink{classBmsBattery_abc578f8ac8df533a3fc87b524db0e509}{mtx}});}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00113}00113\ }
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00114}00114\ \ \ \ \ \textcolor{comment}{//if\ 100ms\ have\ passed\ since\ the\ last\ received\ message}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00115}00115\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classBmsBattery_a244c678f86a09925c68fa21fbf6f020c}{timeStamp}}+0.1<timeNow)}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00116}00116\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00117}00117\ \ \ \ \ \ \ \ \ \textcolor{comment}{//status=IBattery::BATTERY\_TIMEOUT;}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00118}00118\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00119}00119\ }
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00120}00120\ \ \ \ \ \textcolor{comment}{//read\ battery\ data.}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00121}00121\ \ \ \ \ \textcolor{comment}{//if\ nothing\ is\ received,\ rec=0,\ the\ while\ exits\ immediately.\ The\ string\ will\ be\ not\ valid,\ so\ the\ parser\ will\ skip\ it\ and\ it\ will\ leave\ unchanged\ the\ battery\ status\ (voltage/current/charge)}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00122}00122\ \ \ \ \ \textcolor{comment}{//if\ a\ text\ line\ is\ received,\ then\ try\ to\ receive\ more\ text\ to\ empty\ the\ buffer.\ If\ nothing\ else\ is\ received,\ serial\_buff\ will\ be\ left\ unchanged\ from\ the\ previous\ value.\ The\ loop\ will\ exit\ and\ the\ sting\ will\ be\ parsed.}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00123}00123\ \ \ \ \ \mbox{\hyperlink{classBmsBattery_a85accfd495aff0eb7253c7aafc630439}{serial\_buff}}[0]\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00124}00124\ \ \ \ \ \textcolor{keywordtype}{int}\ rec\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00125}00125\ \ \ \ \ \textcolor{keywordflow}{do}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00126}00126\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00127}00127\ \ \ \ \ \ \ \ \ rec\ =\ \mbox{\hyperlink{classBmsBattery_acda497362a1d9dcae84c85fd4f82c11c}{pSerial}}-\/>receiveLine(\mbox{\hyperlink{classBmsBattery_a85accfd495aff0eb7253c7aafc630439}{serial\_buff}},\ 250);}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00128}00128\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classBmsBattery_aa4766d001c064460429387b657117c2f}{debugEnable}})\ yDebug(\textcolor{stringliteral}{"{}\%d\ <\%s>\ "{}},\ rec,\ \mbox{\hyperlink{classBmsBattery_a85accfd495aff0eb7253c7aafc630439}{serial\_buff}});}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00129}00129\ \ \ \ \ \}\ \textcolor{keywordflow}{while}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00130}00130\ \ \ \ \ \ \ \ \ (rec>0);}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00131}00131\ }
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00132}00132\ \ \ \ \ \textcolor{keywordtype}{int}\ len\ =\ strlen(\mbox{\hyperlink{classBmsBattery_a85accfd495aff0eb7253c7aafc630439}{serial\_buff}});}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00133}00133\ \ \ \ \ \textcolor{keywordtype}{bool}\ reading\_ok\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00134}00134\ \ \ \ \ \textcolor{keywordflow}{if}\ (len>0)}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00135}00135\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00136}00136\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ pars\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00137}00137\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ raw\_battery\_current\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00138}00138\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ raw\_battery\_voltage\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00139}00139\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ raw\_battery\_charge\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00140}00140\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ raw\_battery\_checksum\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00141}00141\ \ \ \ \ \ \ \ \ pars\ =\ sscanf(\mbox{\hyperlink{classBmsBattery_a85accfd495aff0eb7253c7aafc630439}{serial\_buff}},\ \textcolor{stringliteral}{"{}\%*s\ \%d\ \%*s\ \%d\ \%*s\ \%d\ \%*s\ \%d"{}},\ \&raw\_battery\_current,\ \&raw\_battery\_voltage,\ \&raw\_battery\_charge,\ \&raw\_battery\_checksum);}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00142}00142\ }
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00143}00143\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (pars\ ==\ 4)}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00144}00144\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00145}00145\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (verify\_checksum(raw\_battery\_current,\ raw\_battery\_voltage,\ raw\_battery\_charge,\ raw\_battery\_checksum))}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00146}00146\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00147}00147\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ time\_t\ rawtime;}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00148}00148\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{struct\ }tm\ *\ timeinfo;}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00149}00149\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{sine_8m_adf373d0d082773c69f688bdb3a56d6aa}{time}}(\&rawtime);}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00150}00150\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ timeinfo\ =\ localtime(\&rawtime);}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00151}00151\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//battery\_data.timestamp\ =\ asctime(timeinfo);}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00152}00152\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classBmsBattery_a346e1b07730308e3916b301da9ec8c61}{battery\_voltage}}\ =\ double(\mbox{\hyperlink{classBmsBattery_a346e1b07730308e3916b301da9ec8c61}{battery\_voltage}})\ /\ 1024\ *\ 66;}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00153}00153\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classBmsBattery_a95c4c34bb759283669d3910866ee8093}{battery\_current}}\ =\ (double(\mbox{\hyperlink{classBmsBattery_a95c4c34bb759283669d3910866ee8093}{battery\_current}})\ -\/\ 512)\ /\ 128\ *\ 20;\ \textcolor{comment}{//+-\/\ 60\ is\ the\ maximum\ current\ that\ the\ sensor\ can\ read.\ 128+512\ is\ the\ value\ of\ the\ AD\ }}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00154}00154\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//when\ the\ current\ is\ 20A.}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00155}00155\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classBmsBattery_af51620898f9b9d0c09af86bc1a18f785}{battery\_charge}}\ =\ double(\mbox{\hyperlink{classBmsBattery_af51620898f9b9d0c09af86bc1a18f785}{battery\_charge}})\ /\ 100;\ \textcolor{comment}{//\ the\ value\ coming\ from\ the\ BCS\ board\ goes\ from\ 0\ to\ 100\%}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00156}00156\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ reading\_ok\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00157}00157\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00158}00158\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00159}00159\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00160}00160\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}checksum\ error\ while\ reading\ battery\ data\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00161}00161\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00162}00162\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00163}00163\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00164}00164\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00165}00165\ \ \ \ \ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}error\ reading\ battery\ data:\ \%d\(\backslash\)n"{}},\ pars);}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00166}00166\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00167}00167\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00168}00168\ }
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00169}00169\ \ \ \ \ \textcolor{comment}{//\ print\ data\ to\ screen}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00170}00170\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classBmsBattery_a4b15a0b92c517b195855273b8662b132}{screenEnable}})}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00171}00171\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00172}00172\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ buff[1024];}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00173}00173\ \ \ \ \ \ \ \ \ sprintf(buff,\ \textcolor{stringliteral}{"{}battery\ status:\ \%+6.1fA\ \ \ \%\ 6.1fV\ \ \ charge:\%\ 6.1f\%\%"{}},\ \mbox{\hyperlink{classBmsBattery_a95c4c34bb759283669d3910866ee8093}{battery\_current}},\ \mbox{\hyperlink{classBmsBattery_a346e1b07730308e3916b301da9ec8c61}{battery\_voltage}},\ \mbox{\hyperlink{classBmsBattery_af51620898f9b9d0c09af86bc1a18f785}{battery\_charge}});}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00174}00174\ \ \ \ \ \ \ \ \ yDebug(\textcolor{stringliteral}{"{}BmsBattery::run()\ log\_buffer\ is:\ \%s"{}},\ buff);}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00175}00175\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00176}00176\ \}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00177}00177\ }
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00178}\mbox{\hyperlink{classBmsBattery_afbe8afb92cc8ac6917b8237899ca34c2}{00178}}\ \mbox{\hyperlink{YarpDevReturnValueCompat_8h_aa9fe6d5119aed82807a53228f43b70ce}{YARP\_DEV\_RETURN\_VALUE\_TYPE\_CH312}}\ \mbox{\hyperlink{classBmsBattery_afbe8afb92cc8ac6917b8237899ca34c2}{BmsBattery::getBatteryVoltage}}(\textcolor{keywordtype}{double}\ \&voltage)}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00179}00179\ \{}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00180}00180\ \ \ \ \ lock\_guard<mutex>\ lck(\mbox{\hyperlink{classBmsBattery_abc578f8ac8df533a3fc87b524db0e509}{mtx}});}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00181}00181\ \ \ \ \ voltage\ =\ \mbox{\hyperlink{classBmsBattery_a346e1b07730308e3916b301da9ec8c61}{battery\_voltage}};}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00182}00182\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{YarpDevReturnValueCompat_8h_a94ffe31d3768984c48ca26eed4d05fb6}{YARP\_DEV\_RETURN\_VALUE\_OK\_CH312}};}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00183}00183\ \}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00184}00184\ }
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00185}\mbox{\hyperlink{classBmsBattery_a40403751123dbf54b6dcde49402bff6d}{00185}}\ \mbox{\hyperlink{YarpDevReturnValueCompat_8h_aa9fe6d5119aed82807a53228f43b70ce}{YARP\_DEV\_RETURN\_VALUE\_TYPE\_CH312}}\ \mbox{\hyperlink{classBmsBattery_a40403751123dbf54b6dcde49402bff6d}{BmsBattery::getBatteryCurrent}}(\textcolor{keywordtype}{double}\ \&current)}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00186}00186\ \{}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00187}00187\ \ \ \ \ lock\_guard<mutex>\ lck(\mbox{\hyperlink{classBmsBattery_abc578f8ac8df533a3fc87b524db0e509}{mtx}});}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00188}00188\ \ \ \ \ current\ =\ \mbox{\hyperlink{classBmsBattery_a95c4c34bb759283669d3910866ee8093}{battery\_current}};}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00189}00189\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{YarpDevReturnValueCompat_8h_a94ffe31d3768984c48ca26eed4d05fb6}{YARP\_DEV\_RETURN\_VALUE\_OK\_CH312}};}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00190}00190\ \}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00191}00191\ }
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00192}\mbox{\hyperlink{classBmsBattery_aa628aedce230e3ece275b3e13c495af5}{00192}}\ \mbox{\hyperlink{YarpDevReturnValueCompat_8h_aa9fe6d5119aed82807a53228f43b70ce}{YARP\_DEV\_RETURN\_VALUE\_TYPE\_CH312}}\ \mbox{\hyperlink{classBmsBattery_aa628aedce230e3ece275b3e13c495af5}{BmsBattery::getBatteryCharge}}(\textcolor{keywordtype}{double}\ \&charge)}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00193}00193\ \{}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00194}00194\ \ \ \ \ lock\_guard<mutex>\ lck(\mbox{\hyperlink{classBmsBattery_abc578f8ac8df533a3fc87b524db0e509}{mtx}});}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00195}00195\ \ \ \ \ charge\ =\ \mbox{\hyperlink{classBmsBattery_af51620898f9b9d0c09af86bc1a18f785}{battery\_charge}};}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00196}00196\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{YarpDevReturnValueCompat_8h_a94ffe31d3768984c48ca26eed4d05fb6}{YARP\_DEV\_RETURN\_VALUE\_OK\_CH312}};}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00197}00197\ \}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00198}00198\ }
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00199}\mbox{\hyperlink{classBmsBattery_a166337a9e2482b7a3c2deb06da9c6eaf}{00199}}\ \mbox{\hyperlink{YarpDevReturnValueCompat_8h_aa9fe6d5119aed82807a53228f43b70ce}{YARP\_DEV\_RETURN\_VALUE\_TYPE\_CH312}}\ \mbox{\hyperlink{classBmsBattery_a166337a9e2482b7a3c2deb06da9c6eaf}{BmsBattery::getBatteryStatus}}(Battery\_status\ \&status)}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00200}00200\ \{}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00201}00201\ \ \ \ \ \textcolor{comment}{//yError("{}Not\ yet\ implemented"{});}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00202}00202\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{YarpDevReturnValueCompat_8h_aa20ecb4221c00b7c366dbfb8fc48732b}{YARP\_DEV\_RETURN\_VALUE\_ERROR\_NOT\_IMPLEMENTED\_BY\_DEVICE\_CH312}};}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00203}00203\ \}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00204}00204\ }
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00205}\mbox{\hyperlink{classBmsBattery_a162143463bc5dd7e1d2e2cd3169657e8}{00205}}\ \mbox{\hyperlink{YarpDevReturnValueCompat_8h_aa9fe6d5119aed82807a53228f43b70ce}{YARP\_DEV\_RETURN\_VALUE\_TYPE\_CH312}}\ \mbox{\hyperlink{classBmsBattery_a162143463bc5dd7e1d2e2cd3169657e8}{BmsBattery::getBatteryTemperature}}(\textcolor{keywordtype}{double}\ \&temperature)}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00206}00206\ \{}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00207}00207\ \ \ \ \ \textcolor{comment}{//yError("{}Not\ yet\ implemented"{});}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00208}00208\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{YarpDevReturnValueCompat_8h_aa20ecb4221c00b7c366dbfb8fc48732b}{YARP\_DEV\_RETURN\_VALUE\_ERROR\_NOT\_IMPLEMENTED\_BY\_DEVICE\_CH312}};}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00209}00209\ \}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00210}00210\ }
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00211}\mbox{\hyperlink{classBmsBattery_a9b6ebb60f4b62a6ba91ff46b00b029a3}{00211}}\ \mbox{\hyperlink{YarpDevReturnValueCompat_8h_aa9fe6d5119aed82807a53228f43b70ce}{YARP\_DEV\_RETURN\_VALUE\_TYPE\_CH312}}\ \mbox{\hyperlink{classBmsBattery_a9b6ebb60f4b62a6ba91ff46b00b029a3}{BmsBattery::getBatteryInfo}}(\textcolor{keywordtype}{string}\ \&info)}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00212}00212\ \{}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00213}00213\ \ \ \ \ lock\_guard<mutex>\ lck(\mbox{\hyperlink{classBmsBattery_abc578f8ac8df533a3fc87b524db0e509}{mtx}});}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00214}00214\ \ \ \ \ info\ =\ \mbox{\hyperlink{classBmsBattery_a2b90ba5d4133ca07c1318b019f57a23b}{battery\_info}};}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00215}00215\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{YarpDevReturnValueCompat_8h_a94ffe31d3768984c48ca26eed4d05fb6}{YARP\_DEV\_RETURN\_VALUE\_OK\_CH312}};}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00216}00216\ \}}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00217}00217\ }
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00218}\mbox{\hyperlink{classBmsBattery_a5b06786d5e642b75d418e308ca3fa385}{00218}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classBmsBattery_a5b06786d5e642b75d418e308ca3fa385}{BmsBattery::threadRelease}}()}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00219}00219\ \{}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00220}00220\ \ \ \ \ yTrace(\textcolor{stringliteral}{"{}BmsBattery\ Thread\ released\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{bmsBattery_8cpp_source_l00221}00221\ \}}
+
+\end{DoxyCode}

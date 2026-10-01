@@ -1,0 +1,308 @@
+\doxysection{Socket\+Can.\+cpp}
+\hypertarget{SocketCan_8cpp_source}{}\label{SocketCan_8cpp_source}\index{icub-\/main/src/libraries/icubmod/socketCan/SocketCan.cpp@{icub-\/main/src/libraries/icubmod/socketCan/SocketCan.cpp}}
+\mbox{\hyperlink{SocketCan_8cpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00001}00001\ \textcolor{comment}{//\ -\/*-\/\ Mode:C++;\ tab-\/width:4;\ c-\/basic-\/offset:4;\ indent-\/tabs-\/mode:nil\ -\/*-\/}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00002}00002\ }
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00003}00003\ \textcolor{comment}{/*\ }}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00004}00004\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010\ RobotCub\ Consortium,\ European\ Commission\ FP6\ Project\ IST-\/004370}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00005}00005\ \textcolor{comment}{\ *\ Author:\ Marco\ Randazzo}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00006}00006\ \textcolor{comment}{\ *\ email:\ \ marco.randazzo@iit.it}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00007}00007\ \textcolor{comment}{\ *\ website:\ www.robotcub.org}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00008}00008\ \textcolor{comment}{\ *\ Permission\ is\ granted\ to\ copy,\ distribute,\ and/or\ modify\ this\ program}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00009}00009\ \textcolor{comment}{\ *\ under\ the\ terms\ of\ the\ GNU\ General\ Public\ License,\ version\ 2\ or\ any}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00010}00010\ \textcolor{comment}{\ *\ later\ version\ published\ by\ the\ Free\ Software\ Foundation.}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00011}00011\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00012}00012\ \textcolor{comment}{\ *\ A\ copy\ of\ the\ license\ can\ be\ found\ at}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00013}00013\ \textcolor{comment}{\ *\ http://www.robotcub.org/icub/license/gpl.txt}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00014}00014\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00015}00015\ \textcolor{comment}{\ *\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00016}00016\ \textcolor{comment}{\ *\ WITHOUT\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00017}00017\ \textcolor{comment}{\ *\ MERCHANTABILITY\ or\ FITNESS\ FOR\ A\ PARTICULAR\ PURPOSE.\ See\ the\ GNU\ General}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00018}00018\ \textcolor{comment}{\ *\ Public\ License\ for\ more\ details}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00019}00019\ \textcolor{comment}{*/}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00020}00020\ }
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00024}00024\ }
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00025}00025\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{SocketCan_8h}{SocketCan.h}}"{}}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00026}00026\ \textcolor{preprocessor}{\#include\ <yarp/dev/CanBusInterface.h>}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00027}00027\ \textcolor{preprocessor}{\#include\ <yarp/os/Bottle.h>}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00028}00028\ \textcolor{preprocessor}{\#include\ <yarp/os/Value.h>}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00029}00029\ \textcolor{preprocessor}{\#include\ <sys/types.h>}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00030}00030\ \textcolor{preprocessor}{\#include\ <yarp/os/Time.h>}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00031}00031\ \textcolor{preprocessor}{\#include\ <sys/socket.h>}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00032}00032\ \textcolor{preprocessor}{\#include\ <sys/ioctl.h>}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00033}00033\ \textcolor{preprocessor}{\#include\ <net/if.h>}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00034}00034\ \textcolor{preprocessor}{\#include\ <arpa/inet.h>}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00035}00035\ \textcolor{preprocessor}{\#include\ <linux/can.h>}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00036}00036\ \textcolor{preprocessor}{\#include\ <linux/can/raw.h>}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00037}00037\ \textcolor{preprocessor}{\#include\ <sys/ioctl.h>}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00038}00038\ \textcolor{preprocessor}{\#include\ <string.h>}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00039}00039\ \textcolor{preprocessor}{\#include\ <stdio.h>}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00040}00040\ \textcolor{preprocessor}{\#include\ <unistd.h>}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00041}00041\ \textcolor{preprocessor}{\#include\ <fcntl.h>}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00042}00042\ }
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00043}00043\ }
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00044}00044\ \textcolor{comment}{/*\ At\ time\ of\ writing,\ these\ constants\ are\ not\ defined\ in\ the\ headers\ */}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00045}00045\ \textcolor{preprocessor}{\#ifndef\ PF\_CAN}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00046}\mbox{\hyperlink{SocketCan_8cpp_aeac0c3db7a1e021f17987bcc76893849}{00046}}\ \textcolor{preprocessor}{\#define\ PF\_CAN\ 29}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00047}00047\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00048}00048\ \ }
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00049}00049\ \textcolor{preprocessor}{\#ifndef\ AF\_CAN}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00050}\mbox{\hyperlink{SocketCan_8cpp_a546620c7e758f003b24b7fdae4f97bd4}{00050}}\ \textcolor{preprocessor}{\#define\ AF\_CAN\ PF\_CAN}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00051}00051\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00052}00052\ }
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00053}\mbox{\hyperlink{SocketCan_8cpp_acf5f74da809fa7d89e8fb6bea7442c5c}{00053}}\ \textcolor{preprocessor}{\#define\ SOCK\_DEBUG\ 0}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00054}00054\ }
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00055}00055\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceyarp_1_1dev}{yarp::dev}};}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00056}00056\ \textcolor{keyword}{using\ namespace\ }yarp::os;}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00057}00057\ }
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00058}\mbox{\hyperlink{SocketCan_8cpp_a30a70396a382148b416da3beb2261320}{00058}}\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{SocketCan_8cpp_a30a70396a382148b416da3beb2261320}{TX\_QUEUE\_SIZE}}=2047;}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00059}\mbox{\hyperlink{SocketCan_8cpp_a36b6745df5d7dee3f3e811643ccffdf4}{00059}}\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{SocketCan_8cpp_a36b6745df5d7dee3f3e811643ccffdf4}{RX\_QUEUE\_SIZE}}=2047;}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00060}00060\ }
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00061}\mbox{\hyperlink{classyarp_1_1dev_1_1SocketCan_a9611413fe2cb3112525c9a88a5209127}{00061}}\ \mbox{\hyperlink{classyarp_1_1dev_1_1SocketCan_a9611413fe2cb3112525c9a88a5209127}{SocketCan::SocketCan}}()}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00062}00062\ \{}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00063}00063\ \ \ \ \ skt\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00064}00064\ \}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00065}00065\ }
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00066}\mbox{\hyperlink{classyarp_1_1dev_1_1SocketCan_a846d94d33907bd68679c43737c0c1c8c}{00066}}\ \mbox{\hyperlink{classyarp_1_1dev_1_1SocketCan_a846d94d33907bd68679c43737c0c1c8c}{SocketCan::\string~SocketCan}}()}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00067}00067\ \{}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00068}00068\ \ }
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00069}00069\ \}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00070}00070\ }
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00071}\mbox{\hyperlink{classyarp_1_1dev_1_1SocketCan_afd0b34dc176c2f7edad55f78d6010827}{00071}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classyarp_1_1dev_1_1SocketCan_afd0b34dc176c2f7edad55f78d6010827}{SocketCan::canSetBaudRate}}(\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ rate)}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00072}00072\ \{\ }
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00073}00073\ \ \ \ \ \textcolor{comment}{//not\ yet\ implemented}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00074}00074\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00075}00075\ \}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00076}00076\ }
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00077}\mbox{\hyperlink{classyarp_1_1dev_1_1SocketCan_affe5dfeb5478344b3a03e162b0c16842}{00077}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classyarp_1_1dev_1_1SocketCan_affe5dfeb5478344b3a03e162b0c16842}{SocketCan::canGetBaudRate}}(\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ *rate)}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00078}00078\ \{}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00079}00079\ \ \ \ \ \textcolor{comment}{//not\ yet\ implemented}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00080}00080\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00081}00081\ \}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00082}00082\ }
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00083}\mbox{\hyperlink{classyarp_1_1dev_1_1SocketCan_a45629178a60e6039b136896a4b2333df}{00083}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classyarp_1_1dev_1_1SocketCan_a45629178a60e6039b136896a4b2333df}{SocketCan::canIdAdd}}(\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ \textcolor{keywordtype}{id})}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00084}00084\ \{}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00085}00085\ \ \ \ \ \textcolor{comment}{//not\ yet\ implemented}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00086}00086\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00087}00087\ \}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00088}00088\ }
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00089}\mbox{\hyperlink{classyarp_1_1dev_1_1SocketCan_aae7e512d943ae5a9a12fb6a87b1487ef}{00089}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classyarp_1_1dev_1_1SocketCan_aae7e512d943ae5a9a12fb6a87b1487ef}{SocketCan::canIdDelete}}(\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ \textcolor{keywordtype}{id})}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00090}00090\ \{}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00091}00091\ \ \ \ \ \textcolor{comment}{//not\ yet\ implemented\ }}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00092}00092\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00093}00093\ \}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00094}00094\ }
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00095}\mbox{\hyperlink{classyarp_1_1dev_1_1SocketCan_a460430fcdb2208fc95e17a7b51755a42}{00095}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classyarp_1_1dev_1_1SocketCan_a460430fcdb2208fc95e17a7b51755a42}{SocketCan::canRead}}(CanBuffer\ \&msgs,}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00096}00096\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ size,\ }
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00097}00097\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ *readout,}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00098}00098\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ wait)}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00099}00099\ \{}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00100}00100\ \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00101}00101\ \textcolor{comment}{\ \ \ \ int\ res;}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00102}00102\ \textcolor{comment}{\ \ \ \ \#ifdef\ WIN32}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00103}00103\ \textcolor{comment}{\ \ \ \ \ \ \ \ long\ lRead=size;}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00104}00104\ \textcolor{comment}{\ \ \ \ \#else}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00105}00105\ \textcolor{comment}{\ \ \ \ \ \ \ \ int32\_t\ lRead=size;}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00106}00106\ \textcolor{comment}{\ \ \ \ \#endif}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00107}00107\ \textcolor{comment}{}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00108}00108\ \textcolor{comment}{\ \ \ \ CMSG\ *tmp=reinterpret\_cast<CMSG\ *>(msgs[0].getPointer());}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00109}00109\ \textcolor{comment}{\ \ \ \ if\ (wait)}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00110}00110\ \textcolor{comment}{\ \ \ \ \ \ \ \ res=::canRead(*handle,\ tmp,\ \&lRead,\ 0);}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00111}00111\ \textcolor{comment}{\ \ \ \ else}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00112}00112\ \textcolor{comment}{\ \ \ \ \ \ \ \ res=::canTake(*handle,\ tmp,\ \&lRead);}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00113}00113\ \textcolor{comment}{}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00114}00114\ \textcolor{comment}{\ \ \ \ *readout=lRead;}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00115}00115\ \textcolor{comment}{}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00116}00116\ \textcolor{comment}{\ \ \ \ if\ (\ (res==NTCAN\_SUCCESS)||(res==NTCAN\_RX\_TIMEOUT))}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00117}00117\ \textcolor{comment}{\ \ \ \ \ \ \ \ return\ true;}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00118}00118\ \textcolor{comment}{}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00119}00119\ \textcolor{comment}{\ \ \ \ fprintf(stderr,\ "{}Error:\ canRead\ returned\ with\ code:\%.8X\(\backslash\)n"{},\ res);*/}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00120}00120\ }
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00121}00121\ \ \ \ \ \textcolor{keywordtype}{int}\ i=0;}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00122}00122\ \ \ \ \ \textcolor{keywordtype}{int}\ bytes\_read=0;}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00123}00123\ \textcolor{preprocessor}{\ \ \ \ \#if\ SOCK\_DEBUG}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00124}00124\ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}Asked\ for\ \%d\ messages\(\backslash\)n"{}},\ size);}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00125}00125\ \textcolor{preprocessor}{\ \ \ \ \#endif}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00126}00126\ \ \ \ \ \textcolor{keywordflow}{for}\ (i=0;\ i<size;\ i++)}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00127}00127\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00128}00128\ \ \ \ \ \ \ \ \ can\_frame\ *frm=\textcolor{keyword}{reinterpret\_cast<}can\_frame\ *\textcolor{keyword}{>}(msgs[i].getPointer());}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00129}00129\ \ \ \ \ \ \ \ \ \textcolor{comment}{//printf("{}start\ reading\(\backslash\)n"{});}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00130}00130\ \ \ \ \ \ \ \ \ bytes\_read\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00131}00131\ \ \ \ \ \ \ \ \ bytes\_read\ =\ read(\ skt,\ frm,\ \textcolor{keyword}{sizeof}(*frm)\ );}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00132}00132\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \#if\ SOCK\_DEBUG}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00133}00133\ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}finished\ reading.\ read\ \%d\ bytes\(\backslash\)n"{}},bytes\_read);}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00134}00134\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \#endif}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00135}00135\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (bytes\_read<=0)\ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00136}00136\ }
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00137}00137\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \#if\ SOCK\_DEBUG}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00138}00138\ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}Read:\ \%d\ \(\backslash\)n\ "{}},bytes\_read);}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00139}00139\ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}len\ \%d\ "{}},\ frm-\/>can\_dlc);}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00140}00140\ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}id\ \%d\ "{}},\ frm-\/>can\_id);}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00141}00141\ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}data:\ "{}});}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00142}00142\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ j=0;j<frm-\/>can\_dlc;j++)}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00143}00143\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\%2x\ "{}},\ frm-\/>data[j]);}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00144}00144\ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00145}00145\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \#endif}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00146}00146\ }
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00147}00147\ \ \ \ \ \ \ \ \ \textcolor{comment}{//yarp::os::Time::delay(0.010);\ //test\ only}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00148}00148\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00149}00149\ \ \ \ \ *readout=i;}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00150}00150\ \textcolor{preprocessor}{\ \ \ \ \#if\ SOCK\_DEBUG}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00151}00151\ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}Read\ \%d\ messages\(\backslash\)n"{}},\ *readout);}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00152}00152\ \textcolor{preprocessor}{\ \ \ \ \#endif}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00153}00153\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00154}00154\ }
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00155}00155\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00156}00156\ \textcolor{comment}{\ \ \ \ //debug}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00157}00157\ \textcolor{comment}{\ \ \ \ //struct\ can\_frame\ frame;}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00158}00158\ \textcolor{comment}{\ \ \ \ can\_frame\ *frame=reinterpret\_cast<can\_frame\ *>(msgs[0].getPointer());}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00159}00159\ \textcolor{comment}{\ \ \ \ bytes\_read\ =\ read(\ skt,\ frame,\ sizeof(*frame)\ );}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00160}00160\ \textcolor{comment}{\ \ \ \ *readout=1;}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00161}00161\ \textcolor{comment}{}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00162}00162\ \textcolor{comment}{\ \ \ \ printf("{}Read:\ \%d\ \(\backslash\)n\ "{},bytes\_read);}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00163}00163\ \textcolor{comment}{}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00164}00164\ \textcolor{comment}{\ \ \ \ printf("{}len\ \%d\ "{},\ frame-\/>can\_dlc);}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00165}00165\ \textcolor{comment}{\ \ \ \ printf("{}id\ \%d\ "{},\ frame-\/>can\_id);}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00166}00166\ \textcolor{comment}{\ \ \ \ printf("{}data:\ "{});}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00167}00167\ \textcolor{comment}{\ \ \ \ for(i=0;i<frame-\/>can\_dlc;i++)}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00168}00168\ \textcolor{comment}{\ \ \ \ \ \ \ \ printf("{}\%2x\ "{},\ frame-\/>data[i]);}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00169}00169\ \textcolor{comment}{\ \ \ \ printf("{}\(\backslash\)n"{});}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00170}00170\ \textcolor{comment}{}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00171}00171\ \textcolor{comment}{\ \ \ \ return\ true;}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00172}00172\ \textcolor{comment}{\ \ \ \ */}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00173}00173\ \}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00174}00174\ }
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00175}\mbox{\hyperlink{classyarp_1_1dev_1_1SocketCan_aa7a30e59bca06e79ea2f49de38674c43}{00175}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classyarp_1_1dev_1_1SocketCan_aa7a30e59bca06e79ea2f49de38674c43}{SocketCan::canWrite}}(\textcolor{keyword}{const}\ CanBuffer\ \&msgs,}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00176}00176\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ size,}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00177}00177\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ *sent,}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00178}00178\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ wait)}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00179}00179\ \{}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00180}00180\ \ \ \ \ \textcolor{keywordtype}{int}\ res;}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00181}00181\ \ \ \ \ int32\_t\ lRead=size;}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00182}00182\ \ \ \ \ \textcolor{keywordtype}{int}\ bytes\_sent=0;}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00183}00183\ }
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00184}00184\ \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00185}00185\ \textcolor{comment}{\ \ \ \ //debug}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00186}00186\ \textcolor{comment}{\ \ \ \ struct\ can\_frame\ frame2;}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00187}00187\ \textcolor{comment}{\ \ \ \ frame2.can\_id\ =\ 0x123;}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00188}00188\ \textcolor{comment}{\ \ \ \ strcpy(\ (char*)(\&frame2.data),\ "{}YAY"{}\ );}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00189}00189\ \textcolor{comment}{\ \ \ \ frame2.can\_dlc\ =\ strlen(\ (char*)(\&frame2.data)\ );}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00190}00190\ \textcolor{comment}{\ \ \ \ bytes\_sent\ =\ write(\ skt,\ \&frame2,\ sizeof(frame2)\ );}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00191}00191\ \textcolor{comment}{*/}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00192}00192\ \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00193}00193\ \textcolor{comment}{\ \ \ \ //debug}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00194}00194\ \textcolor{comment}{\ \ \ \ can\_frame\ frame3;}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00195}00195\ \textcolor{comment}{\ \ \ \ frame3.can\_id\ =\ 0x123;}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00196}00196\ \textcolor{comment}{\ \ \ \ frame3.data[0]\ =\ 'Y';}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00197}00197\ \textcolor{comment}{\ \ \ \ frame3.can\_dlc\ =\ 1;}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00198}00198\ \textcolor{comment}{\ \ \ \ bytes\_sent\ =\ write(\ skt,\ \&frame3,\ sizeof(frame3)\ );}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00199}00199\ \textcolor{comment}{*/}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00200}00200\ }
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00201}00201\ \ \ \ \ \textcolor{comment}{//debug}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00202}00202\ \ \ \ \ \textcolor{comment}{//fprintf(stderr,\ "{}id:\%d\ data:\%d\ size:\%d\(\backslash\)n"{},\ tmp-\/>can\_id,\ tmp-\/>data[0],\ tmp-\/>can\_dlc\ );}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00203}00203\ \ \ \ }
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00204}00204\ \ \ \ \ \textcolor{comment}{//@@@\ IMPORTANT\ (RANDAZ):\ I'm\ putting\ here\ a\ delay\ of\ one\ millisecond.}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00205}00205\ \ \ \ \ \textcolor{comment}{//I\ noticed\ that\ without\ this\ delay\ a\ lot\ CAN\ messages\ are\ lost\ when\ iCubInterface\ starts\ and}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00206}00206\ \ \ \ \ \textcolor{comment}{//sends\ the\ configuration\ parameters\ (PIDs\ etc.)\ to\ the\ control\ boards.}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00207}00207\ \ \ \ \ \textcolor{comment}{//Further\ investigation\ is\ required\ in\ order\ to\ understand\ how\ the\ internal\ buffer\ is\ handled\ }}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00208}00208\ \ \ \ \ \textcolor{comment}{//when\ the\ function\ write(\ skt,\ tmp,\ sizeof(*tmp)\ );\ is\ called.}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00209}00209\ \ \ \ \ Time::delay(0.001);}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00210}00210\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00211}00211\ \ \ \ \ \textcolor{keywordtype}{int}\ i=0;}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00212}00212\ \ \ \ \ (*sent)=0;}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00213}00213\ \ \ \ \ \textcolor{keywordflow}{for}\ (i=0;\ i<size;\ i++)}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00214}00214\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00215}00215\ \ \ \ \ \ \ \ \ CanBuffer\ \&buffer=\textcolor{keyword}{const\_cast<}CanBuffer\ \&\textcolor{keyword}{>}(msgs);}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00216}00216\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keyword}{struct\ }can\_frame\ *tmp=\textcolor{keyword}{reinterpret\_cast<}\textcolor{keyword}{const\ }struct\ can\_frame*\textcolor{keyword}{>}(buffer[i].getPointer());\ \ \ }
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00217}00217\ \ \ \ \ \ \ \ \ bytes\_sent\ =\ write(\ skt,\ tmp,\ \textcolor{keyword}{sizeof}(*tmp)\ );}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00218}00218\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (bytes\_sent>0)\ }
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00219}00219\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00220}00220\ \ \ \ \ \ \ \ \ \ \ \ \ (*sent)++;}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00221}00221\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00222}00222\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00223}00223\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00224}00224\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{saveNetwork_8m_a0eba6f64b9c26507a877bcb0c4f270e2}{fprintf}}(stderr,\ \textcolor{stringliteral}{"{}Error:\ SocketCan::canWrite()\ was\ unable\ to\ send\ message.\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00225}00225\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//break;}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00226}00226\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00227}00227\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00228}00228\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00229}00229\ \ \ \ \ \textcolor{keywordflow}{if}\ (*sent\ <size)}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00230}00230\ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00231}00231\ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{saveNetwork_8m_a0eba6f64b9c26507a877bcb0c4f270e2}{fprintf}}(stderr,\ \textcolor{stringliteral}{"{}Error:\ SocketCan::canWrite()\ not\ all\ messages\ were\ sent.\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00232}00232\ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00233}00233\ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00234}00234\ \ \ \ }
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00235}00235\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00236}00236\ \}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00237}00237\ }
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00238}\mbox{\hyperlink{classyarp_1_1dev_1_1SocketCan_aad1aac2476d94bb9a37da300031607b2}{00238}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classyarp_1_1dev_1_1SocketCan_aad1aac2476d94bb9a37da300031607b2}{SocketCan::open}}(yarp::os::Searchable\ \&par)}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00239}00239\ \{}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00240}00240\ \ \ \ \ \textcolor{keywordtype}{int}\ canTxQueue=\mbox{\hyperlink{EsdCan_8cpp_a30a70396a382148b416da3beb2261320}{TX\_QUEUE\_SIZE}};}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00241}00241\ \ \ \ \ \textcolor{keywordtype}{int}\ canRxQueue=\mbox{\hyperlink{EsdCan_8cpp_a36b6745df5d7dee3f3e811643ccffdf4}{RX\_QUEUE\_SIZE}};}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00242}00242\ \ \ \ \ \textcolor{keywordtype}{int}\ netId\ =-\/1;}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00243}00243\ \ \ \ \ \textcolor{keywordtype}{int}\ txTimeout=500;}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00244}00244\ \ \ \ \ \textcolor{keywordtype}{int}\ rxTimeout=500;}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00245}00245\ }
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00246}00246\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ netId=par.check(\textcolor{stringliteral}{"{}CanDeviceNum"{}},\ Value(-\/1),\ \textcolor{stringliteral}{"{}numeric\ identifier\ of\ the\ can\ device"{}}).asInt32();}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00247}00247\ \ \ \ \ \textcolor{keywordflow}{if}\ \ (netId\ ==\ -\/1)\ \ \ \ netId=par.check(\textcolor{stringliteral}{"{}canDeviceNum"{}},\ Value(-\/1),\ \textcolor{stringliteral}{"{}numeric\ identifier\ of\ the\ can\ device"{}}).asInt32();}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00248}00248\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00249}00249\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ txTimeout=par.check(\textcolor{stringliteral}{"{}CanTxTimeout"{}},\ Value(500),\ \textcolor{stringliteral}{"{}timeout\ on\ transmission\ [ms]"{}}).asInt32();}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00250}00250\ \ \ \ \ \textcolor{keywordflow}{if}\ \ (txTimeout\ ==\ 500)\ txTimeout=par.check(\textcolor{stringliteral}{"{}canTxTimeout"{}},\ Value(500),\ \textcolor{stringliteral}{"{}timeout\ on\ transmission\ [ms]"{}}).asInt32();}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00251}00251\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00252}00252\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ rxTimeout=par.check(\textcolor{stringliteral}{"{}CanRxTimeout"{}},\ Value(500),\ \textcolor{stringliteral}{"{}timeout\ on\ receive\ when\ calling\ blocking\ read\ [ms]"{}}).asInt32()\ ;}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00253}00253\ \ \ \ \ \textcolor{keywordflow}{if}\ \ (rxTimeout\ ==\ 500)\ rxTimeout=par.check(\textcolor{stringliteral}{"{}canRxTimeout"{}},\ Value(500),\ \textcolor{stringliteral}{"{}timeout\ on\ receive\ when\ calling\ blocking\ read\ [ms]"{}}).asInt32()\ ;}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00254}00254\ }
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00255}00255\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ canTxQueue=par.check(\textcolor{stringliteral}{"{}CanTxQueue"{}},\ Value(\mbox{\hyperlink{EsdCan_8cpp_a30a70396a382148b416da3beb2261320}{TX\_QUEUE\_SIZE}}),\ \textcolor{stringliteral}{"{}length\ of\ tx\ buffer"{}}).asInt32();}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00256}00256\ \ \ \ \ \textcolor{keywordflow}{if}\ \ (canTxQueue\ ==\ \mbox{\hyperlink{EsdCan_8cpp_a30a70396a382148b416da3beb2261320}{TX\_QUEUE\_SIZE}})\ canTxQueue=par.check(\textcolor{stringliteral}{"{}canTxQueue"{}},\ Value(\mbox{\hyperlink{EsdCan_8cpp_a30a70396a382148b416da3beb2261320}{TX\_QUEUE\_SIZE}}),\ \textcolor{stringliteral}{"{}length\ of\ tx\ buffer"{}}).asInt32();}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00257}00257\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00258}00258\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ canRxQueue=par.check(\textcolor{stringliteral}{"{}CanRxQueue"{}},\ Value(\mbox{\hyperlink{EsdCan_8cpp_a36b6745df5d7dee3f3e811643ccffdf4}{RX\_QUEUE\_SIZE}}),\ \textcolor{stringliteral}{"{}length\ of\ rx\ buffer"{}}).asInt32()\ ;}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00259}00259\ \ \ \ \ \textcolor{keywordflow}{if}\ \ (canRxQueue\ ==\ \mbox{\hyperlink{EsdCan_8cpp_a36b6745df5d7dee3f3e811643ccffdf4}{RX\_QUEUE\_SIZE}})\ canRxQueue=par.check(\textcolor{stringliteral}{"{}canRxQueue"{}},\ Value(\mbox{\hyperlink{EsdCan_8cpp_a36b6745df5d7dee3f3e811643ccffdf4}{RX\_QUEUE\_SIZE}}),\ \textcolor{stringliteral}{"{}length\ of\ rx\ buffer"{}}).asInt32()\ ;}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00260}00260\ }
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00261}00261\ \ \ \ \textcolor{keywordtype}{int}\ so\_timestamping\_flags\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00262}00262\ \ \ \ \textcolor{comment}{/*\ Create\ the\ socket\ */}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00263}00263\ \ \ \ skt\ =\ socket(\ \mbox{\hyperlink{SocketCan_8cpp_aeac0c3db7a1e021f17987bcc76893849}{PF\_CAN}},\ SOCK\_RAW,\ CAN\_RAW\ );}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00264}00264\ \ }
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00265}00265\ \ \ \ \textcolor{comment}{/*\ Locate\ the\ interface\ you\ wish\ to\ use\ */}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00266}00266\ \ \ \ \textcolor{keyword}{struct\ }ifreq\ ifr;}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00267}00267\ \ \ \ sprintf\ (ifr.ifr\_name,\ \textcolor{stringliteral}{"{}can\%d"{}},netId);}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00268}00268\ \ \ \ ioctl(skt,\ SIOCGIFINDEX,\ \&ifr);\ \textcolor{comment}{//\ ifr.ifr\_ifindex\ gets\ filled\ with\ that\ device's\ index}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00269}00269\ \ }
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00270}00270\ \ \ \ \textcolor{comment}{/*\ Select\ that\ CAN\ interface,\ and\ bind\ the\ socket\ to\ it.\ */}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00271}00271\ \ \ \ \textcolor{keyword}{struct\ }sockaddr\_can\ addr;}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00272}00272\ \ \ \ addr.can\_family\ =\ \mbox{\hyperlink{SocketCan_8cpp_a546620c7e758f003b24b7fdae4f97bd4}{AF\_CAN}};}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00273}00273\ \ \ \ addr.can\_ifindex\ =\ ifr.ifr\_ifindex;}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00274}00274\ \ \ \ bind(\ skt,\ (\textcolor{keyword}{struct}\ sockaddr*)\&addr,\ \textcolor{keyword}{sizeof}(addr)\ );}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00275}00275\ }
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00276}00276\ \ \ \ \ \textcolor{keywordtype}{int}\ flags;}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00277}00277\ \ \ \ \ \textcolor{keywordflow}{if}\ (-\/1\ ==\ (flags\ =\ fcntl(skt,\ F\_GETFL,\ 0)))\ flags\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00278}00278\ \ \ \ \ fcntl(skt,\ F\_SETFL,\ flags\ |\ O\_NONBLOCK);}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00279}00279\ }
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00280}00280\ }
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00281}00281\ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00282}00282\ \}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00283}00283\ }
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00284}\mbox{\hyperlink{classyarp_1_1dev_1_1SocketCan_a2c06144d924e85ccd7c91be67bce78ce}{00284}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classyarp_1_1dev_1_1SocketCan_a2c06144d924e85ccd7c91be67bce78ce}{SocketCan::close}}()}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00285}00285\ \{}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00286}00286\ \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00287}00287\ \textcolor{comment}{\ \ \ \ int\ res;}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00288}00288\ \textcolor{comment}{\ \ \ \ if\ (!handle)}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00289}00289\ \textcolor{comment}{\ \ \ \ \ \ \ \ return\ false;}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00290}00290\ \textcolor{comment}{}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00291}00291\ \textcolor{comment}{\ \ \ \ res=::canClose\ (*handle);}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00292}00292\ \textcolor{comment}{}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00293}00293\ \textcolor{comment}{\ \ \ \ if\ (res!=NTCAN\_SUCCESS)}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00294}00294\ \textcolor{comment}{\ \ \ \ \ \ \ \ return\ false;}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00295}00295\ \textcolor{comment}{}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00296}00296\ \textcolor{comment}{\ \ \ \ delete\ handle;}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00297}00297\ \textcolor{comment}{\ \ \ \ handle=0;}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00298}00298\ \textcolor{comment}{*/}}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00299}00299\ }
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00300}00300\ \ \ \ \ \textcolor{keywordflow}{if}\ (!skt)}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00301}00301\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00302}00302\ }
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00303}00303\ \ \ \ \ \textcolor{comment}{//not\ yet\ implemented\ }}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00304}00304\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{SocketCan_8cpp_source_l00305}00305\ \}}
+
+\end{DoxyCode}

@@ -1,0 +1,906 @@
+\doxysection{compensator.\+cpp}
+\hypertarget{compensator_8cpp_source}{}\label{compensator_8cpp_source}\index{icub-\/main/src/modules/skinManager/src/compensator.cpp@{icub-\/main/src/modules/skinManager/src/compensator.cpp}}
+\mbox{\hyperlink{compensator_8cpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00001}00001\ \textcolor{comment}{/*\ }}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00002}00002\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2009\ RobotCub\ Consortium,\ European\ Commission\ FP6\ Project\ IST-\/004370}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00003}00003\ \textcolor{comment}{\ *\ Authors:\ Andrea\ Del\ Prete,\ Alexander\ Schmitz}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00004}00004\ \textcolor{comment}{\ *\ email:\ \ \ andrea.delprete@iit.it,\ alexander.schmitz@iit.it}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00005}00005\ \textcolor{comment}{\ *\ website:\ www.robotcub.org\ }}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00006}00006\ \textcolor{comment}{\ *\ Permission\ is\ granted\ to\ copy,\ distribute,\ and/or\ modify\ this\ program}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00007}00007\ \textcolor{comment}{\ *\ under\ the\ terms\ of\ the\ GNU\ General\ Public\ License,\ version\ 2\ or\ any}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00008}00008\ \textcolor{comment}{\ *\ later\ version\ published\ by\ the\ Free\ Software\ Foundation.}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00009}00009\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00010}00010\ \textcolor{comment}{\ *\ A\ copy\ of\ the\ license\ can\ be\ found\ at}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00011}00011\ \textcolor{comment}{\ *\ http://www.robotcub.org/icub/license/gpl.txt}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00012}00012\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00013}00013\ \textcolor{comment}{\ *\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00014}00014\ \textcolor{comment}{\ *\ WITHOUT\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00015}00015\ \textcolor{comment}{\ *\ MERCHANTABILITY\ or\ FITNESS\ FOR\ A\ PARTICULAR\ PURPOSE.\ See\ the\ GNU\ General}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00016}00016\ \textcolor{comment}{\ *\ Public\ License\ for\ more\ details}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00017}00017\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00018}00018\ \textcolor{preprocessor}{\#include\ <yarp/os/Time.h>}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00019}00019\ \textcolor{preprocessor}{\#include\ <yarp/math/Math.h>}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00020}00020\ \textcolor{preprocessor}{\#include\ <yarp/math/Rand.h>}\ \textcolor{comment}{//\ TEMP}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00021}00021\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{math_8h}{math.h}}"{}}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00022}00022\ \textcolor{preprocessor}{\#include\ <algorithm>}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00023}00023\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{compensator_8h}{iCub/skinManager/compensator.h}}"{}}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00024}00024\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00025}00025\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00026}00026\ \textcolor{keyword}{using\ namespace\ }std;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00027}00027\ \textcolor{keyword}{using\ namespace\ }yarp::os;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00028}00028\ \textcolor{keyword}{using\ namespace\ }yarp::sig;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00029}00029\ \textcolor{keyword}{using\ namespace\ }yarp::math;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00030}00030\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceiCub_1_1skinManager}{iCub::skinManager}};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00031}00031\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceiCub_1_1skinDynLib}{iCub::skinDynLib}};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00032}00032\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00033}00033\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ Compensator::BIN\_TOUCH\ \ \ \ \ =\ 100.0;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00034}00034\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ Compensator::BIN\_NO\_TOUCH\ \ =\ 0.0;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00035}00035\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00036}\mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_a35f185b80e1344b55ee2328ccad4d1a5}{00036}}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_a35f185b80e1344b55ee2328ccad4d1a5}{Compensator::Compensator}}(\textcolor{keywordtype}{string}\ \_name,\ \textcolor{keywordtype}{string}\ \_robotName,\ \textcolor{keywordtype}{string}\ outputPortName,\ \textcolor{keywordtype}{string}\ inputPortName,\ BufferedPort<Bottle>*\ \_infoPort,\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00037}00037\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ \_compensationGain,\ \textcolor{keywordtype}{double}\ \_contactCompensationGain,\ \textcolor{keywordtype}{int}\ addThreshold,\ \textcolor{keywordtype}{float}\ \_minBaseline,\ \textcolor{keywordtype}{bool}\ \_zeroUpRawData,\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00038}00038\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \_binarization,\ \textcolor{keywordtype}{bool}\ \_smoothFilter,\ \textcolor{keywordtype}{float}\ \_smoothFactor,\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ \_linkNum)}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00039}00039\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ :}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00040}00040\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ compensationGain(\_compensationGain),\ contactCompensationGain(\_contactCompensationGain),}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00041}00041\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ addThreshold(addThreshold),\ infoPort(\_infoPort),}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00042}00042\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ minBaseline(\_minBaseline),\ binarization(\_binarization),\ smoothFilter(\_smoothFilter),\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00043}00043\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ smoothFactor(\_smoothFactor),\ robotName(\_robotName),\ name(\_name),\ linkNum(\_linkNum)}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00044}00044\ \{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00045}00045\ \ \ \ \ this-\/>zeroUpRawData\ =\ \_zeroUpRawData;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00046}00046\ \ \ \ \ \_isWorking\ =\ init(\_name,\ \_robotName,\ outputPortName,\ inputPortName);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00047}00047\ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00048}00048\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00049}\mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_abd33c7198d4e93261ed742f1aef2b044}{00049}}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_abd33c7198d4e93261ed742f1aef2b044}{Compensator::\string~Compensator}}()\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00050}00050\ \ \ \ \ \textcolor{keywordflow}{if}(tactileSensorDevice)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00051}00051\ \ \ \ \ \ \ \ \ tactileSensorDevice-\/>close();}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00052}00052\ \ \ \ \ \ \ \ \ \textcolor{keyword}{delete}\ tactileSensorDevice;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00053}00053\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00054}00054\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00055}00055\ \ \ \ \ compensatedTactileDataPort.interrupt();}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00056}00056\ \ \ \ \ compensatedTactileDataPort.close();}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00057}00057\ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00058}00058\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00059}00059\ \textcolor{keywordtype}{bool}\ Compensator::init(\textcolor{keywordtype}{string}\ name,\ \textcolor{keywordtype}{string}\ robotName,\ \textcolor{keywordtype}{string}\ outputPortName,\ \textcolor{keywordtype}{string}\ inputPortName)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00060}00060\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1skinDynLib_1_1skinPart}{skinPart}}\ =\ \mbox{\hyperlink{namespaceiCub_1_1skinDynLib_ad9eb09d94574e8020c27676ca5e9bdfca5c940816227c088d9f093c8f6ca94fb5}{SKIN\_PART\_UNKNOWN}};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00061}00061\ \ \ \ \ bodyPart\ =\ \mbox{\hyperlink{namespaceiCub_1_1skinDynLib_add9bfc7bd9eeccb70837cfb9401a46fda66f5f16e3cc6061b9b68739f3546907e}{BODY\_PART\_UNKNOWN}};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00062}00062\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00063}00063\ \ \ \ \ \textcolor{keywordflow}{if}\ (!compensatedTactileDataPort.open(outputPortName.c\_str()))\ \{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00064}00064\ \ \ \ \ \ \ \ \ stringstream\ msg;\ msg<<\ \textcolor{stringliteral}{"{}Unable\ to\ open\ output\ port\ "{}}<<\ outputPortName;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00065}00065\ \ \ \ \ \ \ \ \ sendInfoMsg(msg.str());}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00066}00066\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};\ \ \textcolor{comment}{//\ unable\ to\ open}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00067}00067\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00068}00068\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00069}00069\ \ \ \ \ Property\ options;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00070}00070\ \ \ \ \ stringstream\ localPortName;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00071}00071\ \ \ \ \ localPortName<<\ \textcolor{stringliteral}{"{}/"{}}<<\ name<<\ \textcolor{stringliteral}{"{}/input"{}};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00072}00072\ \ \ \ \ options.put(\textcolor{stringliteral}{"{}robot"{}},\ \ robotName.c\_str());}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00073}00073\ \ \ \ \ options.put(\textcolor{stringliteral}{"{}local"{}},\ \ localPortName.str().c\_str());}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00074}00074\ \ \ \ \ options.put(\textcolor{stringliteral}{"{}remote"{}},\ \ inputPortName.c\_str());}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00075}00075\ \ \ \ \ options.put(\textcolor{stringliteral}{"{}device"{}},\ \textcolor{stringliteral}{"{}analogsensorclient"{}});}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00076}00076\ \ \ \ \ tactileSensorDevice\_inputPortName=inputPortName.c\_str();}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00077}00077\ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00078}00078\ \ \ \ \ \textcolor{comment}{//\ create\ a\ new\ device\ driver}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00079}00079\ \ \ \ \ tactileSensorDevice\ =\ \textcolor{keyword}{new}\ PolyDriver(options);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00080}00080\ \ \ \ \ \textcolor{keywordflow}{if}\ (!tactileSensorDevice-\/>isValid())\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00081}00081\ \ \ \ \ \ \ \ \ sendInfoMsg(\textcolor{stringliteral}{"{}Device\ not\ available.\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00082}00082\ \ \ \ \ \ \ \ \ \textcolor{comment}{//printf("{}\%s"{},\ Drivers::factory().toString().c\_str());}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00083}00083\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00084}00084\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00085}00085\ \ \ \ \ \textcolor{comment}{//\ open\ the\ sensor\ interface\ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00086}00086\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}}\ =\ tactileSensorDevice-\/>view(tactileSensor);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00087}00087\ \ \ \ \ \textcolor{keywordflow}{if}\ (!\mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}})\ \{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00088}00088\ \ \ \ \ \ \ \ \ sendInfoMsg(\textcolor{stringliteral}{"{}Problems\ acquiring\ interfaces"{}});}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00089}00089\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00090}00090\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00091}00091\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00092}00092\ \ \ \ \ \textcolor{comment}{//\ (temp)\ open\ port\ to\ read\ skin\ data\ with\ timestamp\ (because\ device\ driver\ doesn't\ provide\ timestamps)}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00093}00093\ \ \ \ \ localPortName<<\ \textcolor{stringliteral}{"{}\_temp"{}};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00094}00094\ \ \ \ \ \textcolor{keywordflow}{if}(!inputPort.open(localPortName.str().c\_str()))}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00095}00095\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00096}00096\ \ \ \ \ \ \ \ \ stringstream\ msg;\ msg<<\ \textcolor{stringliteral}{"{}Unable\ to\ open\ input\ data\ port\ "{}}<<\ localPortName.str();}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00097}00097\ \ \ \ \ \ \ \ \ sendInfoMsg(msg.str());}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00098}00098\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00099}00099\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00100}00100\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00101}00101\ \ \ \ \ \textcolor{keywordflow}{if}(\ !Network::connect(inputPortName.c\_str(),\ localPortName.str().c\_str()))}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00102}00102\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00103}00103\ \ \ \ \ \ \ \ \ stringstream\ msg;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00104}00104\ \ \ \ \ \ \ \ \ msg<<\ \textcolor{stringliteral}{"{}Problems\ trying\ to\ connect\ ports\ \%s\ and\ \%s."{}}<<\ inputPortName.c\_str()<<\ localPortName.str().c\_str();}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00105}00105\ \ \ \ \ \ \ \ \ sendInfoMsg(msg.str());}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00106}00106\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00107}00107\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00108}00108\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00109}00109\ \ \ \ \ \textcolor{keywordtype}{int}\ getChannelsCounter\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00110}00110\ \ \ \ \ skinDim\ =\ tactileSensor-\/>getChannels();}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00111}00111\ \ \ \ \ \textcolor{keywordflow}{while}(skinDim<=0)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00112}00112\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ getChannels()\ returns\ 0\ if\ it\ hasn't\ performed\ the\ first\ reading\ yet}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00113}00113\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ so\ wait\ for\ 1/50\ sec,\ then\ try\ again\ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00114}00114\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(++getChannelsCounter==50)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00115}00115\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ after\ 50\ failed\ trials\ give\ up\ and\ use\ the\ default\ value}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00116}00116\ \ \ \ \ \ \ \ \ \ \ \ \ skinDim\ =\ 192;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00117}00117\ \ \ \ \ \ \ \ \ \ \ \ \ sendInfoMsg(\textcolor{stringliteral}{"{}Error\ reading\ the\ number\ of\ channels\ of\ the\ port.\ Using\ 192\ as\ default\ value."{}});}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00118}00118\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00119}00119\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00120}00120\ \ \ \ \ \ \ \ \ Time::delay(0.02);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00121}00121\ \ \ \ \ \ \ \ \ skinDim\ =\ tactileSensor-\/>getChannels();}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00122}00122\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00123}00123\ \ \ \ \ readErrorCounter\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00124}00124\ \ \ \ \ rawData.resize(skinDim);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00125}00125\ \ \ \ \ baselines.resize(skinDim);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00126}00126\ \ \ \ \ touchThresholds.resize(skinDim);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00127}00127\ \ \ \ \ touchDetected.resize(skinDim);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00128}00128\ \ \ \ \ subTouchDetected.resize(skinDim);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00129}00129\ \ \ \ \ touchDetectedFilt.resize(skinDim);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00130}00130\ \ \ \ \ compensatedData.resize(skinDim);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00131}00131\ \ \ \ \ compensatedDataOld.resize(skinDim);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00132}00132\ \ \ \ \ compensatedDataFilt.resize(skinDim);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00133}00133\ \ \ \ \ taxelPos.resize(skinDim,\ \mbox{\hyperlink{compute__ekf__sym_8m_a35baefda5ec044ac7c1f5a41815b5b45}{zeros}}(3));}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00134}00134\ \ \ \ \ taxelOri.resize(skinDim,\ \mbox{\hyperlink{compute__ekf__sym_8m_a35baefda5ec044ac7c1f5a41815b5b45}{zeros}}(3));}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00135}00135\ \ \ \ \ taxelPoseConfidence.resize(skinDim,0.0);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00136}00136\ \ \ \ \ maxNeighDist\ =\ \mbox{\hyperlink{namespaceiCub_1_1skinManager_ac45d94e3a6f57a92b52879b61749de3e}{MAX\_NEIGHBOR\_DISTANCE}};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00137}00137\ \ \ \ \ \textcolor{comment}{//\ by\ default\ every\ taxel\ is\ neighbor\ with\ all\ the\ other\ taxels}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00138}00138\ \ \ \ \ list<int>\ defaultNeighbors(skinDim);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00139}00139\ \ \ \ \ \textcolor{keywordtype}{int}\ i=0;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00140}00140\ \ \ \ \ \textcolor{keywordflow}{for}(list<int>::iterator\ it=defaultNeighbors.begin();it!=defaultNeighbors.end();it++,\ i++)\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00141}00141\ \ \ \ \ \ \ \ \ *it\ =\ i;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00142}00142\ \ \ \ \ neighborsXtaxel.resize(skinDim,\ defaultNeighbors);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00143}00143\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00144}00144\ \ \ \ \ \textcolor{comment}{//\ test\ read\ to\ check\ if\ the\ skin\ is\ broken\ (all\ taxel\ output\ is\ 0)}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00145}00145\ \ \ \ \ \textcolor{keywordflow}{if}(robotName!=\textcolor{stringliteral}{"{}icubSim"{}}\ \&\&\ readInputData(compensatedData))\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00146}00146\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ skinBroken\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00147}00147\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ i=0;\ i<skinDim;\ i++)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00148}00148\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(compensatedData[i]!=0.0)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00149}00149\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ skinBroken\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00150}00150\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00151}00151\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00152}00152\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00153}00153\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(skinBroken)}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00154}00154\ \ \ \ \ \ \ \ \ \ \ \ \ sendInfoMsg(\textcolor{stringliteral}{"{}The\ output\ of\ all\ the\ taxels\ is\ 0.\ Probably\ there\ is\ a\ hardware\ problem."{}});}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00155}00155\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ !skinBroken;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00156}00156\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00157}00157\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00158}00158\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00159}00159\ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00160}00160\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00161}\mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_ac1907c3e6850c7c1eed3e1317dce61f9}{00161}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_ac1907c3e6850c7c1eed3e1317dce61f9}{Compensator::calibrationInit}}()\{\ \ \ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00162}00162\ \ \ \ \ \textcolor{comment}{//\ take\ the\ semaphore\ so\ that\ the\ touchThreshold\ can't\ be\ read\ during\ the\ calibration\ phase}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00163}00163\ \ \ \ \ lock\_guard<mutex>\ lck(touchThresholdSem);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00164}00164\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00165}00165\ \ \ \ \ \textcolor{comment}{//\ send\ a\ command\ to\ the\ microcontroller\ for\ calibrating\ the\ skin\ sensors}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00166}00166\ \ \ \ \ \textcolor{keywordflow}{if}(robotName!=\textcolor{stringliteral}{"{}icubSim"{}})\{\ \ \ \ \textcolor{comment}{//\ this\ feature\ isn't\ implemented\ in\ the\ simulator\ and\ causes\ a\ runtime\ error}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00167}00167\ \ \ \ \ \ \ \ \ tactileSensor-\/>calibrateSensor();}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00168}00168\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00169}00169\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00170}00170\ \ \ \ \ \textcolor{comment}{//\ initialize}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00171}00171\ \ \ \ \ calibrationRead\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00172}00172\ \ \ \ \ saturatedTaxels.resize(0);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00173}00173\ \ \ \ \ start\_sum.assign(skinDim,\ 0);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00174}00174\ \ \ \ \ skin\_empty.assign(skinDim,\ vector<int>(MAX\_SKIN+1,\ 0));}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00175}00175\ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00176}00176\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00177}\mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_aaaf92e74ee61f276c4ec0057f92482de}{00177}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_aaaf92e74ee61f276c4ec0057f92482de}{Compensator::calibrationDataCollection}}()\{\ \ \ \ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00178}00178\ \ \ \ \ Vector\ skin\_values(skinDim);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00179}00179\ \ \ \ \ \textcolor{keywordflow}{if}(!readInputData(skin\_values))}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00180}00180\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00181}00181\ \ \ \ \ calibrationRead++;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00182}00182\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00183}00183\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ j=0;\ j<skinDim;\ j++)\ \{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00184}00184\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (zeroUpRawData==\textcolor{keyword}{false})}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00185}00185\ \ \ \ \ \ \ \ \ \ \ \ \ skin\_values[j]\ =\ MAX\_SKIN\ -\/\ skin\_values[j];}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00186}00186\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00187}00187\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(skin\_values[j]<0\ ||\ skin\_values[j]>MAX\_SKIN)}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00188}00188\ \ \ \ \ \ \ \ \ \ \ \ \ sendInfoMsg(\textcolor{stringliteral}{"{}Error\ while\ reading\ the\ tactile\ data!\ Data\ out\ of\ range:\ "{}}+\mbox{\hyperlink{namespaceiCub_1_1skinManager_a34046cbbd9cb77d15cb2d25870c0ee03}{toString}}(skin\_values[j]));}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00189}00189\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00190}00190\ \ \ \ \ \ \ \ \ \ \ \ \ skin\_empty[j][int(skin\_values[j])]++;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00191}00191\ \ \ \ \ \ \ \ \ \ \ \ \ start\_sum[j]\ +=\ int(skin\_values[j]);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00192}00192\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00193}00193\ \ \ \ \ \}\ \ \ \ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00194}00194\ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00195}00195\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00196}\mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_a589baf3514601a80ac5a7855483c9010}{00196}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_a589baf3514601a80ac5a7855483c9010}{Compensator::calibrationFinish}}()\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00197}00197\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00198}00198\ \ \ \ \ \textcolor{comment}{//vector<float>\ standard\_dev(skinDim,\ 0);}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00199}00199\ \ \ \ \ \textcolor{comment}{//get\ percentile}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00200}00200\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ i=0;\ i<skinDim;\ i++)\ \{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00201}00201\ \ \ \ \ \ \ \ \ \textcolor{comment}{//avg\ start\ value}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00202}00202\ \ \ \ \ \ \ \ \ baselines[i]\ =\ start\_sum[i]/\ (calibrationRead!=0.0\ ?\ calibrationRead\ :\ 1.0);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00203}00203\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00204}00204\ \ \ \ \ \ \ \ \ \textcolor{comment}{//cumulative\ values}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00205}00205\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ j=1;\ j<=MAX\_SKIN;\ j++)\ \{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00206}00206\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//standard\_dev[i]\ +=\ fabs(j-\/baselines[i])\ *\ skin\_empty[i][j];}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00207}00207\ \ \ \ \ \ \ \ \ \ \ \ \ skin\_empty[i][j]\ +=\ skin\_empty[i][j-\/1]\ ;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00208}00208\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00209}00209\ \ \ \ \ \ \ \ \ \textcolor{comment}{//standard\_dev[i]\ /=\ (CAL\_TIME*PERIOD);}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00210}00210\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00211}00211\ \ \ \ \ \ \ \ \ \textcolor{comment}{//when\ do\ we\ cross\ the\ threshold?\ Compute\ 95\ percentile}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00212}00212\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(\ skin\_empty[i][MAX\_SKIN]\ <\ 0.95*calibrationRead\ )}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00213}00213\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00214}00214\ \ \ \ \ \ \ \ \ \ \ \ \ sendInfoMsg(\textcolor{stringliteral}{"{}Error\ during\ calibration.\ Most\ readings\ were\ out\ of\ range."{}});}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00215}00215\ \ \ \ \ \ \ \ \ \ \ \ \ \_isWorking\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00216}00216\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00217}00217\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00218}00218\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00219}00219\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ j=0;\ j<=MAX\_SKIN;\ j++)\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00220}00220\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00221}00221\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (skin\_empty[i][j]\ >\ (calibrationRead*0.95))\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00222}00222\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00223}00223\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ the\ threshold\ can\ not\ be\ less\ than\ MIN\_TOUCH\_THR}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00224}00224\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ touchThresholds[i]\ =\ (double)j\ -\/\ baselines[i];}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00225}00225\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ j\ =\ MAX\_SKIN;\ \ \ \textcolor{comment}{//\ break}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00226}00226\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00227}00227\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00228}00228\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00229}00229\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00230}00230\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00231}00231\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00232}00232\ \ \ \ \ \textcolor{comment}{//\ store\ the\ initial\ baseline\ to\ compute\ the\ drift\ compensated\ later}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00233}00233\ \ \ \ \ initialBaselines\ =\ baselines;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00234}00234\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00235}00235\ \ \ \ \ \textcolor{comment}{//\ set\ the\ "{}old\ output\ value"{}\ for\ the\ smoothing\ filter\ to\ the\ baseline\ value\ to\ get\ a\ smooth\ start}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00236}00236\ \ \ \ \ compensatedDataOld\ =\ baselines;\ \ \ \ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00237}00237\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00238}00238\ \ \ \ \ \textcolor{comment}{//\ test\ to\ check\ if\ the\ skin\ is\ broken\ (all\ taxel\ baselines\ are\ 255\ OR\ thresholds\ are\ 0)}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00239}00239\ \ \ \ \ \textcolor{keywordtype}{bool}\ baseline255\ =\ \textcolor{keyword}{true},\ thresholdZero\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00240}00240\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ i=0;\ i<skinDim;\ i++)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00241}00241\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(baselines[i]!=255)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00242}00242\ \ \ \ \ \ \ \ \ \ \ \ \ baseline255\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00243}00243\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00244}00244\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(robotName==\textcolor{stringliteral}{"{}icubSim"{}}\ ||\ touchThresholds[i]>1\mbox{\hyperlink{compute__ekf__fast_8m_a08a4415e9d594ff960030b921d42b91e}{e}}-\/5)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00245}00245\ \ \ \ \ \ \ \ \ \ \ \ \ thresholdZero\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00246}00246\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00247}00247\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00248}00248\ \ \ \ \ \textcolor{keywordflow}{if}(baseline255\ ||\ thresholdZero)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00249}00249\ \ \ \ \ \ \ \ \ \_isWorking\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00250}00250\ \textcolor{comment}{//\ \ \ \ \ \ \ \ if(baseline255)}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00251}00251\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ sendInfoMsg("{}The\ baselines\ of\ all\ the\ taxels\ are\ 255.\ Probably\ there\ is\ a\ hardware\ problem."{});}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00252}00252\ \textcolor{comment}{//\ \ \ \ \ \ \ \ if(thresholdZero)}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00253}00253\ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ sendInfoMsg("{}The\ noise\ of\ all\ taxels\ is\ 0.\ Probably\ there\ is\ a\ hardware\ problem."{});}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00254}00254\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00255}00255\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ i=0;\ i<skinDim;\ i++)\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00256}00256\ \ \ \ \ \ \ \ \ touchThresholds[i]\ =\ max<double>(MIN\_TOUCH\_THR,\ touchThresholds[i]);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00257}00257\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00258}00258\ \ \ \ \ \textcolor{comment}{//\ print\ to\ console}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00259}00259\ \ \ \ \ \textcolor{comment}{/*if(\_isWorking)\{}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00260}00260\ \textcolor{comment}{\ \ \ \ \ \ \ \ printf("{}\(\backslash\)n[\%s\ (\%s)]\ Baselines:\(\backslash\)n"{},\ name.c\_str(),\ getSkinPartName().c\_str());}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00261}00261\ \textcolor{comment}{\ \ \ \ \ \ \ \ for\ (unsigned\ int\ i=0;\ i<skinDim;\ i++)\ \{}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00262}00262\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ if(!(i\%12))\ fprintf(stderr,\ "{}\(\backslash\)n"{});}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00263}00263\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ fprintf(stderr,"{}\%5.1f\ "{},\ baselines[i]);\ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00264}00264\ \textcolor{comment}{\ \ \ \ \ \ \ \ \}}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00265}00265\ \textcolor{comment}{\ \ \ \ \ \ \ \ printf("{}\(\backslash\)n[\%s\ (\%s)]\ Thresholds\ (95\ percentile):\(\backslash\)n"{},\ name.c\_str(),\ getSkinPartName().c\_str());}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00266}00266\ \textcolor{comment}{\ \ \ \ \ \ \ \ for\ (unsigned\ int\ i=0;\ i<skinDim;\ i++)\ \{}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00267}00267\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ if(!(i\%12))\ fprintf(stderr,\ "{}\(\backslash\)n"{});}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00268}00268\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ touchThresholds[i]\ =\ max<double>(MIN\_TOUCH\_THR,\ touchThresholds[i]);}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00269}00269\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ fprintf(stderr,"{}\%3.1f\ "{},\ touchThresholds[i]);\ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00270}00270\ \textcolor{comment}{\ \ \ \ \ \ \ \ \}}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00271}00271\ \textcolor{comment}{\ \ \ \ \ \ \ \ printf("{}\(\backslash\)n"{});}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00272}00272\ \textcolor{comment}{\ \ \ \ \}*/}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00273}00273\ \ \ \ \ sendInfoMsg(\textcolor{stringliteral}{"{}Calibration\ finished"{}});}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00274}00274\ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00275}00275\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00276}00276\ \textcolor{keywordtype}{bool}\ Compensator::readInputData(Vector\&\ skin\_values)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00277}00277\ \ \ \ \ Vector\ *tmp=0;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00278}00278\ \ \ \ \ \textcolor{keywordflow}{if}((tmp=inputPort.read(\textcolor{keyword}{false}))==0)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00279}00279\ \ \ \ \ \ \ \ \ readErrorCounter++;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00280}00280\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(readErrorCounter>MAX\_READ\_ERROR)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00281}00281\ \ \ \ \ \ \ \ \ \ \ \ \ \_isWorking\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00282}00282\ \ \ \ \ \ \ \ \ \ \ \ \ sendInfoMsg(\textcolor{stringliteral}{"{}Too\ many\ errors\ in\ a\ row.\ Stopping\ the\ compensator."{}});}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00283}00283\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00284}00284\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00285}00285\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00286}00286\ \ \ \ \ \textcolor{comment}{//try\ to\ read\ envelope\ of\ input\ data\ port}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00287}00287\ \ \ \ \ inputPort.getEnvelope(timestamp);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00288}00288\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00289}00289\ \ \ \ \ skin\_values\ =\ *tmp;\ \textcolor{comment}{//\ copy\ data}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00290}00290\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00291}00291\ \ \ \ \ \textcolor{keywordflow}{if}(skin\_values.size()\ !=\ skinDim)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00292}00292\ \ \ \ \ \ \ \ \ readErrorCounter++;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00293}00293\ \ \ \ \ \ \ \ \ sendInfoMsg(\textcolor{stringliteral}{"{}Unexpected\ size\ of\ the\ input\ array\ (raw\ tactile\ data):\ "{}}+\mbox{\hyperlink{namespaceiCub_1_1skinManager_a34046cbbd9cb77d15cb2d25870c0ee03}{toString}}(skin\_values.size()));}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00294}00294\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(readErrorCounter>MAX\_READ\_ERROR)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00295}00295\ \ \ \ \ \ \ \ \ \ \ \ \ \_isWorking\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00296}00296\ \ \ \ \ \ \ \ \ \ \ \ \ sendInfoMsg(\textcolor{stringliteral}{"{}Too\ many\ errors\ in\ a\ row.\ Stopping\ the\ compensator."{}});}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00297}00297\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00298}00298\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00299}00299\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00300}00300\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00301}00301\ \ \ \ \ readErrorCounter\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00302}00302\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00303}00303\ \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00304}00304\ \textcolor{comment}{\ \ \ \ int\ err;}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00305}00305\ \textcolor{comment}{\ \ \ \ if((err=tactileSensor-\/>read(skin\_values))!=IAnalogSensor::AS\_OK)\{}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00306}00306\ \textcolor{comment}{\ \ \ \ \ \ \ \ readErrorCounter++;}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00307}00307\ \textcolor{comment}{}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00308}00308\ \textcolor{comment}{\ \ \ \ \ \ \ \ stringstream\ msg;}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00309}00309\ \textcolor{comment}{\ \ \ \ \ \ \ \ if(err\ ==\ IAnalogSensor::AS\_TIMEOUT)\ \ \ \ \ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00310}00310\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ msg<<\ "{}Timeout\ error\ reading\ tactile\ sensor."{};}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00311}00311\ \textcolor{comment}{\ \ \ \ \ \ \ \ else\ if(err\ ==\ IAnalogSensor::AS\_OVF)}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00312}00312\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ msg<<\ "{}Ovf\ error\ reading\ tactile\ sensor."{};}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00313}00313\ \textcolor{comment}{\ \ \ \ \ \ \ \ else\ if(err\ ==\ IAnalogSensor::AS\_ERROR)}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00314}00314\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ msg<<\ "{}Generic\ error\ reading\ tactile\ sensor."{};}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00315}00315\ \textcolor{comment}{\ \ \ \ \ \ \ \ sendInfoMsg(msg.str());}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00316}00316\ \textcolor{comment}{}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00317}00317\ \textcolor{comment}{\ \ \ \ \ \ \ \ if(readErrorCounter>MAX\_READ\_ERROR)\{}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00318}00318\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \_isWorking\ =\ false;}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00319}00319\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ sendInfoMsg("{}Too\ many\ errors\ in\ a\ row.\ Stopping\ the\ compensator."{});}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00320}00320\ \textcolor{comment}{\ \ \ \ \ \ \ \ \}}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00321}00321\ \textcolor{comment}{\ \ \ \ \ \ \ \ return\ false;}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00322}00322\ \textcolor{comment}{\ \ \ \ \}}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00323}00323\ \textcolor{comment}{}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00324}00324\ \textcolor{comment}{\ \ \ \ if(skin\_values.size()\ !=\ skinDim)\{}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00325}00325\ \textcolor{comment}{\ \ \ \ \ \ \ \ readErrorCounter++;}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00326}00326\ \textcolor{comment}{\ \ \ \ \ \ \ \ sendInfoMsg("{}Unexpected\ size\ of\ the\ input\ array\ (raw\ tactile\ data):\ "{}+toString(skin\_values.size()));}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00327}00327\ \textcolor{comment}{\ \ \ \ \ \ \ \ if(readErrorCounter>MAX\_READ\_ERROR)\{}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00328}00328\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \_isWorking\ =\ false;}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00329}00329\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ sendInfoMsg("{}Too\ many\ errors\ in\ a\ row.\ Stopping\ the\ compensator."{});}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00330}00330\ \textcolor{comment}{\ \ \ \ \ \ \ \ \}}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00331}00331\ \textcolor{comment}{\ \ \ \ \ \ \ \ return\ false;}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00332}00332\ \textcolor{comment}{\ \ \ \ \}}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00333}00333\ \textcolor{comment}{}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00334}00334\ \textcolor{comment}{\ \ \ \ readErrorCounter\ =\ 0;}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00335}00335\ \textcolor{comment}{\ \ \ \ return\ true;*/}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00336}00336\ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00337}00337\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00338}\mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_a60419e27e14d6155314a03d230c2e68c}{00338}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_a60419e27e14d6155314a03d230c2e68c}{Compensator::readRawAndWriteCompensatedData}}()\{\ \ \ \ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00339}00339\ \ \ \ \ \textcolor{keywordflow}{if}(!readInputData(rawData))}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00340}00340\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00341}00341\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00342}00342\ \ \ \ \ Vector\&\ compensatedData2Send\ =\ compensatedTactileDataPort.prepare();}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00343}00343\ \ \ \ \ compensatedData2Send.resize(skinDim);\ \ \ \textcolor{comment}{//\ local\ variable\ with\ data\ to\ send}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00344}00344\ \ \ \ \ compensatedData.resize(skinDim);\ \ \ \ \ \ \ \ \textcolor{comment}{//\ global\ variable\ with\ data\ to\ store}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00345}00345\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00346}00346\ \ \ \ \ \textcolor{keywordtype}{double}\ d;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00347}00347\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ i=0;\ i<skinDim;\ i++)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00348}00348\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ baseline\ compensation}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00349}00349\ \ \ \ \ \ \ \ \ d\ =\ \ (double)(\ zeroUpRawData\ ?\ rawData(i)-\/baselines[i]\ :\ MAX\_SKIN-\/rawData(i)-\/baselines[i]\ );}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00350}00350\ \ \ \ \ \ \ \ \ d\ =\ \ \ min<double>(\ MAX\_SKIN,\ d);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00351}00351\ \ \ \ \ \ \ \ \ compensatedData[i]\ =\ d;\ \ \ \ \ \textcolor{comment}{//\ save\ the\ data\ before\ applying\ filtering}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00352}00352\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00353}00353\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ detect\ touch\ (before\ applying\ filtering,\ so\ the\ compensation\ algorithm\ is\ not\ affected\ by\ the\ filters)}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00354}00354\ \ \ \ \ \ \ \ \ touchDetected[i]\ =\ (d\ >\ touchThresholds[i]\ +\ addThreshold);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00355}00355\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00356}00356\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ detect\ subtouch}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00357}00357\ \ \ \ \ \ \ \ \ subTouchDetected[i]\ =\ (d\ <\ -\/touchThresholds[i]\ -\/\ addThreshold);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00358}00358\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00359}00359\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ smooth\ filter}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00360}00360\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(smoothFilter)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00361}00361\ \ \ \ \ \ \ \ \ \ \ \ \ lock\_guard<mutex>\ lck(smoothFactorSem);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00362}00362\ \ \ \ \ \ \ \ \ \ \ \ \ d\ =\ (1-\/smoothFactor)*d\ +\ smoothFactor*compensatedDataOld(i);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00363}00363\ \ \ \ \ \ \ \ \ \ \ \ \ compensatedDataOld(i)\ =\ d;\ \ \ \ \textcolor{comment}{//\ update\ old\ value}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00364}00364\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00365}00365\ \ \ \ \ \ \ \ \ compensatedDataFilt[i]\ =\ d;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00366}00366\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00367}00367\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ binarization\ filter}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00368}00368\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ here\ we\ don't\ use\ the\ touchDetected\ array\ because,\ if\ the\ smooth\ filter\ is\ on,}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00369}00369\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ we\ want\ to\ use\ the\ filtered\ values}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00370}00370\ \ \ \ \ \ \ \ \ touchDetectedFilt[i]\ =\ (d\ >\ touchThresholds[i]\ +\ addThreshold);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00371}00371\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(binarization)}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00372}00372\ \ \ \ \ \ \ \ \ \ \ \ \ d\ =\ (\ touchDetectedFilt[i]\ ?\ BIN\_TOUCH\ :\ BIN\_NO\_TOUCH\ );}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00373}00373\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00374}00374\ \ \ \ \ \ \ \ \ compensatedData2Send[i]\ =\ max<double>(0.0,\ d);\ \textcolor{comment}{//\ trim\ only\ data\ to\ send\ because\ you\ need\ negative\ values\ for\ update\ baseline}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00375}00375\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00376}00376\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00377}00377\ \ \ \ \ compensatedTactileDataPort.write();}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00378}00378\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00379}00379\ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00380}00380\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00381}\mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_a41f387c0bfc370515aaf2f74cba93c48}{00381}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_a41f387c0bfc370515aaf2f74cba93c48}{Compensator::updateBaseline}}()\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00382}00382\ \ \ \ \ \textcolor{keywordtype}{double}\ mean\_change\ =\ 0,\ change,\ gain;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00383}00383\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ non\_touching\_taxels\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00384}00384\ \ \ \ \ \textcolor{keywordtype}{double}\ d;\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00385}00385\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00386}00386\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ j=0;\ j<skinDim;\ j++)\ \{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00387}00387\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ ***\ Algorithm\ 1}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00388}00388\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*if(!touchDetected[j])\{}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00389}00389\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ if(d\ >\ 0.5)\ \{}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00390}00390\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ baselines[j]\ \ \ \ \ \ \ \ +=\ compensationGain;}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00391}00391\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ mean\_change\ \ \ \ \ \ \ \ \ \ \ \ +=\ compensationGain;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ //for\ changing\ the\ taxels\ where\ we\ detected\ touch}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00392}00392\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \}else\ if(d\ <\ -\/0.5)\ \{}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00393}00393\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ baselines[j]\ \ \ \ \ \ \ \ -\/=\ compensationGain;}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00394}00394\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ mean\_change\ \ \ \ \ \ \ \ \ \ \ \ -\/=\ compensationGain;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ //for\ changing\ the\ taxels\ where\ we\ detected\ touch}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00395}00395\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \}}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00396}00396\ \textcolor{comment}{\ \ \ \ \ \ \ \ \}*/}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00397}00397\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00398}00398\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ ***\ Algorithm\ 2}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00399}00399\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*if(!(touchDetected[j]\ ||\ subTouchDetected[j]))\{}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00400}00400\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ non\_touching\_taxels++;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ //for\ changing\ the\ taxels\ where\ we\ detected\ touch}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00401}00401\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ d\ =\ compensatedData(j);}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00402}00402\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ if(fabs(d)>0.5)\{}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00403}00403\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ change\ \ \ \ \ \ \ \ \ \ =\ (compensationGain/50)*d/touchThresholds[j];}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00404}00404\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ baselines[j]\ \ \ \ +=\ change;}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00405}00405\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ mean\_change\ \ \ \ \ +=\ change;}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00406}00406\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \}}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00407}00407\ \textcolor{comment}{\ \ \ \ \ \ \ \ \}*/}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00408}00408\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00409}00409\ \ \ \ \ \ \ \ \ d\ =\ compensatedData(j);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00410}00410\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(touchDetected[j])\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00411}00411\ \ \ \ \ \ \ \ \ \ \ \ \ gain\ \ \ \ \ \ \ \ \ \ \ \ =\ contactCompensationGain*0.02;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00412}00412\ \ \ \ \ \ \ \ \ \}\textcolor{keywordflow}{else}\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00413}00413\ \ \ \ \ \ \ \ \ \ \ \ \ gain\ \ \ \ \ \ \ \ \ \ \ \ =\ compensationGain*0.02;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00414}00414\ \ \ \ \ \ \ \ \ \ \ \ \ non\_touching\_taxels++;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00415}00415\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00416}00416\ \ \ \ \ \ \ \ \ change\ \ \ \ \ \ \ \ \ \ =\ gain*d/touchThresholds[j];}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00417}00417\ \ \ \ \ \ \ \ \ baselines[j]\ \ \ \ +=\ change;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00418}00418\ \ \ \ \ \ \ \ \ mean\_change\ \ \ \ \ +=\ change;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00419}00419\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00420}00420\ \ \ \ \ \textcolor{comment}{//\ \ \ \ \ \ \ \ if(j<5)}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00421}00421\ \ \ \ \ \textcolor{comment}{//\ \ \ \ \ \ \ \ printf("{}\%d\ touch\ detected\ \%s,\ change\ \%.6f,\ gain:\ \%.3f\(\backslash\)n"{},\ j,\ touchDetected[j]?"{}yes"{}:"{}no"{},\ change,\ touchDetected[j]?contactCompensationGain:compensationGain);}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00422}00422\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00423}00423\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(baselines[j]<0)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00424}00424\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}*\ temp\ =\ \textcolor{keyword}{new}\ \textcolor{keywordtype}{char}[300];}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00425}00425\ \ \ \ \ \ \ \ \ \ \ \ \ sprintf(temp,\ \textcolor{stringliteral}{"{}ERROR-\/Negative\ baseline.\ Port\ \%s;\ tax\ \%d;\ baseline\ \%.2f;\ gain:\ \%.4f;\ d:\ \%.2f;\ raw:\ \%.2f;\ change:\ \%f;\ touchThr:\ \%.2f"{}},\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00426}00426\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespaceiCub_1_1skinDynLib_a2f8f97f128c284d2b3ea854ab370dd2e}{SkinPart\_s}}[\mbox{\hyperlink{classiCub_1_1skinDynLib_1_1skinPart}{skinPart}}].c\_str(),\ j,\ baselines[j],\ gain,\ d,\ rawData[j],\ change,\ touchThresholds[j]);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00427}00427\ \ \ \ \ \ \ \ \ \ \ \ \ sendInfoMsg(temp);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00428}00428\ \ \ \ \ \ \ \ \ \}\ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00429}00429\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00430}00430\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00431}00431\ \ \ \ \ \textcolor{comment}{//for\ compensating\ the\ taxels\ where\ we\ detected\ touch}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00432}00432\ \ \ \ \ \textcolor{comment}{/*if\ (non\_touching\_taxels>0\ \&\&\ non\_touching\_taxels<skinDim\ \&\&\ mean\_change!=0)\{}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00433}00433\ \textcolor{comment}{\ \ \ \ \ \ \ \ mean\_change\ /=\ non\_touching\_taxels;}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00434}00434\ \textcolor{comment}{\ \ \ \ \ \ \ \ for(unsigned\ int\ j=0;\ j<skinDim;\ j++)\ \{}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00435}00435\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ if\ (touchDetected[j])\ \{}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00436}00436\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ baselines[j]\ \ \ \ \ \ \ \ +=\ mean\_change;}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00437}00437\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ if(baselines[j]<0)\{}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00438}00438\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ char*\ temp\ =\ new\ char[300];}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00439}00439\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sprintf(temp,\ "{}ERROR-\/Negative\ baseline.\ Taxel\ \%d;\ baseline\ \%.2f;\ meanchange:\ \%f"{},\ j,\ baselines[j],\ mean\_change);}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00440}00440\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sendInfoMsg(temp);}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00441}00441\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00442}00442\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \}}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00443}00443\ \textcolor{comment}{\ \ \ \ \ \ \ \ \}}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00444}00444\ \textcolor{comment}{\ \ \ \ \}*/}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00445}00445\ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00446}00446\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00447}\mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_a80d18c8cc3d98ab08312afdc975ad307}{00447}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_a80d18c8cc3d98ab08312afdc975ad307}{Compensator::doesBaselineExceed}}(\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ \&taxelIndex,\ \textcolor{keywordtype}{double}\ \&baseline,\ \textcolor{keywordtype}{double}\ \&initialBaseline)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00448}00448\ \ \ \ \ vector<unsigned\ int>::iterator\ it;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00449}00449\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ i=0;\ i<skinDim;\ i++)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00450}00450\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(baselines[i]<minBaseline\ ||\ baselines[i]>MAX\_SKIN-\/minBaseline)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00451}00451\ \ \ \ \ \ \ \ \ \ \ \ \ it\ =\ find(saturatedTaxels.begin(),\ saturatedTaxels.end(),\ i);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00452}00452\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(it==saturatedTaxels.end())\{\ \ \textcolor{comment}{//\ if\ the\ taxel\ hasn't\ been\ already\ signalled}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00453}00453\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//fprintf(stderr,\ "{}Baseline\ \%d\ exceeds:\ \%f\(\backslash\)n"{},\ i,\ baselines[i]);}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00454}00454\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ saturatedTaxels.push\_back(i);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00455}00455\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ baseline\ =\ baselines[i];}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00456}00456\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ initialBaseline\ =\ initialBaselines[i];}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00457}00457\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ taxelIndex\ =\ i;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00458}00458\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00459}00459\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00460}00460\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00461}00461\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00462}00462\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00463}00463\ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00464}00464\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00465}\mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_ae45386a34cb38be31528f4ca084b2644}{00465}}\ \mbox{\hyperlink{classiCub_1_1skinDynLib_1_1skinContactList}{skinContactList}}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_ae45386a34cb38be31528f4ca084b2644}{Compensator::getContacts}}()\{\ \ \ \ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00466}00466\ \ \ \ \ vector<int>\ \ \ \ \ \ \ \ \ contactXtaxel(skinDim,\ -\/1);\ \ \ \ \ \textcolor{comment}{//\ contact\ for\ each\ taxel\ (-\/1\ means\ no\ contact)}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00467}00467\ \ \ \ \ deque<deque<int>\ >\ \ taxelsXcontact;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ taxels\ for\ each\ contact}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00468}00468\ \ \ \ \ \textcolor{keywordtype}{int}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ contactId\ =\ 0;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ id\ of\ the\ next\ contact\ to\ create}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00469}00469\ \ \ \ \ \textcolor{keywordtype}{int}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ neighCont;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ id\ of\ the\ contact\ of\ the\ current\ neighbor}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00470}00470\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00471}00471\ \ \ \ \ poseSem.lock();}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00472}00472\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00473}00473\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ i=0;\ i<skinDim;\ i++)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00474}00474\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(touchDetectedFilt[i]\ )\{\ \textcolor{comment}{//\ \&\&\ contactXtaxel[i]<0\ (second\ condition\ should\ always\ be\ true)}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00475}00475\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ list<int>\ *neighbors\ =\ \&(neighborsXtaxel[i]);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00476}00476\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//printf("{}Taxel\ \%d\ active.\ Going\ to\ check\ its\ \%d\ neighbors\(\backslash\)n"{},\ i,\ neighbors-\/>size());}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00477}00477\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(list<int>::iterator\ it=neighbors-\/>begin();\ it!=neighbors-\/>end();\ it++)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00478}00478\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ neighCont\ =\ contactXtaxel[(*it)];}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00479}00479\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(neighCont\ >=\ 0)\{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ **\ if\ neighbor\ belongs\ to\ a\ contact}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00480}00480\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(contactXtaxel[i]<0)\{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ **\ add\ taxel\ to\ pre-\/existing\ contact}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00481}00481\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ contactXtaxel[i]\ =\ neighCont;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00482}00482\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ taxelsXcontact[neighCont].push\_back(i);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00483}00483\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//printf("{}Add\ taxel\ to\ pre\ existing\ contact\ \%d\ (neighbor\ \%d)\(\backslash\)n"{},\ neighCont,\ (*neighbors)[n]);}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00484}00484\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}\textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}(contactXtaxel[i]!=neighCont)\{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ **\ merge\ 2\ contacts}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00485}00485\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//mergeContacts(contactXtaxel[i],\ neighCont);}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00486}00486\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ newId\ =\ min(contactXtaxel[i],\ neighCont);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00487}00487\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ oldId\ =\ max(contactXtaxel[i],\ neighCont);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00488}00488\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ deque<int>\ tax2move\ =\ taxelsXcontact[oldId];}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00489}00489\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(deque<int>::iterator\ it=tax2move.begin();\ it!=tax2move.end();\ it++)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00490}00490\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ contactXtaxel[(*it)]\ =\ newId;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ assign\ new\ contact\ id}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00491}00491\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ taxelsXcontact[newId].push\_back((*it));\ \ \ \ \ \textcolor{comment}{//\ add\ taxel\ ids\ to\ contact}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00492}00492\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00493}00493\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ taxelsXcontact[oldId].clear();\ \ \ \ \ \ \textcolor{comment}{//\ clear\ the\ list\ of\ taxels\ belonging\ to\ the\ merged\ contact}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00494}00494\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//printf("{}Merge\ two\ contacts:\ \%d\ and\ \%d\(\backslash\)n"{},\ oldId,\ newId);}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00495}00495\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00496}00496\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00497}00497\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00498}00498\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00499}00499\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(contactXtaxel[i]<0)\{\ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ **\ if\ no\ neighbor\ belongs\ to\ a\ contact\ -\/>\ create\ new\ contact}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00500}00500\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ contactXtaxel[i]\ =\ contactId;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00501}00501\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ taxelsXcontact.resize(contactId+1);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00502}00502\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ taxelsXcontact[contactId].push\_back(i);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00503}00503\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ contactId++;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00504}00504\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//printf("{}New\ contact\ created:\ \%d\(\backslash\)n"{},\ contactId-\/1);}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00505}00505\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00506}00506\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00507}00507\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00508}00508\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00509}00509\ \ \ \ \ poseSem.unlock();}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00510}00510\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00511}00511\ \ \ \ \ \mbox{\hyperlink{classiCub_1_1skinDynLib_1_1skinContactList}{skinContactList}}\ contactList;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00512}00512\ \ \ \ \ Vector\ CoP(3),\ geoCenter(3),\ normal(3);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00513}00513\ \ \ \ \ \textcolor{keywordtype}{double}\ pressure,\ pressureCoP,\ pressureNormal,\ \mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00514}00514\ \ \ \ \ \textcolor{keywordtype}{int}\ activeTaxels,\ activeTaxelsGeo;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00515}00515\ \ \ \ \ vector<unsigned\ int>\ taxelList;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00516}00516\ \ \ \ \ \textcolor{keywordflow}{for}(\ deque<deque<int>\ >::iterator\ it=taxelsXcontact.begin();\ it!=taxelsXcontact.end();\ it++)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00517}00517\ \ \ \ \ \ \ \ \ activeTaxels\ =\ it-\/>size();}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00518}00518\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(activeTaxels==0)\ \textcolor{keywordflow}{continue};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00519}00519\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00520}00520\ \ \ \ \ \ \ \ \ taxelList.resize(activeTaxels);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00521}00521\ \ \ \ \ \ \ \ \ CoP.zero();}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00522}00522\ \ \ \ \ \ \ \ \ geoCenter.zero();}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00523}00523\ \ \ \ \ \ \ \ \ normal.zero();}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00524}00524\ \ \ \ \ \ \ \ \ pressure\ =\ pressureCoP\ =\ pressureNormal\ =\ 0.0;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00525}00525\ \ \ \ \ \ \ \ \ activeTaxelsGeo\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00526}00526\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ i=0;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00527}00527\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\ deque<int>::iterator\ tax=it-\/>begin();\ tax!=it-\/>end();\ tax++,\ i++)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00528}00528\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}}\ \ \ \ \ \ \ \ \ =\ max(compensatedDataFilt[(*tax)],\ 0.0);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00529}00529\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(norm(taxelPos[(*tax)])!=0.0)\{\ \ \textcolor{comment}{//\ if\ the\ taxel\ position\ estimate\ exists}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00530}00530\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CoP\ \ \ \ \ \ \ \ \ +=\ taxelPos[(*tax)]\ *\ \mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00531}00531\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pressureCoP\ +=\ \mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00532}00532\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ activeTaxelsGeo++;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00533}00533\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ geoCenter\ \ \ +=\ taxelPos[(*tax)];}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00534}00534\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00535}00535\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(norm(taxelOri[(*tax)])!=0.0)\{\ \ \textcolor{comment}{//\ if\ the\ taxel\ orientation\ estimate\ exists}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00536}00536\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ normal\ \ \ \ \ \ \ \ \ \ +=\ taxelOri[(*tax)]\ *\ \mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00537}00537\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pressureNormal\ \ +=\ \mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00538}00538\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00539}00539\ \ \ \ \ \ \ \ \ \ \ \ \ pressure\ \ \ \ +=\ \mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00540}00540\ \ \ \ \ \ \ \ \ \ \ \ \ taxelList[i]\ =\ *tax;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00541}00541\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00542}00542\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ if\ this\ is\ not\ the\ only\ contact\ and\ no\ taxel\ in\ this\ contact\ has\ a\ position\ =>\ discard\ it}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00543}00543\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(taxelsXcontact.size()>1\ \&\&\ activeTaxelsGeo==0)}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00544}00544\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00545}00545\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(pressureCoP!=0.0)\ \ \ \ \ \ \ \ CoP\ \ \ \ \ \ \ \ \ /=\ pressureCoP;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00546}00546\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(pressureNormal!=0.0)\ \ \ \ \ normal\ \ \ \ \ \ /=\ pressureNormal;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00547}00547\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(activeTaxelsGeo!=0)\ \ \ \ \ \ geoCenter\ \ \ /=\ activeTaxelsGeo;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00548}00548\ \ \ \ \ \ \ \ \ pressure\ \ \ \ /=\ activeTaxels;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00549}00549\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classiCub_1_1skinDynLib_1_1skinContact}{skinContact}}\ c(bodyPart,\ \mbox{\hyperlink{classiCub_1_1skinDynLib_1_1skinPart}{skinPart}},\ linkNum,\ CoP,\ geoCenter,\ taxelList,\ pressure,\ normal);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00550}00550\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ set\ an\ estimate\ of\ the\ force\ that\ is\ with\ normal\ direction\ and\ intensity\ equal\ to\ the\ pressure}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00551}00551\ \ \ \ \ \ \ \ \ c.\mbox{\hyperlink{classiCub_1_1skinDynLib_1_1dynContact_a4139985d218dd1255f02c7f45eda8951}{setForce}}(-\/0.05*activeTaxels*pressure*normal);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00552}00552\ \ \ \ \ \ \ \ \ contactList.push\_back(c);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00553}00553\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00554}00554\ \ \ \ \ \textcolor{comment}{//printf("{}ContactList:\ \%s\(\backslash\)n"{},\ contactList.toString().c\_str());}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00555}00555\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00556}00556\ \ \ \ \ \textcolor{keywordflow}{return}\ contactList;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00557}00557\ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00558}00558\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00559}\mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_a967fcce4d7965a9227963e3feb55c8b9}{00559}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_a967fcce4d7965a9227963e3feb55c8b9}{Compensator::setSmoothFilter}}(\textcolor{keywordtype}{bool}\ value)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00560}00560\ \ \ \ \ \textcolor{keywordflow}{if}(smoothFilter\ !=\ value)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00561}00561\ \ \ \ \ \ \ \ \ smoothFilter\ =\ value;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00562}00562\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(value)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00563}00563\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ set\ the\ old\ output\ value\ of\ the\ smooth\ filter\ to\ the\ last\ read,\ to\ get\ a\ smooth\ start}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00564}00564\ \ \ \ \ \ \ \ \ \ \ \ \ compensatedDataOld\ =\ compensatedData;\ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00565}00565\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00566}00566\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00567}00567\ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00568}\mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_a39a9b6d0609fbd7b4b7755c4554cc012}{00568}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_a39a9b6d0609fbd7b4b7755c4554cc012}{Compensator::setSmoothFactor}}(\textcolor{keywordtype}{float}\ value)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00569}00569\ \ \ \ \ \textcolor{keywordflow}{if}(value<0.0\ ||\ value>1.0)}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00570}00570\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00571}00571\ \ \ \ \ \textcolor{keywordflow}{if}(value==1.0)\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00572}00572\ \ \ \ \ \ \ \ \ value\ =\ 0.99f;\ \ \ \ \textcolor{comment}{//\ otherwise\ with\ 1\ the\ values\ don't\ update}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00573}00573\ \ \ \ \ lock\_guard<mutex>\ lck(smoothFactorSem);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00574}00574\ \ \ \ \ smoothFactor\ =\ value;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00575}00575\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00576}00576\ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00577}00577\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00578}\mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_a872df874c5beab41a0ba1d3e5731cdda}{00578}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_a872df874c5beab41a0ba1d3e5731cdda}{Compensator::setSkinPart}}(\mbox{\hyperlink{namespaceiCub_1_1skinDynLib_ad9eb09d94574e8020c27676ca5e9bdfc}{SkinPart}}\ \_skinPart)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00579}00579\ \ \ \ \ this-\/>\mbox{\hyperlink{classiCub_1_1skinDynLib_1_1skinPart}{skinPart}}\ =\ \_skinPart;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00580}00580\ \ \ \ \ this-\/>bodyPart\ =\ \mbox{\hyperlink{group__skinDynLib_gacbe078bd08a176a1dc65c84134970f2e}{skinDynLib::getBodyPart}}(\mbox{\hyperlink{classiCub_1_1skinDynLib_1_1skinPart}{skinPart}});}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00581}00581\ \ \ \ \ this-\/>linkNum\ =\ \mbox{\hyperlink{group__skinDynLib_ga303a5ea39ebfed3f15f3ca51c9c91ef8}{skinDynLib::getLinkNum}}(\mbox{\hyperlink{classiCub_1_1skinDynLib_1_1skinPart}{skinPart}});}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00582}00582\ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00583}00583\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00584}\mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_a718ce27b89b4af24aef7819bd7edc2cb}{00584}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_a718ce27b89b4af24aef7819bd7edc2cb}{Compensator::setAddThreshold}}(\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ thr)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00585}00585\ \ \ \ \ \textcolor{keywordflow}{if}(thr>=MAX\_SKIN)}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00586}00586\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00587}00587\ \ \ \ \ addThreshold\ =\ thr;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00588}00588\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00589}00589\ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00590}00590\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00591}\mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_ae595d65dbeee89e85e180d25c3c99c02}{00591}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_ae595d65dbeee89e85e180d25c3c99c02}{Compensator::setCompensationGain}}(\textcolor{keywordtype}{double}\ gain)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00592}00592\ \ \ \ \ \textcolor{keywordflow}{if}(gain<=0.0)}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00593}00593\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00594}00594\ \ \ \ \ compensationGain\ =\ gain;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00595}00595\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00596}00596\ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00597}00597\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00598}\mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_a7aaf1584e86f905e765c6f5f3dfb5b39}{00598}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_a7aaf1584e86f905e765c6f5f3dfb5b39}{Compensator::setContactCompensationGain}}(\textcolor{keywordtype}{double}\ gain)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00599}00599\ \ \ \ \ \textcolor{keywordflow}{if}(gain<0.0)}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00600}00600\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00601}00601\ \ \ \ \ contactCompensationGain\ =\ gain;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00602}00602\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00603}00603\ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00604}00604\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00605}\mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_a7c02d9b91739c9c5197fc891fed664ae}{00605}}\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_a7c02d9b91739c9c5197fc891fed664ae}{Compensator::getNumTaxels}}()\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00606}00606\ \ \ \ \ \textcolor{keywordflow}{if}(\_isWorking)}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00607}00607\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ skinDim;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00608}00608\ \ \ \ \ \textcolor{keywordflow}{return}\ 0;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00609}00609\ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00610}00610\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00611}\mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_aab9da3695ef8269a4601fdc8bb264f6e}{00611}}\ Vector\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_aab9da3695ef8269a4601fdc8bb264f6e}{Compensator::getCompensation}}()\{\ \ \ \textcolor{keywordflow}{return}\ baselines-\/initialBaselines;\ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00612}00612\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00613}\mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_ad30ba3f902f9aac7c26bb52c38638686}{00613}}\ Vector\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_ad30ba3f902f9aac7c26bb52c38638686}{Compensator::getTouchThreshold}}()\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00614}00614\ \ \ \ \ lock\_guard<mutex>\ lck(touchThresholdSem);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00615}00615\ \ \ \ \ \textcolor{keywordflow}{return}\ touchThresholds;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00616}00616\ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00617}00617\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00618}\mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_a97fd482c7c6d207c937b871af7658fb5}{00618}}\ \textcolor{keywordtype}{float}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_a97fd482c7c6d207c937b871af7658fb5}{Compensator::getSmoothFactor}}()\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00619}00619\ \ \ \ \ lock\_guard<mutex>\ lck(smoothFactorSem);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00620}00620\ \ \ \ \ \textcolor{keywordflow}{return}\ smoothFactor;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00621}00621\ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00622}\mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_a93ea0494165be441f38db09f5e564006}{00622}}\ Vector\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_a93ea0494165be441f38db09f5e564006}{Compensator::getTaxelPosition}}(\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ taxelId)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00623}00623\ \ \ \ \ \textcolor{keywordflow}{if}(taxelId>=skinDim)}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00624}00624\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{compute__ekf__sym_8m_a35baefda5ec044ac7c1f5a41815b5b45}{zeros}}(0);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00625}00625\ \ \ \ \ lock\_guard<mutex>\ lck(poseSem);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00626}00626\ \ \ \ \ Vector\ res\ =\ taxelPos[taxelId];}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00627}00627\ \ \ \ \ res.push\_back(taxelPoseConfidence[taxelId]);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00628}00628\ \ \ \ \ \textcolor{keywordflow}{return}\ res;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00629}00629\ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00630}\mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_a8c469bce0f780624dbd03ff7319c19fe}{00630}}\ vector<Vector>\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_a8c469bce0f780624dbd03ff7319c19fe}{Compensator::getTaxelPositions}}()\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00631}00631\ \ \ \ \ lock\_guard<mutex>\ lck(poseSem);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00632}00632\ \ \ \ \ vector<Vector>\ res\ =\ taxelPos;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00633}00633\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ i=0;\ i<res.size();\ i++)}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00634}00634\ \ \ \ \ \ \ \ \ res[i].push\_back(taxelPoseConfidence[i]);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00635}00635\ \ \ \ \ \textcolor{keywordflow}{return}\ res;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00636}00636\ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00637}\mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_afdfcd8f9f4ffa0886f15dbe0e0ff3803}{00637}}\ Vector\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_afdfcd8f9f4ffa0886f15dbe0e0ff3803}{Compensator::getTaxelOrientation}}(\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ taxelId)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00638}00638\ \ \ \ \ \textcolor{keywordflow}{if}(taxelId>=skinDim)}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00639}00639\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{compute__ekf__sym_8m_a35baefda5ec044ac7c1f5a41815b5b45}{zeros}}(0);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00640}00640\ \ \ \ \ lock\_guard<mutex>\ lck(poseSem);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00641}00641\ \ \ \ \ Vector\ res\ =\ taxelOri[taxelId];}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00642}00642\ \ \ \ \ res.push\_back(taxelPoseConfidence[taxelId]);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00643}00643\ \ \ \ \ \textcolor{keywordflow}{return}\ res;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00644}00644\ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00645}\mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_a2cd2ad2de806a153b3c4fcf3d11faf6f}{00645}}\ vector<Vector>\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_a2cd2ad2de806a153b3c4fcf3d11faf6f}{Compensator::getTaxelOrientations}}()\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00646}00646\ \ \ \ \ lock\_guard<mutex>\ lck(poseSem);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00647}00647\ \ \ \ \ vector<Vector>\ res\ =\ taxelOri;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00648}00648\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ i=0;\ i<res.size();\ i++)}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00649}00649\ \ \ \ \ \ \ \ \ res[i].push\_back(taxelPoseConfidence[i]);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00650}00650\ \ \ \ \ \textcolor{keywordflow}{return}\ res;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00651}00651\ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00652}\mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_ac7dc08a9d9533b002e75103a2c0b3432}{00652}}\ Vector\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_ac7dc08a9d9533b002e75103a2c0b3432}{Compensator::getTaxelPose}}(\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ taxelId)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00653}00653\ \ \ \ \ \textcolor{keywordflow}{if}(taxelId>=skinDim)}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00654}00654\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{compute__ekf__sym_8m_a35baefda5ec044ac7c1f5a41815b5b45}{zeros}}(0);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00655}00655\ \ \ \ \ lock\_guard<mutex>\ lck(poseSem);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00656}00656\ \ \ \ \ Vector\ res\ =\ cat(taxelPos[taxelId],\ taxelOri[taxelId]);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00657}00657\ \ \ \ \ res.push\_back(taxelPoseConfidence[taxelId]);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00658}00658\ \ \ \ \ \textcolor{keywordflow}{return}\ res;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00659}00659\ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00660}\mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_a38a9a42df72068dac2f0e8dee6082775}{00660}}\ vector<Vector>\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_a38a9a42df72068dac2f0e8dee6082775}{Compensator::getTaxelPoses}}()\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00661}00661\ \ \ \ \ vector<Vector>\ res(skinDim);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00662}00662\ \ \ \ \ lock\_guard<mutex>\ lck(poseSem);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00663}00663\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ i=0;\ i<skinDim;\ i++)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00664}00664\ \ \ \ \ \ \ \ \ res[i]\ =\ cat(taxelPos[i],\ taxelOri[i]);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00665}00665\ \ \ \ \ \ \ \ \ res[i].push\_back(taxelPoseConfidence[i]);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00666}00666\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00667}00667\ \ \ \ \ \textcolor{keywordflow}{return}\ res;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00668}00668\ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00669}00669\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00670}\mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_a6bbd8f43019e2987019545a66c3442e0}{00670}}\ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_a6bbd8f43019e2987019545a66c3442e0}{Compensator::getPoseConfidence}}(\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ taxelId)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00671}00671\ \ \ \ \ \textcolor{keywordflow}{if}(taxelId>=skinDim)}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00672}00672\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ -\/1.0;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00673}00673\ \ \ \ \ lock\_guard<mutex>\ lck(poseSem);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00674}00674\ \ \ \ \ \textcolor{keywordflow}{return}\ taxelPoseConfidence[taxelId];}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00675}00675\ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00676}00676\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00677}\mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_a00a7a85e7cab86b7b1c189bf6ba33ddf}{00677}}\ Vector\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_a00a7a85e7cab86b7b1c189bf6ba33ddf}{Compensator::getPoseConfidences}}()\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00678}00678\ \ \ \ \ lock\_guard<mutex>\ lck(poseSem);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00679}00679\ \ \ \ \ \textcolor{keywordflow}{return}\ taxelPoseConfidence;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00680}00680\ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00681}00681\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00682}\mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_af30bfe0d6235759d426a3f46cec3e88b}{00682}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_af30bfe0d6235759d426a3f46cec3e88b}{Compensator::setMaxNeighborDistance}}(\textcolor{keywordtype}{double}\ d)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00683}00683\ \ \ \ \ \textcolor{keywordflow}{if}(d<0.0)}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00684}00684\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00685}00685\ \ \ \ \ maxNeighDist\ =\ d;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00686}00686\ \ \ \ \ lock\_guard<mutex>\ lck(poseSem);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00687}00687\ \ \ \ \ computeNeighbors();}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00688}00688\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00689}00689\ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00690}00690\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00691}\mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_a1cf30be660d2256f054f23f853531666}{00691}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_a1cf30be660d2256f054f23f853531666}{Compensator::setTaxelPosesFromFile}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *filePath)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00692}00692\ \ \ \ \ yarp::os::ResourceFinder\ rf;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00693}00693\ \ \ \ \ rf.setDefaultContext(\textcolor{stringliteral}{"{}skinGui"{}});\ \ \ \textcolor{comment}{//overridden\ by\ -\/-\/context\ parameter}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00694}00694\ \ \ \ \ rf.setDefaultConfigFile(filePath);\ \textcolor{comment}{//overridden\ by\ -\/-\/from\ parameter}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00695}00695\ \ \ \ \ rf.configure(0,NULL);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00696}00696\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00697}00697\ \ \ \ \ yarp::os::Bottle\ \&calibration\ =\ rf.findGroup(\textcolor{stringliteral}{"{}calibration"{}});}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00698}00698\ \ \ \ \ \textcolor{keywordflow}{if}\ (calibration.isNull())}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00699}00699\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00700}00700\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_a85b2d8380c4ec56c3a535aeea815289f}{setTaxelPosesFromFileOld}}(filePath);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00701}00701\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00702}00702\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00703}00703\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00704}00704\ \ \ \ \ \ \ \ \ lock\_guard<mutex>\ lck(poseSem);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00705}00705\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ size=calibration.size()-\/1;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00706}00706\ \ \ \ \ \ \ \ \ skinDim=size;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00707}00707\ \ \ \ \ \ \ \ \ taxelPos.resize(skinDim,\ \mbox{\hyperlink{compute__ekf__sym_8m_a35baefda5ec044ac7c1f5a41815b5b45}{zeros}}(3));}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00708}00708\ \ \ \ \ \ \ \ \ taxelOri.resize(skinDim,\ \mbox{\hyperlink{compute__ekf__sym_8m_a35baefda5ec044ac7c1f5a41815b5b45}{zeros}}(3));}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00709}00709\ \ \ \ \ \ \ \ \ taxelPoseConfidence.resize(skinDim,\ 0.0);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00710}00710\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i\ =\ 0;\ i\ <\ size;\ ++i)}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00711}00711\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00712}00712\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (i<(\textcolor{keywordtype}{int})taxelPos.size())}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00713}00713\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00714}00714\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Vector\ taxelPosNrm(6,0.0);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00715}00715\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ taxelPosNrm\ =\ \mbox{\hyperlink{group__skinDynLib_ga89d0efa37401dffa4d34783e56edbc59}{iCub::skinDynLib::vectorFromBottle}}(*(calibration.get(i+1).asList()),0,6);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00716}00716\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ taxelPos[i]\ =\ taxelPosNrm.subVector(0,2);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00717}00717\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ taxelOri[i]\ =\ taxelPosNrm.subVector(3,5);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00718}00718\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00719}00719\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(norm(taxelPos[i])>0.0)}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00720}00720\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ taxelPoseConfidence[i]\ =\ 1.0;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00721}00721\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00722}00722\ \ \ \ \ \ \ \ \ computeNeighbors();}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00723}00723\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00724}00724\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00725}00725\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00726}00726\ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00727}00727\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00728}\mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_a85b2d8380c4ec56c3a535aeea815289f}{00728}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_a85b2d8380c4ec56c3a535aeea815289f}{Compensator::setTaxelPosesFromFileOld}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *filePath)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00729}00729\ \ \ \ \ ifstream\ posFile;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00730}00730\ \ \ \ \ posFile.open(filePath);\ \ \ \ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00731}00731\ \ \ \ \ \textcolor{keywordflow}{if}\ (!posFile.is\_open())}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00732}00732\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00733}00733\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00734}00734\ \ \ \ \ \textcolor{keywordtype}{string}\ posLine;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00735}00735\ \ \ \ \ \textcolor{keywordtype}{int}\ totalLines\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00736}00736\ \ \ \ \ \textcolor{keywordflow}{while}\ (getline(posFile,posLine))\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00737}00737\ \ \ \ \ \ \ \ \ posLine.erase(posLine.find\_last\_not\_of(\textcolor{stringliteral}{"{}\ \(\backslash\)n\(\backslash\)r\(\backslash\)t"{}})+1);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00738}00738\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(!posLine.empty())totalLines++;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00739}00739\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00740}00740\ \ \ \ \ posFile.clear();\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00741}00741\ \ \ \ \ posFile.seekg(0,\ std::ios::beg);\textcolor{comment}{//rewind\ iterator}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00742}00742\ \ \ \ \ \textcolor{keywordflow}{if}(totalLines!=skinDim)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00743}00743\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}*\ temp\ =\ \textcolor{keyword}{new}\ \textcolor{keywordtype}{char}[200];}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00744}00744\ \ \ \ \ \ \ \ \ sprintf(temp,\ \textcolor{stringliteral}{"{}Error\ while\ reading\ taxel\ position\ file\ \%s:\ num\ of\ lines\ \%d\ is\ not\ equal\ to\ num\ of\ taxels\ \%d.\(\backslash\)n"{}},\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00745}00745\ \ \ \ \ \ \ \ \ \ \ \ \ filePath,\ totalLines,\ skinDim);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00746}00746\ \ \ \ \ \ \ \ \ sendInfoMsg(temp);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00747}00747\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00748}00748\ \ \ \ \ lock\_guard<mutex>\ lck(poseSem);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00749}00749\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00750}00750\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ i=\ 0;\ getline(posFile,posLine);\ i++)\ \{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00751}00751\ \ \ \ \ \ \ \ \ \ \ \ \ posLine.erase(posLine.find\_last\_not\_of(\textcolor{stringliteral}{"{}\ \(\backslash\)n\(\backslash\)r\(\backslash\)t"{}})+1);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00752}00752\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(posLine.empty())}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00753}00753\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00754}00754\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{string}\ number;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00755}00755\ \ \ \ \ \ \ \ \ \ \ \ \ istringstream\ iss(posLine,\ istringstream::in);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00756}00756\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ j\ =\ 0;\ iss\ >>\ number;\ j++\ )\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00757}00757\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(i<taxelPos.size())\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00758}00758\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(j<3)}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00759}00759\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ taxelPos[i][j]\ =\ strtod(number.c\_str(),NULL);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00760}00760\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00761}00761\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ taxelOri[i][j-\/3]\ =\ strtod(number.c\_str(),NULL);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00762}00762\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00763}00763\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00764}00764\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(norm(taxelPos[i])>0.0)}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00765}00765\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ taxelPoseConfidence[i]\ =\ 1.0;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00766}00766\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00767}00767\ \ \ \ \ \ \ \ \ computeNeighbors();}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00768}00768\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00769}00769\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00770}00770\ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00771}\mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_a03ee4149c954fd07d6c7c62e7743850f}{00771}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_a03ee4149c954fd07d6c7c62e7743850f}{Compensator::setTaxelPoses}}(\textcolor{keyword}{const}\ vector<Vector>\ \&poses)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00772}00772\ \ \ \ \ \textcolor{keywordflow}{if}(poses.size()!=skinDim)}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00773}00773\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00774}00774\ \ \ \ \ lock\_guard<mutex>\ lck(poseSem);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00775}00775\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00776}00776\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ i=0;\ i<skinDim;\ i++)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00777}00777\ \ \ \ \ \ \ \ \ \ \ \ \ taxelPos[i]\ =\ poses[i].subVector(0,2);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00778}00778\ \ \ \ \ \ \ \ \ \ \ \ \ taxelOri[i]\ =\ poses[i].subVector(3,5);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00779}00779\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(poses[i].size()\ ==\ 7)}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00780}00780\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ taxelPoseConfidence[i]\ =\ poses[i][6];}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00781}00781\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00782}00782\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00783}00783\ \ \ \ \ computeNeighbors();}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00784}00784\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00785}00785\ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00786}\mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_a0cf10c356ead40402c6cbc993fbd9393}{00786}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_a0cf10c356ead40402c6cbc993fbd9393}{Compensator::setTaxelPose}}(\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ taxelId,\ \textcolor{keyword}{const}\ Vector\ \&pose)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00787}00787\ \ \ \ \ \textcolor{keywordflow}{if}(taxelId>=skinDim\ ||\ pose.size()!=6)}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00788}00788\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00789}00789\ \ \ \ \ lock\_guard<mutex>\ lck(poseSem);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00790}00790\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00791}00791\ \ \ \ \ \ \ \ \ taxelPos[taxelId]\ =\ pose.subVector(0,2);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00792}00792\ \ \ \ \ \ \ \ \ taxelOri[taxelId]\ =\ pose.subVector(3,5);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00793}00793\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(pose.size()\ ==\ 7)}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00794}00794\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ taxelPoseConfidence[taxelId]\ =\ pose[6];}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00795}00795\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00796}00796\ \ \ \ \ updateNeighbors(taxelId);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00797}00797\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00798}00798\ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00799}\mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_aa41f57a3ed55b01dc588c22ce9c87a5c}{00799}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_aa41f57a3ed55b01dc588c22ce9c87a5c}{Compensator::setTaxelPositions}}(\textcolor{keyword}{const}\ Vector\ \&positions)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00800}00800\ \ \ \ \ lock\_guard<mutex>\ lck(poseSem);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00801}00801\ \ \ \ \ \textcolor{keywordflow}{if}(skinDim*3\ ==\ positions.size())\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00802}00802\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ j=0;\ j<skinDim;\ j++)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00803}00803\ \ \ \ \ \ \ \ \ \ \ \ \ taxelPos[j]\ =\ positions.subVector(3*j,\ 3*j+2);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00804}00804\ \ \ \ \ \ \ \ \ \}\ \ \ \ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00805}00805\ \ \ \ \ \}\ \ \ \ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00806}00806\ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}(skinDim*4\ ==\ positions.size())\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00807}00807\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ j=0;\ j<skinDim;\ j++)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00808}00808\ \ \ \ \ \ \ \ \ \ \ \ \ taxelPos[j]\ =\ positions.subVector(4*j,\ 4*j+2);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00809}00809\ \ \ \ \ \ \ \ \ \ \ \ \ taxelPoseConfidence[j]\ =\ positions[4*j+3];}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00810}00810\ \ \ \ \ \ \ \ \ \}\ \ \ \ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00811}00811\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00812}00812\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00813}00813\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00814}00814\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00815}00815\ \ \ \ \ computeNeighbors();}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00816}00816\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00817}00817\ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00818}00818\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00819}\mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_a604ccc7a1ca5e454923cad4ae0335d56}{00819}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_a604ccc7a1ca5e454923cad4ae0335d56}{Compensator::setTaxelPosition}}(\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ taxelId,\ \textcolor{keyword}{const}\ Vector\ \&position)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00820}00820\ \ \ \ \ \ \textcolor{keywordflow}{if}(taxelId>=skinDim\ ||\ (position.size()!=3\ \&\&\ position.size()!=4))}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00821}00821\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00822}00822\ \ \ \ \ lock\_guard<mutex>\ lck(poseSem);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00823}00823\ \ \ \ \ taxelPos[taxelId]\ =\ position.subVector(0,2);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00824}00824\ \ \ \ \ \textcolor{keywordflow}{if}(position.size()==4)}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00825}00825\ \ \ \ \ \ \ \ \ taxelPoseConfidence[taxelId]\ =\ position[3];}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00826}00826\ \ \ \ \ updateNeighbors(taxelId);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00827}00827\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00828}00828\ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00829}\mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_a4e3bc27b8e9e00c8f0eaa914d9323b1c}{00829}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_a4e3bc27b8e9e00c8f0eaa914d9323b1c}{Compensator::setTaxelOrientations}}(\textcolor{keyword}{const}\ vector<Vector>\ \&orientations)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00830}00830\ \ \ \ \ \textcolor{keywordflow}{if}(orientations.size()!=skinDim)}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00831}00831\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00832}00832\ \ \ \ \ lock\_guard<mutex>\ lck(poseSem);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00833}00833\ \ \ \ \ taxelOri\ =\ orientations;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00834}00834\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00835}00835\ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00836}\mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_a956e11b2b3fdf26525b0ea0707194071}{00836}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_a956e11b2b3fdf26525b0ea0707194071}{Compensator::setTaxelOrientation}}(\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ taxelId,\ \textcolor{keyword}{const}\ Vector\ \&orientation)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00837}00837\ \ \ \ \ \ \textcolor{keywordflow}{if}(taxelId>=skinDim\ ||\ (orientation.size()!=3\ \&\&\ orientation.size()!=4))}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00838}00838\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00839}00839\ \ \ \ \ lock\_guard<mutex>\ lck(poseSem);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00840}00840\ \ \ \ \ taxelOri[taxelId]\ =\ orientation.subVector(0,2);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00841}00841\ \ \ \ \ \textcolor{keywordflow}{if}(orientation.size()==4)}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00842}00842\ \ \ \ \ \ \ \ \ taxelPoseConfidence[taxelId]\ =\ orientation[3];}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00843}00843\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00844}00844\ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00845}00845\ \textcolor{keywordtype}{void}\ Compensator::computeNeighbors()\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00846}00846\ \ \ \ \ neighborsXtaxel.clear();}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00847}00847\ \ \ \ \ neighborsXtaxel.resize(skinDim,\ list<int>(0));}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00848}00848\ \ \ \ \ Vector\ v;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00849}00849\ \ \ \ \ \textcolor{keywordtype}{double}\ d2\ =\ maxNeighDist*maxNeighDist;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00850}00850\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ i=0;\ i<skinDim;\ i++)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00851}00851\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ j=i+1;\ j<skinDim;\ j++)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00852}00852\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//if(taxelPos[i][0]!=0.0\ ||\ taxelPos[i][1]!=0.0\ ||\ taxelPos[i][2]!=0.0)\{\ \ //\ if\ the\ taxel\ exists}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00853}00853\ \ \ \ \ \ \ \ \ \ \ \ \ v\ =\ taxelPos[i]-\/taxelPos[j];}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00854}00854\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(\ dot(v,v)\ <=\ d2)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00855}00855\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ neighborsXtaxel[i].push\_back(j);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00856}00856\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ neighborsXtaxel[j].push\_back(i);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00857}00857\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//printf("{}Taxels\ \%d\ (\%s)\ and\ \%d\ (\%s)\ are\ neighbors\(\backslash\)n"{},\ i,\ taxelPos[i].toString().c\_str(),\ j,\ taxelPos[j].toString().c\_str());}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00858}00858\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00859}00859\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\}}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00860}00860\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00861}00861\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00862}00862\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00863}00863\ \ \ \ \ \textcolor{keywordtype}{int}\ minNeighbors=skinDim,\ maxNeighbors=0,\ ns;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00864}00864\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ i=0;\ i<skinDim;\ i++)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00865}00865\ \ \ \ \ \ \ \ \ \textcolor{comment}{//if(taxelPos[i][0]!=0.0\ ||\ taxelPos[i][1]!=0.0\ ||\ taxelPos[i][2]!=0.0)\{\ \ //\ if\ the\ taxel\ exists}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00866}00866\ \ \ \ \ \ \ \ \ ns\ =\ neighborsXtaxel[i].size();}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00867}00867\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(ns>maxNeighbors)\ maxNeighbors\ =\ ns;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00868}00868\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(ns<minNeighbors)\ minNeighbors\ =\ ns;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00869}00869\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00870}00870\ \ \ \ \ stringstream\ ss;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00871}00871\ \ \ \ \ ss<<\textcolor{stringliteral}{"{}Neighbors\ computed.\ Min\ neighbors:\ "{}}<<minNeighbors<<\textcolor{stringliteral}{"{};\ max\ neighbors:\ "{}}<<maxNeighbors;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00872}00872\ \ \ \ \ sendInfoMsg(ss.str());}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00873}00873\ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00874}00874\ \textcolor{keywordtype}{void}\ Compensator::updateNeighbors(\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ taxelId)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00875}00875\ \ \ \ \ Vector\ v;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00876}00876\ \ \ \ \ \textcolor{keywordtype}{double}\ d2\ =\ maxNeighDist*maxNeighDist;}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00877}00877\ \ \ \ \ \textcolor{comment}{//\ remove\ all\ the\ neighbors\ of\ the\ taxel\ with\ id=taxelId}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00878}00878\ \ \ \ \ neighborsXtaxel[taxelId].clear();}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00879}00879\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00880}00880\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ i=0;\ i<skinDim;\ i++)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00881}00881\ \ \ \ \ \ \ \ \ \textcolor{comment}{//if(taxelPos[i][0]!=0.0\ ||\ taxelPos[i][1]!=0.0\ ||\ taxelPos[i][2]!=0.0)\{\ \ //\ if\ the\ taxel\ exists}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00882}00882\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ remove\ taxelId\ from\ the\ neighbor\ list\ (if\ there\ is)}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00883}00883\ \ \ \ \ \ \ \ \ neighborsXtaxel[i].remove(taxelId);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00884}00884\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ check\ whether\ they\ are\ neighbors}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00885}00885\ \ \ \ \ \ \ \ \ v\ =\ taxelPos[i]-\/taxelPos[taxelId];}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00886}00886\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(\ \mbox{\hyperlink{group__Maths_ga5ce2d7161a9e7ddb0a46cdb870a49b88}{dot}}(v,v)\ <=\ d2)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00887}00887\ \ \ \ \ \ \ \ \ \ \ \ \ neighborsXtaxel[i].push\_back(taxelId);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00888}00888\ \ \ \ \ \ \ \ \ \ \ \ \ neighborsXtaxel[taxelId].push\_back(i);}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00889}00889\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00890}00890\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00891}00891\ \}}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00892}00892\ }
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00893}00893\ \textcolor{keywordtype}{void}\ Compensator::sendInfoMsg(\textcolor{keywordtype}{string}\ msg)\{}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00894}00894\ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}[\%s]:\ \%s"{}},\ \mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_a740e447e84b3f12b096c25b535397434}{getInputPortName}}().c\_str(),\ msg.c\_str());}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00895}00895\ \ \ \ \ Bottle\&\ b\ =\ infoPort-\/>prepare();}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00896}00896\ \ \ \ \ b.clear();}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00897}00897\ \ \ \ \ b.addString(\mbox{\hyperlink{classiCub_1_1skinManager_1_1Compensator_a740e447e84b3f12b096c25b535397434}{getInputPortName}}().c\_str());}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00898}00898\ \ \ \ \ b.addString((\textcolor{stringliteral}{"{}:\ "{}}\ +\ msg).c\_str());}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00899}00899\ \ \ \ \ infoPort-\/>write(\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{compensator_8cpp_source_l00900}00900\ \}}
+
+\end{DoxyCode}

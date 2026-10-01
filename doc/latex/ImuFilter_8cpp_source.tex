@@ -1,0 +1,199 @@
+\doxysection{Imu\+Filter.\+cpp}
+\hypertarget{ImuFilter_8cpp_source}{}\label{ImuFilter_8cpp_source}\index{icub-\/main/src/libraries/icubmod/imuFilter/ImuFilter.cpp@{icub-\/main/src/libraries/icubmod/imuFilter/ImuFilter.cpp}}
+\mbox{\hyperlink{ImuFilter_8cpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00001}00001\ \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00002}00002\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2014\ iCub\ Facility\ -\/\ Istituto\ Italiano\ di\ Tecnologia}}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00003}00003\ \textcolor{comment}{\ *\ Author:\ Ugo\ Pattacini,\ Nicolo'\ Genesio}}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00004}00004\ \textcolor{comment}{\ *\ email:\ \ ugo.pattacini@iit.it,\ nicolo.genesio@iit.it}}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00005}00005\ \textcolor{comment}{\ *\ Permission\ is\ granted\ to\ copy,\ distribute,\ and/or\ modify\ this\ program}}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00006}00006\ \textcolor{comment}{\ *\ under\ the\ terms\ of\ the\ GNU\ General\ Public\ License,\ version\ 2\ or\ any}}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00007}00007\ \textcolor{comment}{\ *\ later\ version\ published\ by\ the\ Free\ Software\ Foundation.}}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00008}00008\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00009}00009\ \textcolor{comment}{\ *\ A\ copy\ of\ the\ license\ can\ be\ found\ at}}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00010}00010\ \textcolor{comment}{\ *\ http://www.robotcub.org/icub/license/gpl.txt}}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00011}00011\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00012}00012\ \textcolor{comment}{\ *\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but}}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00013}00013\ \textcolor{comment}{\ *\ WITHOUT\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of}}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00014}00014\ \textcolor{comment}{\ *\ MERCHANTABILITY\ or\ FITNESS\ FOR\ A\ PARTICULAR\ PURPOSE.\ See\ the\ GNU\ General}}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00015}00015\ \textcolor{comment}{\ *\ Public\ License\ for\ more\ details}}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00016}00016\ \textcolor{comment}{*/}}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00017}00017\ }
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00018}00018\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{ImuFilter_8h}{ImuFilter.h}}"{}}}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00019}00019\ \textcolor{preprocessor}{\#include\ <yarp/os/LogStream.h>}}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00020}00020\ \textcolor{preprocessor}{\#include\ <cstring>}}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00021}00021\ \textcolor{preprocessor}{\#include\ <cmath>}}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00022}00022\ }
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00023}00023\ \textcolor{preprocessor}{\#include\ <yarp/os/Time.h>}}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00024}00024\ }
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00025}00025\ }
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00026}00026\ \textcolor{keyword}{using\ namespace\ }std;}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00027}00027\ \textcolor{keyword}{using\ namespace\ }yarp::os;}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00028}00028\ \textcolor{keyword}{using\ namespace\ }yarp::sig;}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00029}00029\ }
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00030}00030\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespaceyarp}{yarp}}\ \{}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00031}00031\ \textcolor{keyword}{namespace\ }dev\ \{}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00032}00032\ }
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00033}\mbox{\hyperlink{classyarp_1_1dev_1_1ImuFilter_a23f670cf38b098cb2d1cd99878bb5f93}{00033}}\ \mbox{\hyperlink{classyarp_1_1dev_1_1ImuFilter_a23f670cf38b098cb2d1cd99878bb5f93}{ImuFilter::ImuFilter}}():\ gyroFilt(1,Vector(3,0.0)),\ magFilt(1,Vector(3,0.0)),}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00034}00034\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ velEst(40,0.05),\ biasInt(0.0,Vector(3,0.0)),}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00035}00035\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classyarp_1_1dev_1_1PassThroughInertial}{PassThroughInertial}}(),\ PeriodicThread(0.0)}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00036}00036\ \{}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00037}00037\ \}}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00038}00038\ }
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00039}\mbox{\hyperlink{classyarp_1_1dev_1_1ImuFilter_a60d173806f22a90d66219bc03fc179f7}{00039}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classyarp_1_1dev_1_1ImuFilter_a60d173806f22a90d66219bc03fc179f7}{ImuFilter::threadInit}}()\ \{}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00040}00040\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00041}00041\ \}}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00042}\mbox{\hyperlink{classyarp_1_1dev_1_1ImuFilter_ad6ac38c1e970cc0cb5138ba585e6199a}{00042}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classyarp_1_1dev_1_1ImuFilter_ad6ac38c1e970cc0cb5138ba585e6199a}{ImuFilter::run}}()\ \{}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00043}00043\ }
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00044}00044\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}}\{\textcolor{keyword}{true}\};}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00045}00045\ \ \ \ \ \textcolor{keywordtype}{double}\ ts\{0.0\};}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00046}00046\ \ \ \ \ Vector\ gyroFiltered,\ magn;}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00047}00047\ }
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00048}00048\ \ \ \ \ \textcolor{keywordflow}{if}\ (!\ \mbox{\hyperlink{classyarp_1_1dev_1_1PassThroughInertial_a2eaf74139ec6a342442372c5ad9cbc67}{PassThroughInertial::proxyIGyro}}\ ||}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00049}00049\ \ \ \ \ \ \ \ \ !\ \mbox{\hyperlink{classyarp_1_1dev_1_1PassThroughInertial_a823e6ff3630d90205b8e4209c13626b3}{PassThroughInertial::proxyIMagn}})\ \{}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00050}00050\ \ \ \ \ \ \ \ \ yError()<<\textcolor{stringliteral}{"{}imuFilter:\ the\ imu\ is\ not\ attached"{}};}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00051}00051\ \ \ \ \ \ \ \ \ this-\/>askToStop();}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00052}00052\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00053}00053\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00054}00054\ \ \ \ \ \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}}\ \&=\ \mbox{\hyperlink{classyarp_1_1dev_1_1PassThroughInertial_a2eaf74139ec6a342442372c5ad9cbc67}{PassThroughInertial::proxyIGyro}}-\/>getThreeAxisGyroscopeStatus(0)\ ==\ MAS\_OK;}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00055}00055\ \ \ \ \ \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}}\ \&=\ \mbox{\hyperlink{classyarp_1_1dev_1_1PassThroughInertial_a2eaf74139ec6a342442372c5ad9cbc67}{PassThroughInertial::proxyIGyro}}-\/>getThreeAxisGyroscopeMeasure(0,\ gyro,\ gyroTs);}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00056}00056\ }
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00057}00057\ \ \ \ \ \textcolor{keywordflow}{if}\ (!\mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}})\{}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00058}00058\ \ \ \ \ \ \ \ \ yError()<<\textcolor{stringliteral}{"{}imuFilter:\ unable\ to\ get\ gyro"{}};}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00059}00059\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00060}00060\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00061}00061\ }
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00062}00062\ \ \ \ \ \textcolor{keywordflow}{if}\ (std::fabs(gyroTs\ -\/\ prevTs)\ <\ 1\mbox{\hyperlink{compute__ekf__fast_8m_a08a4415e9d594ff960030b921d42b91e}{e}}-\/6\ )\{}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00063}00063\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00064}00064\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00065}00065\ }
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00066}00066\ \ \ \ \ \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}}\ \&=\ \mbox{\hyperlink{classyarp_1_1dev_1_1PassThroughInertial_a823e6ff3630d90205b8e4209c13626b3}{PassThroughInertial::proxyIMagn}}-\/>getThreeAxisMagnetometerStatus(0)\ ==\ MAS\_OK;}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00067}00067\ \ \ \ \ \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}}\ \&=\ \mbox{\hyperlink{classyarp_1_1dev_1_1PassThroughInertial_a823e6ff3630d90205b8e4209c13626b3}{PassThroughInertial::proxyIMagn}}-\/>getThreeAxisMagnetometerMeasure(0,\ magn,\ ts);}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00068}00068\ }
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00069}00069\ \ \ \ \ \textcolor{keywordflow}{if}\ (!\mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}})\{}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00070}00070\ \ \ \ \ \ \ \ \ yError()<<\textcolor{stringliteral}{"{}imuFilter:\ unable\ to\ get\ magnetometer\ measures"{}};}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00071}00071\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00072}00072\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00073}00073\ }
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00074}00074\ \ \ \ \ stampBias.update(ts);}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00075}00075\ \ \ \ \ \textcolor{keywordtype}{double}\ t0=Time::now();}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00076}00076\ }
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00077}00077\ \ \ \ \ m\_mutex.lock();}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00078}00078\ \ \ \ \ gyroFiltered\ =\ gyroFilt.\mbox{\hyperlink{classiCub_1_1ctrl_1_1MedianFilter_a3c6a5b764f3bb346f8a3cf9505585b00}{filt}}(gyro);}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00079}00079\ }
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00080}00080\ \ \ \ \ gyro\ -\/=\ gyroBias;}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00081}00081\ \ \ \ \ gyroFiltered\ -\/=\ gyroBias;}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00082}00082\ \ \ \ \ m\_mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00083}00083\ }
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00084}00084\ \ \ \ \ Vector\ mag\_filt=magFilt.\mbox{\hyperlink{classiCub_1_1ctrl_1_1MedianFilter_a3c6a5b764f3bb346f8a3cf9505585b00}{filt}}(magn);}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00085}00085\ \ \ \ \ \textcolor{keywordtype}{double}\ magVel=yarp::math::norm(velEst.\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyEstimator_a0dc22d3239efc6d0e5288a8ad6c9b221}{estimate}}(\mbox{\hyperlink{classiCub_1_1ctrl_1_1AWPolyElement}{iCub::ctrl::AWPolyElement}}(mag\_filt,stampBias.getTime())));}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00086}00086\ }
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00087}00087\ \ \ \ \ adaptGyroBias=adaptGyroBias?(magVel<mag\_vel\_thres\_up):(magVel<mag\_vel\_thres\_down);}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00088}00088\ \ \ \ \ gyroBias=biasInt.\mbox{\hyperlink{classiCub_1_1ctrl_1_1Integrator_a258d1f29ff3e98ce46e0835d6a7f29e0}{integrate}}(adaptGyroBias?gyroFiltered:Vector(3,0.0));}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00089}00089\ \ \ \ \ \textcolor{keywordtype}{double}\ dt=Time::now()-\/t0;}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00090}00090\ }
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00091}00091\ \ \ \ \ \textcolor{keywordflow}{if}\ (bPort.getOutputCount()>0)}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00092}00092\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00093}00093\ \ \ \ \ \ \ \ \ bPort.prepare()=gyroBias;}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00094}00094\ \ \ \ \ \ \ \ \ bPort.setEnvelope(stampBias);}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00095}00095\ \ \ \ \ \ \ \ \ bPort.write();}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00096}00096\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00097}00097\ }
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00098}00098\ \ \ \ \ \textcolor{keywordflow}{if}\ (verbose)}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00099}00099\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00100}00100\ \ \ \ \ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}imuFilter:\ magVel\ \ \ =\ \%g\ =>\ [\%s]"{}},magVel,adaptGyroBias?\textcolor{stringliteral}{"{}adapt-\/gyroBias"{}}:\textcolor{stringliteral}{"{}no-\/adaption"{}});}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00101}00101\ \ \ \ \ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}imuFilter:\ gyro\ \ \ \ \ =\ \%s"{}},gyro.toString(3,3).c\_str());}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00102}00102\ \ \ \ \ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}imuFilter:\ gyroBias\ =\ \%s"{}},gyroBias.toString(3,3).c\_str());}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00103}00103\ \ \ \ \ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}imuFilter:\ dt\ \ \ \ \ \ \ =\ \%.0f\ [us]"{}},dt*1e6);}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00104}00104\ \ \ \ \ \ \ \ \ yInfo(\textcolor{stringliteral}{"{}\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00105}00105\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00106}00106\ \ \ \ \ prevTs\ =\ gyroTs;}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00107}00107\ \}}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00108}\mbox{\hyperlink{classyarp_1_1dev_1_1ImuFilter_a98870b42d283e39e8c53b7fa26296220}{00108}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classyarp_1_1dev_1_1ImuFilter_a98870b42d283e39e8c53b7fa26296220}{ImuFilter::threadRelease}}()\ \{\}}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00109}00109\ }
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00110}00110\ \textcolor{comment}{//DEVICE\ DRIVER\ }}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00111}\mbox{\hyperlink{classyarp_1_1dev_1_1ImuFilter_a6637a06757e3065a0ab5cc080b5c408a}{00111}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classyarp_1_1dev_1_1ImuFilter_a6637a06757e3065a0ab5cc080b5c408a}{ImuFilter::open}}(yarp::os::Searchable\&\ config)}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00112}00112\ \{}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00113}00113\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}}\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00114}00114\ }
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00115}00115\ \ \ \ \ \textcolor{comment}{//\ opening\ comunication\ ports}}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00116}00116\ \ \ \ \ \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}}\ \&=\ \mbox{\hyperlink{classyarp_1_1dev_1_1PassThroughInertial_a98baa86850ca3135fc59d57c915aca56}{PassThroughInertial::open}}(config);}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00117}00117\ }
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00118}00118\ \ \ \ \ \textcolor{keywordflow}{if}\ (!\mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}})\ \{}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00119}00119\ \ \ \ \ \ \ \ \ yError()<<\textcolor{stringliteral}{"{}ImuFilter:\ failed\ to\ open\ proxy\ device"{}};}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00120}00120\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00121}00121\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00122}00122\ }
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00123}00123\ \ \ \ \ \textcolor{keywordtype}{string}\ name=config.check(\textcolor{stringliteral}{"{}name"{}},Value(\textcolor{stringliteral}{"{}imuFilter"{}})).asString();}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00124}00124\ \ \ \ \ \textcolor{keywordtype}{string}\ robot=config.check(\textcolor{stringliteral}{"{}robot"{}},Value(\textcolor{stringliteral}{"{}icub"{}})).asString();}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00125}00125\ \ \ \ \ \textcolor{keywordtype}{size\_t}\ gyro\_order=(size\_t)config.check(\textcolor{stringliteral}{"{}gyro-\/order"{}},Value(5)).asInt32();}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00126}00126\ \ \ \ \ \textcolor{keywordtype}{size\_t}\ mag\_order=(size\_t)config.check(\textcolor{stringliteral}{"{}mag-\/order"{}},Value(51)).asInt32();}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00127}00127\ }
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00128}00128\ \ \ \ \ mag\_vel\_thres\_up=config.check(\textcolor{stringliteral}{"{}mag-\/vel-\/thres-\/up"{}},Value(0.04)).asFloat64();}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00129}00129\ \ \ \ \ mag\_vel\_thres\_down=config.check(\textcolor{stringliteral}{"{}mag-\/vel-\/thres-\/down"{}},Value(0.02)).asFloat64();}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00130}00130\ \ \ \ \ bias\_gain=config.check(\textcolor{stringliteral}{"{}bias-\/gain"{}},Value(0.001)).asFloat64();}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00131}00131\ \ \ \ \ verbose=config.check(\textcolor{stringliteral}{"{}verbose"{}});}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00132}00132\ }
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00133}00133\ \ \ \ \ gyroFilt.\mbox{\hyperlink{classiCub_1_1ctrl_1_1MedianFilter_acbfc7c1e5f449b00eddb9f34cbd74ce0}{setOrder}}(gyro\_order);}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00134}00134\ \ \ \ \ magFilt.\mbox{\hyperlink{classiCub_1_1ctrl_1_1MedianFilter_acbfc7c1e5f449b00eddb9f34cbd74ce0}{setOrder}}(mag\_order);}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00135}00135\ \ \ \ \ biasInt.\mbox{\hyperlink{classiCub_1_1ctrl_1_1Integrator_a626b21de6bb6a28f55119b84ba4d291c}{setTs}}(bias\_gain);}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00136}00136\ \ \ \ \ gyroBias.resize(3,0.0);}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00137}00137\ \ \ \ \ adaptGyroBias=\textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00138}00138\ }
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00139}00139\ \ \ \ \ m\_period\_ms=config.check(\textcolor{stringliteral}{"{}period"{}},Value(20)).asInt32();}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00140}00140\ }
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00141}00141\ \ \ \ \ \textcolor{keywordflow}{if}\ (name.at(0)\ !=\ \textcolor{charliteral}{'/'})}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00142}00142\ \ \ \ \ \ \ \ \ name\ =\ \textcolor{stringliteral}{"{}/"{}}\ +name;}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00143}00143\ \ \ \ \ \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}}\ \&=\ bPort.open(name+\textcolor{stringliteral}{"{}/bias:o"{}});}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00144}00144\ }
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00145}00145\ \ \ \ \ this-\/>setPeriod(m\_period\_ms\ /\ 1000.0);}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00146}00146\ }
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00147}00147\ \ \ \ \ \textcolor{keywordflow}{if}\ (!\mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}})\ \{}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00148}00148\ \ \ \ \ \ \ \ \ yError()<<\textcolor{stringliteral}{"{}imuFilter:\ failed\ to\ open\ the\ bias\ port"{}};}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00149}00149\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00150}00150\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00151}00151\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00152}00152\ }
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00153}00153\ \}}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00154}00154\ }
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00155}\mbox{\hyperlink{classyarp_1_1dev_1_1ImuFilter_a1fa5196e9323ceef5ca85740a94670c6}{00155}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classyarp_1_1dev_1_1ImuFilter_a1fa5196e9323ceef5ca85740a94670c6}{ImuFilter::close}}()}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00156}00156\ \{}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00157}00157\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}}\ =\ \ \mbox{\hyperlink{classyarp_1_1dev_1_1ImuFilter_a260f7f109b1cbc21c0a6835db6d662b6}{detachAll}}();}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00158}00158\ \ \ \ \ \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}}\ \&=\ \mbox{\hyperlink{classyarp_1_1dev_1_1PassThroughInertial_ac87f70d2a3aef73fe3a8f79b094e35be}{PassThroughInertial::close}}();}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00159}00159\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}};}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00160}00160\ \}}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00161}00161\ }
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00162}\mbox{\hyperlink{classyarp_1_1dev_1_1ImuFilter_a2587148bf929f6c2e6af58b2c7fc3a2a}{00162}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classyarp_1_1dev_1_1ImuFilter_a2587148bf929f6c2e6af58b2c7fc3a2a}{ImuFilter::attachAll}}(\textcolor{keyword}{const}\ yarp::dev::PolyDriverList\ \&\mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}})\ \{}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00163}00163\ }
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00164}00164\ \ \ \ \ \textcolor{keywordflow}{if}(\mbox{\hyperlink{classyarp_1_1dev_1_1PassThroughInertial_a275c7109ce3b3df4c8c427652618403d}{PassThroughInertial::attachAll}}(\mbox{\hyperlink{show__eyes__axes_8m_ac483f6ce851c9ecd9fb835ff7551737c}{p}}))\ \{}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00165}00165\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ this-\/>start();}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00166}00166\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00167}00167\ \ \ \ \ \textcolor{keywordflow}{else}\{}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00168}00168\ \ \ \ \ \ \ \ \ yError()<<\textcolor{stringliteral}{"{}imuFilter:\ attach\ failed"{}};}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00169}00169\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00170}00170\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00171}00171\ \}}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00172}\mbox{\hyperlink{classyarp_1_1dev_1_1ImuFilter_a260f7f109b1cbc21c0a6835db6d662b6}{00172}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classyarp_1_1dev_1_1ImuFilter_a260f7f109b1cbc21c0a6835db6d662b6}{ImuFilter::detachAll}}()\ \{}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00173}00173\ \ \ \ \ this-\/>PeriodicThread::stop();}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00174}00174\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classyarp_1_1dev_1_1PassThroughInertial_aa9179610402f4b682cf1453ae6f1870b}{PassThroughInertial::detachAll}}();}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00175}00175\ \}}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00176}00176\ }
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00177}\mbox{\hyperlink{classyarp_1_1dev_1_1ImuFilter_a89720eec5b2abbd59124276ee053c839}{00177}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classyarp_1_1dev_1_1ImuFilter_a89720eec5b2abbd59124276ee053c839}{ImuFilter::getThreeAxisGyroscopeMeasure}}(\textcolor{keywordtype}{size\_t}\ sens\_index,\ yarp::sig::Vector\&\ \mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}},\ \textcolor{keywordtype}{double}\&\ timestamp)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00178}00178\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00179}00179\ \ \ \ \ \textcolor{keywordflow}{if}\ (sens\_index\ !=\ 0)}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00180}00180\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00181}00181\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}imuFilter:\ sens\_index\ must\ be\ equal\ to\ 0\ as\ there\ exists\ only\ one\ sensor"{}};}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00182}00182\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00183}00183\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00184}00184\ }
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00185}00185\ \ \ \ \ m\_mutex.lock();}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00186}00186\ \ \ \ \ \mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}}\ =\ gyro;}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00187}00187\ \ \ \ \ timestamp\ =\ gyroTs;}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00188}00188\ \ \ \ \ m\_mutex.unlock();}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00189}00189\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00190}00190\ \}}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00191}00191\ }
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00192}00192\ \}\ \textcolor{comment}{//\ namespace\ dev}}
+\DoxyCodeLine{\Hypertarget{ImuFilter_8cpp_source_l00193}00193\ \}\ \textcolor{comment}{//\ namespace\ yarp}}
+
+\end{DoxyCode}
