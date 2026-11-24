@@ -1,0 +1,150 @@
+\chapter{emb\+Obj\+Motion\+Control Parser Maintenance Guide }
+\hypertarget{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2PARSER__MAINTENANCE__GUIDE}{}\label{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2PARSER__MAINTENANCE__GUIDE}\index{embObjMotionControl Parser Maintenance Guide@{embObjMotionControl Parser Maintenance Guide}}
+\label{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2PARSER__MAINTENANCE__GUIDE_autotoc_md50}%
+\Hypertarget{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2PARSER__MAINTENANCE__GUIDE_autotoc_md50}%
+\hypertarget{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2PARSER__MAINTENANCE__GUIDE_autotoc_md51}{}\doxysection{\texorpdfstring{Purpose}{Purpose}}\label{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2PARSER__MAINTENANCE__GUIDE_autotoc_md51}
+This guide explains how to safely extend and maintain the emb\+Obj\+Motion\+Control parser after the YARP4 modernization work.
+
+The goals of the refactor are\+:
+\begin{DoxyItemize}
+\item improve maintainability and readability,
+\item keep behavior explicit and predictable,
+\item reduce noisy startup logs while preserving full configuration visibility.
+\end{DoxyItemize}\hypertarget{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2PARSER__MAINTENANCE__GUIDE_autotoc_md52}{}\doxysection{\texorpdfstring{Architecture Intent}{Architecture Intent}}\label{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2PARSER__MAINTENANCE__GUIDE_autotoc_md52}
+The parser architecture follows a clear separation of concerns\+:
+\begin{DoxyItemize}
+\item Types and configuration payloads are defined in \doxylink{embObjMotionControlConfigTypes_8h}{emb\+Obj\+Motion\+Control\+Config\+Types.\+h}.
+\item Default values are centralized in \doxylink{embObjMotionControlDefaults_8h}{emb\+Obj\+Motion\+Control\+Defaults.\+h}.
+\item Parsing, validation, and assignment logic are implemented in \doxylink{eomcParser_8cpp}{eomc\+Parser.\+cpp} and declared in \doxylink{eomcParser_8h}{eomc\+Parser.\+h}.
+\end{DoxyItemize}
+
+A key design point is optional-\/parameter tracking through register\+Optional\+Parameter().
+
+Instead of flooding yarprobotinterface output with repeated messages such as "{}parameter X missing, using default Y"{} for each missing key, the parser records optional/defaulted parameters and prints one consolidated summary table through print\+Optional\+Parameters\+Table().
+
+This keeps logs readable and makes users more aware of the effective configuration at a glance.\hypertarget{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2PARSER__MAINTENANCE__GUIDE_autotoc_md53}{}\doxysection{\texorpdfstring{Files To Update When Adding Or Changing Parameters}{Files To Update When Adding Or Changing Parameters}}\label{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2PARSER__MAINTENANCE__GUIDE_autotoc_md53}
+When adding a new parser parameter, or changing an existing one, update all applicable layers\+:
+
+
+\begin{DoxyEnumerate}
+\item Type/schema layer
+\end{DoxyEnumerate}
+\begin{DoxyItemize}
+\item File\+: \doxylink{embObjMotionControlConfigTypes_8h}{src/libraries/icubmod/emb\+Obj\+Motion\+Control/emb\+Obj\+Motion\+Control\+Config\+Types.\+h}
+\item Action\+: add or update the typed field in the relevant struct.
+\end{DoxyItemize}
+\begin{DoxyEnumerate}
+\item Default-\/value layer
+\end{DoxyEnumerate}
+\begin{DoxyItemize}
+\item File\+: \doxylink{embObjMotionControlDefaults_8h}{src/libraries/icubmod/emb\+Obj\+Motion\+Control/emb\+Obj\+Motion\+Control\+Defaults.\+h}
+\item Action\+: define or update the default value in the appropriate defaults block.
+\end{DoxyItemize}
+\begin{DoxyEnumerate}
+\item Parser layer
+\end{DoxyEnumerate}
+\begin{DoxyItemize}
+\item File\+: \doxylink{eomcParser_8cpp}{src/libraries/icubmod/emb\+Obj\+Motion\+Control/eomc\+Parser.\+cpp}
+\item Action\+: parse the key, validate it, assign it, and track optional/default usage with register\+Optional\+Parameter() when relevant.
+\end{DoxyItemize}
+\begin{DoxyEnumerate}
+\item Parser interface layer
+\end{DoxyEnumerate}
+\begin{DoxyItemize}
+\item File\+: \doxylink{eomcParser_8h}{src/libraries/icubmod/emb\+Obj\+Motion\+Control/eomc\+Parser.\+h}
+\item Action\+: update declarations if parser data flow or signatures change.
+\end{DoxyItemize}
+\begin{DoxyEnumerate}
+\item Documentation layer
+\end{DoxyEnumerate}
+\begin{DoxyItemize}
+\item File\+: \doxylink{embObjMotionControlConfigurationDefaults_8md}{src/libraries/icubmod/emb\+Obj\+Motion\+Control/emb\+Obj\+Motion\+Control\+Configuration\+Defaults.\+md}
+\item Action\+: update documentation for new or changed defaults and expected keys.
+\end{DoxyItemize}\hypertarget{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2PARSER__MAINTENANCE__GUIDE_autotoc_md54}{}\doxysection{\texorpdfstring{Standard Parser Pattern To Reuse}{Standard Parser Pattern To Reuse}}\label{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2PARSER__MAINTENANCE__GUIDE_autotoc_md54}
+Use this order consistently\+:
+
+
+\begin{DoxyEnumerate}
+\item Read the group
+\end{DoxyEnumerate}
+\begin{DoxyItemize}
+\item Use Get\+Group\+Bottle() for mandatory/optional group retrieval.
+\end{DoxyItemize}
+\begin{DoxyEnumerate}
+\item Read parameter values
+\end{DoxyEnumerate}
+\begin{DoxyItemize}
+\item Use \doxylink{parametricCalibrator_8cpp_a40d6b496989985f2df05e8b8183f9717}{extract\+Group()} for joint-\/wise vectors/lists.
+\item For scalar values, use Bottle find checks and type checks.
+\end{DoxyItemize}
+\begin{DoxyEnumerate}
+\item Validate early
+\end{DoxyEnumerate}
+\begin{DoxyItemize}
+\item Verify type, cardinality, enum compatibility, and range.
+\item Fail fast with board-\/aware and joint-\/aware error messages.
+\end{DoxyItemize}
+\begin{DoxyEnumerate}
+\item Handle optional parameters
+\end{DoxyEnumerate}
+\begin{DoxyItemize}
+\item If missing and optional, assign default from \+\_\+default\+Settings.
+\item Call register\+Optional\+Parameter(parameter\+Name, default\+Value, was\+Used).
+\end{DoxyItemize}
+\begin{DoxyEnumerate}
+\item Assign final values
+\end{DoxyEnumerate}
+\begin{DoxyItemize}
+\item Write into typed per-\/joint/per-\/group destination structures.
+\end{DoxyItemize}
+\begin{DoxyEnumerate}
+\item Report once
+\end{DoxyEnumerate}
+\begin{DoxyItemize}
+\item Avoid repeated warning spam for every missing key.
+\item Use the consolidated optional-\/parameter summary table.
+\end{DoxyItemize}\hypertarget{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2PARSER__MAINTENANCE__GUIDE_autotoc_md55}{}\doxysection{\texorpdfstring{Optional Parameter Logging Policy}{Optional Parameter Logging Policy}}\label{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2PARSER__MAINTENANCE__GUIDE_autotoc_md55}
+Preferred behavior\+:
+\begin{DoxyItemize}
+\item Mandatory missing or invalid parameter\+: fail and report clear error.
+\item Optional missing parameter\+: apply default and register it.
+\item End of parsing/open\+: print a single summary table of optional/defaulted parameters.
+\end{DoxyItemize}
+
+Benefits\+:
+\begin{DoxyItemize}
+\item cleaner logs,
+\item easier troubleshooting,
+\item better user awareness of effective runtime configuration.
+\end{DoxyItemize}\hypertarget{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2PARSER__MAINTENANCE__GUIDE_autotoc_md56}{}\doxysection{\texorpdfstring{Backward Compatibility Policy}{Backward Compatibility Policy}}\label{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2PARSER__MAINTENANCE__GUIDE_autotoc_md56}
+When renaming or changing semantics of a parameter\+:
+\begin{DoxyItemize}
+\item keep old key support for one transition cycle when possible,
+\item parse new key first and old key as fallback,
+\item emit a single compatibility warning (not repeated per joint),
+\item document deprecation and removal timeline.
+\end{DoxyItemize}\hypertarget{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2PARSER__MAINTENANCE__GUIDE_autotoc_md57}{}\doxysection{\texorpdfstring{Validation Checklist For Pull Requests}{Validation Checklist For Pull Requests}}\label{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2PARSER__MAINTENANCE__GUIDE_autotoc_md57}
+Use this checklist before merging parser changes\+:
+
+
+\begin{DoxyEnumerate}
+\item Type exists and is correctly placed in \doxylink{embObjMotionControlConfigTypes_8h}{emb\+Obj\+Motion\+Control\+Config\+Types.\+h}.
+\item Default exists and is correctly placed in \doxylink{embObjMotionControlDefaults_8h}{emb\+Obj\+Motion\+Control\+Defaults.\+h}.
+\item Parser reads key and validates value in \doxylink{eomcParser_8cpp}{eomc\+Parser.\+cpp}.
+\item Optional parameter handling uses register\+Optional\+Parameter() where applicable.
+\item Error messages include board context and joint context when relevant.
+\item No noisy per-\/parameter default warnings were added.
+\item Summary-\/table behavior remains intact.
+\item Related docs were updated.
+\item Existing robot configuration compatibility was considered.
+\item The corresponding template for the target version was updated in robots-\/configuration \doxylink{namespaceiCub}{i\+Cub} templates\+: \href{https://github.com/robotology/robots-configuration/tree/master/iCubTemplates}{\texttt{https\+://github.\+com/robotology/robots-\/configuration/tree/master/i\+Cub\+Templates}}.
+\end{DoxyEnumerate}\hypertarget{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2PARSER__MAINTENANCE__GUIDE_autotoc_md58}{}\doxysection{\texorpdfstring{Common Pitfalls}{Common Pitfalls}}\label{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2PARSER__MAINTENANCE__GUIDE_autotoc_md58}
+
+\begin{DoxyItemize}
+\item Adding parsing logic without adding typed storage.
+\item Adding typed storage without adding defaults.
+\item Using hardcoded magic defaults in parser code.
+\item Logging one warning per joint for the same optional key.
+\item Forgetting consistency checks across JOINTSET\+\_\+\+CFG constraints.
+\item Changing key names without compatibility fallback. 
+\end{DoxyItemize}

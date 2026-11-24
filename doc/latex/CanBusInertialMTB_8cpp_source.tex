@@ -1,0 +1,518 @@
+\doxysection{Can\+Bus\+Inertial\+MTB.\+cpp}
+\hypertarget{CanBusInertialMTB_8cpp_source}{}\label{CanBusInertialMTB_8cpp_source}\index{icub-\/main/src/libraries/icubmod/canBusInertialMTB/CanBusInertialMTB.cpp@{icub-\/main/src/libraries/icubmod/canBusInertialMTB/CanBusInertialMTB.cpp}}
+\mbox{\hyperlink{CanBusInertialMTB_8cpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00001}00001\ \textcolor{comment}{//\ -\/*-\/\ mode:C++;\ tab-\/width:4;\ c-\/basic-\/offset:4;\ indent-\/tabs-\/mode:nil\ -\/*-\/}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00002}00002\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00003}00003\ \textcolor{comment}{//\ Copyright:\ (C)\ 2013\ iCub\ Facility}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00004}00004\ \textcolor{comment}{//\ Authors:\ Marco\ Randazzo\ and\ Lorenzo\ Natale}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00005}00005\ \textcolor{comment}{//\ CopyPolicy:\ Released\ under\ the\ terms\ of\ the\ GNU\ GPL\ v2.0.}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00006}00006\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00007}00007\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{CanBusInertialMTB_8h}{CanBusInertialMTB.h}}>}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00008}00008\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00009}00009\ \textcolor{preprocessor}{\#include\ <yarp/os/Time.h>}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00010}00010\ \textcolor{preprocessor}{\#include\ <yarp/os/Log.h>}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00011}00011\ \textcolor{preprocessor}{\#include\ <iostream>}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00012}00012\ \textcolor{preprocessor}{\#include\ <cstring>}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00013}00013\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00014}00014\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00015}00015\ \textcolor{preprocessor}{\#include\ <iCubCanProto\_skinMessages.h>}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00016}00016\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00017}\mbox{\hyperlink{CanBusInertialMTB_8cpp_a8e272f1e19f90ec294f98456f126c6b6}{00017}}\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ \ \ \ \mbox{\hyperlink{CanBusInertialMTB_8cpp_a8e272f1e19f90ec294f98456f126c6b6}{CANBUS\_INERTIAL\_MTB\_CAN\_DRIVER\_BUFFER\_SIZE}}=2047;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00018}\mbox{\hyperlink{CanBusInertialMTB_8cpp_a2850897d8560a4e4ac2727ef2cc7b647}{00018}}\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{CanBusInertialMTB_8cpp_a2850897d8560a4e4ac2727ef2cc7b647}{CANBUS\_INERTIAL\_MTB\_TIMEOUT}}=0.1;\ \textcolor{comment}{//100ms}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00019}00019\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00020}00020\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00021}00021\ \textcolor{comment}{//\ Protocol\ for\ inertial\ sensor\ messages\ sent\ by\ the\ MTB}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00022}\mbox{\hyperlink{CanBusInertialMTB_8cpp_a0a9eb47b0894c7a4e0ba6aff84c92b01}{00022}}\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ \ \ \ \mbox{\hyperlink{CanBusInertialMTB_8cpp_a0a9eb47b0894c7a4e0ba6aff84c92b01}{CAN\_MSG\_CLASS\_ACC\_GYRO}}\ \ =\ 0x500;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00023}\mbox{\hyperlink{CanBusInertialMTB_8cpp_a3d80226697d9d1e6aeb192b28ff3ca3c}{00023}}\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ \ \ \ \mbox{\hyperlink{CanBusInertialMTB_8cpp_a3d80226697d9d1e6aeb192b28ff3ca3c}{MSG\_TYPE\_GYRO}}\ \ \ \ \ \ \ \ \ \ \ =\ 0x000;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00024}\mbox{\hyperlink{CanBusInertialMTB_8cpp_a7f9e923f4e8ee38b0eb44c306716a1d7}{00024}}\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ \ \ \ \mbox{\hyperlink{CanBusInertialMTB_8cpp_a7f9e923f4e8ee38b0eb44c306716a1d7}{MSG\_TYPE\_ACC}}\ \ \ \ \ \ \ \ \ \ \ =\ 0x001;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00025}00025\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00026}\mbox{\hyperlink{CanBusInertialMTB_8cpp_a6f4e578bdec557c660f5d2d11519386c}{00026}}\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{short}\ \ \ \ \mbox{\hyperlink{CanBusInertialMTB_8cpp_a6f4e578bdec557c660f5d2d11519386c}{CANBUS\_INERTIAL\_MTB\_DEFAULT\_SENSOR\_PERIOD}}=10;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00027}00027\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00028}\mbox{\hyperlink{CanBusInertialMTB_8cpp_a415a989dc948d5b7a0ed6f5da9c41204}{00028}}\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ \ \ \mbox{\hyperlink{CanBusInertialMTB_8cpp_a415a989dc948d5b7a0ed6f5da9c41204}{CANBUS\_INERTIAL\_MTB\_INTERNAL\_ACC\_BIT}}\ =\ 0x02;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00029}\mbox{\hyperlink{CanBusInertialMTB_8cpp_a2af1e005640f6638f9685ac930c123a2}{00029}}\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ \ \ \mbox{\hyperlink{CanBusInertialMTB_8cpp_a2af1e005640f6638f9685ac930c123a2}{CANBUS\_INERTIAL\_MTB\_EXTERNAL\_ACC\_BIT}}\ =\ 0x08;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00030}\mbox{\hyperlink{CanBusInertialMTB_8cpp_a051999ec9872251fdd949cc287a462ca}{00030}}\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ \ \ \mbox{\hyperlink{CanBusInertialMTB_8cpp_a051999ec9872251fdd949cc287a462ca}{CANBUS\_INERTIAL\_MTB\_EXTERNAL\_GYRO\_BIT}}\ =\ 0x04;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00031}00031\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00032}00032\ \textcolor{keyword}{using\ namespace\ }std;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00033}00033\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00034}00034\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00035}\mbox{\hyperlink{CanBusInertialMTB_8cpp_acdda0ac9d1b3c5fb59feea74053a5275}{00035}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{CanBusInertialMTB_8cpp_acdda0ac9d1b3c5fb59feea74053a5275}{checkRequiredParamIsString}}(yarp::os::Searchable\&\ config,}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00036}00036\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::string\&\ paramName)}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00037}00037\ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00038}00038\ \ \ \ \ \textcolor{keywordtype}{bool}\ correct\ =\ config.check(paramName);}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00039}00039\ \ \ \ \ \textcolor{keywordflow}{if}(\ correct\ )}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00040}00040\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00041}00041\ \ \ \ \ \ \ \ \ correct\ =\ config.find(paramName).isString();}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00042}00042\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00043}00043\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00044}00044\ \ \ \ \ \textcolor{keywordflow}{if}(\ !correct\ )}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00045}00045\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00046}00046\ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}CanBusInertialMTB:\ problem\ loading\ parameter\ \%s\ as\ string"{}},paramName.c\_str());}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00047}00047\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00048}00048\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00049}00049\ \ \ \ \ \textcolor{keywordflow}{return}\ correct;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00050}00050\ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00051}00051\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00052}\mbox{\hyperlink{CanBusInertialMTB_8cpp_a29b96f5afcaa5ecaf8739edc3306bbec}{00052}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{CanBusInertialMTB_8cpp_a29b96f5afcaa5ecaf8739edc3306bbec}{checkRequiredParamIsInt}}(yarp::os::Searchable\&\ config,}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00053}00053\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::string\&\ paramName)}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00054}00054\ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00055}00055\ \ \ \ \ \textcolor{keywordtype}{bool}\ correct\ =\ config.check(paramName);}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00056}00056\ \ \ \ \ \textcolor{keywordflow}{if}(\ correct\ )}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00057}00057\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00058}00058\ \ \ \ \ \ \ \ \ correct\ =\ config.find(paramName).isInt32();}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00059}00059\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00060}00060\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00061}00061\ \ \ \ \ \textcolor{keywordflow}{if}(\ !correct\ )}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00062}00062\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00063}00063\ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}CanBusInertialMTB:\ problem\ loading\ parameter\ \%s\ as\ int"{}},paramName.c\_str());}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00064}00064\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00065}00065\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00066}00066\ \ \ \ \ \textcolor{keywordflow}{return}\ correct;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00067}00067\ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00068}00068\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00069}\mbox{\hyperlink{CanBusInertialMTB_8cpp_a3232e8358e786c851438200ee94cc73a}{00069}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{CanBusInertialMTB_8cpp_a3232e8358e786c851438200ee94cc73a}{checkRequiredParamIsVectorOfInt}}(yarp::os::Searchable\&\ config,}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00070}00070\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::string\&\ paramName,}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00071}00071\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<int>\ \&\ output\_vector)}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00072}00072\ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00073}00073\ \ \ \ \ \textcolor{keywordtype}{bool}\ correct\ =\ !(config.findGroup(paramName).isNull());}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00074}00074\ \ \ \ \ \textcolor{keywordflow}{if}(\ correct\ )}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00075}00075\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00076}00076\ \ \ \ \ \ \ \ \ Bottle\ ids\ =\ config.findGroup(paramName).tail();}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00077}00077\ \ \ \ \ \ \ \ \ output\_vector.resize(ids.size());}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00078}00078\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i\ =\ 0;\ i\ <\ ids.size();\ i++\ )}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00079}00079\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00080}00080\ \ \ \ \ \ \ \ \ \ \ \ \ output\_vector[i]\ =\ ids.get(i).asInt32();}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00081}00081\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00082}00082\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00083}00083\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00084}00084\ \ \ \ \ \textcolor{keywordflow}{if}(\ !correct\ )}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00085}00085\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00086}00086\ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}CanBusInertialMTB:\ problem\ loading\ parameter\ \%s\ as\ vector\ of\ int"{}},paramName.c\_str());}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00087}00087\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00088}00088\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00089}00089\ \ \ \ \ \textcolor{keywordflow}{return}\ correct;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00090}00090\ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00091}00091\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00092}00092\ \textcolor{comment}{//\ \(\backslash\)todo\ TODO\ bug\ ?\ }}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00093}\mbox{\hyperlink{CanBusInertialMTB_8cpp_abfbfd0b8e09fb1e9a583047c3fae16a0}{00093}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{CanBusInertialMTB_8cpp_abfbfd0b8e09fb1e9a583047c3fae16a0}{checkRequiredParamIsVectorOfString}}(yarp::os::Searchable\&\ config,}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00094}00094\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::string\&\ paramName,}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00095}00095\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<std::string>\ \&\ output\_vector)}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00096}00096\ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00097}00097\ \ \ \ \ \textcolor{keywordtype}{bool}\ correct\ =\ !(config.findGroup(paramName).isNull());}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00098}00098\ \ \ \ \ \textcolor{keywordflow}{if}(\ correct\ )}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00099}00099\ \ \ \ \ correct\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00100}00100\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00101}00101\ \ \ \ \ \ \ \ \ Bottle\ ids\ =\ config.findGroup(paramName).tail();}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00102}00102\ \ \ \ \ \ \ \ \ std::cout\ <<\ \textcolor{stringliteral}{"{}ids\ :\ "{}}\ <<\ ids.toString()\ <<\ std::endl;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00103}00103\ \ \ \ \ \ \ \ \ std::cout\ <<\ \textcolor{stringliteral}{"{}ids\ :\ "{}}\ <<\ config.find(paramName).toString()\ <<\ std::endl;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00104}00104\ \ \ \ \ \ \ \ \ output\_vector.resize(ids.size());}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00105}00105\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i\ =\ 0;\ i\ <\ ids.size();\ i++\ )}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00106}00106\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00107}00107\ \ \ \ \ \ \ \ \ \ \ \ \ output\_vector[i]\ =\ ids.get(i).asString().c\_str();}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00108}00108\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00109}00109\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00110}00110\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00111}00111\ \ \ \ \ \textcolor{keywordflow}{if}(\ !correct\ )}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00112}00112\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00113}00113\ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}CanBusInertialMTB:\ problem\ loading\ parameter\ \%s\ as\ vector\ of\ string"{}},paramName.c\_str());}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00114}00114\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00115}00115\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00116}00116\ \ \ \ \ \textcolor{keywordflow}{return}\ correct;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00117}00117\ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00118}00118\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00119}00119\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00120}00120\ \textcolor{keywordtype}{bool}\ CanBusInertialMTB::validateConf(yarp::os::Searchable\&\ config,}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00121}00121\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<int>\ \&\ canAddresses)}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00122}00122\ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00123}00123\ \ \ \ \ std::cout\ <<\ \textcolor{stringliteral}{"{}CanBusInertialMTB::validateConf\ :\ "{}}\ <<\ config.toString()\ <<\ std::endl;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00124}00124\ \ \ \ \ \textcolor{keywordtype}{bool}\ correct=\textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00125}00125\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00126}00126\ \ \ \ \ correct\ =\ correct\ \&\&\ \mbox{\hyperlink{CanBusInertialMTB_8cpp_acdda0ac9d1b3c5fb59feea74053a5275}{checkRequiredParamIsString}}(config,\textcolor{stringliteral}{"{}canbusDevice"{}});}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00127}00127\ \ \ \ \ correct\ =\ correct\ \&\&\ \mbox{\hyperlink{CanBusInertialMTB_8cpp_a29b96f5afcaa5ecaf8739edc3306bbec}{checkRequiredParamIsInt}}(config,\textcolor{stringliteral}{"{}canDeviceNum"{}});}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00128}00128\ \ \ \ \ correct\ =\ correct\ \&\&\ \mbox{\hyperlink{CanBusInertialMTB_8cpp_a3232e8358e786c851438200ee94cc73a}{checkRequiredParamIsVectorOfInt}}(config,\textcolor{stringliteral}{"{}canAddress"{}},canAddresses);}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00129}00129\ \ \ \ \ correct\ =\ correct\ \&\&\ \mbox{\hyperlink{CanBusInertialMTB_8cpp_acdda0ac9d1b3c5fb59feea74053a5275}{checkRequiredParamIsString}}(config,\textcolor{stringliteral}{"{}physDevice"{}});}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00130}00130\ \ \ \ \ correct\ =\ correct\ \&\&\ \mbox{\hyperlink{CanBusInertialMTB_8cpp_acdda0ac9d1b3c5fb59feea74053a5275}{checkRequiredParamIsString}}(config,\textcolor{stringliteral}{"{}sensorType"{}});}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00131}00131\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00132}00132\ \ \ \ \ \textcolor{keywordflow}{return}\ correct;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00133}00133\ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00134}00134\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00135}\mbox{\hyperlink{classCanBusInertialMTB_a534cd166606ca527d68fffa05fcfbba3}{00135}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classCanBusInertialMTB_a534cd166606ca527d68fffa05fcfbba3}{CanBusInertialMTB::open}}(yarp::os::Searchable\&\ config)}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00136}00136\ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00137}00137\ \ \ \ \ std::vector<int>\ canAddresses;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00138}00138\ \ \ \ \ \textcolor{keywordtype}{bool}\ correct\ =\ this-\/>validateConf(config,canAddresses);}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00139}00139\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00140}00140\ \ \ \ \ \textcolor{keywordflow}{if}\ (!correct)}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00141}00141\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00142}00142\ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}CanBusInertialMTB:\ Insufficient\ parameters\ to\ CanBusInertialMTB\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00143}00143\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00144}00144\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00145}00145\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00146}00146\ \ \ \ \ \textcolor{comment}{//Read\ sensor\ period\ for\ all\ sensors}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00147}00147\ \ \ \ \ \textcolor{keywordtype}{int}\ sensorPeriod\ =\ \mbox{\hyperlink{CanBusInertialMTB_8cpp_a6f4e578bdec557c660f5d2d11519386c}{CANBUS\_INERTIAL\_MTB\_DEFAULT\_SENSOR\_PERIOD}};}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00148}00148\ \ \ \ \ \textcolor{keywordflow}{if}\ (config.check(\textcolor{stringliteral}{"{}sensorPeriod"{}}))}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00149}00149\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00150}00150\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ int\_sensorPeriod\ =\ config.find(\textcolor{stringliteral}{"{}sensorPeriod"{}}).asInt32();}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00151}00151\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(\ int\_sensorPeriod\ <\ 1\ ||\ int\_sensorPeriod\ >\ 255\ )}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00152}00152\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00153}00153\ \ \ \ \ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}CanBusInertialMTB:\ sensorPeriod\ is\ lower\ than\ 1\ or\ bigger\ then\ 255\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00154}00154\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00155}00155\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00156}00156\ \ \ \ \ \ \ \ \ sensorPeriod\ =\ int\_sensorPeriod;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00157}00157\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00158}00158\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00159}00159\ \ \ \ \ \textcolor{comment}{//Parse\ sensor\ type\ and\ address\ of\ all\ readed\ sensors}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00160}00160\ \ \ \ \ this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a500706225731d647969f86b27603133c}{boards}}.resize(canAddresses.size());}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00161}00161\ \ \ \ \ this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a7e3244b9cff247e47dc51f44e7e751a6}{nrOfTotalChannels}}\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00162}00162\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00163}00163\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00164}00164\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}}=0;\ \mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}}\ <\ this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a500706225731d647969f86b27603133c}{boards}}.size();\ \mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}}++\ )}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00165}00165\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00166}00166\ \ \ \ \ \ \ \ \ this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a500706225731d647969f86b27603133c}{boards}}[\mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}}].boardId\ =\ canAddresses[\mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}}];}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00167}00167\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(\ config.find(\textcolor{stringliteral}{"{}sensorType"{}}).asString()\ ==\ \textcolor{stringliteral}{"{}acc"{}}\ )}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00168}00168\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00169}00169\ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a500706225731d647969f86b27603133c}{boards}}[\mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}}].enabledSensors\ =\ \mbox{\hyperlink{CanBusInertialMTB_8cpp_a415a989dc948d5b7a0ed6f5da9c41204}{CANBUS\_INERTIAL\_MTB\_INTERNAL\_ACC\_BIT}};}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00170}00170\ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a500706225731d647969f86b27603133c}{boards}}[\mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}}].enabledGyro\ \ \ \ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00171}00171\ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a500706225731d647969f86b27603133c}{boards}}[\mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}}].nrOfChannels\ \ \ =\ 3;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00172}00172\ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a500706225731d647969f86b27603133c}{boards}}[\mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}}].vectorOffset\ \ \ =\ this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a7e3244b9cff247e47dc51f44e7e751a6}{nrOfTotalChannels}};}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00173}00173\ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a7e3244b9cff247e47dc51f44e7e751a6}{nrOfTotalChannels}}\ +=\ this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a500706225731d647969f86b27603133c}{boards}}[\mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}}].nrOfChannels;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00174}00174\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00175}00175\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}(\ config.find(\textcolor{stringliteral}{"{}sensorType"{}}).asString()\ ==\ \textcolor{stringliteral}{"{}extAccAndGyro"{}}\ )}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00176}00176\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00177}00177\ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a500706225731d647969f86b27603133c}{boards}}[\mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}}].enabledSensors\ =\ \mbox{\hyperlink{CanBusInertialMTB_8cpp_a051999ec9872251fdd949cc287a462ca}{CANBUS\_INERTIAL\_MTB\_EXTERNAL\_GYRO\_BIT}}\ |}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00178}00178\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{CanBusInertialMTB_8cpp_a2af1e005640f6638f9685ac930c123a2}{CANBUS\_INERTIAL\_MTB\_EXTERNAL\_ACC\_BIT}};}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00179}00179\ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a500706225731d647969f86b27603133c}{boards}}[\mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}}].enabledGyro\ \ \ \ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00180}00180\ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a500706225731d647969f86b27603133c}{boards}}[\mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}}].nrOfChannels\ \ \ =\ 6;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00181}00181\ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a500706225731d647969f86b27603133c}{boards}}[\mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}}].vectorOffset\ \ \ =\ this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a7e3244b9cff247e47dc51f44e7e751a6}{nrOfTotalChannels}};}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00182}00182\ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a7e3244b9cff247e47dc51f44e7e751a6}{nrOfTotalChannels}}\ +=\ this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a500706225731d647969f86b27603133c}{boards}}[\mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}}].nrOfChannels;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00183}00183\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00184}00184\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00185}00185\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00186}00186\ \ \ \ \ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}CanBusInertialMTB:\ unknown\ sensorType\ \%s"{}},config.find(\textcolor{stringliteral}{"{}sensorType"{}}).asString().c\_str());}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00187}00187\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00188}00188\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00189}00189\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00190}00190\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00191}00191\ \ \ \ \ \textcolor{keywordflow}{if}\ (config.check(\textcolor{stringliteral}{"{}period"{}})==\textcolor{keyword}{true})}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00192}00192\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00193}00193\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ period=10;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00194}00194\ \ \ \ \ \ \ \ \ period=config.find(\textcolor{stringliteral}{"{}period"{}}).asInt32();}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00195}00195\ \ \ \ \ \ \ \ \ setPeriod((\textcolor{keywordtype}{double})period/1000.0);}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00196}00196\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00197}00197\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00198}00198\ \ \ \ \ Property\ prop;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00199}00199\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00200}00200\ \ \ \ \ prop.put(\textcolor{stringliteral}{"{}device"{}},\ config.find(\textcolor{stringliteral}{"{}canbusDevice"{}}).asString().c\_str());}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00201}00201\ \ \ \ \ prop.put(\textcolor{stringliteral}{"{}physDevice"{}},\ config.find(\textcolor{stringliteral}{"{}physDevice"{}}).asString().c\_str());}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00202}00202\ \ \ \ \ prop.put(\textcolor{stringliteral}{"{}canTxTimeout"{}},\ 500);}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00203}00203\ \ \ \ \ prop.put(\textcolor{stringliteral}{"{}canRxTimeout"{}},\ 500);}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00204}00204\ \ \ \ \ prop.put(\textcolor{stringliteral}{"{}canDeviceNum"{}},\ config.find(\textcolor{stringliteral}{"{}canDeviceNum"{}}).asInt32());}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00205}00205\ \ \ \ \ prop.put(\textcolor{stringliteral}{"{}canMyAddress"{}},\ 0);}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00206}00206\ \ \ \ \ prop.put(\textcolor{stringliteral}{"{}canTxQueueSize"{}},\ \mbox{\hyperlink{CanBusInertialMTB_8cpp_a8e272f1e19f90ec294f98456f126c6b6}{CANBUS\_INERTIAL\_MTB\_CAN\_DRIVER\_BUFFER\_SIZE}});}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00207}00207\ \ \ \ \ prop.put(\textcolor{stringliteral}{"{}canRxQueueSize"{}},\ \mbox{\hyperlink{CanBusInertialMTB_8cpp_a8e272f1e19f90ec294f98456f126c6b6}{CANBUS\_INERTIAL\_MTB\_CAN\_DRIVER\_BUFFER\_SIZE}});}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00208}00208\ \ \ \ \ \mbox{\hyperlink{classCanBusInertialMTB_a7f6fe97c7f14f3ecbab68d7d789efc6f}{pCanBus}}=0;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00209}00209\ \ \ \ \ \mbox{\hyperlink{classCanBusInertialMTB_a480f5302564f298117174ed7c7796619}{pCanBufferFactory}}=0;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00210}00210\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00211}00211\ \ \ \ \ \textcolor{comment}{//open\ the\ can\ driver}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00212}00212\ \ \ \ \ \mbox{\hyperlink{classCanBusInertialMTB_ab43ccd42f50f9697116dbb669b5defca}{driver}}.open(prop);}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00213}00213\ \ \ \ \ \textcolor{keywordflow}{if}\ (!\mbox{\hyperlink{classCanBusInertialMTB_ab43ccd42f50f9697116dbb669b5defca}{driver}}.isValid())}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00214}00214\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00215}00215\ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}Unable\ to\ open\ CanBusInertialMTB\ check\ parameters\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00216}00216\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00217}00217\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00218}00218\ \ \ \ \ \mbox{\hyperlink{classCanBusInertialMTB_ab43ccd42f50f9697116dbb669b5defca}{driver}}.view(\mbox{\hyperlink{classCanBusInertialMTB_a7f6fe97c7f14f3ecbab68d7d789efc6f}{pCanBus}});}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00219}00219\ \ \ \ \ \textcolor{keywordflow}{if}\ (!\mbox{\hyperlink{classCanBusInertialMTB_a7f6fe97c7f14f3ecbab68d7d789efc6f}{pCanBus}})}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00220}00220\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00221}00221\ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}Unable\ to\ open\ CAN\ device\ not\ available\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00222}00222\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00223}00223\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00224}00224\ \ \ \ \ \mbox{\hyperlink{classCanBusInertialMTB_ab43ccd42f50f9697116dbb669b5defca}{driver}}.view(\mbox{\hyperlink{classCanBusInertialMTB_a480f5302564f298117174ed7c7796619}{pCanBufferFactory}});}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00225}00225\ \ \ \ \ \mbox{\hyperlink{classCanBusInertialMTB_a34332144007868999bbf7089dc914157}{outBuffer}}=\mbox{\hyperlink{classCanBusInertialMTB_a480f5302564f298117174ed7c7796619}{pCanBufferFactory}}-\/>createBuffer(\mbox{\hyperlink{CanBusInertialMTB_8cpp_a8e272f1e19f90ec294f98456f126c6b6}{CANBUS\_INERTIAL\_MTB\_CAN\_DRIVER\_BUFFER\_SIZE}});}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00226}00226\ \ \ \ \ \mbox{\hyperlink{classCanBusInertialMTB_a3b11904e8fee4a34d0f930a9a51163e1}{inBuffer}}=\mbox{\hyperlink{classCanBusInertialMTB_a480f5302564f298117174ed7c7796619}{pCanBufferFactory}}-\/>createBuffer(\mbox{\hyperlink{CanBusInertialMTB_8cpp_a8e272f1e19f90ec294f98456f126c6b6}{CANBUS\_INERTIAL\_MTB\_CAN\_DRIVER\_BUFFER\_SIZE}});}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00227}00227\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00228}00228\ \ \ \ \ \textcolor{comment}{//select\ the\ communication\ speed}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00229}00229\ \ \ \ \ \mbox{\hyperlink{classCanBusInertialMTB_a7f6fe97c7f14f3ecbab68d7d789efc6f}{pCanBus}}-\/>canSetBaudRate(0);\ \textcolor{comment}{//default\ 1MB/s}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00230}00230\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00231}00231\ \ \ \ \ \textcolor{comment}{//\ open\ the\ can\ mask\ for\ the\ desired\ canDeviceId}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00232}00232\ \ \ \ \ \textcolor{comment}{//\ messages\ class\ is\ 0x500}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00233}00233\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}}=0;\ \mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}}\ <\ this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a500706225731d647969f86b27603133c}{boards}}.size();\ \mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}}++\ )}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00234}00234\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00235}00235\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{short}\ \ \ \ \ boardId\ =\ this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a500706225731d647969f86b27603133c}{boards}}[\mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}}].boardId;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00236}00236\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(\ this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a500706225731d647969f86b27603133c}{boards}}[\mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}}].enabledGyro\ )}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00237}00237\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00238}00238\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCanBusInertialMTB_a7f6fe97c7f14f3ecbab68d7d789efc6f}{pCanBus}}-\/>canIdAdd((\mbox{\hyperlink{CanBusInertialMTB_8cpp_a0a9eb47b0894c7a4e0ba6aff84c92b01}{CAN\_MSG\_CLASS\_ACC\_GYRO}})+(boardId<<4)+\mbox{\hyperlink{CanBusInertialMTB_8cpp_a3d80226697d9d1e6aeb192b28ff3ca3c}{MSG\_TYPE\_GYRO}});}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00239}00239\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00240}00240\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCanBusInertialMTB_a7f6fe97c7f14f3ecbab68d7d789efc6f}{pCanBus}}-\/>canIdAdd((\mbox{\hyperlink{CanBusInertialMTB_8cpp_a0a9eb47b0894c7a4e0ba6aff84c92b01}{CAN\_MSG\_CLASS\_ACC\_GYRO}})+(boardId<<4)+\mbox{\hyperlink{CanBusInertialMTB_8cpp_a7f9e923f4e8ee38b0eb44c306716a1d7}{MSG\_TYPE\_ACC}});}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00241}00241\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00242}00242\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00243}00243\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00244}00244\ \ \ \ \ \mbox{\hyperlink{classCanBusInertialMTB_a68d4e34b5a8d2e17dfafb95a1aa6702a}{data}}.resize(this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a7e3244b9cff247e47dc51f44e7e751a6}{nrOfTotalChannels}});}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00245}00245\ \ \ \ \ \mbox{\hyperlink{classCanBusInertialMTB_a68d4e34b5a8d2e17dfafb95a1aa6702a}{data}}.zero();}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00246}00246\ \ \ \ \ \mbox{\hyperlink{classCanBusInertialMTB_a52f3b92c14e852585a533ea180a5214d}{privateData}}.resize(this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a7e3244b9cff247e47dc51f44e7e751a6}{nrOfTotalChannels}});}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00247}00247\ \ \ \ \ \mbox{\hyperlink{classCanBusInertialMTB_a52f3b92c14e852585a533ea180a5214d}{privateData}}.zero();}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00248}00248\ \ \ \ \ \mbox{\hyperlink{classCanBusInertialMTB_a1dc6fa9c323c741e30478b2f798a3b21}{sharedStatus}}.resize(this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a7e3244b9cff247e47dc51f44e7e751a6}{nrOfTotalChannels}},IAnalogSensor::AS\_OK);}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00249}00249\ \ \ \ \ \mbox{\hyperlink{classCanBusInertialMTB_a45ce6d8135106d528872e4381a6a1c20}{privateStatus}}.resize(this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a7e3244b9cff247e47dc51f44e7e751a6}{nrOfTotalChannels}},IAnalogSensor::AS\_OK);}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00250}00250\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00251}00251\ \ \ \ \ PeriodicThread::start();}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00252}00252\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00253}00253\ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00254}00254\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00255}\mbox{\hyperlink{classCanBusInertialMTB_ace1c68c7d15a33d2484da4c2f4f77b23}{00255}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classCanBusInertialMTB_ace1c68c7d15a33d2484da4c2f4f77b23}{CanBusInertialMTB::close}}()}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00256}00256\ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00257}00257\ \ \ \ \ \textcolor{comment}{//stop\ the\ thread}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00258}00258\ \ \ \ \ PeriodicThread::stop();}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00259}00259\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00260}00260\ \ \ \ \ \textcolor{comment}{//stop\ the\ driver}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00261}00261\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classCanBusInertialMTB_a480f5302564f298117174ed7c7796619}{pCanBufferFactory}})}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00262}00262\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00263}00263\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCanBusInertialMTB_a480f5302564f298117174ed7c7796619}{pCanBufferFactory}}-\/>destroyBuffer(\mbox{\hyperlink{classCanBusInertialMTB_a3b11904e8fee4a34d0f930a9a51163e1}{inBuffer}});}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00264}00264\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCanBusInertialMTB_a480f5302564f298117174ed7c7796619}{pCanBufferFactory}}-\/>destroyBuffer(\mbox{\hyperlink{classCanBusInertialMTB_a34332144007868999bbf7089dc914157}{outBuffer}});}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00265}00265\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00266}00266\ \ \ \ \ \mbox{\hyperlink{classCanBusInertialMTB_ab43ccd42f50f9697116dbb669b5defca}{driver}}.close();}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00267}00267\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00268}00268\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00269}00269\ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00270}00270\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00271}\mbox{\hyperlink{classCanBusInertialMTB_a4a0afa16f9436bb0c9ebf17d383e11a2}{00271}}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{classCanBusInertialMTB_a4a0afa16f9436bb0c9ebf17d383e11a2}{CanBusInertialMTB::read}}(yarp::sig::Vector\ \&\mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}})}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00272}00272\ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00273}00273\ \ \ \ \ lock\_guard<mutex>\ lck(\mbox{\hyperlink{classCanBusInertialMTB_a0dc49924f615d4bbdc089825490a47b2}{mtx}});}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00274}00274\ \ \ \ \ \mbox{\hyperlink{sine_8m_a2a89187d8e8e8fba509ef9ab5f815d88}{out}}=\mbox{\hyperlink{classCanBusInertialMTB_a68d4e34b5a8d2e17dfafb95a1aa6702a}{data}};}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00275}00275\ \ \ \ \ \textcolor{keywordflow}{return}\ this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a573d90fa91614f757bd9b2fff976e872}{sharedGlobalStatus}};}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00276}00276\ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00277}00277\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00278}\mbox{\hyperlink{classCanBusInertialMTB_a8191486c485584e1f57dd23de9888337}{00278}}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{classCanBusInertialMTB_a8191486c485584e1f57dd23de9888337}{CanBusInertialMTB::getState}}(\textcolor{keywordtype}{int}\ ch)}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00279}00279\ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00280}00280\ \ \ \ \ lock\_guard<mutex>\ lck(\mbox{\hyperlink{classCanBusInertialMTB_a0dc49924f615d4bbdc089825490a47b2}{mtx}});}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00281}00281\ \ \ \ \ \textcolor{keywordflow}{return}\ this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a1dc6fa9c323c741e30478b2f798a3b21}{sharedStatus}}[ch];}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00282}00282\ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00283}00283\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00284}\mbox{\hyperlink{classCanBusInertialMTB_a5027c40c9489706505ef8f48dbe864fd}{00284}}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{classCanBusInertialMTB_a5027c40c9489706505ef8f48dbe864fd}{CanBusInertialMTB::getChannels}}()}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00285}00285\ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00286}00286\ \ \ \ \ \textcolor{keywordflow}{return}\ this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a7e3244b9cff247e47dc51f44e7e751a6}{nrOfTotalChannels}};}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00287}00287\ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00288}00288\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00289}\mbox{\hyperlink{classCanBusInertialMTB_a4ab6ef4c78948d1ef6e87f7064b26949}{00289}}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{classCanBusInertialMTB_a4ab6ef4c78948d1ef6e87f7064b26949}{CanBusInertialMTB::calibrateSensor}}()}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00290}00290\ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00291}00291\ \ \ \ \ \textcolor{comment}{//NOT\ YET\ IMPLEMENTED}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00292}00292\ \ \ \ \ \textcolor{keywordflow}{return}\ 0;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00293}00293\ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00294}00294\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00295}\mbox{\hyperlink{classCanBusInertialMTB_aa6cd7751d709d33741a3a609f12dd3aa}{00295}}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{classCanBusInertialMTB_aa6cd7751d709d33741a3a609f12dd3aa}{CanBusInertialMTB::calibrateChannel}}(\textcolor{keywordtype}{int}\ ch,\ \textcolor{keywordtype}{double}\ v)}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00296}00296\ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00297}00297\ \ \ \ \ \textcolor{comment}{//NOT\ YET\ IMPLEMENTED}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00298}00298\ \ \ \ \ \textcolor{keywordflow}{return}\ 0;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00299}00299\ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00300}00300\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00301}\mbox{\hyperlink{classCanBusInertialMTB_adfe6897904cef5d106f5ae7aa33efe08}{00301}}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{classCanBusInertialMTB_a4ab6ef4c78948d1ef6e87f7064b26949}{CanBusInertialMTB::calibrateSensor}}(\textcolor{keyword}{const}\ yarp::sig::Vector\&\ v)}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00302}00302\ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00303}00303\ \ \ \ \ \textcolor{comment}{//NOT\ YET\ IMPLEMENTED}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00304}00304\ \ \ \ \ \textcolor{keywordflow}{return}\ 0;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00305}00305\ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00306}00306\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00307}\mbox{\hyperlink{classCanBusInertialMTB_a57181dd9e7f37365ff0e84fbb8ab484b}{00307}}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{classCanBusInertialMTB_aa6cd7751d709d33741a3a609f12dd3aa}{CanBusInertialMTB::calibrateChannel}}(\textcolor{keywordtype}{int}\ ch)}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00308}00308\ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00309}00309\ \ \ \ \ \textcolor{comment}{//NOT\ YET\ IMPLEMENTED}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00310}00310\ \ \ \ \ \textcolor{keywordflow}{return}\ 0;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00311}00311\ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00312}00312\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00313}\mbox{\hyperlink{classCanBusInertialMTB_af599ad694778dd6ab11b9a90ab5123b8}{00313}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classCanBusInertialMTB_af599ad694778dd6ab11b9a90ab5123b8}{CanBusInertialMTB::threadInit}}()}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00314}00314\ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00315}00315\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}}=0;\ \mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}}\ <\ this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a500706225731d647969f86b27603133c}{boards}}.size();\ \mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}}++\ )}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00316}00316\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00317}00317\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ canMessages=0;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00318}00318\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{id}\ =\ 0x200\ +\ this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a500706225731d647969f86b27603133c}{boards}}[\mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}}].boardId;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00319}00319\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00320}00320\ \ \ \ \ \ \ \ \ CanMessage\ \&msg=\mbox{\hyperlink{classCanBusInertialMTB_a34332144007868999bbf7089dc914157}{outBuffer}}[0];}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00321}00321\ \ \ \ \ \ \ \ \ msg.setId(\textcolor{keywordtype}{id});}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00322}00322\ \ \ \ \ \ \ \ \ msg.getData()[0]=ICUBCANPROTO\_POL\_SK\_CMD\_\_ACC\_GYRO\_SETUP;\ \textcolor{comment}{//\ message\ type}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00323}00323\ \ \ \ \ \ \ \ \ msg.getData()[1]=this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a500706225731d647969f86b27603133c}{boards}}[\mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}}].enabledSensors;\ \textcolor{comment}{//\ =\ enable\ the\ desired\ senssors}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00324}00324\ \ \ \ \ \ \ \ \ msg.getData()[2]=this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a500706225731d647969f86b27603133c}{boards}}[\mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}}].sensorPeriod;\ \textcolor{comment}{//\ period\ (ms)}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00325}00325\ \ \ \ \ \ \ \ \ msg.setLen(3);}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00326}00326\ \ \ \ \ \ \ \ \ canMessages=0;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00327}00327\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ ret\ =\ \mbox{\hyperlink{classCanBusInertialMTB_a7f6fe97c7f14f3ecbab68d7d789efc6f}{pCanBus}}-\/>canWrite(\mbox{\hyperlink{classCanBusInertialMTB_a34332144007868999bbf7089dc914157}{outBuffer}},\ 1,\ \&canMessages);}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00328}00328\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00329}00329\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(\ !ret\ )}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00330}00330\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00331}00331\ \ \ \ \ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}CanBusInertialMTB:\ canWrite\ returned\ false\ for\ sensor\ with\ address\ \%x"{}},this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a500706225731d647969f86b27603133c}{boards}}[\mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}}].boardId);}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00332}00332\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00333}00333\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00334}00334\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00335}00335\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00336}00336\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00337}00337\ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00338}00338\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00339}00339\ \textcolor{keywordtype}{void}\ CanBusInertialMTB::setPrivateBoardStatus(\textcolor{keywordtype}{int}\ boardIndex,\ \textcolor{keywordtype}{short}\ status)}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00340}00340\ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00341}00341\ \ \ \ \ \textcolor{keywordtype}{int}\ vectorOffset\ =\ this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a500706225731d647969f86b27603133c}{boards}}[boardIndex].vectorOffset;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00342}00342\ \ \ \ \ \textcolor{keywordtype}{int}\ nrOfBoardChannels\ =\ this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a500706225731d647969f86b27603133c}{boards}}[boardIndex].nrOfChannels;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00343}00343\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i=0;\ i\ <\ nrOfBoardChannels;\ i++\ )}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00344}00344\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00345}00345\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCanBusInertialMTB_a45ce6d8135106d528872e4381a6a1c20}{privateStatus}}[vectorOffset+i]\ =\ status;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00346}00346\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00347}00347\ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00348}00348\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00349}00349\ \textcolor{keywordtype}{void}\ CanBusInertialMTB::setPrivateBoardGyroStatus(\textcolor{keywordtype}{int}\ boardIndex,\ \textcolor{keywordtype}{short}\ status)}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00350}00350\ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00351}00351\ \ \ \ \ \textcolor{keywordtype}{int}\ vectorOffset\ =\ this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a500706225731d647969f86b27603133c}{boards}}[boardIndex].vectorOffset;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00352}00352\ \ \ \ \ \textcolor{keywordtype}{int}\ nrOfBoardChannels\ =\ this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a500706225731d647969f86b27603133c}{boards}}[boardIndex].nrOfChannels;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00353}00353\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i=3;\ i\ <\ 6;\ i++\ )}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00354}00354\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00355}00355\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCanBusInertialMTB_a45ce6d8135106d528872e4381a6a1c20}{privateStatus}}[vectorOffset+i]\ =\ status;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00356}00356\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00357}00357\ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00358}00358\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00359}00359\ \textcolor{keywordtype}{void}\ CanBusInertialMTB::setPrivateBoardAccStatus(\textcolor{keywordtype}{int}\ boardIndex,\ \textcolor{keywordtype}{short}\ status)}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00360}00360\ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00361}00361\ \ \ \ \ \textcolor{keywordtype}{int}\ vectorOffset\ =\ this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a500706225731d647969f86b27603133c}{boards}}[boardIndex].vectorOffset;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00362}00362\ \ \ \ \ \textcolor{keywordtype}{int}\ nrOfBoardChannels\ =\ this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a500706225731d647969f86b27603133c}{boards}}[boardIndex].nrOfChannels;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00363}00363\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i=0;\ i\ <\ 3;\ i++\ )}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00364}00364\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00365}00365\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCanBusInertialMTB_a45ce6d8135106d528872e4381a6a1c20}{privateStatus}}[vectorOffset+i]\ =\ status;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00366}00366\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00367}00367\ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00368}00368\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00369}\mbox{\hyperlink{classCanBusInertialMTB_adea0d4ae28f1fc699a6152e3c7d98b04}{00369}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classCanBusInertialMTB_adea0d4ae28f1fc699a6152e3c7d98b04}{CanBusInertialMTB::run}}()}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00370}00370\ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00371}00371\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ canMessages=0;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00372}00372\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00373}00373\ \ \ \ \ \textcolor{keywordtype}{bool}\ res=\mbox{\hyperlink{classCanBusInertialMTB_a7f6fe97c7f14f3ecbab68d7d789efc6f}{pCanBus}}-\/>canRead(\mbox{\hyperlink{classCanBusInertialMTB_a3b11904e8fee4a34d0f930a9a51163e1}{inBuffer}},\mbox{\hyperlink{CanBusInertialMTB_8cpp_a8e272f1e19f90ec294f98456f126c6b6}{CANBUS\_INERTIAL\_MTB\_CAN\_DRIVER\_BUFFER\_SIZE}},\&canMessages);}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00374}00374\ \ \ \ \ \textcolor{keywordflow}{if}\ (!res)}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00375}00375\ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}CanBusInertialMTB::run():\ canRead\ failed\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00376}00376\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00377}00377\ \ \ \ \ \textcolor{keywordtype}{double}\ timeNow=Time::now();}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00378}00378\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00379}00379\ \ \ \ \ \textcolor{keywordflow}{if}(canMessages\ <0)}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00380}00380\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00381}00381\ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}CanBusInertialMTB::run()\ get\ \%d\ canMessages\(\backslash\)n"{}},\ canMessages);}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00382}00382\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}}=0;\ \mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}}\ <\ this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a500706225731d647969f86b27603133c}{boards}}.size();\ \mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}}++\ )}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00383}00383\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00384}00384\ \ \ \ \ \ \ \ \ \ \ \ \ setPrivateBoardStatus(\mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}},IAnalogSensor::AS\_ERROR);}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00385}00385\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00386}00386\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00387}00387\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00388}00388\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00389}00389\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ i=0;\ i<canMessages;\ i++)}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00390}00390\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00391}00391\ \ \ \ \ \ \ \ \ CanMessage\ \&msg=\mbox{\hyperlink{classCanBusInertialMTB_a3b11904e8fee4a34d0f930a9a51163e1}{inBuffer}}[i];}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00392}00392\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00393}00393\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ msgid\ \ \ \ =\ msg.getId();}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00394}00394\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{char}\ *buff\ \ \ =\ msg.getData();}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00395}00395\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ len\ \ \ \ \ \ =\ msg.getLen();}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00396}00396\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{char}\ \ \ \textcolor{keywordtype}{id}\ \ \ \ \ \ =\ ((msgid\ \&\ 0x00f0)>>4);}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00397}00397\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ \ \ msg\_class\ \ =\ ((msgid\ \&\ 0x0700));}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00398}00398\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{char}\ \ msg\_type\ \ \ =\ ((msgid\ \&\ 0x000f));}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00399}00399\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00400}00400\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \(\backslash\)todo\ TODO\ substitute\ the\ double\ for\ with\ a\ boardId\ -\/>\ board\ index\ vector?\ Worth?}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00401}00401\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}}=0;\ \mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}}\ <\ this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a500706225731d647969f86b27603133c}{boards}}.size();\ \mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}}++\ )}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00402}00402\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00403}00403\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{short}\ \ \ \ \ boardId\ =\ this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a500706225731d647969f86b27603133c}{boards}}[\mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}}].boardId;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00404}00404\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ \ \ \ \ \ \ vectorOffset\ =\ this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a500706225731d647969f86b27603133c}{boards}}[\mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}}].vectorOffset;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00405}00405\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//parse\ data\ here}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00406}00406\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\textcolor{keywordtype}{id}==boardId\ \&\&\ msg\_class==\mbox{\hyperlink{CanBusInertialMTB_8cpp_a0a9eb47b0894c7a4e0ba6aff84c92b01}{CAN\_MSG\_CLASS\_ACC\_GYRO}}\ \&\&\ msg\_type\ ==\ \mbox{\hyperlink{CanBusInertialMTB_8cpp_a7f9e923f4e8ee38b0eb44c306716a1d7}{MSG\_TYPE\_ACC}})}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00407}00407\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00408}00408\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a500706225731d647969f86b27603133c}{boards}}[\mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}}].accTimeStamp=timeNow;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00409}00409\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCanBusInertialMTB_a52f3b92c14e852585a533ea180a5214d}{privateData}}[vectorOffset+0]=\ (\textcolor{keywordtype}{signed}\ short)\ ((buff[1]<<8)\ +\ buff[0]);}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00410}00410\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCanBusInertialMTB_a52f3b92c14e852585a533ea180a5214d}{privateData}}[vectorOffset+1]=\ (\textcolor{keywordtype}{signed}\ short)\ ((buff[3]<<8)\ +\ buff[2]);}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00411}00411\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCanBusInertialMTB_a52f3b92c14e852585a533ea180a5214d}{privateData}}[vectorOffset+2]=\ (\textcolor{keywordtype}{signed}\ short)\ ((buff[5]<<8)\ +\ buff[4]);}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00412}00412\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ setPrivateBoardAccStatus(\mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}},IAnalogSensor::AS\_OK);}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00413}00413\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00414}00414\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00415}00415\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\textcolor{keywordtype}{id}==boardId\ \&\&\ this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a500706225731d647969f86b27603133c}{boards}}[\mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}}].enabledGyro\ \&\&\ msg\_class==\mbox{\hyperlink{CanBusInertialMTB_8cpp_a0a9eb47b0894c7a4e0ba6aff84c92b01}{CAN\_MSG\_CLASS\_ACC\_GYRO}}\ \&\&\ msg\_type\ ==\ \mbox{\hyperlink{CanBusInertialMTB_8cpp_a3d80226697d9d1e6aeb192b28ff3ca3c}{MSG\_TYPE\_GYRO}})}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00416}00416\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00417}00417\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a500706225731d647969f86b27603133c}{boards}}[\mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}}].gyroTimeStamp=timeNow;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00418}00418\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCanBusInertialMTB_a52f3b92c14e852585a533ea180a5214d}{privateData}}[vectorOffset+3]=\ (\textcolor{keywordtype}{signed}\ short)\ (buff[1]<<8)+buff[0];}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00419}00419\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCanBusInertialMTB_a52f3b92c14e852585a533ea180a5214d}{privateData}}[vectorOffset+4]=\ (\textcolor{keywordtype}{signed}\ short)\ (buff[3]<<8)+buff[2];}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00420}00420\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCanBusInertialMTB_a52f3b92c14e852585a533ea180a5214d}{privateData}}[vectorOffset+5]=\ (\textcolor{keywordtype}{signed}\ short)\ (buff[5]<<8)+buff[4];}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00421}00421\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ setPrivateBoardGyroStatus(\mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}},IAnalogSensor::AS\_OK);}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00422}00422\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00423}00423\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00424}00424\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00425}00425\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00426}00426\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00427}00427\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00428}00428\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00429}00429\ \ \ \ \ \textcolor{keywordflow}{if}(\mbox{\hyperlink{classCanBusInertialMTB_a5ffe8f285c7e3bc4beb5b594d03513a5}{initted}})}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00430}00430\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00431}00431\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}}=0;\ \mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}}\ <\ this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a500706225731d647969f86b27603133c}{boards}}.size();\ \mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}}++\ )}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00432}00432\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00433}00433\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{short}\ \ boardId\ =\ this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a500706225731d647969f86b27603133c}{boards}}[\mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}}].boardId;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00434}00434\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00435}00435\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//if\ 100ms\ have\ passed\ since\ the\ last\ received\ message\ for\ gyro}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00436}00436\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ delay\ =\ timeNow-\/this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a500706225731d647969f86b27603133c}{boards}}[\mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}}].gyroTimeStamp;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00437}00437\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (delay\ >\ \mbox{\hyperlink{CanBusInertialMTB_8cpp_a2850897d8560a4e4ac2727ef2cc7b647}{CANBUS\_INERTIAL\_MTB\_TIMEOUT}}\ \&\&\ this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a500706225731d647969f86b27603133c}{boards}}[\mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}}].enabledGyro)}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00438}00438\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00439}00439\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}CanBusInertialMTB::run():\ gyroscope\ read\ for\ board\ \%x\ timed\ out\ (last\ received\ \%lf\ sec\ ago)"{}},boardId,delay);}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00440}00440\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ setPrivateBoardGyroStatus(\mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}},IAnalogSensor::AS\_TIMEOUT);}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00441}00441\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00442}00442\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00443}00443\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//if\ 100ms\ have\ passed\ since\ the\ last\ received\ message\ for\ acc}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00444}00444\ \ \ \ \ \ \ \ \ \ \ \ \ delay\ =\ timeNow-\/this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a500706225731d647969f86b27603133c}{boards}}[\mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}}].accTimeStamp;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00445}00445\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (delay\ >\ \mbox{\hyperlink{CanBusInertialMTB_8cpp_a2850897d8560a4e4ac2727ef2cc7b647}{CANBUS\_INERTIAL\_MTB\_TIMEOUT}})}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00446}00446\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00447}00447\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}CanBusInertialMTB::run():\ accelerometer\ read\ for\ board\ \%x\ timed\ out\ (last\ received\ \%lf\ sec\ ago)"{}},boardId,delay);}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00448}00448\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ setPrivateBoardAccStatus(\mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}},IAnalogSensor::AS\_TIMEOUT);}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00449}00449\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00450}00450\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00451}00451\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00452}00452\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00453}00453\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00454}00454\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ wait\ some\ time\ to\ have\ the\ device\ ready\ and\ avoid\ spurious\ timeout\ messages\ at\ startup}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00455}00455\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCanBusInertialMTB_a4a7f18055d90552b2157429ec71b9d20}{count}}++;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00456}00456\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(\mbox{\hyperlink{classCanBusInertialMTB_a4a7f18055d90552b2157429ec71b9d20}{count}}\ ==\ 10)}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00457}00457\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCanBusInertialMTB_a5ffe8f285c7e3bc4beb5b594d03513a5}{initted}}=\textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00458}00458\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00459}00459\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00460}00460\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00461}00461\ \ \ \ \ \textcolor{comment}{//Compute\ the\ global\ status}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00462}00462\ \ \ \ \ this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a4863d623c20bb03227b4461f641290fe}{privateGlobalStatus}}\ =\ IAnalogSensor::AS\_OK;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00463}00463\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ ch=0;\ ch\ <\ this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a7e3244b9cff247e47dc51f44e7e751a6}{nrOfTotalChannels}};\ ch+=\ 3)}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00464}00464\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00465}00465\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(\ this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a45ce6d8135106d528872e4381a6a1c20}{privateStatus}}[ch]\ ==\ IAnalogSensor::AS\_ERROR\ )}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00466}00466\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00467}00467\ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a4863d623c20bb03227b4461f641290fe}{privateGlobalStatus}}\ =\ IAnalogSensor::AS\_ERROR;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00468}00468\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00469}00469\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00470}00470\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(\ this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a45ce6d8135106d528872e4381a6a1c20}{privateStatus}}[ch]\ ==\ IAnalogSensor::AS\_TIMEOUT\ )}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00471}00471\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00472}00472\ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a4863d623c20bb03227b4461f641290fe}{privateGlobalStatus}}\ =\ IAnalogSensor::AS\_TIMEOUT;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00473}00473\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00474}00474\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00475}00475\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00476}00476\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00477}00477\ \ \ \ \ \textcolor{comment}{//\ Copy\ the\ data\ in\ the\ output\ data}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00478}00478\ \ \ \ \ lock\_guard<mutex>\ lck(\mbox{\hyperlink{classCanBusInertialMTB_a0dc49924f615d4bbdc089825490a47b2}{mtx}});}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00479}00479\ \ \ \ \ memcpy(\mbox{\hyperlink{classCanBusInertialMTB_a68d4e34b5a8d2e17dfafb95a1aa6702a}{data}}.data(),\ \mbox{\hyperlink{classCanBusInertialMTB_a52f3b92c14e852585a533ea180a5214d}{privateData}}.data(),\ \textcolor{keyword}{sizeof}(\textcolor{keywordtype}{double})*\mbox{\hyperlink{classCanBusInertialMTB_a52f3b92c14e852585a533ea180a5214d}{privateData}}.size());}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00480}00480\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{size\_t}\ ch=0;\ ch\ <\ \mbox{\hyperlink{classCanBusInertialMTB_a45ce6d8135106d528872e4381a6a1c20}{privateStatus}}.size();\ ch++\ )}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00481}00481\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00482}00482\ \ \ \ \ \ \ \ \ this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a1dc6fa9c323c741e30478b2f798a3b21}{sharedStatus}}[ch]\ =\ \ this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a45ce6d8135106d528872e4381a6a1c20}{privateStatus}}[ch];}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00483}00483\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00484}00484\ \ \ \ \ this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a573d90fa91614f757bd9b2fff976e872}{sharedGlobalStatus}}\ =\ this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a4863d623c20bb03227b4461f641290fe}{privateGlobalStatus}};}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00485}00485\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00486}00486\ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00487}00487\ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00488}00488\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00489}\mbox{\hyperlink{classCanBusInertialMTB_a345f7b2c3129751ce3b5a8beda080f55}{00489}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classCanBusInertialMTB_a345f7b2c3129751ce3b5a8beda080f55}{CanBusInertialMTB::threadRelease}}()}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00490}00490\ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00491}00491\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}}=0;\ \mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}}\ <\ this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a500706225731d647969f86b27603133c}{boards}}.size();\ \mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}}++\ )}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00492}00492\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00493}00493\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ canMessages=0;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00494}00494\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{id}\ =\ 0x200\ +\ this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a500706225731d647969f86b27603133c}{boards}}[\mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}}].boardId;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00495}00495\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00496}00496\ \ \ \ \ \ \ \ \ CanMessage\ \&msg=\mbox{\hyperlink{classCanBusInertialMTB_a34332144007868999bbf7089dc914157}{outBuffer}}[0];}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00497}00497\ \ \ \ \ \ \ \ \ msg.setId(\textcolor{keywordtype}{id});}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00498}00498\ \ \ \ \ \ \ \ \ msg.getData()[0]=ICUBCANPROTO\_POL\_SK\_CMD\_\_ACC\_GYRO\_SETUP;\ \textcolor{comment}{//\ message\ type}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00499}00499\ \ \ \ \ \ \ \ \ msg.getData()[1]=0x0;\ \textcolor{comment}{//\ disable\ all\ the\ sensors}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00500}00500\ \ \ \ \ \ \ \ \ msg.getData()[2]=0x1;\ \textcolor{comment}{//\ period\ (ms)}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00501}00501\ \ \ \ \ \ \ \ \ msg.setLen(3);}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00502}00502\ \ \ \ \ \ \ \ \ canMessages=0;}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00503}00503\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ ret\ =\ \mbox{\hyperlink{classCanBusInertialMTB_a7f6fe97c7f14f3ecbab68d7d789efc6f}{pCanBus}}-\/>canWrite(\mbox{\hyperlink{classCanBusInertialMTB_a34332144007868999bbf7089dc914157}{outBuffer}},\ 1,\ \&canMessages);}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00504}00504\ }
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00505}00505\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(\ !ret\ )}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00506}00506\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00507}00507\ \ \ \ \ \ \ \ \ \ \ \ \ yError(\textcolor{stringliteral}{"{}CanBusInertialMTB:\ canWrite\ returned\ false\ for\ sensor\ with\ address\ \%x"{}},this-\/>\mbox{\hyperlink{classCanBusInertialMTB_a500706225731d647969f86b27603133c}{boards}}[\mbox{\hyperlink{debugFunctions_8cpp_a387aed6ca89cc24e456666d7df7c1fa0}{board}}].boardId);}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00508}00508\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00509}00509\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00510}00510\ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00511}00511\ \}}
+\DoxyCodeLine{\Hypertarget{CanBusInertialMTB_8cpp_source_l00512}00512\ }
+
+\end{DoxyCode}

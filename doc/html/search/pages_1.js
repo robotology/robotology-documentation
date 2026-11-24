@@ -1,0 +1,26 @@
+var searchData=
+[
+  ['2_201_20control_20law_20paramvalues_3a_3acontrollaw_0',['2.1 Control law (&lt;span class=&quot;tt&quot;&gt;ParamValues::controlLaw&lt;/span&gt;)',['../md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2embObjMotionControlConfigurationDefaults.html#autotoc_md22',1,'']]],
+  ['2_201_20raw_20adc_20data_20or_20ft_20data_1',['2.1. Raw ADC data or FT data',['../dir_15700a512f3bde6dbe65cf4d19589c35.html#autotoc_md126',1,'']]],
+  ['2_202_20feedback_20control_20units_20paramvalues_3a_3afbkunits_2',['2.2 Feedback control units (&lt;span class=&quot;tt&quot;&gt;ParamValues::fbkUnits&lt;/span&gt;)',['../md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2embObjMotionControlConfigurationDefaults.html#autotoc_md23',1,'']]],
+  ['2_203_20output_20control_20units_20paramvalues_3a_3aoutunits_3',['2.3 Output control units (&lt;span class=&quot;tt&quot;&gt;ParamValues::outUnits&lt;/span&gt;)',['../md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2embObjMotionControlConfigurationDefaults.html#autotoc_md24',1,'']]],
+  ['2_204_20output_20type_20paramvalues_3a_3aoutputtype_4',['2.4 Output type (&lt;span class=&quot;tt&quot;&gt;ParamValues::outputType&lt;/span&gt;)',['../md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2embObjMotionControlConfigurationDefaults.html#autotoc_md25',1,'']]],
+  ['2_205_20temperature_20sensor_20type_20paramvalues_3a_3atemperaturesensor_5',['2.5 Temperature sensor type (&lt;span class=&quot;tt&quot;&gt;ParamValues::temperatureSensor&lt;/span&gt;)',['../md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2embObjMotionControlConfigurationDefaults.html#autotoc_md26',1,'']]],
+  ['2_206_20axis_20type_20paramvalues_3a_3aaxistype_6',['2.6 Axis type (&lt;span class=&quot;tt&quot;&gt;ParamValues::axisType&lt;/span&gt;)',['../md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2embObjMotionControlConfigurationDefaults.html#autotoc_md27',1,'']]],
+  ['2_207_20control_20mode_20keys_20paramvalues_3a_3acontrolmode_7',['2.7 Control mode keys (&lt;span class=&quot;tt&quot;&gt;ParamValues::controlMode&lt;/span&gt;)',['../md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2embObjMotionControlConfigurationDefaults.html#autotoc_md28',1,'']]],
+  ['2_20allowed_20string_20tokens_20validation_20values_8',['2. Allowed string tokens (validation values)',['../md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2embObjMotionControlConfigurationDefaults.html#autotoc_md21',1,'']]],
+  ['2_20can_20battery_9',['3.2. Can battery',['../dir_b7a553fe0ffb2e4dd036ca37c65c8eb6.html#autotoc_md144',1,'']]],
+  ['2_20control_20architecture_10',['2. Control Architecture',['../md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide.html#autotoc_md63',1,'']]],
+  ['2_20current_20output_11',['4.2 Current Output',['../md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide.html#autotoc_md81',1,'']]],
+  ['2_20feedback_20control_20units_20paramvalues_3a_3afbkunits_12',['2.2 Feedback control units (&lt;span class=&quot;tt&quot;&gt;ParamValues::fbkUnits&lt;/span&gt;)',['../md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2embObjMotionControlConfigurationDefaults.html#autotoc_md23',1,'']]],
+  ['2_20initializing_20motor_20devices_13',['2. Initializing Motor Devices',['../icub_anyrobot_cartesian_interface.html#subsec_customcart_solver_initdevices',1,'']]],
+  ['2_20minjerk_20modes_20with_20current_20output_14',['5.2 MinJerk Modes with Current Output',['../md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide.html#autotoc_md91',1,'']]],
+  ['2_20output_20format_15',['2 Output format',['../dir_e8fa20001492bf8967feaacffdfc8a14.html#autotoc_md13',1,'3.2. Output format'],['../dir_15700a512f3bde6dbe65cf4d19589c35.html#autotoc_md129',1,'3.2. Output format']]],
+  ['2_20position_20direct_20control_16',['3.2 Position Direct Control',['../md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide.html#autotoc_md70',1,'']]],
+  ['2_20shared_20pid_20name_20across_20position_20velocity_20mixed_20control_17',['5.2 Shared PID name across position / velocity / mixed control',['../md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2embObjMotionControlConfigurationDefaults.html#autotoc_md41',1,'']]],
+  ['2_20test_20execution_18',['2. Test execution',['../dir_b7a553fe0ffb2e4dd036ca37c65c8eb6.html#autotoc_md141',1,'']]],
+  ['2_20timeouts_20group_19',['3.2 TIMEOUTS group',['../md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2embObjMotionControlConfigurationDefaults.html#autotoc_md31',1,'']]],
+  ['2_20visual_20studio_20code_20debugging_20',['2 Visual studio code debugging',['../dir_15700a512f3bde6dbe65cf4d19589c35.html#autotoc_md132',1,'4.2. Visual studio code debugging'],['../dir_e8fa20001492bf8967feaacffdfc8a14.html#autotoc_md17',1,'5.2. Visual studio code debugging']]],
+  ['2_20x_20array_20interface_21',['YARP images with Python 2.x / array interface',['../icub_python_imaging.html#array_interface',1,'']]],
+  ['2_20xml_20configuration_20file_22',['2 XML configuration file',['../dir_e8fa20001492bf8967feaacffdfc8a14.html#autotoc_md10',1,'2. XML configuration file'],['../dir_15700a512f3bde6dbe65cf4d19589c35.html#autotoc_md125',1,'2. XML configuration file']]]
+];

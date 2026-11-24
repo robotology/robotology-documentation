@@ -1,0 +1,467 @@
+\chapter{YARP 4 Motor Control Modes and Velocity Control }
+\hypertarget{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide}{}\label{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide}\index{YARP 4 Motor Control Modes and Velocity Control@{YARP 4 Motor Control Modes and Velocity Control}}
+\label{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md59}%
+\Hypertarget{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md59}%
+
+
+This document describes the motor-\/control extensions introduced during the work related to \href{https://github.com/robotology/icub-firmware/issues/615}{\texttt{robotology/icub-\/firmware\#615}}.
+
+The main goals are\+:
+
+
+\begin{DoxyItemize}
+\item Introduce a dedicated {\bfseries{Velocity Direct}} control mode.
+\item Allow velocity control to generate either\+:
+\begin{DoxyItemize}
+\item a direct {\bfseries{PWM}} command, or
+\item a {\bfseries{current}} reference processed by the internal current loop.
+\end{DoxyItemize}
+\item Make the different combinations of high-\/level control modes and low-\/level outputs configurable.
+\item Update the YARP interfaces, configuration files, parser, communication protocol, EMS firmware, and 2FOC firmware accordingly.
+\item Provide clearer PID configuration and descriptions in {\ttfamily yarpmotorgui}.
+\item Introduce the {\ttfamily Feed\+Foward}parameter in the {\ttfamily Velocity Direct} with inner current control.
+\item Configure Kbemf in as motor parameter and use it in current control loop.
+\end{DoxyItemize}
+
+\DoxyHorRuler{0}
+\hypertarget{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md61}{}\doxysection{\texorpdfstring{1. Background}{1. Background}}\label{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md61}
+The original velocity-\/control implementation relied on a trajectory generator, commonly referred to as {\bfseries{Min\+Jerk}}. The input velocity reference was first processed by the trajectory generator before being passed to the subsequent control loops.
+
+This implementation remains available and is referred to as the {\bfseries{standard}} or {\bfseries{classic velocity control}} mode.
+
+The new architecture also supports direct control modes in which the trajectory generator is bypassed. This is useful when the user needs to send a velocity reference directly to the control loop without additional interpolation.
+
+\DoxyHorRuler{0}
+\hypertarget{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md63}{}\doxysection{\texorpdfstring{2. Control Architecture}{2. Control Architecture}}\label{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md63}
+The control chain can be divided into two main levels\+:\hypertarget{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md64}{}\doxysubsection{\texorpdfstring{High-\/level control}{High-\/level control}}\label{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md64}
+High-\/level controllers generally run at approximately 1 k\+Hz and include\+:
+
+
+\begin{DoxyItemize}
+\item Position control.
+\item Velocity control.
+\item Mixed position/velocity control.
+\item Position Direct control.
+\item Velocity Direct control.
+\item The trajectory-\/generation stage, such as Min\+Jerk.
+\end{DoxyItemize}\hypertarget{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md65}{}\doxysubsection{\texorpdfstring{Low-\/level control}{Low-\/level control}}\label{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md65}
+Low-\/level controllers are implemented on the motor-\/control boards and include\+:
+
+
+\begin{DoxyItemize}
+\item PWM output.
+\item Current control.
+\item Velocity control.
+\item Velocity control with an internal current loop.
+\item Current limiting and motor-\/side feedback processing.
+\end{DoxyItemize}
+
+The final control law is selected through the motor-\/control configuration files. Different control schemes can be obtained by enabling or disabling branches of the general control structure and by configuring the corresponding PID parameters.
+
+\DoxyHorRuler{0}
+\hypertarget{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md67}{}\doxysection{\texorpdfstring{3. Control Modes}{3. Control Modes}}\label{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md67}
+\hypertarget{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md68}{}\doxysubsection{\texorpdfstring{3.\+1 Standard Position Control}{3.\+1 Standard Position Control}}\label{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md68}
+In standard position control, the position reference is processed by the trajectory generator. The generated trajectory is then used by the position controller.
+
+The output of the position controller can be connected to different low-\/level control modes, such as\+:
+
+
+\begin{DoxyItemize}
+\item PWM.
+\item Current.
+\item Velocity.
+\item Velocity with an internal current loop.
+\end{DoxyItemize}
+
+The trajectory generator is enabled in this mode.
+
+\DoxyHorRuler{0}
+\hypertarget{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md70}{}\doxysubsection{\texorpdfstring{3.\+2 Position Direct Control}{3.\+2 Position Direct Control}}\label{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md70}
+Position Direct bypasses the trajectory generator.
+
+The position reference is sent directly to the position controller. A velocity reference can also be sent together with the position reference and used as a feedforward term.
+
+Position Direct can be combined with the following low-\/level outputs\+:
+
+
+\begin{DoxyItemize}
+\item PWM.
+\item Current.
+\item Velocity.
+\item Velocity with an internal current loop.
+\end{DoxyItemize}
+
+The position-\/direct PID is already available on the EMS board. The associated PID parameters must be correctly exposed through the configuration protocol and YARP configuration pipeline.
+
+\DoxyHorRuler{0}
+\hypertarget{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md72}{}\doxysubsection{\texorpdfstring{3.\+3 Standard Velocity Control}{3.\+3 Standard Velocity Control}}\label{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md72}
+Standard velocity control uses the trajectory generator. The velocity reference is interpolated before being sent to the velocity controller.
+
+The velocity controller can generate\+:
+
+
+\begin{DoxyItemize}
+\item A PWM command.
+\item A current reference.
+\item A velocity reference for a lower-\/level velocity loop.
+\item A velocity reference followed by the internal current loop.
+\end{DoxyItemize}
+
+This mode is intended to preserve compatibility with the existing control behavior.
+
+\DoxyHorRuler{0}
+\hypertarget{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md74}{}\doxysubsection{\texorpdfstring{3.\+4 Velocity Direct Control}{3.\+4 Velocity Direct Control}}\label{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md74}
+{\bfseries{Velocity Direct}} is the main new YARP 4 control mode.
+
+In this mode\+:
+
+
+\begin{DoxyItemize}
+\item The velocity reference is sent directly to the velocity controller.
+\item The Min\+Jerk trajectory generator is bypassed.
+\item The output can be configured as either\+:
+\begin{DoxyItemize}
+\item PWM, or
+\item current.
+\end{DoxyItemize}
+\end{DoxyItemize}
+
+The mode is intended for applications requiring direct velocity control on the motor-\/side.
+
+The new YARP interface exposes the direct velocity command through a dedicated interface containing the {\ttfamily set\+Velocity} operation.
+
+{\bfseries{In 2FOC case}}\+: The user configures the PID gains in machine-\/unit and velocity references have to be in metric unit.
+
+The Velocity Direct mode is explicitly distinguished from the original velocity-\/control mode.
+
+\DoxyHorRuler{0}
+\hypertarget{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md76}{}\doxysubsection{\texorpdfstring{3.\+5 Mixed Control}{3.\+5 Mixed Control}}\label{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md76}
+The Mixed mode accepts both position and velocity references.
+
+The velocity reference can be used as a feedforward component while the position reference is processed by the position controller. The exact behavior depends on the motor-\/control configuration.
+
+The existing YARP {\ttfamily MIXED} mode was considered for this purpose. However, the final control law must be defined explicitly at the configuration and firmware levels rather than relying only on the historical behavior of the interface.
+
+\DoxyHorRuler{0}
+\hypertarget{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md78}{}\doxysection{\texorpdfstring{4. Low-\/\+Level Output Modes}{4. Low-\/\+Level Output Modes}}\label{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md78}
+The high-\/level controller can be connected to different low-\/level output stages.\hypertarget{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md79}{}\doxysubsection{\texorpdfstring{4.\+1 PWM Output}{4.\+1 PWM Output}}\label{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md79}
+With PWM output, the controller directly generates a PWM command for the motor.
+
+The current loop is not explicitly included in the configured control chain. However, the 2FOC board can still apply current limiting where required.
+
+This mode is useful when the user needs direct torque-\/like actuation through PWM.
+
+\DoxyHorRuler{0}
+\hypertarget{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md81}{}\doxysubsection{\texorpdfstring{4.\+2 Current Output}{4.\+2 Current Output}}\label{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md81}
+With current output, the high-\/level controller generates a current reference.
+
+The current reference is then processed by the internal current loop on the 2FOC board. This provides a cascaded architecture in which the current controller regulates the motor current take into account the {\ttfamily Kbemf} paramter
+
+This mode is useful when current regulation and torque control are required.
+
+\DoxyHorRuler{0}
+\hypertarget{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md83}{}\doxysubsection{\texorpdfstring{4.\+3 Velocity Output}{4.\+3 Velocity Output}}\label{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md83}
+With velocity output, the high-\/level control generates a velocity reference for a lower-\/level velocity controller.
+
+This allows the control law to be split across different levels, for example\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{Position\ controller\ →\ Velocity\ controller\ →\ PWM}
+
+\end{DoxyCode}
+
+
+or\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{Position\ controller\ →\ Velocity\ controller\ →\ Current\ controller}
+
+\end{DoxyCode}
+
+
+\DoxyHorRuler{0}
+\hypertarget{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md85}{}\doxysubsection{\texorpdfstring{4.\+4 Velocity with Internal Current Loop}{4.\+4 Velocity with Internal Current Loop}}\label{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md85}
+The {\ttfamily velocity\+\_\+current} output combines a velocity loop and an internal current loop\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{Velocity\ controller\ →\ Current\ controller\ →\ Motor}
+
+\end{DoxyCode}
+
+
+The velocity controller generates a current reference, which is then processed by the current loop on the 2FOC board.
+
+\DoxyHorRuler{0}
+\hypertarget{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md87}{}\doxysection{\texorpdfstring{5. Motor Control Structure}{5. Motor Control Structure}}\label{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md87}
+The new architecture aims to provide a flexible control structure rather than implementing a separate fixed schema for every possible combination.
+
+The following diagrams summarize the main control-\/mode combinations.
+
+The diagrams are graphical representations of the control chains implemented across the EMS and 2FOC boards.
+
+These schemes can be adapted to any other embedded board (for example, an AMC-\/family board), abstracting away where the control loop runs while preserving the control flow.
+
+\DoxyHorRuler{0}
+\hypertarget{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md89}{}\doxysubsection{\texorpdfstring{5.\+1 Min\+Jerk Modes with PWM Output}{5.\+1 Min\+Jerk Modes with PWM Output}}\label{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md89}
+This configuration includes the Min\+Jerk trajectory generator and supports Position, Velocity, and Mixed high-\/level modes.
+
+The final output is PWM.
+
+
+
+\DoxyHorRuler{0}
+\hypertarget{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md91}{}\doxysubsection{\texorpdfstring{5.\+2 Min\+Jerk Modes with Current Output}{5.\+2 Min\+Jerk Modes with Current Output}}\label{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md91}
+This configuration includes the Min\+Jerk trajectory generator and generates a current reference for the internal current loop.
+
+
+
+\DoxyHorRuler{0}
+\hypertarget{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md93}{}\doxysubsection{\texorpdfstring{5.\+3 Min\+Jerk Modes with Velocity Output}{5.\+3 Min\+Jerk Modes with Velocity Output}}\label{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md93}
+This configuration includes the Min\+Jerk trajectory generator and generates a velocity reference for the lower-\/level velocity controller.
+
+
+
+\DoxyHorRuler{0}
+\hypertarget{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md95}{}\doxysubsection{\texorpdfstring{5.\+4 Min\+Jerk Modes with Velocity and Current Control}{5.\+4 Min\+Jerk Modes with Velocity and Current Control}}\label{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md95}
+This configuration includes\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{MinJerk\ →\ Position/Velocity/Mixed\ control\ →\ Velocity\ loop\ →\ Current\ loop}
+
+\end{DoxyCode}
+
+
+The {\ttfamily velocity\+\_\+current} output mode is already available in the 2FOC board. The configuration protocol must expose and configure it consistently.
+
+
+
+\DoxyHorRuler{0}
+\hypertarget{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md97}{}\doxysubsection{\texorpdfstring{5.\+5 Position Direct with PWM Output}{5.\+5 Position Direct with PWM Output}}\label{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md97}
+In this configuration, the Min\+Jerk trajectory generator is bypassed.
+
+The position reference is processed by the Position Direct PID, which generates a PWM command.
+
+
+
+The Position Direct PID is already implemented on the EMS board. Its parameters must be made available through the configuration protocol.
+
+\DoxyHorRuler{0}
+\hypertarget{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md99}{}\doxysubsection{\texorpdfstring{5.\+6 Position Direct with Current Output}{5.\+6 Position Direct with Current Output}}\label{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md99}
+The Position Direct controller generates a current reference, which is processed by the internal current loop.
+
+
+
+The control chain is\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{Position\ reference\ →\ Position\ Direct\ PID\ →\ Current\ reference\ →\ Current\ loop}
+
+\end{DoxyCode}
+
+
+\DoxyHorRuler{0}
+\hypertarget{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md101}{}\doxysubsection{\texorpdfstring{5.\+7 Position Direct with Velocity Output}{5.\+7 Position Direct with Velocity Output}}\label{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md101}
+The Position Direct controller generates a velocity reference for the lower-\/level velocity controller.
+
+
+
+The control chain is\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{Position\ reference\ →\ Position\ Direct\ PID\ →\ Velocity\ loop}
+
+\end{DoxyCode}
+
+
+A velocity feedforward reference can also be sent together with the position reference when supported by the selected interface and configuration.
+
+\DoxyHorRuler{0}
+\hypertarget{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md103}{}\doxysubsection{\texorpdfstring{5.\+8 Position Direct with Velocity and Current Control}{5.\+8 Position Direct with Velocity and Current Control}}\label{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md103}
+This configuration combines Position Direct with a velocity loop and an internal current loop.
+
+
+
+The control chain is\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{Position\ reference}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ │}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ ▼}
+\DoxyCodeLine{Position\ Direct\ PID}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ │}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ ▼}
+\DoxyCodeLine{Velocity\ loop}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ │}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ ▼}
+\DoxyCodeLine{Current\ loop}
+
+\end{DoxyCode}
+
+
+Both the Position Direct PID and the {\ttfamily velocity\+\_\+current} output mode must be configured through the complete software and firmware pipeline.
+
+\DoxyHorRuler{0}
+\hypertarget{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md105}{}\doxysection{\texorpdfstring{8. YARP 4 Changes}{8. YARP 4 Changes}}\label{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md105}
+The integration of the new control modes requires YARP 4. Here is the link to the YARP4 change log\+: \href{https://github.com/robotology/yarp/blob/master/doc/release/v4_0_0.MD}{\texttt{https\+://github.\+com/robotology/yarp/blob/master/doc/release/v4\+\_\+0\+\_\+0.\+MD}}\hypertarget{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md106}{}\doxysubsection{\texorpdfstring{Changes in YARP4 interfaces}{Changes in YARP4 interfaces}}\label{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md106}
+\hypertarget{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md107}{}\doxysubsubsection{\texorpdfstring{Return Values}{Return Values}}\label{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md107}
+Several YARP interfaces changed their return type from {\ttfamily bool} to {\ttfamily Return\+Value}.
+
+Implementations must use\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{ReturnValue\_ok}
+
+\end{DoxyCode}
+
+
+instead of returning {\ttfamily true}. \hypertarget{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md108}{}\doxysubsubsection{\texorpdfstring{IPIDControl interface}{IPIDControl interface}}\label{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md108}
+
+\begin{DoxyItemize}
+\item Return Type Changes All PID interface methods now return {\itshape Return\+Value} instead of bool
+\item New 4 Methods Added\+:
+\begin{DoxyItemize}
+\item {\ttfamily set\+Pid\+Feedforward\+Raw} -\/ e\textquotesingle{}un valore satreeming che viene mandato e che viene moltiplicato per KFF sets the PID feedforward \mbox{[}NOTE\+: in the protocol we use already the kff and offset. are thy used for the same purpose?\mbox{]}
+\item {\ttfamily get\+Pid\+Offset\+Raw} -\/ gets the PID offset (with double\& instead of double\+\_\+)
+\item {\ttfamily get\+Pid\+Feedforward\+Raw} -\/ gets the PID feedforward
+\item {\ttfamily get\+Pid\+Extra\+Info\+Raw} and {\ttfamily get\+Pid\+Extra\+Infos\+Raw} -\/ get extra information about PIDs Parameter Changes
+\item {\ttfamily is\+Pid\+Enabled\+Raw}\+: the enabled parameter changed from bool\+\_\+ to bool\& (reference instead of pointer) \mbox{[}NOTE\+: no to be implemented\mbox{]}
+\end{DoxyItemize}
+\end{DoxyItemize}\hypertarget{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md109}{}\doxysubsubsection{\texorpdfstring{IPosition\+Control}{IPosition\+Control}}\label{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md109}
+
+\begin{DoxyItemize}
+\item Return Type Changes All PID interface methods now return {\itshape Return\+Value} instead of bool
+\item Some methos has been renamed to make the meanfully, but the implementation is the same \texorpdfstring{$>$}{>}\mbox{[}!\+NOTE\+: \mbox{]} \begin{quote}
+\end{quote}
+
+\item Methods containing {\ttfamily ref} refer to direct control references.
+\item Methods containing {\ttfamily traj} refer to trajectory-\/based control references. 
+\end{DoxyItemize}
+
+
+\begin{DoxyTable}{3}{}{}{1}
+\SetCell{c,bg=\tableheadbgcolor,font=\bfseries}\#  &\SetCell{c,bg=\tableheadbgcolor,font=\bfseries}Old Method Name (origin/master)  &\SetCell{c,bg=\tableheadbgcolor,font=\bfseries}New Method Name (current)  \\
+1  &{\ttfamily set\+Ref\+Speed\+Raw}  &{\ttfamily set\+Traj\+Speed\+Raw}  \\
+2  &{\ttfamily set\+Ref\+Speeds\+Raw}  &{\ttfamily set\+Traj\+Speeds\+Raw}  \\
+3  &{\ttfamily get\+Ref\+Speed\+Raw}  &{\ttfamily get\+Traj\+Speed\+Raw}  \\
+4  &{\ttfamily get\+Ref\+Speeds\+Raw}  &{\ttfamily get\+Traj\+Speeds\+Raw}  \\
+5  &{\ttfamily set\+Ref\+Acceleration\+Raw}  &{\ttfamily set\+Traj\+Acceleration\+Raw}  \\
+6  &{\ttfamily set\+Ref\+Accelerations\+Raw}  &{\ttfamily set\+Traj\+Accelerations\+Raw}  \\
+7  &{\ttfamily get\+Ref\+Acceleration\+Raw}  &{\ttfamily get\+Traj\+Acceleration\+Raw}  \\
+8  &{\ttfamily get\+Ref\+Accelerations\+Raw}  &{\ttfamily get\+Traj\+Accelerations\+Raw}  \\
+\end{DoxyTable}
+\hypertarget{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md110}{}\doxysubsubsection{\texorpdfstring{IVelocity\+Control}{IVelocity\+Control}}\label{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md110}
+
+\begin{DoxyTable}{3}{}{}{1}
+\SetCell{c,bg=\tableheadbgcolor,font=\bfseries}\#  &\SetCell{c,bg=\tableheadbgcolor,font=\bfseries}Old Method Name (origin/master)  &\SetCell{c,bg=\tableheadbgcolor,font=\bfseries}New Method Name (current)  \\
+1  &{\ttfamily get\+Ref\+Velocity\+Raw}  &{\ttfamily get\+Target\+Velocity\+Raw}  \\
+2  &{\ttfamily get\+Ref\+Velocities\+Raw}  &{\ttfamily get\+Target\+Velocities\+Raw}  \\
+\end{DoxyTable}
+\hypertarget{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md111}{}\doxysubsubsection{\texorpdfstring{IVelocity\+Direct}{IVelocity\+Direct}}\label{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md111}
+YARP 4 introduces the {\ttfamily Velocity Direct} control mode.
+
+This mode is distinct from the existing velocity mode\+:
+
+
+\begin{DoxyTable}{3}{}{}{1}
+\SetCell{c,bg=\tableheadbgcolor,font=\bfseries}Control mode  &\SetCell{r,bg=\tableheadbgcolor,font=\bfseries}Trajectory generator  &\SetCell{c,bg=\tableheadbgcolor,font=\bfseries}Reference  \\
+Velocity  &\SetCell{r}Enabled  &Velocity reference processed by the trajectory generator  \\
+Velocity Direct  &\SetCell{r}Disabled  &Direct velocity reference  \\
+\end{DoxyTable}
+
+
+The direct mode is intended for applications where the velocity command must be applied without Min\+Jerk interpolation.
+
+These are the main functions
+
+
+\begin{DoxyItemize}
+\item {\ttfamily set\+Ref\+Velocity\+Raw(int jnt, double vel)}
+\item {\ttfamily set\+Ref\+Velocity\+Raw(const std\+::vector\& vels)}
+\item {\ttfamily set\+Ref\+Velocity\+Raw(const std\+::vector\& jnts, const std\+::vector\& vels)}
+\item {\ttfamily get\+Ref\+Velocity\+Raw(const int jnt, double\& vel)}
+\item {\ttfamily get\+Ref\+Velocity\+Raw(std\+::vector\& vels)}
+\item {\ttfamily get\+Ref\+Velocity\+Raw(const std\+::vector\& jnts, std\+::vector\& vels)}
+\end{DoxyItemize}
+
+{\bfseries{Important Note\+:}} The name {\ttfamily get\+Ref\+Velocity\+Raw} has been {\bfseries{repurposed}} for the new Velocity\+Direct interface, while in the IVelocity\+Control2 interface, it has been renamed to {\ttfamily get\+Target\+Velocity\+Raw}.\hypertarget{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md112}{}\doxysubsubsection{\texorpdfstring{PID Information and Descriptions}{PID Information and Descriptions}}\label{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md112}
+YARP 4 and {\ttfamily yarpmotorgui} support richer PID information.
+
+A PID can include\+:
+
+
+\begin{DoxyItemize}
+\item PID type.
+\item Input type.
+\item Output type.
+\item Measurement units.
+\item Additional notes.
+\item A textual description.
+\end{DoxyItemize}
+
+A {\ttfamily PIDWith\+Extra\+Info} object was introduced to expose additional PID information through setter and getter methods.
+
+The GUI can display the PID description read from the XML configuration file.
+
+Each control mode can be associated with multiple PID parameter sets. The configuration may contain separate PID sets for\+:
+
+
+\begin{DoxyItemize}
+\item Normal control.
+\item Direct control.
+\item Mixed control.
+\end{DoxyItemize}
+
+The presence of multiple PID sets does not necessarily mean that the control mode can be switched dynamically at runtime. The active set is selected according to the configured control mode.\hypertarget{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md113}{}\doxysubsubsection{\texorpdfstring{Multiple\+Analog\+Sensor}{Multiple\+Analog\+Sensor}}\label{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md113}
+the devices of type Analof\+Sensor have been replaced with Multiple\+Analog\+Sensor type
+
+\DoxyHorRuler{0}
+
+
+\DoxyHorRuler{0}
+
+
+\DoxyHorRuler{0}
+\hypertarget{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md117}{}\doxysection{\texorpdfstring{9. Configuration Changes}{9. Configuration Changes}}\label{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md117}
+The motor-\/control XML configuration is extended to distinguish the different control modes and PID types.
+
+The main configuration concepts include\+:\hypertarget{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md118}{}\doxysubsubsection{\texorpdfstring{the MC file}{the MC file}}\label{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md118}
+
+\begin{DoxyItemize}
+\item Group CONTROL\+:
+\begin{DoxyItemize}
+\item subtitute {\ttfamily speed\+Pid} with {\ttfamily velocity\+Direct}
+\item renamed {\ttfamily pos\+Direct\+Control}in {\ttfamily position\+Direct}
+\item renamed {\ttfamily current\+Pid}in {\ttfamily current\+Control}
+\item the control\+Law of {\ttfamily position\+Direct}in {\ttfamily direct}.
+\item il control {\ttfamily velocity\+Direct}has {\ttfamily direct}in control\+Law instead of {\ttfamily lowlevelspeed} Note\+: all control types are mandatory
+\end{DoxyItemize}
+\item In each PID GROUP\+:
+\begin{DoxyItemize}
+\item Control\+Law has value (see default)
+\item {\ttfamily Output\+Type}is mandatory (see default values)
+\end{DoxyItemize}
+\end{DoxyItemize}\hypertarget{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md119}{}\doxysubsubsection{\texorpdfstring{The MEC file}{The MEC file}}\label{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md119}
+
+\begin{DoxyItemize}
+\item bump {\ttfamily Motioncontrol\+Version}to 7
+\item Sobtituite {\ttfamily Has\+Temp\+Sensor}with {\ttfamily Temperature\+Sensor\+Type}(see default values)
+\end{DoxyItemize}\hypertarget{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md120}{}\doxysubsection{\texorpdfstring{Sensors configuration files}{Sensors configuration files}}\label{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md120}
+Every sensors config type has been updated with Multiple\+Analog\+Sensor and the respective Wrapper and Remapper with Multiple\+Analog\+Server. (Analog\+Server \& Skin\+Wrapper ==\texorpdfstring{$>$}{>} multipleanalogsensorsserver)
+
+\DoxyHorRuler{0}
+\hypertarget{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md122}{}\doxysection{\texorpdfstring{References}{References}}\label{md_icub-main_2src_2libraries_2icubmod_2embObjMotionControl_2YARP4__Velocity__Control__Guide_autotoc_md122}
+
+\begin{DoxyItemize}
+\item \href{https://github.com/robotology/icub-firmware/issues/615}{\texttt{Velocity control improvements – issue \#615}}
+\item \href{https://github.com/robotology/yarp/pull/3270}{\texttt{YARP pull request \#3270}}
+\item \href{https://github.com/isorrentino/motor-control-configuration}{\texttt{Motor-\/control configuration examples}}
+\item \href{https://www.yarp.it/}{\texttt{YARP documentation}} 
+\end{DoxyItemize}

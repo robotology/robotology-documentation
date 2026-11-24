@@ -1,0 +1,202 @@
+\doxysection{tutorial\+\_\+arm\+\_\+joint\+\_\+impedance.\+cpp}
+\hypertarget{tutorial__arm__joint__impedance_8cpp_source}{}\label{tutorial__arm__joint__impedance_8cpp_source}\index{icub-\/tutorials/src/motorControlImpedance/tutorial\_arm\_joint\_impedance.cpp@{icub-\/tutorials/src/motorControlImpedance/tutorial\_arm\_joint\_impedance.cpp}}
+\mbox{\hyperlink{tutorial__arm__joint__impedance_8cpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00001}00001\ \textcolor{comment}{//\ -\/*-\/\ mode:C++;\ tab-\/width:4;\ c-\/basic-\/offset:4;\ indent-\/tabs-\/mode:nil\ -\/*-\/}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00002}00002\ }
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00003}00003\ \textcolor{preprocessor}{\#include\ <stdio.h>}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00004}00004\ \textcolor{preprocessor}{\#include\ <yarp/os/Network.h>}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00005}00005\ \textcolor{preprocessor}{\#include\ <yarp/dev/ControlBoardInterfaces.h>}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00006}00006\ \textcolor{preprocessor}{\#include\ <yarp/dev/PolyDriver.h>}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00007}00007\ \textcolor{preprocessor}{\#include\ <yarp/os/Time.h>}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00008}00008\ \textcolor{preprocessor}{\#include\ <yarp/sig/Vector.h>}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00009}00009\ }
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00010}00010\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00011}00011\ }
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00012}00012\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceyarp_1_1dev}{yarp::dev}};}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00013}00013\ \textcolor{keyword}{using\ namespace\ }yarp::sig;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00014}00014\ \textcolor{keyword}{using\ namespace\ }yarp::os;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00015}00015\ }
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00016}\mbox{\hyperlink{tutorial__arm__joint__impedance_8cpp_a0ddf1224851353fc92bfbff6f499fa97}{00016}}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{icub-tutorials_2src_2anyRobotCartesianInterface_2src_2fakeRobot_2main_8cpp_ae66f6b31b5ad750f1fe042a706a4e3d4}{main}}(\textcolor{keywordtype}{int}\ argc,\ \textcolor{keywordtype}{char}\ *argv[])\ }
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00017}00017\ \{}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00018}00018\ \ \ \ \ Network\ \mbox{\hyperlink{namespaceyarp}{yarp}};}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00019}00019\ }
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00020}00020\ \ \ \ \ Property\ params;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00021}00021\ \ \ \ \ params.fromCommand(argc,\ argv);}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00022}00022\ }
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00023}00023\ \ \ \ \ \textcolor{keywordflow}{if}\ (!params.check(\textcolor{stringliteral}{"{}robot"{}}))}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00024}00024\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00025}00025\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{saveNetwork_8m_a0eba6f64b9c26507a877bcb0c4f270e2}{fprintf}}(stderr,\ \textcolor{stringliteral}{"{}Please\ specify\ the\ name\ of\ the\ robot\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00026}00026\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{saveNetwork_8m_a0eba6f64b9c26507a877bcb0c4f270e2}{fprintf}}(stderr,\ \textcolor{stringliteral}{"{}-\/-\/robot\ name\ (e.g.\ icub)\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00027}00027\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ 1;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00028}00028\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00029}00029\ \ \ \ \ std::string\ robotName=params.find(\textcolor{stringliteral}{"{}robot"{}}).asString();}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00030}00030\ \ \ \ \ std::string\ remotePorts=\textcolor{stringliteral}{"{}/"{}};}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00031}00031\ \ \ \ \ remotePorts+=robotName;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00032}00032\ \ \ \ \ remotePorts+=\textcolor{stringliteral}{"{}/right\_arm"{}};}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00033}00033\ }
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00034}00034\ \ \ \ \ std::string\ localPorts=\textcolor{stringliteral}{"{}/test/client"{}};}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00035}00035\ }
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00036}00036\ \ \ \ \ Property\ options;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00037}00037\ \ \ \ \ options.put(\textcolor{stringliteral}{"{}device"{}},\ \textcolor{stringliteral}{"{}remote\_controlboard"{}});}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00038}00038\ \ \ \ \ options.put(\textcolor{stringliteral}{"{}local"{}},\ localPorts);\ \ \ \textcolor{comment}{//local\ port\ names}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00039}00039\ \ \ \ \ options.put(\textcolor{stringliteral}{"{}remote"{}},\ remotePorts);\ \textcolor{comment}{//where\ we\ connect\ to}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00040}00040\ }
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00041}00041\ \ \ \ \ \textcolor{comment}{//\ create\ a\ device}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00042}00042\ \ \ \ \ PolyDriver\ robotDevice(options);}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00043}00043\ \ \ \ \ \textcolor{keywordflow}{if}\ (!robotDevice.isValid())\ \{}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00044}00044\ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}Device\ not\ available.\ \ Here\ are\ the\ known\ devices:\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00045}00045\ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\%s"{}},\ Drivers::factory().toString().c\_str());}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00046}00046\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ 1;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00047}00047\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00048}00048\ }
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00049}00049\ \ \ \ \ IPositionControl\ *pos;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00050}00050\ \ \ \ \ IEncoders\ *encs;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00051}00051\ \ \ \ \ IControlMode\ *ictrl;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00052}00052\ \ \ \ \ IInteractionMode\ *iint;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00053}00053\ \ \ \ \ IImpedanceControl\ *iimp;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00054}00054\ \ \ \ \ ITorqueControl\ *itrq;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00055}00055\ }
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00056}00056\ }
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00057}00057\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}};}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00058}00058\ \ \ \ \ \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}}\ =\ robotDevice.view(pos);}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00059}00059\ \ \ \ \ \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}}\ =\ \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}}\ \&\&\ robotDevice.view(encs);}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00060}00060\ \ \ \ \ \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}}\ =\ \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}}\ \&\&\ robotDevice.view(ictrl);}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00061}00061\ \ \ \ \ \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}}\ =\ \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}}\ \&\&\ robotDevice.view(iimp);}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00062}00062\ \ \ \ \ \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}}\ =\ \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}}\ \&\&\ robotDevice.view(itrq);}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00063}00063\ \ \ \ \ \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}}\ =\ \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}}\ \&\&\ robotDevice.view(iint);}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00064}00064\ }
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00065}00065\ \ \ \ \ \textcolor{keywordflow}{if}\ (!\mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}})\ \{}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00066}00066\ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}Problems\ acquiring\ interfaces\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00067}00067\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ 1;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00068}00068\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00069}00069\ }
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00070}00070\ \ \ \ \ \textcolor{keywordtype}{int}\ nj=0;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00071}00071\ \ \ \ \ pos-\/>getAxes(\&nj);}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00072}00072\ \ \ \ \ Vector\ encoders;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00073}00073\ \ \ \ \ Vector\ torques;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00074}00074\ \ \ \ \ Vector\ command;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00075}00075\ \ \ \ \ Vector\ tmp;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00076}00076\ \ \ \ \ \textcolor{keywordtype}{int}\ control\_mode;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00077}00077\ \ \ \ \ yarp::dev::InteractionModeEnum\ interaction\_mode;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00078}00078\ \ \ \ \ encoders.resize(nj);}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00079}00079\ \ \ \ \ torques.resize(nj);}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00080}00080\ \ \ \ \ tmp.resize(nj);}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00081}00081\ \ \ \ \ command.resize(nj);}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00082}00082\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00083}00083\ \ \ \ \ \textcolor{keywordtype}{int}\ i;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00084}00084\ \ \ \ \ \textcolor{keywordflow}{for}\ (i\ =\ 0;\ i\ <\ nj;\ i++)\ \{}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00085}00085\ \ \ \ \ \ \ \ \ \ tmp[i]\ =\ 50.0;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00086}00086\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00087}00087\ \ \ \ \ pos-\/>setRefAccelerations(tmp.data());}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00088}00088\ }
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00089}00089\ \ \ \ \ \textcolor{keywordflow}{for}\ (i\ =\ 0;\ i\ <\ nj;\ i++)\ \{}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00090}00090\ \ \ \ \ \ \ \ \ tmp[i]\ =\ 10.0;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00091}00091\ \ \ \ \ \ \ \ \ pos-\/>setRefSpeed(i,\ tmp[i]);}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00092}00092\ \ \ \ \ \ \ \ \ \textcolor{comment}{//SET\ THE\ IMPEDANCE:}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00093}00093\ \ \ \ \ \ \ \ \ \textcolor{comment}{//0.111\ is\ the\ stiffness\ coefficient.\ units:\ \ \ Nm/deg}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00094}00094\ \ \ \ \ \ \ \ \ \textcolor{comment}{//0.014\ is\ the\ damping\ coefficient.\ units:\ \ \ \ \ Nm/(deg/s)}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00095}00095\ \ \ \ \ \ \ \ \ \textcolor{comment}{//0\ is\ the\ additional\ torque\ offset}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00096}00096\ \ \ \ \ \ \ \ \ \textcolor{comment}{//WARNING:\ playing\ with\ this\ value\ may\ lead\ to\ undamped\ oscillatory\ behaviours.}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00097}00097\ \ \ \ \ \ \ \ \ \textcolor{comment}{//when\ you\ raise\ the\ stiffness,\ you\ should\ increase\ the\ damping\ coefficient\ accordingly.}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00098}00098\ \ \ \ \ \ \ \ \ iimp-\/>setImpedance(i,\ 0.111,\ 0.014);}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00099}00099\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00100}00100\ }
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00101}00101\ \ \ \ \ \textcolor{comment}{//pos-\/>setRefSpeeds(tmp.data()))}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00102}00102\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00103}00103\ \ \ \ \ \textcolor{comment}{//fisrst\ zero\ all\ joints}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00104}00104\ \ \ \ \ \textcolor{comment}{//}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00105}00105\ \ \ \ \ command=0;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00106}00106\ \ \ \ \ \textcolor{comment}{//now\ set\ the\ shoulder\ to\ some\ value}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00107}00107\ \ \ \ \ command[0]=-\/50;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00108}00108\ \ \ \ \ command[1]=20;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00109}00109\ \ \ \ \ command[2]=-\/10;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00110}00110\ \ \ \ \ command[3]=50;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00111}00111\ \ \ \ \ pos-\/>positionMove(command.data());}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00112}00112\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00113}00113\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00114}00114\ \textcolor{comment}{\ \ \ \ bool\ done=false;}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00115}00115\ \textcolor{comment}{}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00116}00116\ \textcolor{comment}{\ \ \ \ while(!done)}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00117}00117\ \textcolor{comment}{\ \ \ \ \{}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00118}00118\ \textcolor{comment}{\ \ \ \ \ \ \ \ pos-\/>checkMotionDone(\&done);}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00119}00119\ \textcolor{comment}{\ \ \ \ \ \ \ \ Time::delay(0.1);}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00120}00120\ \textcolor{comment}{\ \ \ \ \}}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00121}00121\ \textcolor{comment}{\ \ \ \ */}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00122}00122\ }
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00123}00123\ \ \ \ \ \textcolor{keywordtype}{int}\ times=0;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00124}00124\ \ \ \ \ \textcolor{keywordflow}{while}(\textcolor{keyword}{true})}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00125}00125\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00126}00126\ \ \ \ \ \ \ \ \ times++;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00127}00127\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (times\%2)}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00128}00128\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00129}00129\ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ set\ the\ elbow\ joint\ only\ in\ compliant\ mode}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00130}00130\ \ \ \ \ \ \ \ \ \ \ \ \ \ ictrl-\/>setControlMode(3,VOCAB\_CM\_POSITION);}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00131}00131\ \ \ \ \ \ \ \ \ \ \ \ \ \ iint-\/>setInteractionMode(3,VOCAB\_IM\_COMPLIANT);}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00132}00132\ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ set\ new\ reference\ positions}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00133}00133\ \ \ \ \ \ \ \ \ \ \ \ \ \ command[0]=-\/50;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00134}00134\ \ \ \ \ \ \ \ \ \ \ \ \ \ command[1]=20;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00135}00135\ \ \ \ \ \ \ \ \ \ \ \ \ \ command[2]=-\/10;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00136}00136\ \ \ \ \ \ \ \ \ \ \ \ \ \ command[3]=60;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00137}00137\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00138}00138\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00139}00139\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00140}00140\ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ set\ the\ elbow\ joint\ in\ stiff\ mode}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00141}00141\ \ \ \ \ \ \ \ \ \ \ \ \ \ ictrl-\/>setControlMode(3,VOCAB\_CM\_POSITION);}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00142}00142\ \ \ \ \ \ \ \ \ \ \ \ \ \ iint-\/>setInteractionMode(3,VOCAB\_IM\_STIFF);}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00143}00143\ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ set\ new\ reference\ positions}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00144}00144\ \ \ \ \ \ \ \ \ \ \ \ \ \ command[0]=-\/20;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00145}00145\ \ \ \ \ \ \ \ \ \ \ \ \ \ command[1]=40;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00146}00146\ \ \ \ \ \ \ \ \ \ \ \ \ \ command[2]=-\/10;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00147}00147\ \ \ \ \ \ \ \ \ \ \ \ \ \ command[3]=30;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00148}00148\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00149}00149\ }
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00150}00150\ \ \ \ \ \ \ \ \ pos-\/>positionMove(command.data());}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00151}00151\ }
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00152}00152\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ count=50;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00153}00153\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}(count-\/-\/)}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00154}00154\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00155}00155\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Time::delay(0.1);}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00156}00156\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ encs-\/>getEncoders(encoders.data());}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00157}00157\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ itrq-\/>getTorques(torques.data());}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00158}00158\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}Encoders:\ \%+5.1lf\ \%+5.1lf\ \%+5.1lf\ \%+5.1lf\ "{}},\ encoders[0],\ encoders[1],\ encoders[2],\ encoders[3]);}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00159}00159\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}Torques:\ \ \%+5.1lfNm\ \%+5.1lfNm\ \%+5.1lfNm\ \%+5.1lfNm\ "{}},\ torques[0],\ torques[1],\ torques[2],\ torques[3]);}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00160}00160\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}Control:\ \ "{}});}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00161}00161\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (i\ =\ 0;\ i\ <\ 4;\ i++)}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00162}00162\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00163}00163\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ictrl-\/>getControlMode(i,\ \&control\_mode);}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00164}00164\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ iint-\/>getInteractionMode(i,\ \&interaction\_mode);}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00165}00165\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{switch}\ (control\_mode)}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00166}00166\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00167}00167\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ VOCAB\_CM\_IDLE:\ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}IDLE\ \ \ \ \ "{}});\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00168}00168\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ VOCAB\_CM\_POSITION:\ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}POSITION\ "{}});\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00169}00169\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ VOCAB\_CM\_POSITION\_DIRECT:\ printf(\textcolor{stringliteral}{"{}POSITION\ DIRECT\ "{}});\ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00170}00170\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ VOCAB\_CM\_VELOCITY:\ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}VELOCITY\ "{}});\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00171}00171\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ VOCAB\_CM\_MIXED:\ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}MIXED\ POS/VEL"{}});\ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00172}00172\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ VOCAB\_CM\_TORQUE:\ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}TORQUE\ \ \ "{}});\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00173}00173\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{default}:}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00174}00174\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ VOCAB\_CM\_UNKNOWN:\ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}UNKNOWN\ \ "{}});\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00175}00175\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00176}00176\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00177}00177\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00178}00178\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}Interaction:\ \ "{}});}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00179}00179\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (i\ =\ 0;\ i\ <\ 4;\ i++)}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00180}00180\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00181}00181\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{switch}\ (interaction\_mode)}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00182}00182\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00183}00183\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ VOCAB\_IM\_COMPLIANT:\ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}(COMPLIANT\ MODE)"{}});\ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00184}00184\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ VOCAB\_IM\_STIFF:\ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}(STIFF\ MODE)"{}});\ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00185}00185\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{default}:}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00186}00186\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ VOCAB\_CM\_UNKNOWN:\ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}(UNKNOWN)\ \ "{}});\ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00187}00187\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00188}00188\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00189}00189\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\(\backslash\)n"{}});}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00190}00190\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00191}00191\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00192}00192\ }
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00193}00193\ \ \ \ \ robotDevice.close();}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00194}00194\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00195}00195\ \ \ \ \ \textcolor{keywordflow}{return}\ 0;}
+\DoxyCodeLine{\Hypertarget{tutorial__arm__joint__impedance_8cpp_source_l00196}00196\ \}}
+
+\end{DoxyCode}

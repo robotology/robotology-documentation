@@ -1,0 +1,688 @@
+\doxysection{Skin\+Mesh\+Client.\+cpp}
+\hypertarget{SkinMeshClient_8cpp_source}{}\label{SkinMeshClient_8cpp_source}\index{icub-\/main/src/tools/iCubSkinGui/plugin/SkinMeshClient.cpp@{icub-\/main/src/tools/iCubSkinGui/plugin/SkinMeshClient.cpp}}
+\mbox{\hyperlink{SkinMeshClient_8cpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00001}00001\ \textcolor{comment}{//\ -\/*-\/\ mode:C++;\ tab-\/width:4;\ c-\/basic-\/offset:4;\ indent-\/tabs-\/mode:nil\ -\/*-\/}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00002}00002\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00003}00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00004}00004\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2009\ RobotCub\ Consortium}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00005}00005\ \textcolor{comment}{\ *\ Author:\ Marco\ Randazzo,\ Marco\ Maggiali,\ Alessandro\ Scalzo,\ Jacopo\ Losi}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00006}00006\ \textcolor{comment}{\ *\ CopyPolicy:\ Released\ under\ the\ terms\ of\ the\ GNU\ GPL\ v2.0.}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00007}00007\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00008}00008\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00009}00009\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00010}00010\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{SkinMeshClient_8h}{include/SkinMeshClient.h}}"{}}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00011}00011\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00012}00012\ \textcolor{preprocessor}{\#include\ <algorithm>}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00013}00013\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00014}00014\ \textcolor{preprocessor}{\#include\ <yarp/os/LogComponent.h>}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00015}00015\ \textcolor{preprocessor}{\#include\ <yarp/os/LogStream.h>}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00016}00016\ \textcolor{preprocessor}{\#include\ <yarp/os/Time.h>}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00017}00017\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00018}\mbox{\hyperlink{SkinMeshClient_8cpp_ae843eb6dd8db7abe7c354072976c3e3e}{00018}}\ \textcolor{preprocessor}{\#define\ SKIN\_THRESHOLD\ 15.0}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00019}00019\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00020}00020\ \textcolor{keyword}{namespace\ }\{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00021}00021\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00022}00022\ YARP\_LOG\_COMPONENT(SKINMESHCLIENT,\ \textcolor{stringliteral}{"{}yarp.tools.skinmeshclient"{}})}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00023}00023\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00024}00024\ \textcolor{keyword}{constexpr}\ \textcolor{keywordtype}{double}\ noSkinPatchWarningPeriod\ =\ 60.0;}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00025}00025\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00026}00026\ std::string\ makeLocalPrefix(yarp::os::Searchable\&\ config)}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00027}00027\ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00028}00028\ \ \ \ \ std::string\ prefix\ =\ \textcolor{stringliteral}{"{}/skinGui"{}};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00029}00029\ \ \ \ \ \textcolor{keywordflow}{if}\ (config.check(\textcolor{stringliteral}{"{}name"{}}))}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00030}00030\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00031}00031\ \ \ \ \ \ \ \ \ prefix\ =\ \textcolor{stringliteral}{"{}/"{}};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00032}00032\ \ \ \ \ \ \ \ \ prefix\ +=\ config.find(\textcolor{stringliteral}{"{}name"{}}).asString();}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00033}00033\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00034}00034\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00035}00035\ \ \ \ \ \textcolor{keywordflow}{if}\ (config.check(\textcolor{stringliteral}{"{}robotPart"{}}))}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00036}00036\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00037}00037\ \ \ \ \ \ \ \ \ prefix\ +=\ \textcolor{stringliteral}{"{}/"{}};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00038}00038\ \ \ \ \ \ \ \ \ prefix\ +=\ config.find(\textcolor{stringliteral}{"{}robotPart"{}}).asString();}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00039}00039\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00040}00040\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00041}00041\ \ \ \ \ \textcolor{keywordflow}{return}\ prefix;}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00042}00042\ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00043}00043\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00044}00044\ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00045}00045\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00046}\mbox{\hyperlink{classSkinMeshClient_a18bf4305f6243bc29c9402178c417891}{00046}}\ \mbox{\hyperlink{classSkinMeshClient_a18bf4305f6243bc29c9402178c417891}{SkinMeshClient::SkinMeshClient}}(Searchable\&\ config,\textcolor{keywordtype}{int}\ period)}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00047}00047\ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00048}00048\ \ \ \ \ \mbox{\hyperlink{classSkinMeshClient_ade733671d5cafb05c0b63c2dda94d8ed}{m\_period}}\ =\ \textcolor{keyword}{static\_cast<}\textcolor{keywordtype}{double}\textcolor{keyword}{>}(period)\ /\ 1000.0;}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00049}00049\ \ \ \ \ m\_config.fromString(config.toString());}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00050}00050\ \ \ \ \ yCDebug(SKINMESHCLIENT)\ <<\ \textcolor{stringliteral}{"{}SkinMeshClient\ running\ at"{}}\ <<\ \textcolor{keyword}{static\_cast<}\textcolor{keywordtype}{int}\textcolor{keyword}{>}(1000.0\ *\ \mbox{\hyperlink{classSkinMeshClient_aa3ceb1fb8ef642ae1f46a17c0cb8ef09}{getPeriod}}())\ <<\ \textcolor{stringliteral}{"{}ms."{}};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00051}00051\ \ \ \ \ \mbox{\hyperlink{classSkinMeshClient_aef615a5413d186937cbd06d6eeccdb66}{mbSimpleDraw}}=\textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00052}00052\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00053}00053\ \ \ \ \ \mbox{\hyperlink{classSkinMeshClient_ab7d909747e75ae7ce5f72da72c9fac2e}{sensorsNum}}=0;}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00054}00054\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ t=0;\ t<\mbox{\hyperlink{classSkinMeshClient_a6655fca29c4a764e16c9d8d2003b1b65}{MAX\_SENSOR\_NUM}};\ ++t)}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00055}00055\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00056}00056\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSkinMeshClient_a3db0b6cf881c69361d52fbfd1446e7b4}{sensor}}[t]=NULL;}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00057}00057\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00058}00058\ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00059}00059\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00060}00060\ \textcolor{keywordtype}{bool}\ SkinMeshClient::configureFromSearchable(yarp::os::Searchable\&\ config)}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00061}00061\ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00062}00062\ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classSkinMeshClient_af235ba9f6263efed67aa0f0a63d96f6e}{m\_configured}})}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00063}00063\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00064}00064\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00065}00065\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00066}00066\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00067}00067\ \ \ \ \ \mbox{\hyperlink{classSkinMeshClient_aef615a5413d186937cbd06d6eeccdb66}{mbSimpleDraw}}=config.check(\textcolor{stringliteral}{"{}light"{}});}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00068}00068\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00069}00069\ \ \ \ \ \textcolor{keyword}{const}\ std::string\ localPrefix\ =\ makeLocalPrefix(config);}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00070}00070\ \ \ \ \ \textcolor{keyword}{const}\ std::string\ part\_virtual\ =\ localPrefix\ +\ \textcolor{stringliteral}{"{}\_virtual:i"{}};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00071}00071\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00072}00072\ \ \ \ \ \textcolor{comment}{//\ Ideally,\ we\ would\ use\ a\ -\/-\/virtual\ flag.\ since\ this\ would\ make\ the\ skinmanager\ xml\ file\ unflexible,}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00073}00073\ \ \ \ \ \textcolor{comment}{//\ let's\ keep\ the\ code\ structure\ without\ incurring\ in\ any\ problem\ whatsoever}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00074}00074\ \ \ \ \ \textcolor{comment}{//\ if\ (config.check("{}virtual"{}))}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00075}00075\ \ \ \ \ \textcolor{keywordflow}{if}\ (\textcolor{keyword}{true})}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00076}00076\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00077}00077\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSkinMeshClient_aecf45dcb3493aba43392e4d6c2c78b9c}{skin\_port\_virtual}}.open(part\_virtual);}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00078}00078\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00079}00079\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00080}00080\ \ \ \ \ \textcolor{keywordflow}{if}\ (!configureSkinClient(config,\ localPrefix))}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00081}00081\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00082}00082\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00083}00083\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00084}00084\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00085}00085\ \ \ \ \ \textcolor{keywordtype}{int}\ width\ =config.check(\textcolor{stringliteral}{"{}width"{}})\ ?\ config.find(\textcolor{stringliteral}{"{}width"{}}).asInt32()\ :\ 320;}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00086}00086\ \ \ \ \ \textcolor{keywordtype}{int}\ height=config.check(\textcolor{stringliteral}{"{}height"{}})\ ?\ config.find(\textcolor{stringliteral}{"{}height"{}}).asInt32()\ :\ 320;}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00087}00087\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00088}00088\ \ \ \ \ \textcolor{keywordtype}{bool}\ useCalibration\ =\ config.check(\textcolor{stringliteral}{"{}useCalibration"{}});}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00089}00089\ \ \ \ \ \textcolor{keywordflow}{if}\ (useCalibration)}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00090}00090\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00091}00091\ \ \ \ \ \ \ \ \ yCInfo(SKINMESHCLIENT)\ <<\ \textcolor{stringliteral}{"{}Using\ calibrated\ skin\ values\ (0-\/255)"{}};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00092}00092\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00093}00093\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00094}00094\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00095}00095\ \ \ \ \ \ \ \ \ yCDebug(SKINMESHCLIENT)\ <<\ \textcolor{stringliteral}{"{}Using\ raw\ skin\ values\ (255-\/0)"{}};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00096}00096\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00097}00097\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00098}00098\ \ \ \ \ Bottle\ *color\ =\ config.find(\textcolor{stringliteral}{"{}color"{}}).asList();}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00099}00099\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{char}\ r=255,\ g=0,\ b=0;}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00100}00100\ \ \ \ \ \textcolor{keywordflow}{if}(color)}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00101}00101\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00102}00102\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(color-\/>size()<3\ ||\ !color-\/>get(0).isInt32()\ ||\ !color-\/>get(1).isInt32()\ ||\ !color-\/>get(2).isInt32())}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00103}00103\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00104}00104\ \ \ \ \ \ \ \ \ \ \ \ \ yCError(SKINMESHCLIENT)\ <<\ \textcolor{stringliteral}{"{}Error\ while\ reading\ the\ parameter\ color:\ three\ integer\ values\ should\ be\ specified"{}}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00105}00105\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ color-\/>toString();}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00106}00106\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00107}00107\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00108}00108\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00109}00109\ \ \ \ \ \ \ \ \ \ \ \ \ r\ =\ color-\/>get(0).asInt32();}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00110}00110\ \ \ \ \ \ \ \ \ \ \ \ \ g\ =\ color-\/>get(1).asInt32();}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00111}00111\ \ \ \ \ \ \ \ \ \ \ \ \ b\ =\ color-\/>get(2).asInt32();}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00112}00112\ \ \ \ \ \ \ \ \ \ \ \ \ yCInfo(SKINMESHCLIENT)\ <<\ \textcolor{stringliteral}{"{}Using\ specified\ color:"{}}\ <<\ r\ <<\ g\ <<\ b;}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00113}00113\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00114}00114\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00115}00115\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00116}00116\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00117}00117\ \ \ \ \ \ \ \ \ yCDebug(SKINMESHCLIENT)\ <<\ \textcolor{stringliteral}{"{}Using\ red\ as\ default\ color."{}};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00118}00118\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00119}00119\ \ \ \ \ \mbox{\hyperlink{classSkinMeshClient_a773388266bd507b1676dbc5d95ac18c4}{defaultColor}}.push\_back(r);}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00120}00120\ \ \ \ \ \mbox{\hyperlink{classSkinMeshClient_a773388266bd507b1676dbc5d95ac18c4}{defaultColor}}.push\_back(g);}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00121}00121\ \ \ \ \ \mbox{\hyperlink{classSkinMeshClient_a773388266bd507b1676dbc5d95ac18c4}{defaultColor}}.push\_back(b);}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00122}00122\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00123}00123\ \ \ \ \ \mbox{\hyperlink{classSkinMeshClient_af486e0c5fb18a0926caa8cc4528ce4b9}{skinThreshold}}\ =\ config.check(\textcolor{stringliteral}{"{}skinThreshold"{}})?config.find(\textcolor{stringliteral}{"{}skinThreshold"{}}).asFloat64():\mbox{\hyperlink{SkinMeshClient_8cpp_ae843eb6dd8db7abe7c354072976c3e3e}{SKIN\_THRESHOLD}};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00124}00124\ \ \ \ \ yCDebug(SKINMESHCLIENT)\ <<\ \textcolor{stringliteral}{"{}Skin\ threshold\ set\ to"{}}\ <<\ \mbox{\hyperlink{classSkinMeshClient_af486e0c5fb18a0926caa8cc4528ce4b9}{skinThreshold}};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00125}00125\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00126}00126\ \ \ \ \ yarp::os::Bottle\ sensorSetConfig=config.findGroup(\textcolor{stringliteral}{"{}SENSORS"{}}).tail();}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00127}00127\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00128}00128\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ t=0;\ t<sensorSetConfig.size();\ ++t)}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00129}00129\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00130}00130\ \ \ \ \ \ \ \ \ yarp::os::Bottle\ sensorConfig(sensorSetConfig.get(t).toString());}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00131}00131\ \ \ \ \ \ \ \ \ std::string\ type(sensorConfig.get(0).asString());}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00132}00132\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00133}00133\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (type==\textcolor{stringliteral}{"{}triangle"{}}\ \ \ \ \ \ \ ||}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00134}00134\ \ \ \ \ \ \ \ \ \ \ \ \ type==\textcolor{stringliteral}{"{}fingertip"{}}\ \ \ \ \ \ ||}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00135}00135\ \ \ \ \ \ \ \ \ \ \ \ \ type==\textcolor{stringliteral}{"{}fingertip2L"{}}\ \ \ \ ||}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00136}00136\ \ \ \ \ \ \ \ \ \ \ \ \ type==\textcolor{stringliteral}{"{}fingertip2R"{}}\ \ \ \ ||}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00137}00137\ \ \ \ \ \ \ \ \ \ \ \ \ type==\textcolor{stringliteral}{"{}fingertip3L"{}}\ \ \ \ ||}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00138}00138\ \ \ \ \ \ \ \ \ \ \ \ \ type==\textcolor{stringliteral}{"{}fingertip3R"{}}\ \ \ \ ||}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00139}00139\ \ \ \ \ \ \ \ \ \ \ \ \ type==\textcolor{stringliteral}{"{}fingertip4L"{}}\ \ \ \ ||}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00140}00140\ \ \ \ \ \ \ \ \ \ \ \ \ type==\textcolor{stringliteral}{"{}fingertip4R"{}}\ \ \ \ ||}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00141}00141\ \ \ \ \ \ \ \ \ \ \ \ \ type==\textcolor{stringliteral}{"{}fingertipMID"{}}\ \ \ ||}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00142}00142\ \ \ \ \ \ \ \ \ \ \ \ \ type==\textcolor{stringliteral}{"{}triangle\_10pad"{}}\ ||}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00143}00143\ \ \ \ \ \ \ \ \ \ \ \ \ type==\textcolor{stringliteral}{"{}quad16"{}}\ \ \ \ \ \ \ \ \ ||}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00144}00144\ \ \ \ \ \ \ \ \ \ \ \ \ type==\textcolor{stringliteral}{"{}palmR"{}}\ \ \ \ \ \ \ \ \ \ ||}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00145}00145\ \ \ \ \ \ \ \ \ \ \ \ \ type==\textcolor{stringliteral}{"{}fakePalm"{}}\ \ \ \ \ \ \ ||}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00146}00146\ \ \ \ \ \ \ \ \ \ \ \ \ type==\textcolor{stringliteral}{"{}palmL"{}}\ \ \ \ \ \ \ \ \ \ ||}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00147}00147\ \ \ \ \ \ \ \ \ \ \ \ \ type\ ==\ \textcolor{stringliteral}{"{}cer\_sh\_pdl"{}}\ \ \ ||}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00148}00148\ \ \ \ \ \ \ \ \ \ \ \ \ type\ ==\ \textcolor{stringliteral}{"{}cer\_sh\_pdr"{}}\ \ \ ||}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00149}00149\ \ \ \ \ \ \ \ \ \ \ \ \ type\ ==\ \textcolor{stringliteral}{"{}cer\_sh\_pp"{}}\ \ \ \ ||}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00150}00150\ \ \ \ \ \ \ \ \ \ \ \ \ type\ ==\ \textcolor{stringliteral}{"{}cer\_sh\_td"{}}\ \ \ \ ||}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00151}00151\ \ \ \ \ \ \ \ \ \ \ \ \ type\ ==\ \textcolor{stringliteral}{"{}cer\_sh\_tp"{}})}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00152}00152\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00153}00153\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ \ \ \ \textcolor{keywordtype}{id}=sensorConfig.get(1).asInt32();}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00154}00154\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ xc=sensorConfig.get(2).asFloat64();}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00155}00155\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ yc=sensorConfig.get(3).asFloat64();}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00156}00156\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ th=sensorConfig.get(4).asFloat64();}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00157}00157\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ gain=sensorConfig.get(5).asFloat64();}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00158}00158\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ \ \ \ lrMirror=sensorConfig.get(6).asInt32();}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00159}00159\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ \ \ \ layoutNum=sensorConfig.get(7).asInt32();}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00160}00160\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00161}00161\ \ \ \ \ \ \ \ \ \ \ \ \ yCDebug(SKINMESHCLIENT)\ <<\ type\ <<\ \textcolor{keywordtype}{id}\ <<\ gain;}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00162}00162\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00163}00163\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\textcolor{keywordtype}{id}>=0\ \&\&\ \textcolor{keywordtype}{id}<\mbox{\hyperlink{classSkinMeshClient_a6655fca29c4a764e16c9d8d2003b1b65}{MAX\_SENSOR\_NUM}})}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00164}00164\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00165}00165\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classSkinMeshClient_a3db0b6cf881c69361d52fbfd1446e7b4}{sensor}}[\textcolor{keywordtype}{id}])}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00166}00166\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00167}00167\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yCError(SKINMESHCLIENT)\ <<\ \textcolor{stringliteral}{"{}Triangle"{}}\ <<\ \textcolor{keywordtype}{id}\ <<\ \textcolor{stringliteral}{"{}already\ exists."{}};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00168}00168\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00169}00169\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00170}00170\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00171}00171\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (type==\textcolor{stringliteral}{"{}triangle"{}})}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00172}00172\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00173}00173\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSkinMeshClient_a3db0b6cf881c69361d52fbfd1446e7b4}{sensor}}[id]=\textcolor{keyword}{new}\ Triangle(xc,yc,th,gain,layoutNum,lrMirror);}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00174}00174\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00175}00175\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (type==\textcolor{stringliteral}{"{}triangle\_10pad"{}})}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00176}00176\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00177}00177\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSkinMeshClient_a3db0b6cf881c69361d52fbfd1446e7b4}{sensor}}[id]=\textcolor{keyword}{new}\ Triangle\_10pad(xc,yc,th,gain,layoutNum,lrMirror);}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00178}00178\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00179}00179\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (type==\textcolor{stringliteral}{"{}fingertip"{}})}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00180}00180\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00181}00181\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSkinMeshClient_a3db0b6cf881c69361d52fbfd1446e7b4}{sensor}}[id]=\textcolor{keyword}{new}\ Fingertip(xc,yc,th,gain,layoutNum,lrMirror);}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00182}00182\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00183}00183\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (type==\textcolor{stringliteral}{"{}fingertip2L"{}})}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00184}00184\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00185}00185\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSkinMeshClient_a3db0b6cf881c69361d52fbfd1446e7b4}{sensor}}[id]=\textcolor{keyword}{new}\ Fingertip2L(xc,yc,th,gain,layoutNum,lrMirror);}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00186}00186\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00187}00187\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (type==\textcolor{stringliteral}{"{}fingertip2R"{}})}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00188}00188\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00189}00189\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSkinMeshClient_a3db0b6cf881c69361d52fbfd1446e7b4}{sensor}}[id]=\textcolor{keyword}{new}\ Fingertip2R(xc,yc,th,gain,layoutNum,lrMirror);}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00190}00190\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00191}00191\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (type==\textcolor{stringliteral}{"{}fingertip3L"{}})}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00192}00192\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00193}00193\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSkinMeshClient_a3db0b6cf881c69361d52fbfd1446e7b4}{sensor}}[id]=\textcolor{keyword}{new}\ Fingertip3L(xc,yc,th,gain,layoutNum,lrMirror);}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00194}00194\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00195}00195\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (type==\textcolor{stringliteral}{"{}fingertip3R"{}})}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00196}00196\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00197}00197\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSkinMeshClient_a3db0b6cf881c69361d52fbfd1446e7b4}{sensor}}[id]=\textcolor{keyword}{new}\ Fingertip3R(xc,yc,th,gain,layoutNum,lrMirror);}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00198}00198\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00199}00199\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (type==\textcolor{stringliteral}{"{}fingertip4L"{}})}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00200}00200\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00201}00201\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSkinMeshClient_a3db0b6cf881c69361d52fbfd1446e7b4}{sensor}}[id]=\textcolor{keyword}{new}\ Fingertip4L(xc,yc,th,gain,layoutNum,lrMirror);}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00202}00202\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00203}00203\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (type==\textcolor{stringliteral}{"{}fingertip4R"{}})}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00204}00204\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00205}00205\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSkinMeshClient_a3db0b6cf881c69361d52fbfd1446e7b4}{sensor}}[id]=\textcolor{keyword}{new}\ Fingertip4R(xc,yc,th,gain,layoutNum,lrMirror);}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00206}00206\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00207}00207\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (type==\textcolor{stringliteral}{"{}fingertipMID"{}})}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00208}00208\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00209}00209\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSkinMeshClient_a3db0b6cf881c69361d52fbfd1446e7b4}{sensor}}[id]=\textcolor{keyword}{new}\ FingertipMID(xc,yc,th,gain,layoutNum,lrMirror);}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00210}00210\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00211}00211\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (type==\textcolor{stringliteral}{"{}quad16"{}})}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00212}00212\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00213}00213\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSkinMeshClient_a3db0b6cf881c69361d52fbfd1446e7b4}{sensor}}[id]=\textcolor{keyword}{new}\ Quad16(xc,yc,th,gain,layoutNum,lrMirror);}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00214}00214\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00215}00215\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (type\ ==\ \textcolor{stringliteral}{"{}cer\_sh\_pdl"{}})}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00216}00216\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00217}00217\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSkinMeshClient_a3db0b6cf881c69361d52fbfd1446e7b4}{sensor}}[id]\ =\ \textcolor{keyword}{new}\ CER\_SH\_PDL(xc,\ yc,\ th,\ gain,\ layoutNum,\ lrMirror);}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00218}00218\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00219}00219\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (type==\textcolor{stringliteral}{"{}palmR"{}})}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00220}00220\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00221}00221\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSkinMeshClient_a3db0b6cf881c69361d52fbfd1446e7b4}{sensor}}[id]=\textcolor{keyword}{new}\ PalmR(xc,yc,th,gain,layoutNum,lrMirror);}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00222}00222\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00223}00223\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (type==\textcolor{stringliteral}{"{}fakePalm"{}})}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00224}00224\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00225}00225\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSkinMeshClient_a3db0b6cf881c69361d52fbfd1446e7b4}{sensor}}[id]=\textcolor{keyword}{new}\ fakePalm(xc,yc,th,gain,layoutNum,lrMirror);}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00226}00226\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00227}00227\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (type==\textcolor{stringliteral}{"{}palmL"{}})}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00228}00228\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00229}00229\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSkinMeshClient_a3db0b6cf881c69361d52fbfd1446e7b4}{sensor}}[id]=\textcolor{keyword}{new}\ PalmL(xc,yc,th,gain,layoutNum,lrMirror);}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00230}00230\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00231}00231\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (type\ ==\ \textcolor{stringliteral}{"{}cer\_sh\_pdl"{}})}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00232}00232\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00233}00233\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSkinMeshClient_a3db0b6cf881c69361d52fbfd1446e7b4}{sensor}}[id]\ =\ \textcolor{keyword}{new}\ CER\_SH\_PDL(xc,\ yc,\ th,\ gain,\ layoutNum,\ lrMirror);}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00234}00234\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00235}00235\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (type\ ==\ \textcolor{stringliteral}{"{}cer\_sh\_pdr"{}})}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00236}00236\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00237}00237\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSkinMeshClient_a3db0b6cf881c69361d52fbfd1446e7b4}{sensor}}[id]\ =\ \textcolor{keyword}{new}\ CER\_SH\_PDR(xc,\ yc,\ th,\ gain,\ layoutNum,\ lrMirror);}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00238}00238\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00239}00239\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (type\ ==\ \textcolor{stringliteral}{"{}cer\_sh\_pp"{}})}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00240}00240\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00241}00241\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSkinMeshClient_a3db0b6cf881c69361d52fbfd1446e7b4}{sensor}}[id]\ =\ \textcolor{keyword}{new}\ CER\_SH\_PP(xc,\ yc,\ th,\ gain,\ layoutNum,\ lrMirror);}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00242}00242\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00243}00243\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (type\ ==\ \textcolor{stringliteral}{"{}cer\_sh\_td"{}})}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00244}00244\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00245}00245\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSkinMeshClient_a3db0b6cf881c69361d52fbfd1446e7b4}{sensor}}[id]\ =\ \textcolor{keyword}{new}\ CER\_SH\_TD(xc,\ yc,\ th,\ gain,\ layoutNum,\ lrMirror);}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00246}00246\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00247}00247\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (type\ ==\ \textcolor{stringliteral}{"{}cer\_sh\_tp"{}})}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00248}00248\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00249}00249\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSkinMeshClient_a3db0b6cf881c69361d52fbfd1446e7b4}{sensor}}[id]\ =\ \textcolor{keyword}{new}\ CER\_SH\_TP(xc,\ yc,\ th,\ gain,\ layoutNum,\ lrMirror);}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00250}00250\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00251}00251\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00252}00252\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSkinMeshClient_a3db0b6cf881c69361d52fbfd1446e7b4}{sensor}}[id]-\/>setCalibrationFlag(useCalibration);}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00253}00253\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ++\mbox{\hyperlink{classSkinMeshClient_ab7d909747e75ae7ce5f72da72c9fac2e}{sensorsNum}};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00254}00254\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00255}00255\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00256}00256\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00257}00257\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00258}00258\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yCWarning(SKINMESHCLIENT)\ <<\ \textcolor{keywordtype}{id}\ <<\ \textcolor{stringliteral}{"{}is\ invalid\ triangle\ Id\ [0:"{}}\ <<\ \mbox{\hyperlink{classSkinMeshClient_a6655fca29c4a764e16c9d8d2003b1b65}{MAX\_SENSOR\_NUM}}\ -\/\ 1\ <<\ \textcolor{stringliteral}{"{}]."{}};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00259}00259\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00260}00260\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00261}00261\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00262}00262\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00263}00263\ \ \ \ \ \ \ \ \ \ \ \ \ yCWarning(SKINMESHCLIENT)\ <<\ \textcolor{stringliteral}{"{}Sensor\ type"{}}\ <<\ type\ <<\ \textcolor{stringliteral}{"{}unknown,\ discarded."{}};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00264}00264\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00265}00265\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00266}00266\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00267}00267\ \ \ \ \ \textcolor{keywordtype}{int}\ max\_tax=0;}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00268}00268\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ t=0;\ t<\mbox{\hyperlink{classSkinMeshClient_a6655fca29c4a764e16c9d8d2003b1b65}{MAX\_SENSOR\_NUM}};\ ++t)}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00269}00269\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00270}00270\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00271}00271\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classSkinMeshClient_a3db0b6cf881c69361d52fbfd1446e7b4}{sensor}}[t])}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00272}00272\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00273}00273\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSkinMeshClient_a3db0b6cf881c69361d52fbfd1446e7b4}{sensor}}[t]-\/>min\_tax=max\_tax;}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00274}00274\ \ \ \ \ \ \ \ \ \ \ \ \ max\_tax\ =\ \mbox{\hyperlink{classSkinMeshClient_a3db0b6cf881c69361d52fbfd1446e7b4}{sensor}}[t]-\/>min\_tax+\mbox{\hyperlink{classSkinMeshClient_a3db0b6cf881c69361d52fbfd1446e7b4}{sensor}}[t]-\/>get\_nTaxels();}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00275}00275\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSkinMeshClient_a3db0b6cf881c69361d52fbfd1446e7b4}{sensor}}[t]-\/>max\_tax=max\_tax-\/1;}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00276}00276\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSkinMeshClient_a3db0b6cf881c69361d52fbfd1446e7b4}{sensor}}[t]-\/>setColor(r,\ g,\ b);}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00277}00277\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00278}00278\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00279}00279\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00280}00280\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//this\ deals\ with\ the\ fact\ that\ some\ traingles\ can\ be\ not\ present,}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00281}00281\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//but\ they\ anyway\ broadcast\ an\ array\ of\ zeros...}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00282}00282\ \ \ \ \ \ \ \ \ \ \ \ \ max\_tax\ +=\ 12;}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00283}00283\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00284}00284\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00285}00285\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00286}00286\ \ \ \ \ \mbox{\hyperlink{classSkinMeshClient_ab29240cde2bd227e090471bef92ae7c3}{resize}}(width,height);}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00287}00287\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00288}00288\ \ \ \ \ \mbox{\hyperlink{classSkinMeshClient_af235ba9f6263efed67aa0f0a63d96f6e}{m\_configured}}\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00289}00289\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00290}00290\ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00291}00291\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00292}00292\ \textcolor{keywordtype}{bool}\ SkinMeshClient::configureSkinClient(yarp::os::Searchable\&\ config,\ \textcolor{keyword}{const}\ std::string\&\ localPrefix)}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00293}00293\ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00294}00294\ \ \ \ \ \textcolor{keyword}{const}\ std::string\ local\ =\ config.check(\textcolor{stringliteral}{"{}local"{}})\ ?\ config.find(\textcolor{stringliteral}{"{}local"{}}).asString()\ :\ localPrefix;}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00295}00295\ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{bool}\ externalConnection\ =\ config.check(\textcolor{stringliteral}{"{}externalConnection"{}})\ ?\ config.find(\textcolor{stringliteral}{"{}externalConnection"{}}).asBool()\ :\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00296}00296\ \ \ \ \ \mbox{\hyperlink{classSkinMeshClient_a6d19f659f160321eb2196fe155c0df9c}{m\_externalConnection}}\ =\ externalConnection;}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00297}00297\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00298}00298\ \ \ \ \ \textcolor{keywordflow}{if}\ (!externalConnection\ \&\&\ !config.check(\textcolor{stringliteral}{"{}remote"{}}))}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00299}00299\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00300}00300\ \ \ \ \ \ \ \ \ yCError(SKINMESHCLIENT)\ <<\ \textcolor{stringliteral}{"{}SkinMeshClient:\ externalConnection\ false\ requires\ a\ remote\ MAS\ server\ prefix."{}};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00301}00301\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00302}00302\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00303}00303\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00304}00304\ \ \ \ \ yarp::os::Property\ clientOptions;}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00305}00305\ \ \ \ \ clientOptions.put(\textcolor{stringliteral}{"{}device"{}},\ \textcolor{stringliteral}{"{}multipleanalogsensorsclient"{}});}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00306}00306\ \ \ \ \ clientOptions.put(\textcolor{stringliteral}{"{}local"{}},\ local);}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00307}00307\ \ \ \ \ clientOptions.put(\textcolor{stringliteral}{"{}remote"{}},\ externalConnection\ ?\ local\ :\ config.find(\textcolor{stringliteral}{"{}remote"{}}).asString());}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00308}00308\ \ \ \ \ clientOptions.put(\textcolor{stringliteral}{"{}timeout"{}},\ config.check(\textcolor{stringliteral}{"{}timeout"{}})\ ?\ config.find(\textcolor{stringliteral}{"{}timeout"{}}).asFloat64()\ :\ \mbox{\hyperlink{classSkinMeshClient_aa3ceb1fb8ef642ae1f46a17c0cb8ef09}{getPeriod}}()\ *\ 2.0);}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00309}00309\ \ \ \ \ clientOptions.put(\textcolor{stringliteral}{"{}externalConnection"{}},\ externalConnection);}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00310}00310\ \ \ \ \ \textcolor{keywordflow}{if}\ (config.check(\textcolor{stringliteral}{"{}carrier"{}}))\ \textcolor{comment}{//TODO:\ check\ carrier\ if\ it\ is\ the\ correct\ one\ -\/\ for\ now\ we\ are\ using\ default\ tcp}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00311}00311\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00312}00312\ \ \ \ \ \ \ \ \ clientOptions.put(\textcolor{stringliteral}{"{}carrier"{}},\ config.find(\textcolor{stringliteral}{"{}carrier"{}}).asString());}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00313}00313\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00314}00314\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00315}00315\ \ \ \ \ \textcolor{keywordflow}{if}\ (!\_multipleAnalogSensorsClientDevice.open(clientOptions))}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00316}00316\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00317}00317\ \ \ \ \ \ \ \ \ yCError(SKINMESHCLIENT)\ <<\ \textcolor{stringliteral}{"{}SkinMeshClient:\ unable\ to\ open\ multipleanalogsensorsclient\ with\ options"{}}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00318}00318\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ clientOptions.toString();}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00319}00319\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00320}00320\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00321}00321\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00322}00322\ \ \ \ \ yarp::dev::ISkinPatches*\ clientSkinPatches\ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00323}00323\ \ \ \ \ \textcolor{keywordflow}{if}\ (!\_multipleAnalogSensorsClientDevice.view(clientSkinPatches)\ ||\ clientSkinPatches\ ==\ \textcolor{keyword}{nullptr})}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00324}00324\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00325}00325\ \ \ \ \ \ \ \ \ yCError(SKINMESHCLIENT)\ <<\ \textcolor{stringliteral}{"{}SkinMeshClient:\ unable\ to\ view\ ISkinPatches\ from\ multipleanalogsensorsclient."{}};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00326}00326\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00327}00327\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00328}00328\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00329}00329\ \ \ \ \ \textcolor{keywordflow}{if}\ (externalConnection)}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00330}00330\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00331}00331\ \ \ \ \ \ \ \ \ remappedMASInterfaces.iskinPatchesSensors\ =\ clientSkinPatches;}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00332}00332\ \ \ \ \ \ \ \ \ yCInfo(SKINMESHCLIENT)\ <<\ \textcolor{stringliteral}{"{}Waiting\ for\ external\ MAS\ streaming\ connection\ on"{}}\ <<\ local\ +\ \textcolor{stringliteral}{"{}/measures:i"{}};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00333}00333\ \ \ \ \ \ \ \ \ yCInfo(SKINMESHCLIENT)\ <<\ \textcolor{stringliteral}{"{}Internal\ MultipleAnalogSensorsRemapper\ is\ not\ used\ with\ externalConnection\ true"{}}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00334}00334\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ \textcolor{stringliteral}{"{}because\ MultipleAnalogSensorsClient\ metadata\ is\ unavailable\ in\ that\ mode."{}};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00335}00335\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00336}00336\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00337}00337\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00338}00338\ \ \ \ \ yarp::os::Bottle\ skinPatchNames;}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00339}00339\ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{size\_t}\ skinPatchCount\ =\ clientSkinPatches-\/>getNrOfSkinPatches();}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00340}00340\ \ \ \ \ yCDebug(SKINMESHCLIENT)\ <<\ \textcolor{stringliteral}{"{}Number\ of\ skin\ patches\ available\ from\ the\ multipleanalogsensorsclient:"{}}\ <<\ skinPatchCount;}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00341}00341\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00342}00342\ \ \ \ \ \textcolor{keywordflow}{if}\ (skinPatchCount\ ==\ 0)}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00343}00343\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00344}00344\ \ \ \ \ \ \ \ \ yCError(SKINMESHCLIENT)\ <<\ \textcolor{stringliteral}{"{}SkinMeshClient:\ no\ skin\ patches\ available\ from\ the\ multipleanalogsensorsclient."{}};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00345}00345\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00346}00346\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00347}00347\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00348}00348\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ skinPatchIndex\ =\ 0;\ skinPatchIndex\ <\ skinPatchCount;\ ++skinPatchIndex)}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00349}00349\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00350}00350\ \ \ \ \ \ \ \ \ std::string\ skinPatchName;}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00351}00351\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!clientSkinPatches-\/>getSkinPatchName(skinPatchIndex,\ skinPatchName))}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00352}00352\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00353}00353\ \ \ \ \ \ \ \ \ \ \ \ \ yCError(SKINMESHCLIENT)\ <<\ \textcolor{stringliteral}{"{}SkinMeshClient:\ unable\ to\ retrieve\ name\ for\ skin\ patch"{}}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00354}00354\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ skinPatchIndex}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00355}00355\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ \textcolor{stringliteral}{"{}from\ multipleanalogsensorsclient."{}};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00356}00356\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00357}00357\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00358}00358\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00359}00359\ \ \ \ \ \ \ \ \ yCDebug(SKINMESHCLIENT)\ <<\ \textcolor{stringliteral}{"{}Name\ of\ found\ skin\ patch:"{}}\ <<\ skinPatchName;}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00360}00360\ \ \ \ \ \ \ \ \ skinPatchNames.addString(skinPatchName);}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00361}00361\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00362}00362\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00363}00363\ \ \ \ \ \textcolor{keywordflow}{if}\ (skinPatchNames.size()\ !=\ \textcolor{keyword}{static\_cast<}\textcolor{keywordtype}{int}\textcolor{keyword}{>}(skinPatchCount))}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00364}00364\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00365}00365\ \ \ \ \ \ \ \ \ yCError(SKINMESHCLIENT)\ <<\ \textcolor{stringliteral}{"{}SkinMeshClient:\ inconsistent\ skin\ patch\ metadata.\ Expected"{}}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00366}00366\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ skinPatchCount}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00367}00367\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ \textcolor{stringliteral}{"{}names\ but\ collected"{}}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00368}00368\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ skinPatchNames.size();}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00369}00369\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00370}00370\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00371}00371\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00372}00372\ \ \ \ \ yarp::os::Property\ remapperOptions;}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00373}00373\ \ \ \ \ remapperOptions.put(\textcolor{stringliteral}{"{}device"{}},\ \textcolor{stringliteral}{"{}multipleanalogsensorsremapper"{}});}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00374}00374\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00375}00375\ \ \ \ \ yarp::os::Bottle\ skinPatchNamesOption;}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00376}00376\ \ \ \ \ yarp::os::Bottle\&\ skinPatchNamesList\ =\ skinPatchNamesOption.addList();}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00377}00377\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i\ =\ 0;\ i\ <\ skinPatchNames.size();\ ++i)}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00378}00378\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00379}00379\ \ \ \ \ \ \ \ \ skinPatchNamesList.addString(skinPatchNames.get(i).asString());}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00380}00380\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00381}00381\ \ \ \ \ remapperOptions.put(\textcolor{stringliteral}{"{}SkinPatchesNames"{}},\ skinPatchNamesOption.get(0));}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00382}00382\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00383}00383\ \ \ \ \ \textcolor{keywordflow}{if}\ (!\_multipleAnalogSensorsRemapperDevice.open(remapperOptions))}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00384}00384\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00385}00385\ \ \ \ \ \ \ \ \ yCError(SKINMESHCLIENT)\ <<\ \textcolor{stringliteral}{"{}SkinMeshClient:\ unable\ to\ open\ multipleanalogsensorsremapper\ with\ options"{}}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00386}00386\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ remapperOptions.toString();}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00387}00387\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00388}00388\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00389}00389\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00390}00390\ \ \ \ \ \textcolor{keywordflow}{if}\ (!\_multipleAnalogSensorsRemapperDevice.view(remappedMASInterfaces.imultwrap)\ ||}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00391}00391\ \ \ \ \ \ \ \ \ remappedMASInterfaces.imultwrap\ ==\ \textcolor{keyword}{nullptr})}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00392}00392\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00393}00393\ \ \ \ \ \ \ \ \ yCError(SKINMESHCLIENT)\ <<\ \textcolor{stringliteral}{"{}SkinMeshClient:\ unable\ to\ view\ IMultipleWrapper\ from\ multipleanalogsensorsremapper."{}};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00394}00394\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00395}00395\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00396}00396\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00397}00397\ \ \ \ \ yarp::dev::PolyDriverList\ clientDeviceList;}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00398}00398\ \ \ \ \ clientDeviceList.push(\&\_multipleAnalogSensorsClientDevice,\ \textcolor{stringliteral}{"{}skin\_mas\_client"{}});}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00399}00399\ \ \ \ \ \textcolor{keywordflow}{if}\ (!remappedMASInterfaces.imultwrap-\/>attachAll(clientDeviceList))}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00400}00400\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00401}00401\ \ \ \ \ \ \ \ \ yCError(SKINMESHCLIENT)\ <<\ \textcolor{stringliteral}{"{}SkinMeshClient:\ unable\ to\ attach\ multipleanalogsensorsclient\ to\ remapper."{}};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00402}00402\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00403}00403\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00404}00404\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00405}00405\ \ \ \ \ \textcolor{keywordflow}{if}\ (!\_multipleAnalogSensorsRemapperDevice.view(remappedMASInterfaces.iskinPatchesSensors)\ ||}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00406}00406\ \ \ \ \ \ \ \ \ remappedMASInterfaces.iskinPatchesSensors\ ==\ \textcolor{keyword}{nullptr})}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00407}00407\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00408}00408\ \ \ \ \ \ \ \ \ yCError(SKINMESHCLIENT)\ <<\ \textcolor{stringliteral}{"{}SkinMeshClient:\ unable\ to\ view\ ISkinPatches\ from\ multipleanalogsensorsremapper."{}};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00409}00409\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00410}00410\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00411}00411\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00412}00412\ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{size\_t}\ remappedSkinPatchCount\ =\ remappedMASInterfaces.iskinPatchesSensors-\/>getNrOfSkinPatches();}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00413}00413\ \ \ \ \ \textcolor{keywordflow}{if}\ (remappedSkinPatchCount\ !=\ skinPatchCount)}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00414}00414\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00415}00415\ \ \ \ \ \ \ \ \ yCError(SKINMESHCLIENT)\ <<\ \textcolor{stringliteral}{"{}SkinMeshClient:\ MultipleAnalogSensorsRemapper\ exposes"{}}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00416}00416\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ remappedSkinPatchCount}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00417}00417\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ \textcolor{stringliteral}{"{}skin\ patches,\ expected"{}}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00418}00418\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ skinPatchCount;}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00419}00419\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00420}00420\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00421}00421\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00422}00422\ \ \ \ \ yCInfo(SKINMESHCLIENT)\ <<\ \textcolor{stringliteral}{"{}Reading\ skin\ patches\ through\ MultipleAnalogSensorsRemapper:"{}}\ <<\ skinPatchNames.toString();}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00423}00423\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00424}00424\ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00425}00425\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00426}00426\ \textcolor{keywordtype}{bool}\ SkinMeshClient::readSkinPatches(yarp::sig::Vector\&\ skinValue)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00427}00427\ \textcolor{keyword}{}\{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00428}00428\ \ \ \ \ \textcolor{keywordflow}{if}\ (remappedMASInterfaces.iskinPatchesSensors\ ==\ \textcolor{keyword}{nullptr})}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00429}00429\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00430}00430\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00431}00431\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00432}00432\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00433}00433\ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{size\_t}\ skinPatchCount\ =\ remappedMASInterfaces.iskinPatchesSensors-\/>getNrOfSkinPatches();}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00434}00434\ \ \ \ \ \textcolor{keywordflow}{if}\ (skinPatchCount\ ==\ 0)}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00435}00435\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00436}00436\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ now\ =\ yarp::os::Time::now();}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00437}00437\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (now\ -\/\ \mbox{\hyperlink{classSkinMeshClient_ae28a1af9ff664561a6943070ffba6443}{m\_lastNoSkinPatchWarningTime}}\ >=\ noSkinPatchWarningPeriod)}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00438}00438\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00439}00439\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classSkinMeshClient_a6d19f659f160321eb2196fe155c0df9c}{m\_externalConnection}})}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00440}00440\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00441}00441\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yCWarning(SKINMESHCLIENT)\ <<\ \textcolor{stringliteral}{"{}SkinMeshClient:\ no\ skin\ patches\ available\ yet\ from\ the\ MAS\ client."{}}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00442}00442\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ \textcolor{stringliteral}{"{}Waiting\ for\ the\ external\ streaming\ connection."{}};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00443}00443\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00444}00444\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00445}00445\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00446}00446\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//TODO:\ decide\ this\ implementation\ detail:\ if\ externalConnection\ is\ false,\ it\ means\ that\ we\ are\ using\ the\ internal\ remapper,\ which\ should\ always\ expose\ the\ same\ skin\ patches\ as\ the\ client,\ so\ if\ we\ have\ no\ skin\ patches\ it\ means\ that\ the\ client\ has\ no\ skin\ patches,\ and\ this\ is\ something\ that\ we\ want\ to\ warn\ about.\ If\ externalConnection\ is\ true,\ instead,\ we\ are\ relying\ on\ an\ external\ streaming\ connection,\ so\ it\ might\ be\ the\ case\ that\ the\ client\ has\ skin\ patches\ but\ we\ haven't\ established\ the\ streaming\ connection\ yet,\ so\ in\ that\ case\ we\ want\ to\ warn\ about\ the\ fact\ that\ we\ have\ no\ skin\ patches\ available\ yet\ and\ we\ are\ waiting\ for\ the\ streaming\ connection\ to\ be\ established.}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00447}00447\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ thus\ in\ this\ case\ it\ should\ an\ Error\ and\ the\ sw\ should\ exit,\ but\ for\ now\ let's\ keep\ it\ as\ a\ warning\ and\ let's\ wait\ for\ the\ streaming\ connection,\ because\ this\ is\ what\ happens\ in\ the\ current\ implementation\ of\ the\ skinmanager\ xml\ file,\ and\ we\ don't\ want\ to\ break\ it\ without\ a\ good\ reason.}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00448}00448\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yCWarning(SKINMESHCLIENT)\ <<\ \textcolor{stringliteral}{"{}SkinMeshClient:\ no\ skin\ patches\ available\ from\ the\ active\ MAS\ skin\ patches\ interface."{}};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00449}00449\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00450}00450\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSkinMeshClient_ae28a1af9ff664561a6943070ffba6443}{m\_lastNoSkinPatchWarningTime}}\ =\ now;}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00451}00451\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00452}00452\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00453}00453\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00454}00454\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00455}00455\ \ \ \ \ std::vector<size\_t>\ skinPatchSizes(skinPatchCount,\ 0);}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00456}00456\ \ \ \ \ \textcolor{keywordtype}{size\_t}\ totalSkinPatchSize\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00457}00457\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ skinPatchIndex\ =\ 0;\ skinPatchIndex\ <\ skinPatchCount;\ ++skinPatchIndex)}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00458}00458\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00459}00459\ \ \ \ \ \ \ \ \ skinPatchSizes[skinPatchIndex]\ =\ remappedMASInterfaces.iskinPatchesSensors-\/>getSkinPatchSize(skinPatchIndex);}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00460}00460\ \ \ \ \ \ \ \ \ totalSkinPatchSize\ +=\ skinPatchSizes[skinPatchIndex];}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00461}00461\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00462}00462\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00463}00463\ \ \ \ \ skinValue.resize(totalSkinPatchSize,\ 0.0);}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00464}00464\ \ \ \ \ \textcolor{keywordtype}{size\_t}\ skinValueOffset\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00465}00465\ \ \ \ \ \textcolor{keywordtype}{bool}\ gotAnyPatch\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00466}00466\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00467}00467\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ skinPatchIndex\ =\ 0;\ skinPatchIndex\ <\ skinPatchCount;\ ++skinPatchIndex)}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00468}00468\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00469}00469\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (remappedMASInterfaces.iskinPatchesSensors-\/>getSkinPatchStatus(skinPatchIndex)\ !=\ yarp::dev::MAS\_OK)}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00470}00470\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00471}00471\ \ \ \ \ \ \ \ \ \ \ \ \ skinValueOffset\ +=\ skinPatchSizes[skinPatchIndex];}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00472}00472\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00473}00473\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00474}00474\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00475}00475\ \ \ \ \ \ \ \ \ yarp::sig::Vector\ skinPatchValue;}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00476}00476\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ timestamp\ =\ 0.0;}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00477}00477\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!remappedMASInterfaces.iskinPatchesSensors-\/>getSkinPatchMeasure(skinPatchIndex,\ skinPatchValue,\ timestamp))}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00478}00478\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00479}00479\ \ \ \ \ \ \ \ \ \ \ \ \ skinValueOffset\ +=\ skinPatchSizes[skinPatchIndex];}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00480}00480\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00481}00481\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00482}00482\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00483}00483\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{size\_t}\ taxelsToCopy\ =\ std::min(skinPatchSizes[skinPatchIndex],\ skinPatchValue.size());}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00484}00484\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i\ =\ 0;\ i\ <\ taxelsToCopy;\ ++i)}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00485}00485\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00486}00486\ \ \ \ \ \ \ \ \ \ \ \ \ skinValue[skinValueOffset\ +\ i]\ =\ skinPatchValue[i];}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00487}00487\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00488}00488\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00489}00489\ \ \ \ \ \ \ \ \ skinValueOffset\ +=\ skinPatchSizes[skinPatchIndex];}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00490}00490\ \ \ \ \ \ \ \ \ gotAnyPatch\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00491}00491\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00492}00492\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00493}00493\ \ \ \ \ \textcolor{keywordflow}{return}\ gotAnyPatch;}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00494}00494\ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00495}00495\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00496}\mbox{\hyperlink{classSkinMeshClient_a53b510c80431d4e025e20b722a10a57e}{00496}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classSkinMeshClient_a53b510c80431d4e025e20b722a10a57e}{SkinMeshClient::start}}()}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00497}00497\ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00498}00498\ \ \ \ \ \textcolor{keywordflow}{if}\ (!configureFromSearchable(m\_config))}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00499}00499\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00500}00500\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSkinMeshClient_afc1a615bc05ce77b1030c44ad50b84b2}{close}}();}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00501}00501\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00502}00502\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00503}00503\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00504}00504\ \ \ \ \ \textcolor{keywordflow}{return}\ runModuleThreaded()\ ==\ 0;}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00505}00505\ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00506}00506\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00507}\mbox{\hyperlink{classSkinMeshClient_a053f7de01131499cad571dac1950d3ce}{00507}}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classSkinMeshClient_a053f7de01131499cad571dac1950d3ce}{SkinMeshClient::stop}}()}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00508}00508\ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00509}00509\ \ \ \ \ stopModule(\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00510}00510\ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00511}00511\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00512}\mbox{\hyperlink{classSkinMeshClient_a66e0ff00092a3b8ee2ac8316ea682187}{00512}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classSkinMeshClient_a66e0ff00092a3b8ee2ac8316ea682187}{SkinMeshClient::configure}}(yarp::os::ResourceFinder\ \&rf)}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00513}00513\ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00514}00514\ \ \ \ \ \textcolor{keywordflow}{return}\ configureFromSearchable(rf);}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00515}00515\ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00516}00516\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00517}\mbox{\hyperlink{classSkinMeshClient_aa3ceb1fb8ef642ae1f46a17c0cb8ef09}{00517}}\ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{classSkinMeshClient_aa3ceb1fb8ef642ae1f46a17c0cb8ef09}{SkinMeshClient::getPeriod}}()}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00518}00518\ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00519}00519\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classSkinMeshClient_ade733671d5cafb05c0b63c2dda94d8ed}{m\_period}};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00520}00520\ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00521}00521\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00522}\mbox{\hyperlink{classSkinMeshClient_aeabd0bb63ddd10390b553a4e7ad4e6a6}{00522}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classSkinMeshClient_aeabd0bb63ddd10390b553a4e7ad4e6a6}{SkinMeshClient::updateModule}}()}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00523}00523\ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00524}00524\ \ \ \ \ std::lock\_guard<std::mutex>\ lck(\mbox{\hyperlink{classSkinMeshClient_aefc3765467470ce9c5dffa2021c6c80e}{mtx}});}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00525}00525\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00526}00526\ \ \ \ \ \textcolor{keywordtype}{bool}\ gotRealData=\textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00527}00527\ \ \ \ \ \textcolor{keywordtype}{bool}\ gotVirtualData=\textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00528}00528\ \ \ \ \ yarp::sig::Vector\ skin\_value;}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00529}00529\ \ \ \ \ yarp::sig::Vector\ skin\_value\_virtual;}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00530}00530\ \ \ \ \ std::vector<unsigned\ char>\ skin\_color\_virtual;}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00531}00531\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00532}00532\ \ \ \ \ \textcolor{keywordflow}{if}\ (readSkinPatches(skin\_value))}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00533}00533\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00534}00534\ \ \ \ \ \ \ \ \ yCTrace(SKINMESHCLIENT)\ <<\ \textcolor{stringliteral}{"{}Reading\ real\ contacts\ from\ ISkinPatches..."{}};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00535}00535\ \ \ \ \ \ \ \ \ gotRealData=\textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00536}00536\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00537}00537\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00538}00538\ \ \ \ \ \textcolor{comment}{//\ Read\ data\ from\ the\ virtual\ contacts}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00539}00539\ \ \ \ \ \textcolor{keywordflow}{if}\ (Bottle\ *input\_virtual=\mbox{\hyperlink{classSkinMeshClient_aecf45dcb3493aba43392e4d6c2c78b9c}{skin\_port\_virtual}}.read(\textcolor{keyword}{false}))}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00540}00540\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00541}00541\ \ \ \ \ \ \ \ \ Bottle\ *data\_virtual\ \ =\ input\_virtual-\/>get(0).asList();}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00542}00542\ \ \ \ \ \ \ \ \ Bottle\ *color\_virtual\ =\ input\_virtual-\/>get(1).asList();}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00543}00543\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (data\_virtual\ !=\ \textcolor{keyword}{nullptr}\ \&\&\ color\_virtual\ !=\ \textcolor{keyword}{nullptr}\ \&\&\ color\_virtual-\/>size()\ >=\ 3)}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00544}00544\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00545}00545\ \ \ \ \ \ \ \ \ \ \ \ \ yCTrace(SKINMESHCLIENT)\ <<\ \textcolor{stringliteral}{"{}Reading\ from\ virtual\ contacts..."{}};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00546}00546\ \ \ \ \ \ \ \ \ \ \ \ \ gotVirtualData=\textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00547}00547\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00548}00548\ \ \ \ \ \ \ \ \ \ \ \ \ skin\_value\_virtual.resize(data\_virtual-\/>size(),0.0);}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00549}00549\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00550}00550\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i=0;\ i<data\_virtual-\/>size();\ i++)}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00551}00551\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00552}00552\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ skin\_value\_virtual[i]\ =\ data\_virtual-\/>get(i).asFloat64();}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00553}00553\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00554}00554\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00555}00555\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i\ =\ 0;\ i<color\_virtual-\/>size();\ i++)}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00556}00556\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00557}00557\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ skin\_color\_virtual.push\_back(color\_virtual-\/>get(i).asInt32());}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00558}00558\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00559}00559\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00560}00560\ \ \ \ \ \ \ \ \ \ \ \ \ yCTrace(SKINMESHCLIENT)\ <<\ \textcolor{stringliteral}{"{}Virtual\ contacts:"{}}\ <<\ skin\_value\_virtual.toString(3,3);}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00561}00561\ \ \ \ \ \ \ \ \ \ \ \ \ yCTrace(SKINMESHCLIENT)\ <<\ \textcolor{stringliteral}{"{}Virtual\ contacts\ color:"{}}\ <<\ skin\_color\_virtual[0]\ <<\ skin\_color\_virtual[1]\ <<\ skin\_color\_virtual[2];}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00562}00562\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00563}00563\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00564}00564\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00565}00565\ \ \ \ \ \textcolor{keywordflow}{if}\ (!gotRealData\ \&\&\ !gotVirtualData)}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00566}00566\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00567}00567\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ sensorId\ =\ 0;\ sensorId\ <\ \mbox{\hyperlink{classSkinMeshClient_a6655fca29c4a764e16c9d8d2003b1b65}{MAX\_SENSOR\_NUM}};\ sensorId++)}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00568}00568\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00569}00569\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classSkinMeshClient_a3db0b6cf881c69361d52fbfd1446e7b4}{sensor}}[sensorId]\ !=\ \textcolor{keyword}{nullptr})}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00570}00570\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00571}00571\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSkinMeshClient_a3db0b6cf881c69361d52fbfd1446e7b4}{sensor}}[sensorId]-\/>clearActivation();}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00572}00572\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00573}00573\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00574}00574\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00575}00575\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00576}00576\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00577}00577\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ sensorId=0;\ sensorId<\mbox{\hyperlink{classSkinMeshClient_a6655fca29c4a764e16c9d8d2003b1b65}{MAX\_SENSOR\_NUM}};\ sensorId++)}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00578}00578\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00579}00579\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{classSkinMeshClient_a3db0b6cf881c69361d52fbfd1446e7b4}{sensor}}[sensorId]==0)\ \textcolor{keywordflow}{continue};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00580}00580\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00581}00581\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ First,\ let's\ see\ if\ this\ touchSensor\ is\ over\ threshold\ in\ the\ real\ skin}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00582}00582\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ isRealSensorOverThreshold=\textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00583}00583\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (gotRealData)}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00584}00584\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00585}00585\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i=\mbox{\hyperlink{classSkinMeshClient_a3db0b6cf881c69361d52fbfd1446e7b4}{sensor}}[sensorId]-\/>min\_tax;\ i<=\mbox{\hyperlink{classSkinMeshClient_a3db0b6cf881c69361d52fbfd1446e7b4}{sensor}}[sensorId]-\/>max\_tax\ \&\&\ i<static\_cast<int>(skin\_value.size());\ i++)}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00586}00586\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00587}00587\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (skin\_value[i]>\mbox{\hyperlink{classSkinMeshClient_af486e0c5fb18a0926caa8cc4528ce4b9}{skinThreshold}})}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00588}00588\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00589}00589\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ isRealSensorOverThreshold\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00590}00590\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00591}00591\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00592}00592\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00593}00593\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00594}00594\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00595}00595\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Second,\ let's\ see\ if\ this\ touchSensor\ is\ over\ threshold\ in\ the\ virtual\ skin}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00596}00596\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ isVirtualSensorOverThreshold=\textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00597}00597\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (gotVirtualData)}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00598}00598\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00599}00599\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i=\mbox{\hyperlink{classSkinMeshClient_a3db0b6cf881c69361d52fbfd1446e7b4}{sensor}}[sensorId]-\/>min\_tax;\ i<=\mbox{\hyperlink{classSkinMeshClient_a3db0b6cf881c69361d52fbfd1446e7b4}{sensor}}[sensorId]-\/>max\_tax\ \&\&\ i<static\_cast<int>(skin\_value\_virtual.size());\ i++)}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00600}00600\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00601}00601\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (skin\_value\_virtual[i]>\mbox{\hyperlink{classSkinMeshClient_af486e0c5fb18a0926caa8cc4528ce4b9}{skinThreshold}})}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00602}00602\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00603}00603\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ isVirtualSensorOverThreshold\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00604}00604\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00605}00605\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00606}00606\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00607}00607\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00608}00608\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00609}00609\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Then,\ let's\ process\ the\ sensor\ with\ either\ the\ real\ or\ the\ virtual\ (or\ none)}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00610}00610\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ EVerything\ will\ be\ clearly\ decoupled,\ a\ couple\ lines\ more\ do\ not\ hurt}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00611}00611\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00612}00612\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ If\ there\ are\ both,\ handle\ them}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00613}00613\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (gotRealData\ \&\&\ gotVirtualData)}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00614}00614\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00615}00615\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Then,\ let's\ process\ the\ sensor\ with\ either\ the\ real\ or\ the\ virtual\ skin}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00616}00616\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i=\mbox{\hyperlink{classSkinMeshClient_a3db0b6cf881c69361d52fbfd1446e7b4}{sensor}}[sensorId]-\/>min\_tax;\ i<=\mbox{\hyperlink{classSkinMeshClient_a3db0b6cf881c69361d52fbfd1446e7b4}{sensor}}[sensorId]-\/>max\_tax;\ i++)}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00617}00617\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00618}00618\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ curr\_tax\ =\ i-\/\mbox{\hyperlink{classSkinMeshClient_a3db0b6cf881c69361d52fbfd1446e7b4}{sensor}}[sensorId]-\/>min\_tax;}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00619}00619\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00620}00620\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ The\ GUI\ layout\ can\ describe\ more\ taxels\ than\ the\ current\ MAS\ sample\ carries,}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00621}00621\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ especially\ while\ clients\ are\ connecting\ or\ when\ only\ a\ subset\ of\ patches\ is\ available.}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00622}00622\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (isRealSensorOverThreshold\ \&\&\ i<\textcolor{keyword}{static\_cast<}\textcolor{keywordtype}{int}\textcolor{keyword}{>}(skin\_value.size()))}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00623}00623\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00624}00624\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSkinMeshClient_a3db0b6cf881c69361d52fbfd1446e7b4}{sensor}}[sensorId]-\/>setActivationFromPortData(skin\_value[i],curr\_tax);}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00625}00625\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSkinMeshClient_a3db0b6cf881c69361d52fbfd1446e7b4}{sensor}}[sensorId]-\/>setColor(\mbox{\hyperlink{classSkinMeshClient_a773388266bd507b1676dbc5d95ac18c4}{defaultColor}}[0],\mbox{\hyperlink{classSkinMeshClient_a773388266bd507b1676dbc5d95ac18c4}{defaultColor}}[1],\mbox{\hyperlink{classSkinMeshClient_a773388266bd507b1676dbc5d95ac18c4}{defaultColor}}[2]);}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00626}00626\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00627}00627\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}(isVirtualSensorOverThreshold\ \&\&\ i<\textcolor{keyword}{static\_cast<}\textcolor{keywordtype}{int}\textcolor{keyword}{>}(skin\_value\_virtual.size()))}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00628}00628\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00629}00629\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSkinMeshClient_a3db0b6cf881c69361d52fbfd1446e7b4}{sensor}}[sensorId]-\/>setActivationFromPortData(skin\_value\_virtual[i],curr\_tax);}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00630}00630\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSkinMeshClient_a3db0b6cf881c69361d52fbfd1446e7b4}{sensor}}[sensorId]-\/>setColor(skin\_color\_virtual[0],skin\_color\_virtual[1],skin\_color\_virtual[2]);}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00631}00631\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00632}00632\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (i<\textcolor{keyword}{static\_cast<}\textcolor{keywordtype}{int}\textcolor{keyword}{>}(skin\_value.size()))}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00633}00633\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00634}00634\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSkinMeshClient_a3db0b6cf881c69361d52fbfd1446e7b4}{sensor}}[sensorId]-\/>setActivationFromPortData(skin\_value[i],curr\_tax);}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00635}00635\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSkinMeshClient_a3db0b6cf881c69361d52fbfd1446e7b4}{sensor}}[sensorId]-\/>setColor(\mbox{\hyperlink{classSkinMeshClient_a773388266bd507b1676dbc5d95ac18c4}{defaultColor}}[0],\mbox{\hyperlink{classSkinMeshClient_a773388266bd507b1676dbc5d95ac18c4}{defaultColor}}[1],\mbox{\hyperlink{classSkinMeshClient_a773388266bd507b1676dbc5d95ac18c4}{defaultColor}}[2]);}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00636}00636\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00637}00637\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00638}00638\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00639}00639\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (gotRealData\ ||\ gotVirtualData)}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00640}00640\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00641}00641\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i=\mbox{\hyperlink{classSkinMeshClient_a3db0b6cf881c69361d52fbfd1446e7b4}{sensor}}[sensorId]-\/>min\_tax;\ i<=\mbox{\hyperlink{classSkinMeshClient_a3db0b6cf881c69361d52fbfd1446e7b4}{sensor}}[sensorId]-\/>max\_tax;\ i++)}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00642}00642\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00643}00643\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ curr\_tax\ =\ i-\/\mbox{\hyperlink{classSkinMeshClient_a3db0b6cf881c69361d52fbfd1446e7b4}{sensor}}[sensorId]-\/>min\_tax;}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00644}00644\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00645}00645\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (gotRealData\ \&\&\ i<\textcolor{keyword}{static\_cast<}\textcolor{keywordtype}{int}\textcolor{keyword}{>}(skin\_value.size()))}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00646}00646\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00647}00647\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSkinMeshClient_a3db0b6cf881c69361d52fbfd1446e7b4}{sensor}}[sensorId]-\/>setActivationFromPortData(skin\_value[i],curr\_tax);}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00648}00648\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSkinMeshClient_a3db0b6cf881c69361d52fbfd1446e7b4}{sensor}}[sensorId]-\/>setColor(\mbox{\hyperlink{classSkinMeshClient_a773388266bd507b1676dbc5d95ac18c4}{defaultColor}}[0],\mbox{\hyperlink{classSkinMeshClient_a773388266bd507b1676dbc5d95ac18c4}{defaultColor}}[1],\mbox{\hyperlink{classSkinMeshClient_a773388266bd507b1676dbc5d95ac18c4}{defaultColor}}[2]);}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00649}00649\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00650}00650\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (gotVirtualData\ \&\&\ i<\textcolor{keyword}{static\_cast<}\textcolor{keywordtype}{int}\textcolor{keyword}{>}(skin\_value\_virtual.size()))}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00651}00651\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00652}00652\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSkinMeshClient_a3db0b6cf881c69361d52fbfd1446e7b4}{sensor}}[sensorId]-\/>setActivationFromPortData(skin\_value\_virtual[i],curr\_tax);}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00653}00653\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classSkinMeshClient_a3db0b6cf881c69361d52fbfd1446e7b4}{sensor}}[sensorId]-\/>setColor(skin\_color\_virtual[0],skin\_color\_virtual[1],skin\_color\_virtual[2]);}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00654}00654\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00655}00655\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00656}00656\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00657}00657\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00658}00658\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00659}00659\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00660}00660\ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00661}00661\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00662}\mbox{\hyperlink{classSkinMeshClient_afc1a615bc05ce77b1030c44ad50b84b2}{00662}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classSkinMeshClient_afc1a615bc05ce77b1030c44ad50b84b2}{SkinMeshClient::close}}()}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00663}00663\ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00664}00664\ \ \ \ \ yCDebug(SKINMESHCLIENT)\ <<\ \textcolor{stringliteral}{"{}SkinMeshClient\ releasing..."{}};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00665}00665\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00666}00666\ \ \ \ \ \textcolor{keywordflow}{if}\ (remappedMASInterfaces.imultwrap\ !=\ \textcolor{keyword}{nullptr})}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00667}00667\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00668}00668\ \ \ \ \ \ \ \ \ remappedMASInterfaces.imultwrap-\/>detachAll();}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00669}00669\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00670}00670\ \ \ \ \ remappedMASInterfaces.imultwrap\ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00671}00671\ \ \ \ \ remappedMASInterfaces.iskinPatchesSensors\ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00672}00672\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00673}00673\ \ \ \ \ \_multipleAnalogSensorsRemapperDevice.close();}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00674}00674\ \ \ \ \ \_multipleAnalogSensorsClientDevice.close();}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00675}00675\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00676}00676\ \ \ \ \ \mbox{\hyperlink{classSkinMeshClient_a39f3a2f0162ee1da3232f733747a29f2}{skin\_port}}.close();}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00677}00677\ \ \ \ \ \mbox{\hyperlink{classSkinMeshClient_aecf45dcb3493aba43392e4d6c2c78b9c}{skin\_port\_virtual}}.close();}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00678}00678\ }
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00679}00679\ \ \ \ \ \mbox{\hyperlink{classSkinMeshClient_af235ba9f6263efed67aa0f0a63d96f6e}{m\_configured}}\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00680}00680\ \ \ \ \ yCDebug(SKINMESHCLIENT)\ <<\ \textcolor{stringliteral}{"{}SkinMeshClient\ released."{}};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00681}00681\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{SkinMeshClient_8cpp_source_l00682}00682\ \}}
+
+\end{DoxyCode}

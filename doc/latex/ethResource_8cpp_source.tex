@@ -1,0 +1,1025 @@
+\doxysection{eth\+Resource.\+cpp}
+\hypertarget{ethResource_8cpp_source}{}\label{ethResource_8cpp_source}\index{icub-\/main/src/libraries/icubmod/embObjLib/ethResource.cpp@{icub-\/main/src/libraries/icubmod/embObjLib/ethResource.cpp}}
+\mbox{\hyperlink{ethResource_8cpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00001}00001\ \textcolor{comment}{//\ -\/*-\/\ Mode:C++;\ tab-\/width:4;\ c-\/basic-\/offset:4;\ indent-\/tabs-\/mode:nil\ -\/*-\/}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00002}00002\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00003}00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00004}00004\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2012\ iCub\ Facility,\ Istituto\ Italiano\ di\ Tecnologia}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00005}00005\ \textcolor{comment}{\ *\ Author:\ \ Alberto\ Cardellino,\ Marco\ Accame}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00006}00006\ \textcolor{comment}{\ *\ email:\ \ \ alberto.cardellino@iit.it,\ marco.accame@iit.it}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00007}00007\ \textcolor{comment}{\ *\ CopyPolicy:\ Released\ under\ the\ terms\ of\ the\ LGPLv2.1\ or\ later,\ see\ LGPL.TXT}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00008}00008\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00009}00009\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00010}00010\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00011}00011\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{ethResource_8h}{ethResource.h}}"{}}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00012}00012\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{ethManager_8h}{ethManager.h}}>}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00013}00013\ \textcolor{preprocessor}{\#include\ <yarp/os/Time.h>}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00014}00014\ \textcolor{preprocessor}{\#include\ <yarp/os/Network.h>}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00015}00015\ \textcolor{preprocessor}{\#include\ <yarp/conf/environment.h>}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00016}00016\ \textcolor{preprocessor}{\#include\ <yarp/os/NetType.h>}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00017}00017\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00018}00018\ \textcolor{comment}{//\ embobj}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00019}00019\ \textcolor{preprocessor}{\#include\ "{}EOropframe\_hid.h"{}}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00020}00020\ \textcolor{preprocessor}{\#include\ "{}EOarray.h"{}}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00021}00021\ \textcolor{preprocessor}{\#include\ "{}EoProtocol.h"{}}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00022}00022\ \textcolor{preprocessor}{\#include\ "{}EoManagement.h"{}}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00023}00023\ \textcolor{preprocessor}{\#include\ "{}EoProtocolMN.h"{}}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00024}00024\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{can__string__eth_8h}{can\_string\_eth.h}}"{}}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00025}00025\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00026}00026\ \textcolor{keyword}{using\ namespace\ }yarp::os;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00027}00027\ \textcolor{keyword}{using\ namespace\ }yarp::os::impl;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00028}00028\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00029}00029\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{theNVmanager_8h}{theNVmanager.h}}>}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00030}00030\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{ethParser_8h}{ethParser.h}}"{}}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00031}00031\ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespaceeth}{eth}};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00032}00032\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00033}00033\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00034}00034\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00035}00035\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00036}00036\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00037}00037\ \textcolor{comment}{//\ -\/\ class\ EthResource}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00038}00038\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00039}\mbox{\hyperlink{classeth_1_1EthResource_a12fa90ec0c1c92066a8dcb491a7d5dc9}{00039}}\ \mbox{\hyperlink{classeth_1_1EthResource_a12fa90ec0c1c92066a8dcb491a7d5dc9}{EthResource::EthResource}}()}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00040}00040\ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00041}00041\ \ \ \ \ ethManager\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ NULL;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00042}00042\ \ \ \ \ isInRunningMode\ \ \ \ \ \ \ \ \ \ \ \ \ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00043}00043\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00044}00044\ \ \ \ \ verifiedBoardPresence\ \ \ \ \ \ \ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00045}00045\ \ \ \ \ askedBoardVersion\ \ \ \ \ \ \ \ \ \ \ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00046}00046\ \ \ \ \ verifiedBoardTransceiver\ \ \ \ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00047}00047\ \ \ \ \ txrateISset\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00048}00048\ \ \ \ \ cleanedBoardBehaviour\ \ \ \ \ \ \ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00049}00049\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00050}00050\ \ \ \ \ boardMNprotocolversion.major\ =\ boardMNprotocolversion.minor;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00051}00051\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00052}00052\ \ \ \ \ txconfig.runnermode\ =\ eomn\_appl\_runnermode\_synchronized;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00053}00053\ \ \ \ \ txconfig.safetygap\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00054}00054\ \ \ \ \ txconfig.cycletime\ =\ defcycletime;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00055}00055\ \ \ \ \ txconfig.txratedivider\ =\ defTXrateOfRegularROPs;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00056}00056\ \ \ \ \ txconfig.maxtimeRX\ =\ defmaxtimeRX;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00057}00057\ \ \ \ \ txconfig.maxtimeDO\ =\ defmaxtimeDO;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00058}00058\ \ \ \ \ txconfig.maxtimeTX\ =\ defmaxtimeTX;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00059}00059\ \ \ \ \ txconfig.logging.flags\ =\ (0x0001\ <<\ eomn\_appl\_log\_asynchro\_exectime\_rxdotx\_overflow);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00060}00060\ \ \ \ \ txconfig.logging.period10ms\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00061}00061\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00062}00062\ \ \ \ \ memset(verifiedEPprotocol,\ 0,\ \textcolor{keyword}{sizeof}(verifiedEPprotocol));}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00063}00063\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00064}00064\ \ \ \ \ usedNumberOfRegularROPs\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00065}00065\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00066}00066\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i\ =\ 0;\ i<16;\ i++)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00067}00067\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00068}00068\ \ \ \ \ \ \ \ \ c\_string\_handler[i]\ =\ NULL;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00069}00069\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00070}00070\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00071}00071\ \ \ \ \ std::string\ tmp\ =\ yarp::conf::environment::get\_string(\textcolor{stringliteral}{"{}ETH\_VERBOSEWHENOK"{}});}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00072}00072\ \ \ \ \ \textcolor{keywordflow}{if}\ (tmp\ !=\ \textcolor{stringliteral}{"{}"{}})}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00073}00073\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00074}00074\ \ \ \ \ \ \ \ \ verbosewhenok\ =\ (bool)(yarp::conf::numeric::from\_string(tmp,\ 0U));}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00075}00075\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00076}00076\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00077}00077\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00078}00078\ \ \ \ \ \ \ \ \ verbosewhenok\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00079}00079\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00080}00080\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00081}00081\ \ \ \ \ verbosewhenok\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00082}00082\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00083}00083\ \ \ \ \ regularsAreSet\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00084}00084\ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00085}00085\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00086}00086\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00087}\mbox{\hyperlink{classeth_1_1EthResource_a8166a4c1edc549f1652157138fa302dc}{00087}}\ \mbox{\hyperlink{classeth_1_1EthResource_a8166a4c1edc549f1652157138fa302dc}{EthResource::\string~EthResource}}()}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00088}00088\ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00089}00089\ \ \ \ \ ethManager\ =\ NULL;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00090}00090\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00091}00091\ \ \ \ \ \textcolor{comment}{//\ Delete\ every\ initialized\ can\_string\_eth\ object}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00092}00092\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i=0;\ i<16;\ i++)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00093}00093\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00094}00094\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (c\_string\_handler[i]\ !=\ NULL)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00095}00095\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00096}00096\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{delete}\ c\_string\_handler[i];}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00097}00097\ \ \ \ \ \ \ \ \ \ \ \ \ c\_string\_handler[i]\ =\ NULL;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00098}00098\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00099}00099\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00100}00100\ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00101}00101\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00102}00102\ \textcolor{keywordtype}{bool}\ EthResource::lock(\textcolor{keywordtype}{bool}\ \mbox{\hyperlink{show__eyes__axes_8m_a58ab1fd68e97078232808206b850161b}{on}})}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00103}00103\ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00104}00104\ \ \ \ \ \textcolor{keywordflow}{if}(\textcolor{keyword}{true}\ ==\ \mbox{\hyperlink{show__eyes__axes_8m_a58ab1fd68e97078232808206b850161b}{on}})}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00105}00105\ \ \ \ \ \ \ \ \ objLock.lock();}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00106}00106\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00107}00107\ \ \ \ \ \ \ \ \ objLock.unlock();}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00108}00108\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00109}00109\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00110}00110\ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00111}00111\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00112}00112\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00113}\mbox{\hyperlink{classeth_1_1EthResource_a7e4178061c547d6d75b356c096d5d42a}{00113}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classeth_1_1EthResource_a7e4178061c547d6d75b356c096d5d42a}{EthResource::open2}}(eOipv4addr\_t\ remIP,\ yarp::os::Searchable\ \&cfgtotal)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00114}00114\ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00115}00115\ \ \ \ \ ethManager\ =\ \mbox{\hyperlink{classeth_1_1TheEthManager_a99b04f7d1ead25ef3d3c1214d8205710}{eth::TheEthManager::instance}}();}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00116}00116\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00117}00117\ \ \ \ \ \mbox{\hyperlink{structeth_1_1parser_1_1pc104Data}{eth::parser::pc104Data}}\ pc104data;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00118}00118\ \ \ \ \ \mbox{\hyperlink{namespaceeth_1_1parser_a8ec58da625146082584ad1a365bdd0e5}{eth::parser::read}}(cfgtotal,\ pc104data);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00119}00119\ \textcolor{comment}{//\ \ \ \ eth::parser::print(pc104data);}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00120}00120\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00121}00121\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00122}00122\ \ \ \ \ \mbox{\hyperlink{structeth_1_1parser_1_1boardData}{eth::parser::boardData}}\ brddata;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00123}00123\ \ \ \ \ \mbox{\hyperlink{namespaceeth_1_1parser_a8ec58da625146082584ad1a365bdd0e5}{eth::parser::read}}(cfgtotal,\ brddata);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00124}00124\ \ \ \ \ \mbox{\hyperlink{namespaceeth_1_1parser_ac2f5662a765ffbe9a0790ca81c24a838}{eth::parser::print}}(brddata);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00125}00125\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00126}00126\ \ \ \ \ txconfig\ =\ brddata.\mbox{\hyperlink{structeth_1_1parser_1_1boardData_ab7339dbdcba32566871a7740137468dd}{settings}}.\mbox{\hyperlink{structeth_1_1parser_1_1boardSettings_ad7f3f428e3759a0d4cc012d874b58f1a}{txconfig}};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00127}00127\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00128}00128\ \ \ \ \ properties.ipv4addr\ =\ remIP;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00129}00129\ \ \ \ \ properties.ipv4addressing\ =\ brddata.\mbox{\hyperlink{structeth_1_1parser_1_1boardData_a7c0f599fede48871f957dade0d4ddbc1}{properties}}.\mbox{\hyperlink{structeth_1_1parser_1_1boardProperties_ac55e35a76751a41fee390540fb724dc5}{ipv4addressing}};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00130}00130\ \ \ \ \ properties.boardtype\ =\ brddata.\mbox{\hyperlink{structeth_1_1parser_1_1boardData_a7c0f599fede48871f957dade0d4ddbc1}{properties}}.\mbox{\hyperlink{structeth_1_1parser_1_1boardProperties_a22fe44b2fba238ff9a6b1f110da7e737}{type}};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00131}00131\ \ \ \ \ properties.ipv4addrString\ =\ brddata.\mbox{\hyperlink{structeth_1_1parser_1_1boardData_a7c0f599fede48871f957dade0d4ddbc1}{properties}}.\mbox{\hyperlink{structeth_1_1parser_1_1boardProperties_afacb259b874b0e56b9871f4fa175d23c}{ipv4string}};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00132}00132\ \ \ \ \ properties.ipv4addressingString\ =\ brddata.\mbox{\hyperlink{structeth_1_1parser_1_1boardData_a7c0f599fede48871f957dade0d4ddbc1}{properties}}.\mbox{\hyperlink{structeth_1_1parser_1_1boardProperties_afeab0b1ebfdd2c5adb5fa87a33dd1093}{ipv4addressingstring}};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00133}00133\ \ \ \ \ properties.boardtypeString\ =\ brddata.\mbox{\hyperlink{structeth_1_1parser_1_1boardData_a7c0f599fede48871f957dade0d4ddbc1}{properties}}.\mbox{\hyperlink{structeth_1_1parser_1_1boardProperties_ab97ab0e3bf048fc37cba39a35463c403}{typestring}};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00134}00134\ \ \ \ \ properties.boardnameString\ =\ brddata.\mbox{\hyperlink{structeth_1_1parser_1_1boardData_ab7339dbdcba32566871a7740137468dd}{settings}}.\mbox{\hyperlink{structeth_1_1parser_1_1boardSettings_a080d6c6afa021d381b79fc281450aa02}{name}};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00135}00135\ \ \ \ \ properties.txROPratedivider\ =\ txconfig.txratedivider;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00136}00136\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00137}00137\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00138}00138\ \ \ \ \ \mbox{\hyperlink{structeth_1_1EthMonitorPresence_1_1Config}{eth::EthMonitorPresence::Config}}\ mpConfig;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00139}00139\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00140}00140\ \ \ \ \ \textcolor{comment}{//\ default\ values\ ...}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00141}00141\ \ \ \ \ mpConfig.\mbox{\hyperlink{structeth_1_1EthMonitorPresence_1_1Config_a606204c25b8ed88af74bc491c0b0a751}{enabled}}\ =\ brddata.\mbox{\hyperlink{structeth_1_1parser_1_1boardData_a23135a5bdaa6183276ba7d849c99a64d}{actions}}.\mbox{\hyperlink{structeth_1_1parser_1_1boardActions_ab93878ddb4c2b6b3603af40ca5f5bb7d}{monitorpresence\_enabled}};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00142}00142\ \ \ \ \ mpConfig.\mbox{\hyperlink{structeth_1_1EthMonitorPresence_1_1Config_a5e1117a82c752ed1afc6b7da419c7ad8}{timeout}}\ =\ brddata.\mbox{\hyperlink{structeth_1_1parser_1_1boardData_a23135a5bdaa6183276ba7d849c99a64d}{actions}}.\mbox{\hyperlink{structeth_1_1parser_1_1boardActions_ae7f0c8be7ca959271504a2d385957720}{monitorpresence\_timeout}};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00143}00143\ \ \ \ \ mpConfig.\mbox{\hyperlink{structeth_1_1EthMonitorPresence_1_1Config_a4fbd2d17b738daa063a5bc661733498b}{periodmissingreport}}\ =\ brddata.\mbox{\hyperlink{structeth_1_1parser_1_1boardData_a23135a5bdaa6183276ba7d849c99a64d}{actions}}.\mbox{\hyperlink{structeth_1_1parser_1_1boardActions_a516c8d38434bb1dac9739c8ec1226671}{monitorpresence\_periodofmissingreport}};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00144}00144\ \ \ \ \ mpConfig.\mbox{\hyperlink{structeth_1_1EthMonitorPresence_1_1Config_a488f58c78bbf5d81b4df7e5c2be064da}{name}}\ =\ brddata.\mbox{\hyperlink{structeth_1_1parser_1_1boardData_a7c0f599fede48871f957dade0d4ddbc1}{properties}}.\mbox{\hyperlink{structeth_1_1parser_1_1boardProperties_afacb259b874b0e56b9871f4fa175d23c}{ipv4string}}\ +\ \textcolor{stringliteral}{"{}\ ("{}}\ +\ brddata.\mbox{\hyperlink{structeth_1_1parser_1_1boardData_ab7339dbdcba32566871a7740137468dd}{settings}}.\mbox{\hyperlink{structeth_1_1parser_1_1boardSettings_a080d6c6afa021d381b79fc281450aa02}{name}}\ +\ \textcolor{stringliteral}{"{})"{}};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00145}00145\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00146}00146\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00147}00147\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00148}00148\ \ \ \ \ \textcolor{comment}{//\ now\ i\ init\ objects}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00149}00149\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00150}00150\ \ \ \ \ lock(\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00151}00151\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00152}00152\ \ \ \ \ \textcolor{comment}{//\ 1.\ init\ transceiver}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00153}00153\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00154}00154\ \ \ \ \ eOipv4addressing\_t\ localIPv4\ =\ ethManager-\/>getLocalIPV4addressing();}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00155}00155\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00156}00156\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00157}00157\ \ \ \ \ \textcolor{keywordflow}{if}(\textcolor{keyword}{false}\ ==\ transceiver.init2(\textcolor{keyword}{this},\ cfgtotal,\ localIPv4,\ remIP))}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00158}00158\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00159}00159\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}EthResource::open2()\ cannot\ init\ transceiver\ w/\ HostTransceiver::init2()\ for\ BOARD"{}}\ <<\ properties.boardnameString\ <<\ \textcolor{stringliteral}{"{}IP"{}}\ <<\ properties.ipv4addrString;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00160}00160\ \ \ \ \ \ \ \ \ lock(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00161}00161\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00162}00162\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00163}00163\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00164}00164\ \ \ \ \ \textcolor{comment}{//\ 2.\ init\ monitor\ presence}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00165}00165\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00166}00166\ \ \ \ \ monitorpresence.config(mpConfig);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00167}00167\ \ \ \ \ monitorpresence.tick();}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00168}00168\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00169}00169\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00170}00170\ \ \ \ \ lock(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00171}00171\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00172}00172\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00173}00173\ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00174}00174\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00175}00175\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00176}00176\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00177}\mbox{\hyperlink{classeth_1_1EthResource_aee2a0ccde3c883dbfce7f658c8e07441}{00177}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classeth_1_1EthResource_aee2a0ccde3c883dbfce7f658c8e07441}{EthResource::close}}()}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00178}00178\ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00179}00179\ \ \ \ \ yTrace();}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00180}00180\ \ \ \ \ \mbox{\hyperlink{classeth_1_1AbstractEthResource_a217c63651c4c4201d90151dfe64ef23d}{posServiceConfiguration}}.clearOnStop(eomn\_serv\_category\_all);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00181}00181\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00182}00182\ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00183}00183\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00184}00184\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00185}\mbox{\hyperlink{classeth_1_1EthResource_a15ab65b4fc87d88752abe544ff1f97bc}{00185}}\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{void}\ *\ \mbox{\hyperlink{classeth_1_1EthResource_a15ab65b4fc87d88752abe544ff1f97bc}{EthResource::getUDPtransmit}}(eOipv4addressing\_t\ \&destination,\ \textcolor{keywordtype}{size\_t}\ \&sizeofpacket,\ uint16\_t\ \&numofrops)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00186}00186\ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00187}00187\ \ \ \ \ destination\ =\ properties.ipv4addressing;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00188}00188\ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{void}\ *\ udp\ =\ transceiver.getUDP(sizeofpacket,\ numofrops);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00189}00189\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00190}00190\ \textcolor{comment}{//\ \ \ \ const\ EOropframeHeader\_t\ *\ header\ =\ reinterpret\_cast<const\ EOropframeHeader\_t\ *>(udp);}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00191}00191\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00192}00192\ \textcolor{comment}{//\ \ \ \ if(nullptr\ !=\ header)}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00193}00193\ \textcolor{comment}{//\ \ \ \ \{}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00194}00194\ \textcolor{comment}{//\ \ \ \ \ \ \ \ yDebug()\ <<\ "{}EthResource::getUDPtransmit():\ the\ header\ has:\ sequencenumber\ =\ "{}\ <<\ header-\/>sequencenumber\ <<\ "{}numofrops\ =\ "{}\ <<\ header-\/>ropsnumberof\ <<\ "{}sizeofrops\ =\ "{}\ <<\ header-\/>ropssizeof;}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00195}00195\ \textcolor{comment}{//\ \ \ \ \}}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00196}00196\ \textcolor{comment}{//\ \ \ \ else}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00197}00197\ \textcolor{comment}{//\ \ \ \ \{}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00198}00198\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00199}00199\ \textcolor{comment}{//\ \ \ \ \}}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00200}00200\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00201}00201\ \ \ \ \ \textcolor{keywordflow}{return}\ udp;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00202}00202\ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00203}00203\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00204}00204\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00205}\mbox{\hyperlink{classeth_1_1EthResource_ae59993fd48a87b00e4d28f79530887e9}{00205}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classeth_1_1EthResource_ae59993fd48a87b00e4d28f79530887e9}{EthResource::Tick}}()}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00206}00206\ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00207}00207\ \ \ \ \ monitorpresence.tick();}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00208}00208\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00209}00209\ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00210}00210\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00211}00211\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00212}\mbox{\hyperlink{classeth_1_1EthResource_ae6c3cce80286ba436cc360f19f4e2a9a}{00212}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classeth_1_1EthResource_ae6c3cce80286ba436cc360f19f4e2a9a}{EthResource::Check}}()}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00213}00213\ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00214}00214\ \ \ \ \ \textcolor{keywordflow}{if}(\textcolor{keyword}{false}\ ==\ regularsAreSet)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00215}00215\ \ \ \ \ \{\ \ \ \textcolor{comment}{//\ we\ dont\ comply\ if\ the\ regulars\ are\ not\ set\ because\ ...\ poor\ board:\ it\ does\ not\ regularly\ transmit}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00216}00216\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00217}00217\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00218}00218\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00219}00219\ \ \ \ \ \textcolor{keywordflow}{return}\ monitorpresence.check();}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00220}00220\ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00221}00221\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00222}00222\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00223}00223\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00224}\mbox{\hyperlink{classeth_1_1EthResource_a18e0d55053651c1d264fe5bf45ffbb60}{00224}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classeth_1_1EthResource_a18e0d55053651c1d264fe5bf45ffbb60}{EthResource::processRXpacket}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{void}\ *\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}},\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{size\_t}\ size)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00225}00225\ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00226}00226\ \ \ \ \ \textcolor{keywordflow}{return}\ transceiver.parseUDP(\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}},\ size);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00227}00227\ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00228}00228\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00229}00229\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00230}\mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{00230}}\ \textcolor{keyword}{const}\ \mbox{\hyperlink{structeth_1_1AbstractEthResource_1_1Properties}{AbstractEthResource::Properties}}\ \&\ \mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{EthResource::getProperties}}()}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00231}00231\ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00232}00232\ \ \ \ \ \textcolor{keywordflow}{return}\ properties;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00233}00233\ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00234}00234\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00235}00235\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00236}00236\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00237}00237\ \textcolor{comment}{//bool\ EthResource::isID32supported(eOprotID32\_t\ id32)}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00238}00238\ \textcolor{comment}{//\{}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00239}00239\ \textcolor{comment}{//\ \ \ \ return\ transceiver.isID32supported(id32);}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00240}00240\ \textcolor{comment}{//\}}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00241}00241\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00242}00242\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00243}00243\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00244}00244\ \textcolor{keywordtype}{bool}\ EthResource::isRunning(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00245}00245\ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00246}00246\ \ \ \ \ \textcolor{keywordflow}{return}(isInRunningMode);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00247}00247\ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00248}00248\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00249}00249\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00250}00250\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00251}00251\ \textcolor{keywordtype}{bool}\ EthResource::verifyBoardTransceiver()}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00252}00252\ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00253}00253\ \ \ \ \ \textcolor{comment}{//\ the\ transceiver\ is\ verified\ if\ we\ have\ the\ same\ mn\ protocol\ version\ inside\ eOmn\_comm\_status\_t::managementprotocolversion}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00254}00254\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00255}00255\ \ \ \ \ \textcolor{keywordflow}{if}(verifiedBoardTransceiver)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00256}00256\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00257}00257\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}(\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00258}00258\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00259}00259\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00260}00260\ \ \ \ \ \textcolor{comment}{//\ we\ dont\ ask\ anything\ to\ the\ board\ ...}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00261}00261\ \textcolor{preprocessor}{\#define\ DONT\_ASK\_COMM\_STATUS}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00262}00262\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00263}00263\ \textcolor{preprocessor}{\#if\ defined(DONT\_ASK\_COMM\_STATUS)}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00264}00264\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00265}00265\ \ \ \ \ \textcolor{keyword}{const}\ eoprot\_version\_t\ *\ pc104versionMN\ =\ eoprot\_version\_of\_endpoint\_get(eoprot\_endpoint\_management);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00266}00266\ \ \ \ \ \textcolor{keyword}{const}\ eoprot\_version\_t\ *\ brdversionMN\ =\ \&boardMNprotocolversion;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00267}00267\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00268}00268\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00269}00269\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00270}00270\ \ \ \ \ theNVmanager\&\ nvman\ =\ \mbox{\hyperlink{classeth_1_1theNVmanager_a71511b145ce752d21a33dc2948994737}{theNVmanager::getInstance}}();}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00271}00271\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00272}00272\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00273}00273\ \ \ \ \ \textcolor{comment}{//\ step\ 1:\ we\ ask\ the\ remote\ board\ the\ eoprot\_tag\_mn\_comm\_status\ variable\ and\ then\ we\ verify\ vs\ mn\ protocol\ version}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00274}00274\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00275}00275\ \ \ \ \ \textcolor{keyword}{const}\ eoprot\_version\_t\ *\ pc104versionMN\ =\ eoprot\_version\_of\_endpoint\_get(eoprot\_endpoint\_management);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00276}00276\ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ timeout\ =\ 0.100;\ \ \ \textcolor{comment}{//\ now\ the\ timeout\ can\ be\ reduced\ because\ the\ board\ is\ already\ connected.}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00277}00277\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00278}00278\ \ \ \ \ eOprotID32\_t\ id32\ =\ eoprot\_ID\_get(eoprot\_endpoint\_management,\ eoprot\_entity\_mn\_comm,\ 0,\ eoprot\_tag\_mn\_comm\_status);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00279}00279\ \ \ \ \ eOmn\_comm\_status\_t\ brdstatus\ =\ \{0\};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00280}00280\ \ \ \ \ uint16\_t\ size\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00281}00281\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00282}00282\ \ \ \ \ \textcolor{keywordtype}{bool}\ rr\ =\ nvman.\mbox{\hyperlink{classeth_1_1theNVmanager_abae6f425741a7aa45999cf2b82a7c62a}{ask}}(ipv4addr,\ id32,\ \&brdstatus,\ timeout);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00283}00283\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00284}00284\ \ \ \ \ \textcolor{keywordflow}{if}(\textcolor{keyword}{false}\ ==\ rr)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00285}00285\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00286}00286\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}EthResource::verifyBoardTransceiver()\ cannot\ read\ brdstatus\ w/\ theNVmanager\ for\ BOARD"{}}\ <<\ \mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{getProperties}}().\mbox{\hyperlink{structeth_1_1AbstractEthResource_1_1Properties_a0f00ef74cba4bf01f914c6a7733a4806}{boardnameString}}\ <<\ \textcolor{stringliteral}{"{}with\ IP"{}}\ <<\ \mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{getProperties}}().\mbox{\hyperlink{structeth_1_1AbstractEthResource_1_1Properties_af470b15fac19dbcb26eef4afac14f353}{ipv4addrString}}\ <<\ \textcolor{stringliteral}{"{}:\ cannot\ proceed\ any\ further"{}};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00287}00287\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00288}00288\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00289}00289\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00290}00290\ \ \ \ \ eoprot\_version\_t\ *\ brdversionMN\ =\ (eoprot\_version\_t*)\&brdstatus.managementprotocolversion;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00291}00291\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00292}00292\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00293}00293\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00294}00294\ \ \ \ \ \textcolor{keywordflow}{if}(pc104versionMN-\/>major\ !=\ brdversionMN-\/>major)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00295}00295\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00296}00296\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}EthResource::verifyBoardTransceiver()\ detected\ different\ mn\ protocol\ major\ versions:\ local\ ="{}}\ <<\ pc104versionMN-\/>major\ <<\ \textcolor{stringliteral}{"{},\ remote\ ="{}}\ <<\ brdversionMN-\/>major\ <<\ \textcolor{stringliteral}{"{}:\ cannot\ proceed\ any\ further"{}};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00297}00297\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}ACTION\ REQUIRED:\ BOARD"{}}\ <<\ \mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{getProperties}}().\mbox{\hyperlink{structeth_1_1AbstractEthResource_1_1Properties_a0f00ef74cba4bf01f914c6a7733a4806}{boardnameString}}\ <<\ \textcolor{stringliteral}{"{}with\ IP"{}}\ <<\ \mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{getProperties}}().\mbox{\hyperlink{structeth_1_1AbstractEthResource_1_1Properties_af470b15fac19dbcb26eef4afac14f353}{ipv4addrString}}\ <<\ \textcolor{stringliteral}{"{}needs\ a\ FW\ update."{}};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00298}00298\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00299}00299\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00300}00300\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00301}00301\ \ \ \ \ \textcolor{keywordflow}{if}(pc104versionMN-\/>minor\ !=\ brdversionMN-\/>minor)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00302}00302\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00303}00303\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}EthResource::verifyBoardTransceiver()\ detected\ different\ mn\ protocol\ minor\ versions:\ local\ ="{}}\ <<\ pc104versionMN-\/>minor\ <<\ \textcolor{stringliteral}{"{},\ remote\ ="{}}\ <<\ brdversionMN-\/>minor\ <<\ \textcolor{stringliteral}{"{}:\ cannot\ proceed\ any\ further."{}};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00304}00304\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}ACTION\ REQUIRED:\ BOARD"{}}\ <<\ \mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{getProperties}}().\mbox{\hyperlink{structeth_1_1AbstractEthResource_1_1Properties_a0f00ef74cba4bf01f914c6a7733a4806}{boardnameString}}\ <<\ \textcolor{stringliteral}{"{}with\ IP"{}}\ <<\ \mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{getProperties}}().\mbox{\hyperlink{structeth_1_1AbstractEthResource_1_1Properties_af470b15fac19dbcb26eef4afac14f353}{ipv4addrString}}\ <<\ \textcolor{stringliteral}{"{}needs\ a\ FW\ update."{}};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00305}00305\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00306}00306\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00307}00307\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00308}00308\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00309}00309\ \ \ \ \ \textcolor{keywordflow}{if}(verbosewhenok)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00310}00310\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00311}00311\ \ \ \ \ \ \ \ \ yDebug()\ <<\ \textcolor{stringliteral}{"{}EthResource::verifyBoardTransceiver()\ has\ validated\ the\ transceiver\ of\ BOARD"{}}\ <<\ \mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{getProperties}}().\mbox{\hyperlink{structeth_1_1AbstractEthResource_1_1Properties_a0f00ef74cba4bf01f914c6a7733a4806}{boardnameString}}\ <<\ \textcolor{stringliteral}{"{}with\ IP"{}}\ <<\ \mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{getProperties}}().\mbox{\hyperlink{structeth_1_1AbstractEthResource_1_1Properties_af470b15fac19dbcb26eef4afac14f353}{ipv4addrString}};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00312}00312\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00313}00313\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00314}00314\ \ \ \ \ verifiedBoardTransceiver\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00315}00315\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00316}00316\ \ \ \ \ \textcolor{keywordflow}{return}(\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00317}00317\ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00318}00318\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00319}00319\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00320}00320\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00321}00321\ \textcolor{keywordtype}{bool}\ EthResource::setTimingOfRunningCycle()}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00322}00322\ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00323}00323\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00324}00324\ \ \ \ \ \textcolor{keywordflow}{if}(txrateISset)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00325}00325\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00326}00326\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}(\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00327}00327\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00328}00328\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00329}00329\ \ \ \ \ \textcolor{comment}{//\ step\ 1:\ we\ send\ the\ remote\ board\ a\ message\ of\ type\ eoprot\_tag\_mn\_appl\_config\ with\ the\ value\ read\ from\ the\ proper\ section}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00330}00330\ \ \ \ \ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ if\ does\ find\ the\ section\ we\ use\ default\ values}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00331}00331\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00332}00332\ \ \ \ \ \textcolor{comment}{//\ call\ a\ set\ until\ verified}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00333}00333\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00334}00334\ \ \ \ \ eOprotID32\_t\ id32\ =\ eoprot\_ID\_get(eoprot\_endpoint\_management,\ eoprot\_entity\_mn\_appl,\ 0,\ eoprot\_tag\_mn\_appl\_config);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00335}00335\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00336}00336\ \ \ \ \ theNVmanager\&\ nvman\ =\ \mbox{\hyperlink{classeth_1_1theNVmanager_a71511b145ce752d21a33dc2948994737}{theNVmanager::getInstance}}();}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00337}00337\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00338}00338\ \ \ \ \ \textcolor{keywordflow}{if}(\textcolor{keyword}{false}\ ==\ nvman.\mbox{\hyperlink{classeth_1_1theNVmanager_aabcb0d4d1aab8d3a4f288eda71c859c7}{setcheck}}(properties.ipv4addr,\ id32,\ \&txconfig,\ 5,\ 0.010,\ 2.0))}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00339}00339\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00340}00340\ \ \ \ \ \ \ \ \ yWarning()\ <<\ \textcolor{stringliteral}{"{}EthResource::setTimingOfRunningCycle()\ for\ BOARD"{}}\ <<\ \mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{getProperties}}().\mbox{\hyperlink{structeth_1_1AbstractEthResource_1_1Properties_a0f00ef74cba4bf01f914c6a7733a4806}{boardnameString}}\ <<\ \textcolor{stringliteral}{"{}with\ IP"{}}\ <<\ \mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{getProperties}}().\mbox{\hyperlink{structeth_1_1AbstractEthResource_1_1Properties_af470b15fac19dbcb26eef4afac14f353}{ipv4addrString}}\ <<\ \textcolor{stringliteral}{"{}could\ not\ configure:\ cycletime\ ="{}}\ <<\ txconfig.cycletime\ <<\ \textcolor{stringliteral}{"{}usec,\ RX\ DO\ TX\ =\ ("{}}\ <<\ txconfig.maxtimeRX\ <<\ txconfig.maxtimeDO\ <<\ txconfig.maxtimeTX\ <<\ \textcolor{stringliteral}{"{})\ usec\ and\ TX\ rate\ ="{}}\ <<\ txconfig.txratedivider\ <<\ \textcolor{stringliteral}{"{}\ every\ cycle"{}};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00341}00341\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00342}00342\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00343}00343\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00344}00344\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00345}00345\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(verbosewhenok)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00346}00346\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00347}00347\ \ \ \ \ \ \ \ \ \ \ \ \ yDebug()\ <<\ \textcolor{stringliteral}{"{}EthResource::setTimingOfRunningCycle()\ for\ BOARD"{}}\ <<\ \mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{getProperties}}().\mbox{\hyperlink{structeth_1_1AbstractEthResource_1_1Properties_a0f00ef74cba4bf01f914c6a7733a4806}{boardnameString}}\ <<\ \textcolor{stringliteral}{"{}with\ IP"{}}\ <<\ \mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{getProperties}}().\mbox{\hyperlink{structeth_1_1AbstractEthResource_1_1Properties_af470b15fac19dbcb26eef4afac14f353}{ipv4addrString}}\ <<\ \textcolor{stringliteral}{"{}has\ succesfully\ set:\ cycletime\ ="{}}\ <<\ txconfig.cycletime\ <<\ \textcolor{stringliteral}{"{}usec,\ RX\ DO\ TX\ =\ ("{}}\ <<\ txconfig.maxtimeRX\ <<\ txconfig.maxtimeDO\ <<\ txconfig.maxtimeTX\ <<\ \textcolor{stringliteral}{"{})\ usec\ and\ TX\ rate\ ="{}}\ <<\ txconfig.txratedivider\ <<\ \textcolor{stringliteral}{"{}\ every\ cycle"{}};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00348}00348\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00349}00349\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00350}00350\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00351}00351\ \ \ \ \ txrateISset\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00352}00352\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00353}00353\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00354}00354\ \ \ \ \ \textcolor{keywordflow}{return}(\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00355}00355\ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00356}00356\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00357}00357\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00358}00358\ \textcolor{keywordtype}{bool}\ EthResource::cleanBoardBehaviour(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00359}00359\ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00360}00360\ \ \ \ \ \textcolor{keywordflow}{if}(cleanedBoardBehaviour)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00361}00361\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00362}00362\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}(\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00363}00363\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00364}00364\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00365}00365\ \ \ \ \ \textcolor{comment}{//\ send\ a\ ...}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00366}00366\ \ \ \ \ \textcolor{keywordflow}{if}(\textcolor{keyword}{false}\ ==\ \mbox{\hyperlink{classeth_1_1EthResource_a81c72020c081f0988a8e8cd59d9923ce}{serviceStop}}(eomn\_serv\_category\_all))}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00367}00367\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00368}00368\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}EthResource::cleanBoardBehaviour()\ cannot\ stop\ services\ for\ BOARD"{}}\ <<\ \mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{getProperties}}().\mbox{\hyperlink{structeth_1_1AbstractEthResource_1_1Properties_a0f00ef74cba4bf01f914c6a7733a4806}{boardnameString}}\ <<\ \textcolor{stringliteral}{"{}with\ IP"{}}\ <<\ \mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{getProperties}}().\mbox{\hyperlink{structeth_1_1AbstractEthResource_1_1Properties_af470b15fac19dbcb26eef4afac14f353}{ipv4addrString}}\ <<\ \textcolor{stringliteral}{"{}:\ cannot\ proceed\ any\ further"{}};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00369}00369\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00370}00370\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00371}00371\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00372}00372\ \ \ \ \ regularsAreSet\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00373}00373\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00374}00374\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00375}00375\ \ \ \ \ \textcolor{keywordflow}{if}(verbosewhenok)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00376}00376\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00377}00377\ \ \ \ \ \ \ \ \ yDebug()\ <<\ \textcolor{stringliteral}{"{}EthResource::cleanBoardBehaviour()\ has\ cleaned\ the\ application\ in\ BOARD"{}}\ <<\ \mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{getProperties}}().\mbox{\hyperlink{structeth_1_1AbstractEthResource_1_1Properties_a0f00ef74cba4bf01f914c6a7733a4806}{boardnameString}}\ <<\ \textcolor{stringliteral}{"{}with\ IP"{}}\ <<\ \mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{getProperties}}().\mbox{\hyperlink{structeth_1_1AbstractEthResource_1_1Properties_af470b15fac19dbcb26eef4afac14f353}{ipv4addrString}}\ <<\ \textcolor{stringliteral}{"{}:\ config\ mode\ +\ cleared\ all\ its\ regulars"{}};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00378}00378\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00379}00379\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00380}00380\ \ \ \ \ cleanedBoardBehaviour\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00381}00381\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00382}00382\ \ \ \ \ \textcolor{keywordflow}{return}(\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00383}00383\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00384}00384\ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00385}00385\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00386}00386\ \textcolor{keywordtype}{bool}\ EthResource::testMultipleASK()}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00387}00387\ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00388}00388\ \textcolor{preprocessor}{\#if\ 1}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00389}00389\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00390}00390\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00391}00391\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00392}00392\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00393}00393\ \ \ \ \ \textcolor{comment}{//\ i\ ask\ multiple\ values\ such\ as:}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00394}00394\ \ \ \ \ eOprotID32\_t\ id32\_commstatus\ =\ eoprot\_ID\_get(eoprot\_endpoint\_management,\ eoprot\_entity\_mn\_comm,\ 0,\ eoprot\_tag\_mn\_comm\_status);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00395}00395\ \ \ \ \ eOmn\_comm\_status\_t\ value\_commstatus\ =\ \{0\};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00396}00396\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00397}00397\ \ \ \ \ eOprotID32\_t\ id32\_applconfig\ =\ eoprot\_ID\_get(eoprot\_endpoint\_management,\ eoprot\_entity\_mn\_appl,\ 0,\ eoprot\_tag\_mn\_appl\_config);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00398}00398\ \ \ \ \ eOmn\_appl\_config\_t\ value\_applconfig\ =\ \{0\};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00399}00399\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00400}00400\ \ \ \ \ eOprotID32\_t\ id32\_applconfig\_txratedivider\ =\ eoprot\_ID\_get(eoprot\_endpoint\_management,\ eoprot\_entity\_mn\_appl,\ 0,\ eoprot\_tag\_mn\_appl\_config\_txratedivider);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00401}00401\ \ \ \ \ uint8\_t\ txratedivider\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00402}00402\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00403}00403\ \ \ \ \ std::vector<eOprotID32\_t>\ id32s;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00404}00404\ \ \ \ \ std::vector<void*>\ values;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00405}00405\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00406}00406\ \ \ \ \ id32s.push\_back(id32\_commstatus);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00407}00407\ \ \ \ \ values.push\_back(\&value\_commstatus);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00408}00408\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00409}00409\ \ \ \ \ id32s.push\_back(id32\_applconfig);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00410}00410\ \ \ \ \ values.push\_back(\&value\_applconfig);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00411}00411\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00412}00412\ \ \ \ \ id32s.push\_back(id32\_applconfig\_txratedivider);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00413}00413\ \ \ \ \ values.push\_back(\&txratedivider);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00414}00414\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00415}00415\ \ \ \ \ id32s.push\_back(id32\_applconfig\_txratedivider);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00416}00416\ \ \ \ \ values.push\_back(\&txratedivider);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00417}00417\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00418}00418\ \ \ \ \ id32s.push\_back(id32\_applconfig\_txratedivider);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00419}00419\ \ \ \ \ values.push\_back(\&txratedivider);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00420}00420\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00421}00421\ \ \ \ \ id32s.push\_back(id32\_applconfig\_txratedivider);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00422}00422\ \ \ \ \ values.push\_back(\&txratedivider);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00423}00423\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00424}00424\ \ \ \ \ id32s.push\_back(id32\_applconfig\_txratedivider);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00425}00425\ \ \ \ \ values.push\_back(\&txratedivider);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00426}00426\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00427}00427\ \ \ \ \ id32s.push\_back(id32\_applconfig\_txratedivider);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00428}00428\ \ \ \ \ values.push\_back(\&txratedivider);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00429}00429\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00430}00430\ \ \ \ \ id32s.push\_back(id32\_applconfig\_txratedivider);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00431}00431\ \ \ \ \ values.push\_back(\&txratedivider);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00432}00432\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00433}00433\ \ \ \ \ id32s.push\_back(id32\_applconfig\_txratedivider);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00434}00434\ \ \ \ \ values.push\_back(\&txratedivider);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00435}00435\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00436}00436\ \ \ \ \ theNVmanager\&\ nvman\ =\ \mbox{\hyperlink{classeth_1_1theNVmanager_a71511b145ce752d21a33dc2948994737}{theNVmanager::getInstance}}();}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00437}00437\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00438}00438\ \ \ \ \ \textcolor{keywordtype}{double}\ tprev\ =\ SystemClock::nowSystem();}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00439}00439\ \ \ \ \ \textcolor{keywordtype}{double}\ tcurr\ =\ SystemClock::nowSystem();}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00440}00440\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00441}00441\ \ \ \ \ \textcolor{keywordtype}{double}\ delta\ =\ tcurr\ -\/\ tprev;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00442}00442\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00443}00443\ \ \ \ \ yDebug()\ <<\ \textcolor{stringliteral}{"{}before"{}};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00444}00444\ \ \ \ \ yDebug()\ <<\ \textcolor{stringliteral}{"{}value\_commstatus.managementprotocolversion.major\ =\ "{}}\ <<\ value\_commstatus.managementprotocolversion.major\ <<\ \textcolor{stringliteral}{"{}value\_commstatus.managementprotocolversion.minor\ =\ "{}}\ <<\ value\_commstatus.managementprotocolversion.minor;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00445}00445\ \ \ \ \ yDebug()\ <<\ \textcolor{stringliteral}{"{}value\_applconfig.cycletime\ =\ "{}}\ <<\ value\_applconfig.cycletime\ <<\ \textcolor{stringliteral}{"{}value\_applconfig.txratedivider"{}}\ <<\ value\_applconfig.txratedivider\ <<\ \textcolor{stringliteral}{"{}etc"{}};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00446}00446\ \ \ \ \ yDebug()\ <<\ \textcolor{stringliteral}{"{}txratedivider\ =\ "{}}\ <<\ txratedivider;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00447}00447\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00448}00448\ \ \ \ \ tprev\ =\ SystemClock::nowSystem();}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00449}00449\ \ \ \ \ \textcolor{comment}{//bool\ ok\ =\ nvman.ask(\&transceiver,\ id32s,\ values,\ 3.0);}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00450}00450\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{WholeBodyPlayerModule_8h_a055865842672bfeb446ff98a1e9104aba444bcb3a3fcf8389296c49467f27e1d6}{ok}}\ =\ \mbox{\hyperlink{classeth_1_1EthResource_a07df2eca74d90eb27d272429ef0a2380}{getRemoteValues}}(id32s,\ values,\ 3.0);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00451}00451\ \ \ \ \ delta\ =\ SystemClock::nowSystem()\ -\/\ tprev;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00452}00452\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00453}00453\ \ \ \ \ yDebug()\ <<\ \textcolor{stringliteral}{"{}parallel\ mode:\ after"{}}\ <<\ delta\ <<\ \textcolor{stringliteral}{"{}seconds"{}};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00454}00454\ \ \ \ \ yDebug()\ <<\ \textcolor{stringliteral}{"{}value\_commstatus.managementprotocolversion.major\ =\ "{}}\ <<\ value\_commstatus.managementprotocolversion.major\ <<\ \textcolor{stringliteral}{"{}value\_commstatus.managementprotocolversion.minor\ =\ "{}}\ <<\ value\_commstatus.managementprotocolversion.minor;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00455}00455\ \ \ \ \ yDebug()\ <<\ \textcolor{stringliteral}{"{}value\_applconfig.cycletime\ =\ "{}}\ <<\ value\_applconfig.cycletime\ <<\ \textcolor{stringliteral}{"{}value\_applconfig.txratedivider"{}}\ <<\ value\_applconfig.txratedivider\ <<\ \textcolor{stringliteral}{"{}etc"{}};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00456}00456\ \ \ \ \ yDebug()\ <<\ \textcolor{stringliteral}{"{}txratedivider\ =\ "{}}\ <<\ txratedivider;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00457}00457\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00458}00458\ \ \ \ \ memset(\&value\_commstatus,\ 0,\ \textcolor{keyword}{sizeof}(value\_commstatus));}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00459}00459\ \ \ \ \ memset(\&value\_applconfig,\ 0,\ \textcolor{keyword}{sizeof}(value\_applconfig));}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00460}00460\ \ \ \ \ txratedivider\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00461}00461\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00462}00462\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00463}00463\ \ \ \ \ tprev\ =\ SystemClock::nowSystem();}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00464}00464\ \ \ \ \ nvman.\mbox{\hyperlink{classeth_1_1theNVmanager_abae6f425741a7aa45999cf2b82a7c62a}{ask}}(\&transceiver,\ id32\_commstatus,\ \&value\_commstatus,\ 3.0);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00465}00465\ \ \ \ \ nvman.\mbox{\hyperlink{classeth_1_1theNVmanager_abae6f425741a7aa45999cf2b82a7c62a}{ask}}(\&transceiver,\ id32\_applconfig,\ \&value\_applconfig,\ 3.0);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00466}00466\ \ \ \ \ nvman.\mbox{\hyperlink{classeth_1_1theNVmanager_abae6f425741a7aa45999cf2b82a7c62a}{ask}}(\&transceiver,\ id32\_applconfig\_txratedivider,\ \&txratedivider,\ 3.0);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00467}00467\ \ \ \ \ nvman.\mbox{\hyperlink{classeth_1_1theNVmanager_abae6f425741a7aa45999cf2b82a7c62a}{ask}}(\&transceiver,\ id32\_applconfig\_txratedivider,\ \&txratedivider,\ 3.0);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00468}00468\ \ \ \ \ nvman.\mbox{\hyperlink{classeth_1_1theNVmanager_abae6f425741a7aa45999cf2b82a7c62a}{ask}}(\&transceiver,\ id32\_applconfig\_txratedivider,\ \&txratedivider,\ 3.0);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00469}00469\ \ \ \ \ nvman.\mbox{\hyperlink{classeth_1_1theNVmanager_abae6f425741a7aa45999cf2b82a7c62a}{ask}}(\&transceiver,\ id32\_applconfig\_txratedivider,\ \&txratedivider,\ 3.0);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00470}00470\ \ \ \ \ nvman.\mbox{\hyperlink{classeth_1_1theNVmanager_abae6f425741a7aa45999cf2b82a7c62a}{ask}}(\&transceiver,\ id32\_applconfig\_txratedivider,\ \&txratedivider,\ 3.0);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00471}00471\ \ \ \ \ nvman.\mbox{\hyperlink{classeth_1_1theNVmanager_abae6f425741a7aa45999cf2b82a7c62a}{ask}}(\&transceiver,\ id32\_applconfig\_txratedivider,\ \&txratedivider,\ 3.0);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00472}00472\ \ \ \ \ nvman.\mbox{\hyperlink{classeth_1_1theNVmanager_abae6f425741a7aa45999cf2b82a7c62a}{ask}}(\&transceiver,\ id32\_applconfig\_txratedivider,\ \&txratedivider,\ 3.0);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00473}00473\ \ \ \ \ nvman.\mbox{\hyperlink{classeth_1_1theNVmanager_abae6f425741a7aa45999cf2b82a7c62a}{ask}}(\&transceiver,\ id32\_applconfig\_txratedivider,\ \&txratedivider,\ 3.0);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00474}00474\ \ \ \ \ delta\ =\ SystemClock::nowSystem()\ -\/\ tprev;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00475}00475\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00476}00476\ \ \ \ \ yDebug()\ <<\ \textcolor{stringliteral}{"{}serial\ mode:\ after"{}}\ <<\ delta\ <<\ \textcolor{stringliteral}{"{}seconds"{}};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00477}00477\ \ \ \ \ yDebug()\ <<\ \textcolor{stringliteral}{"{}value\_commstatus.managementprotocolversion.major\ =\ "{}}\ <<\ value\_commstatus.managementprotocolversion.major\ <<\ \textcolor{stringliteral}{"{}value\_commstatus.managementprotocolversion.minor\ =\ "{}}\ <<\ value\_commstatus.managementprotocolversion.minor;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00478}00478\ \ \ \ \ yDebug()\ <<\ \textcolor{stringliteral}{"{}value\_applconfig.cycletime\ =\ "{}}\ <<\ value\_applconfig.cycletime\ <<\ \textcolor{stringliteral}{"{}value\_applconfig.txratedivider"{}}\ <<\ value\_applconfig.txratedivider\ <<\ \textcolor{stringliteral}{"{}etc"{}};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00479}00479\ \ \ \ \ yDebug()\ <<\ \textcolor{stringliteral}{"{}txratedivider\ =\ "{}}\ <<\ txratedivider;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00480}00480\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00481}00481\ \ \ \ \ \textcolor{keywordflow}{for}(;;);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00482}00482\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00483}00483\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00484}00484\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00485}00485\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00486}00486\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00487}00487\ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00488}00488\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00489}\mbox{\hyperlink{classeth_1_1EthResource_a82739baa93b709f75b39e5d9ffd1a70c}{00489}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classeth_1_1EthResource_a82739baa93b709f75b39e5d9ffd1a70c}{EthResource::verifyEPprotocol}}(eOprot\_endpoint\_t\ ep)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00490}00490\ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00491}00491\ \ \ \ \ \textcolor{keywordflow}{if}((uint8\_t)ep\ >=\ eoprot\_endpoints\_numberof)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00492}00492\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00493}00493\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}EthResource::verifyEPprotocol()\ called\ with\ wrong\ ep\ =\ "{}}\ <<\ ep\ <<\ \textcolor{stringliteral}{"{}:\ cannot\ proceed\ any\ further"{}};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00494}00494\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00495}00495\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00496}00496\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00497}00497\ \ \ \ \ \textcolor{keywordflow}{if}(\textcolor{keyword}{true}\ ==\ verifiedEPprotocol[ep])}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00498}00498\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00499}00499\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}(\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00500}00500\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00501}00501\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00502}00502\ \ \ \ \ \textcolor{keywordflow}{if}(\textcolor{keyword}{false}\ ==\ verifyBoard())}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00503}00503\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00504}00504\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}EthResource::verifyEPprotocol()\ cannot\ verify\ BOARD"{}}\ <<\ \mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{getProperties}}().\mbox{\hyperlink{structeth_1_1AbstractEthResource_1_1Properties_a0f00ef74cba4bf01f914c6a7733a4806}{boardnameString}}\ <<\ \textcolor{stringliteral}{"{}with\ IP"{}}\ <<\ \mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{getProperties}}().\mbox{\hyperlink{structeth_1_1AbstractEthResource_1_1Properties_af470b15fac19dbcb26eef4afac14f353}{ipv4addrString}}\ <<\ \textcolor{stringliteral}{"{}:\ cannot\ proceed\ any\ further"{}};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00505}00505\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00506}00506\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00507}00507\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00508}00508\ \ \ \ \ \textcolor{keywordflow}{if}(\textcolor{keyword}{false}\ ==\ askBoardVersion())}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00509}00509\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00510}00510\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}EthResource::verifyEPprotocol()\ cannot\ ask\ the\ version\ to\ BOARD"{}}\ <<\ \mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{getProperties}}().\mbox{\hyperlink{structeth_1_1AbstractEthResource_1_1Properties_a0f00ef74cba4bf01f914c6a7733a4806}{boardnameString}}\ <<\ \textcolor{stringliteral}{"{}with\ IP"{}}\ <<\ \mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{getProperties}}().\mbox{\hyperlink{structeth_1_1AbstractEthResource_1_1Properties_af470b15fac19dbcb26eef4afac14f353}{ipv4addrString}}\ <<\ \textcolor{stringliteral}{"{}:\ cannot\ proceed\ any\ further"{}};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00511}00511\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00512}00512\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00513}00513\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00514}00514\ \ \ \ \ testMultipleASK();}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00515}00515\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00516}00516\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00517}00517\ \ \ \ \ \textcolor{comment}{//\ 1.\ send\ a\ set<eoprot\_tag\_mn\_comm\_cmmnds\_command\_queryarray>\ and\ wait\ for\ the\ arrival\ of\ a\ sig<eoprot\_tag\_mn\_comm\_cmmnds\_command\_replyarray>}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00518}00518\ \ \ \ \ \textcolor{comment}{//\ \ \ \ the\ opc\ to\ send\ is\ eomn\_opc\_query\_array\_EPdes\ which\ will\ trigger\ a\ opc\ in\ reception\ eomn\_opc\_reply\_array\_EPdes}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00519}00519\ \ \ \ \ \textcolor{comment}{//\ 2.\ the\ resulting\ array\ will\ contains\ a\ eoprot\_endpoint\_descriptor\_t\ item\ for\ the\ specifeid\ ep\ with\ the\ protocol\ version\ of\ the\ ems.}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00520}00520\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00521}00521\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00522}00522\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00523}00523\ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ timeout\ =\ 0.100;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00524}00524\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00525}00525\ \ \ \ \ eOprotID32\_t\ id2send\ =\ eo\_prot\_ID32dummy;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00526}00526\ \ \ \ \ eOprotID32\_t\ id2wait\ =\ eo\_prot\_ID32dummy;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00527}00527\ \ \ \ \ eOmn\_command\_t\ command\ =\ \{0\};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00528}00528\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00529}00529\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00530}00530\ \ \ \ \ \textcolor{comment}{//\ step\ 1:\ ask\ all\ the\ EP\ descriptors.\ from\ them\ we\ can\ extract\ protocol\ version\ of\ MN\ and\ of\ the\ target\ ep}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00531}00531\ \ \ \ \ id2send\ =\ eoprot\_ID\_get(eoprot\_endpoint\_management,\ eoprot\_entity\_mn\_comm,\ 0,\ eoprot\_tag\_mn\_comm\_cmmnds\_command\_queryarray);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00532}00532\ \ \ \ \ memset(\&command,\ 0,\ \textcolor{keyword}{sizeof}(command));}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00533}00533\ \ \ \ \ command.cmd.opc\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ eomn\_opc\_query\_array\_EPdes;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00534}00534\ \ \ \ \ command.cmd.queryarray.opcpar.opc\ \ \ \ \ \ \ \ \ \ \ =\ eomn\_opc\_query\_array\_EPdes;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00535}00535\ \ \ \ \ command.cmd.queryarray.opcpar.endpoint\ \ \ \ \ \ =\ eoprot\_endpoint\_all;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00536}00536\ \ \ \ \ command.cmd.queryarray.opcpar.setnumber\ \ \ \ \ =\ 0;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00537}00537\ \ \ \ \ command.cmd.queryarray.opcpar.setsize\ \ \ \ \ \ \ =\ 0;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00538}00538\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00539}00539\ \ \ \ \ \textcolor{comment}{//\ the\ semaphore\ must\ be\ retrieved\ using\ the\ id\ of\ the\ variable\ which\ is\ waited.\ in\ this\ case,\ it\ is\ the\ array\ of\ descriptors}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00540}00540\ \ \ \ \ id2wait\ =\ eoprot\_ID\_get(eoprot\_endpoint\_management,\ eoprot\_entity\_mn\_comm,\ 0,\ eoprot\_tag\_mn\_comm\_cmmnds\_command\_replyarray);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00541}00541\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00542}00542\ \ \ \ \ \mbox{\hyperlink{classeth_1_1theNVmanager}{theNVmanager}}\&\ nvman\ =\ \mbox{\hyperlink{classeth_1_1theNVmanager_a71511b145ce752d21a33dc2948994737}{theNVmanager::getInstance}}();}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00543}00543\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00544}00544\ \ \ \ \ \textcolor{keywordflow}{if}(\textcolor{keyword}{false}\ ==\ nvman.\mbox{\hyperlink{classeth_1_1theNVmanager_abf6adaaa7ea1dce3b062bc2728078c4a}{command}}(properties.ipv4addr,\ id2send,\ \&command,\ id2wait,\ \&command,\ timeout))}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00545}00545\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00546}00546\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}EthResource::verifyEPprotocol()\ retrieve\ the\ endpoint\ descriptors\ from\ BOARD"{}}\ <<\ \mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{getProperties}}().\mbox{\hyperlink{structeth_1_1AbstractEthResource_1_1Properties_a0f00ef74cba4bf01f914c6a7733a4806}{boardnameString}}\ <<\ \textcolor{stringliteral}{"{}with\ IP"{}}\ <<\ \mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{getProperties}}().\mbox{\hyperlink{structeth_1_1AbstractEthResource_1_1Properties_af470b15fac19dbcb26eef4afac14f353}{ipv4addrString}}\ <<\ \textcolor{stringliteral}{"{}:\ cannot\ proceed\ any\ further"{}};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00547}00547\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00548}00548\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00549}00549\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00550}00550\ \ \ \ \ \textcolor{comment}{//\ the\ array\ is\ ...}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00551}00551\ \ \ \ \ eOmn\_cmd\_replyarray\_t*\ cmdreplyarray\ =\ (eOmn\_cmd\_replyarray\_t*)\&command.cmd.replyarray;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00552}00552\ \ \ \ \ EOarray*\ array\ =\ (EOarray*)cmdreplyarray-\/>array;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00553}00553\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00554}00554\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00555}00555\ \ \ \ \ uint8\_t\ sizeofarray\ =\ eo\_array\_Size(array);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00556}00556\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00557}00557\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00558}00558\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i=0;\ i<sizeofarray;\ i++)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00559}00559\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00560}00560\ \ \ \ \ \ \ \ \ eoprot\_endpoint\_descriptor\_t\ *epd\ =\ (eoprot\_endpoint\_descriptor\_t*)eo\_array\_At(array,\ i);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00561}00561\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00562}00562\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(epd-\/>endpoint\ ==\ eoprot\_endpoint\_management)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00563}00563\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00564}00564\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ eoprot\_version\_t\ *\ pc104versionMN\ =\ eoprot\_version\_of\_endpoint\_get(eoprot\_endpoint\_management);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00565}00565\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(pc104versionMN-\/>major\ !=\ epd-\/>version.major)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00566}00566\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00567}00567\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}EthResource::verifyEPprotocol()\ for\ ep\ ="{}}\ <<\ eoprot\_EP2string(epd-\/>endpoint)\ <<\ \textcolor{stringliteral}{"{}detected:\ pc104.version.major\ ="{}}\ <<\ pc104versionMN-\/>major\ <<\ \textcolor{stringliteral}{"{}and\ board.version.major\ ="{}}\ <<\ epd-\/>version.major;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00568}00568\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}EthResource::verifyEPprotocol()\ detected\ mismatching\ protocol\ version.major\ in\ BOARD"{}}\ <<\ \mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{getProperties}}().\mbox{\hyperlink{structeth_1_1AbstractEthResource_1_1Properties_a0f00ef74cba4bf01f914c6a7733a4806}{boardnameString}}\ <<\ \textcolor{stringliteral}{"{}with\ IP"{}}\ <<\ \mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{getProperties}}().\mbox{\hyperlink{structeth_1_1AbstractEthResource_1_1Properties_af470b15fac19dbcb26eef4afac14f353}{ipv4addrString}}\ <<\ \textcolor{stringliteral}{"{}for\ eoprot\_endpoint\_management:\ cannot\ proceed\ any\ further."{}};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00569}00569\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}ACTION\ REQUIRED:\ BOARD"{}}\ <<\ \mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{getProperties}}().\mbox{\hyperlink{structeth_1_1AbstractEthResource_1_1Properties_a0f00ef74cba4bf01f914c6a7733a4806}{boardnameString}}\ <<\ \textcolor{stringliteral}{"{}with\ IP"{}}\ <<\ \mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{getProperties}}().\mbox{\hyperlink{structeth_1_1AbstractEthResource_1_1Properties_af470b15fac19dbcb26eef4afac14f353}{ipv4addrString}}\ <<\ \textcolor{stringliteral}{"{}needs\ a\ FW\ update."{}};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00570}00570\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00571}00571\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00572}00572\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(pc104versionMN-\/>minor\ !=\ epd-\/>version.minor)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00573}00573\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00574}00574\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}EthResource::verifyEPprotocol()\ for\ ep\ ="{}}\ <<\ eoprot\_EP2string(epd-\/>endpoint)\ <<\ \textcolor{stringliteral}{"{}detected:\ pc104.version.minor\ ="{}}\ <<\ pc104versionMN-\/>minor\ <<\ \textcolor{stringliteral}{"{}and\ board.version.minor\ ="{}}\ <<\ epd-\/>version.minor;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00575}00575\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}EthResource::verifyEPprotocol()\ detected\ mismatching\ protocol\ version.minor\ BOARD"{}}\ <<\ \mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{getProperties}}().\mbox{\hyperlink{structeth_1_1AbstractEthResource_1_1Properties_a0f00ef74cba4bf01f914c6a7733a4806}{boardnameString}}\ <<\ \textcolor{stringliteral}{"{}with\ IP"{}}\ <<\ \mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{getProperties}}().\mbox{\hyperlink{structeth_1_1AbstractEthResource_1_1Properties_af470b15fac19dbcb26eef4afac14f353}{ipv4addrString}}\ <<\ \textcolor{stringliteral}{"{}for\ eoprot\_endpoint\_management:\ cannot\ proceed\ any\ further."{}};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00576}00576\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}ACTION\ REQUIRED:\ BOARD"{}}\ <<\ \mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{getProperties}}().\mbox{\hyperlink{structeth_1_1AbstractEthResource_1_1Properties_a0f00ef74cba4bf01f914c6a7733a4806}{boardnameString}}\ <<\ \textcolor{stringliteral}{"{}with\ IP"{}}\ <<\ \mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{getProperties}}().\mbox{\hyperlink{structeth_1_1AbstractEthResource_1_1Properties_af470b15fac19dbcb26eef4afac14f353}{ipv4addrString}}\ <<\ \textcolor{stringliteral}{"{}needs\ a\ FW\ update."{}};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00577}00577\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00578}00578\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00579}00579\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00580}00580\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(epd-\/>endpoint\ ==\ ep)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00581}00581\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00582}00582\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ eoprot\_version\_t\ *\ pc104versionEP\ =\ eoprot\_version\_of\_endpoint\_get(ep);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00583}00583\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(pc104versionEP-\/>major\ !=\ epd-\/>version.major)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00584}00584\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00585}00585\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}EthResource::verifyEPprotocol()\ for\ ep\ ="{}}\ <<\ eoprot\_EP2string(epd-\/>endpoint)\ <<\ \textcolor{stringliteral}{"{}detected:\ pc104.version.major\ ="{}}\ <<\ pc104versionEP-\/>major\ <<\ \textcolor{stringliteral}{"{}and\ board.version.major\ ="{}}\ <<\ epd-\/>version.major;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00586}00586\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}EthResource::verifyEPprotocol()\ detected\ mismatching\ protocol\ version.major\ in\ BOARD"{}}\ <<\ \mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{getProperties}}().\mbox{\hyperlink{structeth_1_1AbstractEthResource_1_1Properties_a0f00ef74cba4bf01f914c6a7733a4806}{boardnameString}}\ <<\ \textcolor{stringliteral}{"{}with\ IP"{}}\ <<\ \mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{getProperties}}().\mbox{\hyperlink{structeth_1_1AbstractEthResource_1_1Properties_af470b15fac19dbcb26eef4afac14f353}{ipv4addrString}}\ <<\ \textcolor{stringliteral}{"{}\ for"{}}\ <<\ eoprot\_EP2string(ep)\ <<\ \textcolor{stringliteral}{"{}:\ cannot\ proceed\ any\ further."{}};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00587}00587\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}ACTION\ REQUIRED:\ BOARD"{}}\ <<\ \mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{getProperties}}().\mbox{\hyperlink{structeth_1_1AbstractEthResource_1_1Properties_a0f00ef74cba4bf01f914c6a7733a4806}{boardnameString}}\ <<\ \textcolor{stringliteral}{"{}with\ IP"{}}\ <<\ \mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{getProperties}}().\mbox{\hyperlink{structeth_1_1AbstractEthResource_1_1Properties_af470b15fac19dbcb26eef4afac14f353}{ipv4addrString}}\ <<\ \textcolor{stringliteral}{"{}needs\ a\ FW\ update\ to\ offer\ services\ for"{}}\ <<\ eoprot\_EP2string(ep);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00588}00588\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00589}00589\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00590}00590\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(pc104versionEP-\/>minor\ !=\ epd-\/>version.minor)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00591}00591\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00592}00592\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}EthResource::verifyEPprotocol()\ for\ ep\ ="{}}\ <<\ eoprot\_EP2string(epd-\/>endpoint)\ <<\ \textcolor{stringliteral}{"{}detected:\ pc104.version.minor\ ="{}}\ <<\ pc104versionEP-\/>minor\ <<\ \textcolor{stringliteral}{"{}and\ board.version.minor\ ="{}}\ <<\ epd-\/>version.minor;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00593}00593\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}EthResource::verifyEPprotocol()\ detected\ mismatching\ protocol\ version.minor\ in\ BOARD"{}}\ <<\ \mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{getProperties}}().\mbox{\hyperlink{structeth_1_1AbstractEthResource_1_1Properties_a0f00ef74cba4bf01f914c6a7733a4806}{boardnameString}}\ <<\ \textcolor{stringliteral}{"{}with\ IP"{}}\ <<\ \mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{getProperties}}().\mbox{\hyperlink{structeth_1_1AbstractEthResource_1_1Properties_af470b15fac19dbcb26eef4afac14f353}{ipv4addrString}}\ <<\ \textcolor{stringliteral}{"{}\ for"{}}\ <<\ eoprot\_EP2string(ep)\ <<\ \textcolor{stringliteral}{"{}:\ annot\ proceed\ any\ further"{}};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00594}00594\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}ACTION\ REQUIRED:\ BOARD"{}}\ <<\ \mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{getProperties}}().\mbox{\hyperlink{structeth_1_1AbstractEthResource_1_1Properties_a0f00ef74cba4bf01f914c6a7733a4806}{boardnameString}}\ <<\ \textcolor{stringliteral}{"{}with\ IP"{}}\ <<\ \mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{getProperties}}().\mbox{\hyperlink{structeth_1_1AbstractEthResource_1_1Properties_af470b15fac19dbcb26eef4afac14f353}{ipv4addrString}}\ <<\ \textcolor{stringliteral}{"{}needs\ a\ FW\ update\ to\ offer\ services\ for"{}}\ <<\ eoprot\_EP2string(ep);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00595}00595\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00596}00596\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00597}00597\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00598}00598\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00599}00599\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00600}00600\ \ \ \ \ verifiedEPprotocol[ep]\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00601}00601\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00602}00602\ \ \ \ \ \textcolor{keywordflow}{return}(\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00603}00603\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00604}00604\ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00605}00605\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00606}00606\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00607}00607\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00608}00608\ \textcolor{keywordtype}{bool}\ EthResource::verifyBoard(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00609}00609\ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00610}00610\ \ \ \ \ \textcolor{keywordflow}{if}((\textcolor{keyword}{true}\ ==\ verifyBoardPresence())\ \ \ \ \ \ \&\&}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00611}00611\ \ \ \ \ \ \ \ (\textcolor{keyword}{true}\ ==\ verifyBoardTransceiver())\ \ \ \&\&}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00612}00612\ \ \ \ \ \ \ \ (\textcolor{keyword}{true}\ ==\ cleanBoardBehaviour())\ \ \ \ \ \ \&\&}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00613}00613\ \ \ \ \ \ \ \ (\textcolor{keyword}{true}\ ==\ setTimingOfRunningCycle())\ )}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00614}00614\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00615}00615\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}(\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00616}00616\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00617}00617\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00618}00618\ \ \ \ \ \textcolor{keywordflow}{return}(\textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00619}00619\ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00620}00620\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00621}00621\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00622}00622\ \textcolor{keywordtype}{bool}\ EthResource::verifyBoardPresence(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00623}00623\ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00624}00624\ \ \ \ \ \textcolor{keywordflow}{if}(verifiedBoardPresence)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00625}00625\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00626}00626\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}(\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00627}00627\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00628}00628\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00629}00629\ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ timeout\ =\ 1.00;\ \ \ \ \textcolor{comment}{//\ 1\ sec\ is\ more\ than\ enough\ if\ board\ is\ present.\ if\ link\ is\ not\ on\ it\ is\ a\ good\ time\ to\ wait}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00630}00630\ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ retries\ =\ 20;\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ the\ number\ of\ retries\ depends\ on\ the\ above\ timeout\ and\ on\ link-\/up\ time\ of\ the\ EMS.}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00631}00631\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00632}00632\ \ \ \ \ \textcolor{keywordtype}{double}\ start\_time\ =\ yarp::os::Time::now();}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00633}00633\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00634}00634\ \ \ \ \ theNVmanager\&\ nvman\ =\ \mbox{\hyperlink{classeth_1_1theNVmanager_a71511b145ce752d21a33dc2948994737}{theNVmanager::getInstance}}();}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00635}00635\ \ \ \ \ verifiedBoardPresence\ =\ nvman.\mbox{\hyperlink{classeth_1_1theNVmanager_ad78a1ffcf5d37c4dac7364f19b83ef66}{ping}}(properties.ipv4addr,\ boardMNprotocolversion,\ timeout,\ retries);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00636}00636\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00637}00637\ \ \ \ \ \textcolor{keywordtype}{double}\ end\_time\ =\ yarp::os::Time::now();}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00638}00638\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00639}00639\ \ \ \ \ \textcolor{keywordflow}{if}(\textcolor{keyword}{true}\ ==\ verifiedBoardPresence)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00640}00640\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00641}00641\ \ \ \ \ \ \ \ \ verifiedBoardPresence\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00642}00642\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(verbosewhenok)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00643}00643\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00644}00644\ \ \ \ \ \ \ \ \ \ \ \ \ yDebug()\ <<\ \textcolor{stringliteral}{"{}EthResource::verifyBoardPresence()\ found\ BOARD"{}}\ <<\ \mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{getProperties}}().\mbox{\hyperlink{structeth_1_1AbstractEthResource_1_1Properties_a0f00ef74cba4bf01f914c6a7733a4806}{boardnameString}}\ <<\ \textcolor{stringliteral}{"{}with\ IP"{}}\ <<\ \mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{getProperties}}().\mbox{\hyperlink{structeth_1_1AbstractEthResource_1_1Properties_af470b15fac19dbcb26eef4afac14f353}{ipv4addrString}}\ <<\ \textcolor{stringliteral}{"{}after"{}}\ <<\ end\_time-\/start\_time\ <<\ \textcolor{stringliteral}{"{}seconds"{}};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00645}00645\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00646}00646\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00647}00647\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00648}00648\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00649}00649\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}EthResource::verifyBoardPresence()\ DID\ NOT\ have\ replies\ from\ BOARD"{}}\ <<\ \mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{getProperties}}().\mbox{\hyperlink{structeth_1_1AbstractEthResource_1_1Properties_a0f00ef74cba4bf01f914c6a7733a4806}{boardnameString}}\ <<\ \textcolor{stringliteral}{"{}with\ IP"{}}\ <<\ \mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{getProperties}}().\mbox{\hyperlink{structeth_1_1AbstractEthResource_1_1Properties_af470b15fac19dbcb26eef4afac14f353}{ipv4addrString}}\ <<\ \textcolor{stringliteral}{"{}after"{}}\ <<\ end\_time-\/start\_time\ <<\ \textcolor{stringliteral}{"{}seconds:\ CANNOT\ PROCEED\ ANY\ FURTHER"{}};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00650}00650\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00651}00651\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00652}00652\ \ \ \ \ \textcolor{keywordflow}{return}(verifiedBoardPresence);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00653}00653\ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00654}00654\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00655}00655\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00656}00656\ \textcolor{keywordtype}{bool}\ EthResource::askBoardVersion(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00657}00657\ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00658}00658\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00659}00659\ \ \ \ \ \textcolor{keywordflow}{if}(askedBoardVersion)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00660}00660\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00661}00661\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}(\textcolor{keyword}{true});}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00662}00662\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00663}00663\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00664}00664\ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ timeout\ =\ 0.500;\ \ \ \textcolor{comment}{//\ 500\ ms\ is\ more\ than\ enough\ if\ board\ is\ present.\ if\ link\ is\ not\ on\ it\ is\ a\ good\ time\ to\ wait}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00665}00665\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00666}00666\ \ \ \ \ eOprotID32\_t\ id32\ =\ eoprot\_ID\_get(eoprot\_endpoint\_management,\ eoprot\_entity\_mn\_appl,\ 0,\ eoprot\_tag\_mn\_appl\_status);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00667}00667\ \ \ \ \ eOmn\_appl\_status\_t\ applstatus\ =\ \{0\};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00668}00668\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00669}00669\ \ \ \ \ theNVmanager\&\ nvman\ =\ \mbox{\hyperlink{classeth_1_1theNVmanager_a71511b145ce752d21a33dc2948994737}{theNVmanager::getInstance}}();}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00670}00670\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00671}00671\ \ \ \ \ askedBoardVersion\ =\ nvman.\mbox{\hyperlink{classeth_1_1theNVmanager_abae6f425741a7aa45999cf2b82a7c62a}{ask}}(properties.ipv4addr,\ id32,\ \&applstatus,\ timeout);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00672}00672\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00673}00673\ \ \ \ \ \textcolor{keywordflow}{if}(\textcolor{keyword}{false}\ ==\ askedBoardVersion)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00674}00674\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00675}00675\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}EthResource::askBoardVersion()\ cannot\ reach\ BOARD"{}}\ <<\ \mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{getProperties}}().\mbox{\hyperlink{structeth_1_1AbstractEthResource_1_1Properties_a0f00ef74cba4bf01f914c6a7733a4806}{boardnameString}}\ <<\ \textcolor{stringliteral}{"{}with\ IP"{}}\ <<\ \mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{getProperties}}().\mbox{\hyperlink{structeth_1_1AbstractEthResource_1_1Properties_af470b15fac19dbcb26eef4afac14f353}{ipv4addrString}}\ <<\ \textcolor{stringliteral}{"{}w/\ timeout\ of"{}}\ <<\ timeout\ <<\ \textcolor{stringliteral}{"{}seconds"{}};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00676}00676\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00677}00677\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00678}00678\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00679}00679\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00680}00680\ \ \ \ \ \textcolor{comment}{//\ now\ i\ store\ the\ ....}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00681}00681\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00682}00682\ \ \ \ \ properties.firmwareversion.major\ =\ applstatus.version.major;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00683}00683\ \ \ \ \ properties.firmwareversion.minor\ =\ applstatus.version.minor;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00684}00684\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00685}00685\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00686}00686\ \ \ \ \ properties.firmwaredate.year\ =\ applstatus.buildate.year;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00687}00687\ \ \ \ \ properties.firmwaredate.month\ =\ applstatus.buildate.month;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00688}00688\ \ \ \ \ properties.firmwaredate.day\ =\ applstatus.buildate.day;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00689}00689\ \ \ \ \ properties.firmwaredate.hour\ =\ applstatus.buildate.hour;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00690}00690\ \ \ \ \ properties.firmwaredate.min\ =\ applstatus.buildate.min;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00691}00691\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00692}00692\ \ \ \ \ \textcolor{keywordtype}{char}\ versstr[32]\ =\ \{0\};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00693}00693\ \ \ \ \ snprintf(versstr,\ \textcolor{keyword}{sizeof}(versstr),\ \textcolor{stringliteral}{"{}ver\ \%d.\%d\ built\ on\ "{}},\ properties.firmwareversion.major,\ properties.firmwareversion.minor);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00694}00694\ \ \ \ \ \textcolor{keywordtype}{char}\ datestr[32]\ =\ \{0\};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00695}00695\ \ \ \ \ eo\_common\_date\_to\_string(properties.firmwaredate,\ datestr,\ \textcolor{keyword}{sizeof}(datestr));}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00696}00696\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00697}00697\ \ \ \ \ properties.firmwareString\ =\ string(versstr)\ +\ string(datestr);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00698}00698\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00699}00699\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00700}00700\ \ \ \ \ \textcolor{keywordflow}{if}(eobool\_true\ ==\ eoboards\_is\_eth((eObrd\_type\_t)applstatus.boardtype))}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00701}00701\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00702}00702\ \ \ \ \ \ \ \ \ detectedBoardType\ =\ \ (eObrd\_ethtype\_t)\ applstatus.boardtype;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00703}00703\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00704}00704\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00705}00705\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00706}00706\ \ \ \ \ \ \ \ \ detectedBoardType\ =\ eobrd\_ethtype\_unknown;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00707}00707\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00708}00708\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00709}00709\ \ \ \ \ \textcolor{keywordflow}{if}(detectedBoardType\ !=\ properties.boardtype)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00710}00710\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00711}00711\ \ \ \ \ \ \ \ \ yWarning()\ <<\ \textcolor{stringliteral}{"{}EthResource::askBoardVersion():\ detected\ wrong\ board.\ expecting"{}}\ <<\ properties.boardtypeString\ <<\ \textcolor{stringliteral}{"{}and\ detected"{}}\ <<\ eoboards\_type2string2(eoboards\_ethtype2type(detectedBoardType),\ eobool\_true);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00712}00712\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00713}00713\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00714}00714\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00715}00715\ \ \ \ \ yInfo()\ <<\ \textcolor{stringliteral}{"{}EthResource::askBoardVersion()\ found\ BOARD"{}}\ <<\ properties.boardnameString\ <<\ \textcolor{stringliteral}{"{}@\ IP"{}}\ <<\ properties.ipv4addrString\ <<\ \textcolor{stringliteral}{"{}of\ type"{}}\ <<\ properties.boardtypeString<<\ \textcolor{stringliteral}{"{}with\ FW\ ="{}}\ <<\ properties.firmwareString;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00716}00716\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00717}00717\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00718}00718\ \ \ \ \ \textcolor{keywordflow}{return}(askedBoardVersion);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00719}00719\ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00720}00720\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00721}00721\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00722}\mbox{\hyperlink{classeth_1_1EthResource_aa4ce9bd7dd6f5c0b1c302389b3499edf}{00722}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classeth_1_1EthResource_aa4ce9bd7dd6f5c0b1c302389b3499edf}{EthResource::getRemoteValue}}(\textcolor{keyword}{const}\ eOprotID32\_t\ id32,\ \textcolor{keywordtype}{void}\ *value,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ timeout,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ retries)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00723}00723\ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00724}00724\ \ \ \ \ \textcolor{keywordtype}{bool}\ replied\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00725}00725\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00726}00726\ \ \ \ \ \textcolor{keywordtype}{double}\ start\_time\ =\ yarp::os::Time::now();}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00727}00727\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00728}00728\ \ \ \ \ \mbox{\hyperlink{classeth_1_1theNVmanager}{theNVmanager}}\&\ nvman\ =\ \mbox{\hyperlink{classeth_1_1theNVmanager_a71511b145ce752d21a33dc2948994737}{theNVmanager::getInstance}}();}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00729}00729\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00730}00730\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ numOfattempts=0;\ numOfattempts<(retries+1);\ numOfattempts++)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00731}00731\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00732}00732\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(\textcolor{keyword}{true}\ ==\ nvman.\mbox{\hyperlink{classeth_1_1theNVmanager_abae6f425741a7aa45999cf2b82a7c62a}{ask}}(\&transceiver,\ id32,\ value,\ timeout))}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00733}00733\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00734}00734\ \ \ \ \ \ \ \ \ \ \ \ \ replied\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00735}00735\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ stop\ attempts}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00736}00736\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00737}00737\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00738}00738\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00739}00739\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(!replied)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00740}00740\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00741}00741\ \ \ \ \ \ \ \ \ \ \ \ \ yWarning()\ <<\ \textcolor{stringliteral}{"{}EthResource::getRemoteValue()\ cannot\ have\ a\ reply\ from\ BOARD"{}}\ <<\ \mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{getProperties}}().\mbox{\hyperlink{structeth_1_1AbstractEthResource_1_1Properties_a0f00ef74cba4bf01f914c6a7733a4806}{boardnameString}}\ <<\ \textcolor{stringliteral}{"{}with\ IP"{}}\ <<\ \mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{getProperties}}().\mbox{\hyperlink{structeth_1_1AbstractEthResource_1_1Properties_af470b15fac19dbcb26eef4afac14f353}{ipv4addrString}}\ <<\ \textcolor{stringliteral}{"{}at\ attempt\ \#"{}}\ <<\ numOfattempts+1\ <<\ \textcolor{stringliteral}{"{}w/\ timeout\ of"{}}\ <<\ timeout\ <<\ \textcolor{stringliteral}{"{}seconds"{}};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00742}00742\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00743}00743\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00744}00744\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00745}00745\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00746}00746\ \ \ \ \ \textcolor{keywordtype}{double}\ end\_time\ =\ yarp::os::Time::now();}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00747}00747\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00748}00748\ \ \ \ \ \textcolor{keywordflow}{if}(\textcolor{keyword}{false}\ ==\ replied)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00749}00749\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00750}00750\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}\ \ FATAL:\ EthResource::getRemoteValue()\ DID\ NOT\ have\ replies\ from\ BOARD"{}}\ <<\ \mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{getProperties}}().\mbox{\hyperlink{structeth_1_1AbstractEthResource_1_1Properties_a0f00ef74cba4bf01f914c6a7733a4806}{boardnameString}}\ <<\ \textcolor{stringliteral}{"{}with\ IP"{}}\ <<\ \mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{getProperties}}().\mbox{\hyperlink{structeth_1_1AbstractEthResource_1_1Properties_af470b15fac19dbcb26eef4afac14f353}{ipv4addrString}}\ <<\ \textcolor{stringliteral}{"{}\ even\ after"{}}\ <<\ end\_time-\/start\_time\ <<\ \textcolor{stringliteral}{"{}seconds:\ CANNOT\ PROCEED\ ANY\ FURTHER"{}};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00751}00751\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00752}00752\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00753}00753\ \ \ \ \ \textcolor{keywordflow}{return}\ replied;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00754}00754\ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00755}00755\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00756}00756\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00757}\mbox{\hyperlink{classeth_1_1EthResource_a07df2eca74d90eb27d272429ef0a2380}{00757}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classeth_1_1EthResource_a07df2eca74d90eb27d272429ef0a2380}{EthResource::getRemoteValues}}(\textcolor{keyword}{const}\ std::vector<eOprotID32\_t>\ \&id32s,\ \textcolor{keyword}{const}\ std::vector<void*>\ \&values,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ timeout)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00758}00758\ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00759}00759\ \ \ \ \ \mbox{\hyperlink{classeth_1_1theNVmanager}{theNVmanager}}\&\ nvman\ =\ \mbox{\hyperlink{classeth_1_1theNVmanager_a71511b145ce752d21a33dc2948994737}{theNVmanager::getInstance}}();}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00760}00760\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00761}00761\ \ \ \ \ \textcolor{keywordtype}{double}\ start\_time\ =\ yarp::os::Time::now();}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00762}00762\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00763}00763\ \ \ \ \ \textcolor{keywordtype}{bool}\ replied\ =\ nvman.\mbox{\hyperlink{classeth_1_1theNVmanager_abae6f425741a7aa45999cf2b82a7c62a}{ask}}(\&transceiver,\ id32s,\ values,\ timeout);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00764}00764\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00765}00765\ \ \ \ \ \textcolor{keywordtype}{double}\ end\_time\ =\ yarp::os::Time::now();}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00766}00766\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00767}00767\ \ \ \ \ \textcolor{keywordflow}{if}(\textcolor{keyword}{false}\ ==\ replied)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00768}00768\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00769}00769\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}\ \ FATAL:\ EthResource::getRemoteValues()\ DID\ NOT\ have\ replies\ from\ BOARD"{}}\ <<\ \mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{getProperties}}().\mbox{\hyperlink{structeth_1_1AbstractEthResource_1_1Properties_a0f00ef74cba4bf01f914c6a7733a4806}{boardnameString}}\ <<\ \textcolor{stringliteral}{"{}with\ IP"{}}\ <<\ \mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{getProperties}}().\mbox{\hyperlink{structeth_1_1AbstractEthResource_1_1Properties_af470b15fac19dbcb26eef4afac14f353}{ipv4addrString}}\ <<\ \textcolor{stringliteral}{"{}\ even\ after"{}}\ <<\ end\_time-\/start\_time\ <<\ \textcolor{stringliteral}{"{}seconds:\ CANNOT\ PROCEED\ ANY\ FURTHER"{}};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00770}00770\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00771}00771\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00772}00772\ \ \ \ \ \textcolor{keywordflow}{return}\ replied;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00773}00773\ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00774}00774\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00775}00775\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00776}\mbox{\hyperlink{classeth_1_1EthResource_aadb25337eb7b6f389bc189cedf19544b}{00776}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classeth_1_1EthResource_aadb25337eb7b6f389bc189cedf19544b}{EthResource::setRemoteValue}}(\textcolor{keyword}{const}\ eOprotID32\_t\ id32,\ \textcolor{keywordtype}{void}\ *value)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00777}00777\ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00778}00778\ \ \ \ \ \mbox{\hyperlink{classeth_1_1theNVmanager}{theNVmanager}}\&\ nvman\ =\ \mbox{\hyperlink{classeth_1_1theNVmanager_a71511b145ce752d21a33dc2948994737}{theNVmanager::getInstance}}();}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00779}00779\ \ \ \ \ \textcolor{keywordflow}{return}\ nvman.\mbox{\hyperlink{classeth_1_1theNVmanager_ada0763df3268277ed5b551e3974b24f4}{set}}(properties.ipv4addr,\ id32,\ value);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00780}00780\ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00781}00781\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00782}\mbox{\hyperlink{classeth_1_1EthResource_ab15a3d84f8218c5af8090f1371c2c68e}{00782}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classeth_1_1EthResource_ab15a3d84f8218c5af8090f1371c2c68e}{EthResource::setcheckRemoteValue}}(\textcolor{keyword}{const}\ eOprotID32\_t\ id32,\ \textcolor{keywordtype}{void}\ *value,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ retries,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ waitbeforecheck,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ timeout)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00783}00783\ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00784}00784\ \ \ \ \ \mbox{\hyperlink{classeth_1_1theNVmanager}{theNVmanager}}\&\ nvman\ =\ \mbox{\hyperlink{classeth_1_1theNVmanager_a71511b145ce752d21a33dc2948994737}{theNVmanager::getInstance}}();}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00785}00785\ \ \ \ \ \textcolor{keywordflow}{return}\ nvman.\mbox{\hyperlink{classeth_1_1theNVmanager_aabcb0d4d1aab8d3a4f288eda71c859c7}{setcheck}}(properties.ipv4addr,\ id32,\ value,\ retries,\ waitbeforecheck,\ timeout);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00786}00786\ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00787}00787\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00788}\mbox{\hyperlink{classeth_1_1EthResource_ada901fe50e622dd495538139284afadf}{00788}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classeth_1_1EthResource_ada901fe50e622dd495538139284afadf}{EthResource::CANPrintHandler}}(eOmn\_info\_basic\_t\ *infobasic)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00789}00789\ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00790}00790\ \ \ \ \ \textcolor{keywordtype}{char}\ str[256];}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00791}00791\ \ \ \ \ \textcolor{keywordtype}{char}\ canfullmessage[128];}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00792}00792\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00793}00793\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *\ sourcestrings[]\ =}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00794}00794\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00795}00795\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}LOCAL"{}},}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00796}00796\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}CAN1"{}},}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00797}00797\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}CAN2"{}},}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00798}00798\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}UNKNOWN"{}}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00799}00799\ \ \ \ \ \};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00800}00800\ \ \ \ \ \textcolor{keywordtype}{int}\ source\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ EOMN\_INFO\_PROPERTIES\_FLAGS\_get\_source(infobasic-\/>properties.flags);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00801}00801\ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *\ str\_source\ \ \ \ \ \ \ \ \ =\ (source\ >\ eomn\_info\_source\_can2)\ ?\ (sourcestrings[3])\ :\ (sourcestrings[source]);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00802}00802\ \ \ \ \ uint16\_t\ address\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ EOMN\_INFO\_PROPERTIES\_FLAGS\_get\_address(infobasic-\/>properties.flags);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00803}00803\ \ \ \ \ uint8\_t\ *p64\ =\ (uint8\_t*)\&(infobasic-\/>properties.par64);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00804}00804\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00805}00805\ \ \ \ \ \textcolor{keywordtype}{int}\ msg\_id\ =\ (p64[1]\&0xF0)\ >>\ 4;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00806}00806\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00807}00807\ \ \ \ \ uint32\_t\ sec\ =\ infobasic-\/>timestamp\ /\ 1000000;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00808}00808\ \ \ \ \ uint32\_t\ msec\ =\ (infobasic-\/>timestamp\ \%\ 1000000)\ /\ 1000;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00809}00809\ \ \ \ \ uint32\_t\ usec\ =\ infobasic-\/>timestamp\ \%\ 1000;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00810}00810\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00811}00811\ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *boardstr\ =\ properties.boardnameString.c\_str();}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00812}00812\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00813}00813\ \ \ \ \ \textcolor{comment}{//\ Validity\ check}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00814}00814\ \ \ \ \ \textcolor{keywordflow}{if}(address\ >\ 15)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00815}00815\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00816}00816\ \ \ \ \ \ \ \ \ snprintf(canfullmessage,\ \textcolor{keyword}{sizeof}(canfullmessage),\ \textcolor{stringliteral}{"{}Error\ while\ parsing\ the\ message:\ CAN\ address\ detected\ is\ out\ of\ allowed\ range"{}});}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00817}00817\ \ \ \ \ \ \ \ \ snprintf(str,\ \textcolor{keyword}{sizeof}(str),\ \textcolor{stringliteral}{"{}from\ BOARD\ \%s\ (\%s),\ src\ \%s,\ adr\ \%d,\ time\ \%ds\ \%dm\ \%du:\ CAN\ PRINT\ MESSAGE[id\ \%d]\ -\/>\ \%s"{}},}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00818}00818\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ properties.ipv4addrString.c\_str(),}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00819}00819\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ boardstr,}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00820}00820\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ str\_source,}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00821}00821\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ address,}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00822}00822\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sec,}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00823}00823\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ msec,}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00824}00824\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ usec,}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00825}00825\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ msg\_id,}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00826}00826\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ canfullmessage}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00827}00827\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ );}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00828}00828\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{libraries_2icubmod_2embObjLib_2FeatureInterface_8cpp_ad0f5992ec535b21bd63be75c56540ef5}{feat\_PrintError}}(str);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00829}00829\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00830}00830\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00831}00831\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00832}00832\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Initialization\ needed?}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00833}00833\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (c\_string\_handler[address]\ ==\ NULL)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00834}00834\ \ \ \ \ \ \ \ \ \ \ \ \ c\_string\_handler[address]\ =\ \textcolor{keyword}{new}\ \mbox{\hyperlink{classcan__string__eth}{can\_string\_eth}}();}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00835}00835\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00836}00836\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classCanFrame}{CanFrame}}\ can\_msg;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00837}00837\ \ \ \ \ \ \ \ \ can\_msg.\mbox{\hyperlink{classCanFrame_ac6454f9661f3e638b808d4487e83a36b}{setCanData}}(infobasic-\/>properties.par64);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00838}00838\ \ \ \ \ \ \ \ \ can\_msg.\mbox{\hyperlink{classCanFrame_a5b689ffc11c681b5093788609ce6f39e}{setId}}(msg\_id);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00839}00839\ \ \ \ \ \ \ \ \ can\_msg.\mbox{\hyperlink{classCanFrame_a303d1625be518d13c11409a0274645d3}{setSize}}(infobasic-\/>properties.par16);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00840}00840\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ ret\ =\ c\_string\_handler[address]-\/>add\_string(\&can\_msg);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00841}00841\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00842}00842\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ String\ finished?}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00843}00843\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (ret\ !=\ -\/1)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00844}00844\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00845}00845\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}*\ themsg\ =\ c\_string\_handler[address]-\/>get\_string(ret);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00846}00846\ \ \ \ \ \ \ \ \ \ \ \ \ memcpy(canfullmessage,\ themsg,\ \textcolor{keyword}{sizeof}(canfullmessage));}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00847}00847\ \ \ \ \ \ \ \ \ \ \ \ \ canfullmessage[63]\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00848}00848\ \ \ \ \ \ \ \ \ \ \ \ \ c\_string\_handler[address]-\/>clear\_string(ret);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00849}00849\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00850}00850\ \ \ \ \ \ \ \ \ \ \ \ \ snprintf(str,\textcolor{keyword}{sizeof}(str),\ \textcolor{stringliteral}{"{}from\ BOARD\ \%s\ (\%s),\ src\ \%s,\ adr\ \%d,\ time\ \%ds\ \%dm\ \%du:\ CAN\ PRINT\ MESSAGE[id\ \%d]\ -\/>\ \%s"{}},}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00851}00851\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ properties.ipv4addrString.c\_str(),}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00852}00852\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ boardstr,}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00853}00853\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ str\_source,}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00854}00854\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ address,}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00855}00855\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sec,}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00856}00856\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ msec,}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00857}00857\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ usec,}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00858}00858\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ msg\_id,}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00859}00859\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ canfullmessage}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00860}00860\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ );}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00861}00861\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{libraries_2icubmod_2embObjLib_2FeatureInterface_8cpp_ab8ebcda1c43ea672bf964dcfd52ca017}{feat\_PrintInfo}}(str);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00862}00862\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00863}00863\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00864}00864\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00865}00865\ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00866}00866\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00867}00867\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00868}00868\ \textcolor{keywordtype}{bool}\ EthResource::serviceCommand(eOmn\_serv\_operation\_t\ operation,\ eOmn\_serv\_category\_t\ category,\ \textcolor{keyword}{const}\ eOmn\_serv\_parameter\_t*\ param,\ \textcolor{keywordtype}{double}\ timeout,\ \textcolor{keywordtype}{int}\ times)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00869}00869\ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00870}00870\ \ \ \ \ eOprotID32\_t\ id2send\ =\ eoprot\_ID\_get(eoprot\_endpoint\_management,\ eoprot\_entity\_mn\_service,\ 0,\ eoprot\_tag\_mn\_service\_cmmnds\_command);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00871}00871\ \ \ \ \ eOprotID32\_t\ id2wait\ =\ eoprot\_ID\_get(eoprot\_endpoint\_management,\ eoprot\_entity\_mn\_service,\ 0,\ eoprot\_tag\_mn\_service\_status\_commandresult);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00872}00872\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00873}00873\ \ \ \ \ eOmn\_service\_cmmnds\_command\_t\ command\ =\ \{0\};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00874}00874\ \ \ \ \ eOmn\_service\_command\_result\_t\ result\ =\ \{0\};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00875}00875\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00876}00876\ \ \ \ \ command.operation\ =\ operation;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00877}00877\ \ \ \ \ command.category\ =\ category;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00878}00878\ \ \ \ \ \textcolor{keywordflow}{if}(NULL\ !=\ param)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00879}00879\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00880}00880\ \ \ \ \ \ \ \ \ memcpy(\&command.parameter,\ param,\ \textcolor{keyword}{sizeof}(eOmn\_serv\_parameter\_t));}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00881}00881\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00882}00882\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00883}00883\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00884}00884\ \ \ \ \ \ \ \ memset(\&command.parameter,\ 0,\ \textcolor{keyword}{sizeof}(eOmn\_serv\_parameter\_t));}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00885}00885\ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}((eomn\_serv\_operation\_regsig\_load\ ==\ operation)\ ||\ ((eomn\_serv\_operation\_regsig\_clear\ ==\ operation)))}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00886}00886\ \ \ \ \ \ \ \ \{\ \ \ \ \textcolor{comment}{//\ we\ send\ an\ empty\ array}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00887}00887\ \ \ \ \ \ \ \ \ \ \ \ \ eo\_array\_New(eOmn\_serv\_capacity\_arrayof\_id32,\ 4,\ \&command.parameter.arrayofid32);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00888}00888\ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00889}00889\ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00890}00890\ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00891}00891\ \ \ \ \ \ \ \ \ \ \ \ \ command.parameter.configuration.type\ =\ eomn\_serv\_NONE;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00892}00892\ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00893}00893\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00894}00894\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00895}00895\ \ \ \ \ theNVmanager\&\ nvman\ =\ \mbox{\hyperlink{classeth_1_1theNVmanager_a71511b145ce752d21a33dc2948994737}{theNVmanager::getInstance}}();}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00896}00896\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00897}00897\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00898}00898\ \ \ \ \ \textcolor{keywordtype}{bool}\ replied\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00899}00899\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i=0;\ i<times;\ i++)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00900}00900\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00901}00901\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(\textcolor{keyword}{true}\ ==\ nvman.\mbox{\hyperlink{classeth_1_1theNVmanager_abf6adaaa7ea1dce3b062bc2728078c4a}{command}}(properties.ipv4addr,\ id2send,\ \&command,\ id2wait,\ \&result,\ timeout))}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00902}00902\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00903}00903\ \ \ \ \ \ \ \ \ \ \ \ \ replied\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00904}00904\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00905}00905\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00906}00906\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00907}00907\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00908}00908\ \ \ \ \ \textcolor{keywordflow}{if}(\textcolor{keyword}{false}\ ==\ replied)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00909}00909\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00910}00910\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}EthResource::serviceCommand()\ failed\ an\ acked\ activation\ request\ to\ BOARD"{}}\ <<\ \mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{getProperties}}().\mbox{\hyperlink{structeth_1_1AbstractEthResource_1_1Properties_a0f00ef74cba4bf01f914c6a7733a4806}{boardnameString}}\ <<\ \textcolor{stringliteral}{"{}with\ IP"{}}\ <<\ \mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{getProperties}}().\mbox{\hyperlink{structeth_1_1AbstractEthResource_1_1Properties_af470b15fac19dbcb26eef4afac14f353}{ipv4addrString}}\ <<\ \textcolor{stringliteral}{"{}after"{}}\ <<\ times\ <<\ \textcolor{stringliteral}{"{}attempts"{}}\ <<\ \textcolor{stringliteral}{"{}each\ with\ waiting\ timeout\ of"{}}\ <<\ timeout\ <<\ \textcolor{stringliteral}{"{}seconds"{}};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00911}00911\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00912}00912\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00913}00913\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00914}00914\ \ \ \ \ \textcolor{comment}{//yDebug()\ <<\ "{}result\ is:"{}\ <<\ result.latestcommandisok;}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00915}00915\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00916}00916\ \ \ \ \ \textcolor{keywordflow}{return}(result.latestcommandisok);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00917}00917\ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00918}00918\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00919}00919\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00920}\mbox{\hyperlink{classeth_1_1EthResource_ac898b9019cc9bda4512b8641bee35bc2}{00920}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classeth_1_1EthResource_ac898b9019cc9bda4512b8641bee35bc2}{EthResource::serviceVerifyActivate}}(eOmn\_serv\_category\_t\ category,\ \textcolor{keyword}{const}\ eOmn\_serv\_parameter\_t*\ param,\ \textcolor{keywordtype}{double}\ timeout)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00921}00921\ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00922}00922\ \ \ \ \ eOmn\_serv\_parameter\_t\ prepared\ \{\};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00923}00923\ \ \ \ \ \textcolor{keywordflow}{if}(!\mbox{\hyperlink{classeth_1_1AbstractEthResource_a217c63651c4c4201d90151dfe64ef23d}{posServiceConfiguration}}.prepare(category,\ param,\ prepared))}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00924}00924\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00925}00925\ \ \ \ \ \ \ \ \ yError()\ <<\ \textcolor{stringliteral}{"{}EthResource::serviceVerifyActivate():\ MC\ requires"{}}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00926}00926\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ \textcolor{stringliteral}{"{}standalone\ POS\ to\ be\ activated\ first\ on\ BOARD"{}}\ <<\ \mbox{\hyperlink{classeth_1_1EthResource_acddf626177d9ac9bc885fbff17629a82}{getProperties}}().\mbox{\hyperlink{structeth_1_1AbstractEthResource_1_1Properties_a0f00ef74cba4bf01f914c6a7733a4806}{boardnameString}};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00927}00927\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00928}00928\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00929}00929\ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keyword}{auto}*\ request\ =\ param\ ?\ \&prepared\ :\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00930}00930\ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{bool}\ result\ =\ serviceCommand(eomn\_serv\_operation\_verifyactivate,\ category,\ request,\ timeout,\ 3);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00931}00931\ \ \ \ \ \textcolor{keywordflow}{if}(result)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00932}00932\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00933}00933\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classeth_1_1AbstractEthResource_a217c63651c4c4201d90151dfe64ef23d}{posServiceConfiguration}}.rememberActivated(category,\ request);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00934}00934\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00935}00935\ \ \ \ \ \textcolor{keywordflow}{return}\ result;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00936}00936\ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00937}00937\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00938}00938\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00939}\mbox{\hyperlink{classeth_1_1EthResource_a7845765f024620d29b23043066c8d690}{00939}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classeth_1_1EthResource_a7845765f024620d29b23043066c8d690}{EthResource::serviceSetRegulars}}(eOmn\_serv\_category\_t\ category,\ vector<eOprotID32\_t>\ \&id32vector,\ \textcolor{keywordtype}{double}\ timeout)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00940}00940\ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00941}00941\ \ \ \ \ eOmn\_serv\_parameter\_t\ param\ =\ \{0\};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00942}00942\ \ \ \ \ EOarray\ *array\ =\ eo\_array\_New(eOmn\_serv\_capacity\_arrayof\_id32,\ 4,\ \&param.arrayofid32);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00943}00943\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i=0;\ i<id32vector.size();\ i++)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00944}00944\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00945}00945\ \ \ \ \ \ \ \ \ eOprotID32\_t\ id32\ =\ id32vector.at(i);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00946}00946\ \ \ \ \ \ \ \ \ eo\_array\_PushBack(array,\ \&id32);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00947}00947\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00948}00948\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00949}00949\ \ \ \ \ regularsAreSet\ =\ serviceCommand(eomn\_serv\_operation\_regsig\_load,\ category,\ \&param,\ timeout,\ 3);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00950}00950\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00951}00951\ \ \ \ \ \textcolor{keywordflow}{return}\ regularsAreSet;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00952}00952\ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00953}00953\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00954}00954\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00955}00955\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00956}\mbox{\hyperlink{classeth_1_1EthResource_ad166b73b1161f7503f4227903669265d}{00956}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classeth_1_1EthResource_ad166b73b1161f7503f4227903669265d}{EthResource::serviceStart}}(eOmn\_serv\_category\_t\ category,\ \textcolor{keywordtype}{double}\ timeout)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00957}00957\ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00958}00958\ \ \ \ \ \textcolor{keywordtype}{bool}\ ret\ =\ serviceCommand(eomn\_serv\_operation\_start,\ category,\ NULL,\ timeout,\ 3);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00959}00959\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00960}00960\ \ \ \ \ \textcolor{keywordflow}{if}(ret)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00961}00961\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00962}00962\ \ \ \ \ \ \ \ \ isInRunningMode\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00963}00963\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00964}00964\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00965}00965\ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00966}00966\ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00967}00967\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00968}00968\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00969}\mbox{\hyperlink{classeth_1_1EthResource_a81c72020c081f0988a8e8cd59d9923ce}{00969}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classeth_1_1EthResource_a81c72020c081f0988a8e8cd59d9923ce}{EthResource::serviceStop}}(eOmn\_serv\_category\_t\ category,\ \textcolor{keywordtype}{double}\ timeout)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00970}00970\ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00971}00971\ \ \ \ \ \textcolor{keywordtype}{bool}\ ret\ =\ serviceCommand(eomn\_serv\_operation\_stop,\ category,\ NULL,\ timeout,\ 3);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00972}00972\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00973}00973\ \ \ \ \ \textcolor{keywordflow}{if}(ret)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00974}00974\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00975}00975\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classeth_1_1AbstractEthResource_a217c63651c4c4201d90151dfe64ef23d}{posServiceConfiguration}}.clearOnStop(category);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00976}00976\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00977}00977\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00978}00978\ \ \ \ \ \textcolor{keywordflow}{if}(ret\ \&\&\ (category\ ==\ eomn\_serv\_category\_all))}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00979}00979\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00980}00980\ \ \ \ \ \ \ \ \ regularsAreSet\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00981}00981\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00982}00982\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00983}00983\ \ \ \ \ \textcolor{comment}{//\#warning\ TODO:\ the\ result\ for\ command\ stop\ shall\ also\ tell\ if\ the\ the\ board\ is\ in\ running\ mode\ or\ not.}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00984}00984\ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00985}00985\ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00986}00986\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00987}00987\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00988}00988\ \textcolor{comment}{//\ new\ methods\ from\ host\ transceiver}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00989}00989\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00990}\mbox{\hyperlink{classeth_1_1EthResource_a460c3765bec05958bc854a4a69852d1d}{00990}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classeth_1_1EthResource_a460c3765bec05958bc854a4a69852d1d}{EthResource::getLocalValue}}(\textcolor{keyword}{const}\ eOprotID32\_t\ id32,\ \textcolor{keywordtype}{void}\ *\mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}})}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00991}00991\ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00992}00992\ \ \ \ \ \textcolor{keywordflow}{return}\ transceiver.read(id32,\ \mbox{\hyperlink{ST__M1__dataType_8h_a15adfd049ddfba39d5286280f0bc13fda604ac82e88d7a367d4c2830411520c2b}{data}});}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00993}00993\ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00994}00994\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00995}00995\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00996}\mbox{\hyperlink{classeth_1_1EthResource_aa9bf063a989430b89733034ffd570176}{00996}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classeth_1_1EthResource_aa9bf063a989430b89733034ffd570176}{EthResource::setLocalValue}}(eOprotID32\_t\ id32,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{void}\ *value,\ \textcolor{keywordtype}{bool}\ overrideROprotection)}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00997}00997\ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00998}00998\ \ \ \ \ \textcolor{keywordflow}{return}\ transceiver.write(id32,\ value,\ overrideROprotection);}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l00999}00999\ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l01000}01000\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l01001}01001\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l01002}\mbox{\hyperlink{classeth_1_1EthResource_aef520024273f76f4d21c0a964baaad54}{01002}}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classeth_1_1EthResource_aef520024273f76f4d21c0a964baaad54}{EthResource::isFake}}()}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l01003}01003\ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l01004}01004\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l01005}01005\ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l01006}01006\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l01007}\mbox{\hyperlink{classeth_1_1EthResource_a21a19c53636801632f174a230195ab56}{01007}}\ \mbox{\hyperlink{classeth_1_1HostTransceiver}{HostTransceiver}}\ *\ \mbox{\hyperlink{classeth_1_1EthResource_a21a19c53636801632f174a230195ab56}{EthResource::getTransceiver}}()}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l01008}01008\ \{}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l01009}01009\ \ \ \ \ \textcolor{keywordflow}{return}\ \&transceiver;}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l01010}01010\ \}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l01011}01011\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l01012}01012\ \textcolor{comment}{//\ eof}}
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l01013}01013\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l01014}01014\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l01015}01015\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l01016}01016\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l01017}01017\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l01018}01018\ }
+\DoxyCodeLine{\Hypertarget{ethResource_8cpp_source_l01019}01019\ }
+
+\end{DoxyCode}
